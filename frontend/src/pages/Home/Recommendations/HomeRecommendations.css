@@ -1,0 +1,18 @@
+.home-recommendations-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;  /* căn giữa các card */
+  gap: 25px;
+  max-width: none;          /* bỏ max-width để container tự co theo số card */
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.recommendations-title {
+  font-size: 30px;
+  font-weight: 700;
+  margin-bottom: 1px;
+  color: #000000;
+  font-family: 'Poppins', sans-serif;
+  width: 100%;
+}
