@@ -1,0 +1,135 @@
+/* Container toàn trang */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #6c5ce7, #00b894);
+  font-family: "Poppins", sans-serif;
+  padding: 20px;
+}
+
+/* Box form */
+.auth-box {
+  background: #ffffff;
+  padding: 40px 30px;
+  border-radius: 25px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  width: 360px;
+  max-width: 100%;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.auth-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
+}
+
+/* Title */
+.auth-box h2 {
+  margin-bottom: 25px;
+  font-size: 28px;
+  color: #2d3436;
+  font-weight: 600;
+}
+
+/* Input group */
+.input-group {
+  position: relative;
+  margin-bottom: 18px;
+}
+
+.input-group .icon {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: #6c5ce7;
+  font-size: 18px;
+}
+
+.input-group input {
+  width: 80%;
+  padding: 12px 40px 12px 40px;
+  border-radius: 12px;
+  border: 1px solid #dfe6e9;
+  transition: all 0.3s ease;
+  font-size: 15px;
+}
+
+.input-group input:focus {
+  border-color: #6c5ce7;
+  box-shadow: 0 0 8px rgba(108, 92, 231, 0.3);
+  outline: none;
+}
+
+/* Show/hide password icon */
+.input-group .show-hide {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #636e72;
+  font-size: 16px;
+  transition: color 0.2s ease;
+}
+
+.input-group .show-hide:hover {
+  color: #6c5ce7;
+}
+
+/* Button */
+.auth-box button {
+  width: 100%;
+  padding: 12px;
+  background: #6c5ce7;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.auth-box button:hover {
+  background: #a29bfe;
+  transform: translateY(-2px);
+}
+
+/* Paragraph / links */
+.auth-box p {
+  margin-top: 15px;
+  color: #636e72;
+  font-size: 14px;
+}
+
+.auth-box a {
+  color: #6c5ce7;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.auth-box a:hover {
+  color: #a29bfe;
+  text-decoration: underline;
+}
+
+/* Responsive nhỏ */
+@media (max-width: 400px) {
+  .auth-box {
+    padding: 30px 20px;
+  }
+  .auth-box h2 {
+    font-size: 24px;
+  }
+  .input-group input {
+    font-size: 14px;
+  }
+  .auth-box button {
+    font-size: 15px;
+  }
+}
