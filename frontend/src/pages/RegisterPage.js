@@ -38,25 +38,37 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="auth-container">
+    <div className="auth-page">
       <div className="auth-box">
         <h2>Register</h2>
         <form onSubmit={handleRegister}>
           <div className="input-group">
             <FaUser className="icon" />
-            <input placeholder="Username" value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} />
+            <input 
+              placeholder="Username" 
+              value={form.username} 
+              onChange={e => setForm({ ...form, username: e.target.value })} 
+              required
+            />
           </div>
           <div className="input-group">
             <FaEnvelope className="icon" />
-            <input type="email" placeholder="Email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
+            <input 
+              type="email" 
+              placeholder="Email" 
+              value={form.email} 
+              onChange={e => setForm({ ...form, email: e.target.value })} 
+              required
+            />
           </div>
           <div className="input-group">
             <FaLock className="icon" />
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Password"
-              value={form.password}
-              onChange={e => setForm({ ...form, password: e.target.value })}
+            <input 
+              type={showPassword ? "text" : "password"} 
+              placeholder="Password" 
+              value={form.password} 
+              onChange={e => setForm({ ...form, password: e.target.value })} 
+              required
             />
             <span className="show-hide" onClick={() => setShowPassword(!showPassword)}>
               {showPassword ? <FaEyeSlash /> : <FaEye />}
@@ -64,17 +76,20 @@ export default function RegisterPage() {
           </div>
           <div className="input-group">
             <FaLock className="icon" />
-            <input
-              type={showConfirm ? "text" : "password"}
-              placeholder="Confirm Password"
-              value={form.confirm}
-              onChange={e => setForm({ ...form, confirm: e.target.value })}
+            <input 
+              type={showConfirm ? "text" : "password"} 
+              placeholder="Confirm Password" 
+              value={form.confirm} 
+              onChange={e => setForm({ ...form, confirm: e.target.value })} 
+              required
             />
             <span className="show-hide" onClick={() => setShowConfirm(!showConfirm)}>
               {showConfirm ? <FaEyeSlash /> : <FaEye />}
             </span>
           </div>
-          <button type="submit" disabled={loading}>{loading ? "Registering..." : "Register"}</button>
+          <button type="submit" disabled={loading}>
+            {loading ? "Registering..." : "Register"}
+          </button>
         </form>
         <p>Already have an account? <Link to="/login">Login</Link></p>
       </div>
