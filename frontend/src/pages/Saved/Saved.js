@@ -1,12 +1,26 @@
-// SavedPage.js
 import React, { useEffect, useState } from "react";
 import RecommendCard from "../Home/Recommendations/RecommendCard";
+import CreateTripForm from "../../components/CreateTripForm";
 import axios from "axios";
 import "./Saved.css";
 
 export default function SavedPage({ savedIds, handleToggleSave }) {
   const [destinations, setDestinations] = useState([]);
   const token = localStorage.getItem("access_token");
+
+  const [showForm, setShowForm] = useState(false);
+  const [selectedDestination, setSelectedDestination] = useState(null);
+
+  const handleCreateTrip = (destinationObj) => {
+    setSelectedDestination(destinationObj); // lưu luôn object
+    setShowForm(true);
+  };
+
+  // Đóng form
+  const handleCloseForm = () => {
+    setSelectedDestination(null);
+    setShowForm(false);
+  };
 
   useEffect(() => {
     if (!token) {
@@ -18,7 +32,7 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
       .get("/api/saved/list", { headers: { Authorization: `Bearer ${token}` } })
       .then(res => setDestinations(res.data))
       .catch(console.error);
-  }, [token, savedIds]); 
+  }, [token, savedIds]);
 
   const handleUnsave = async (id) => {
     await handleToggleSave(id);
@@ -42,10 +56,18 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
               isSaved={true}
               onToggleSave={() => handleUnsave(dest.id)}
               onViewDetails={(id) => console.log("View details for:", id)}
-              onCreateTrip={(id) => console.log("Create trip for:", id)}
+              onCreateTrip={handleCreateTrip} // truyền object xuống card
             />
           ))}
         </div>
+
+        {/* Form tạo chuyến đi */}
+        {showForm && selectedDestination && (
+          <CreateTripForm
+            initialDestination={selectedDestination} // dùng object để tự fill
+            onClose={handleCloseForm}
+          />
+        )}
       </div>
     </div>
   );
