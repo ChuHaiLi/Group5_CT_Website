@@ -30,35 +30,39 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="auth-container">
+    <div className="auth-page">
       <div className="auth-box">
         <h2>Login</h2>
         <form onSubmit={handleLogin}>
           <div className="input-group">
             <FaEnvelope className="icon" />
-            <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required />
+            <input 
+              type="email" 
+              placeholder="Email" 
+              value={email} 
+              onChange={e => setEmail(e.target.value)} 
+              required 
+            />
           </div>
           <div className="input-group">
             <FaLock className="icon" />
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
+            <input 
+              type={showPassword ? "text" : "password"} 
+              placeholder="Password" 
+              value={password} 
+              onChange={e => setPassword(e.target.value)} 
+              required 
             />
             <span className="show-hide" onClick={() => setShowPassword(!showPassword)}>
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </span>
           </div>
-          <button type="submit" disabled={loading}>{loading ? "Logging in..." : "Login"}</button>
+          <button type="submit" disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
+          </button>
         </form>
-        <p>
-          Don't have an account? <Link to="/register">Register</Link>
-        </p>
-        <p>
-          Forgot password? <Link to="/forgot-password">Reset here</Link>
-        </p>
+        <p>Don't have an account? <Link to="/register">Register</Link></p>
+        <p>Forgot password? <Link to="/forgot-password">Reset here</Link></p>
       </div>
     </div>
   );
