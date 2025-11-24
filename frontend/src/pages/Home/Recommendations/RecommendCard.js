@@ -3,7 +3,6 @@ import { FaHeart, FaRegHeart, FaStar, FaStarHalfAlt, FaRegStar } from "react-ico
 import "./RecommendCard.css";
 
 export default function RecommendCard({ destination, isSaved, onToggleSave, onViewDetails, onCreateTrip }) {
-
   const handleToggle = (e) => {
     e.stopPropagation();
     if (onToggleSave) onToggleSave(destination.id);
@@ -40,7 +39,10 @@ export default function RecommendCard({ destination, isSaved, onToggleSave, onVi
         <div className="rating"><strong>Rating:</strong> {renderStars(destination.rating)}</div>
         <button 
           className="create-trip-btn" 
-          onClick={(e) => { e.stopPropagation(); onCreateTrip(destination.id); }}
+          onClick={(e) => {
+             e.stopPropagation(); 
+             if(onCreateTrip) onCreateTrip(destination); // gửi object
+            }}
         >
           Create a Trip
         </button>
