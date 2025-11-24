@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
+import "../styles/AuthForm.css";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -21,13 +22,27 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="auth-container">
-      <h2>Forgot Password</h2>
-      <form onSubmit={handleSubmit}>
-        <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required />
-        <button type="submit" disabled={loading}>{loading ? "Sending..." : "Send Reset Link"}</button>
-      </form>
-      <p><Link to="/login">Back to login</Link></p>
+    <div className="auth-page">
+      <div className="auth-box">
+        <h2>Forgot Password</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="input-group">
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit" disabled={loading}>
+            {loading ? "Sending..." : "Send Reset Link"}
+          </button>
+        </form>
+        <p>
+          Remember your password? <Link to="/login">Login</Link>
+        </p>
+      </div>
     </div>
   );
 }
