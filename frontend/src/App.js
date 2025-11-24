@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Navbar from "./components/Navbar/Navbar";
@@ -18,7 +18,7 @@ import axios from "axios";
 
 function AppContent() {
   const location = useLocation();
-  const hideNavbar = ["/login", "/register"].includes(location.pathname);
+  const hideNavbar = ["/login", "/register", "/reset-password", "/forgot-password"].includes(location.pathname);
 
   const [savedIds, setSavedIds] = useState(new Set());
 
@@ -78,28 +78,41 @@ function AppContent() {
       {/* Wrapper chung cho content, chỉ page có navbar mới thêm class */}
       <div className={`page-wrapper ${!hideNavbar ? "with-navbar" : ""}`}>
         <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
+  {/* Auth pages */}
+  <Route path="/login" element={<LoginPage />} />
+  <Route path="/register" element={<RegisterPage />} />
+  <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+  <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-          {/* Trang chính */}
-          <Route path="/" element={
-            <PrivateRoute>
-              <HomePage savedIds={savedIds} handleToggleSave={handleToggleSave} />
-            </PrivateRoute>
-          } />
+  {/* Luôn chuyển "/" → login nếu chưa đăng nhập */}
+  <Route
+    path="/"
+    element={
+      localStorage.getItem("access_token")
+        ? <Navigate to="/home" replace />
+        : <Navigate to="/login" replace />
+    }
+  />
 
-          <Route path="/explore" element={<PrivateRoute><ExplorePage /></PrivateRoute>} />
-          <Route path="/mytrips" element={<PrivateRoute><MyTripsPage /></PrivateRoute>} />
-          <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
+  {/* HomePage sau khi đăng nhập */}
+  <Route
+    path="/home"
+    element={
+      <PrivateRoute>
+        <HomePage savedIds={savedIds} handleToggleSave={handleToggleSave} />
+      </PrivateRoute>
+    }
+  />
 
-          <Route path="/saved" element={
-            <PrivateRoute>
-              <SavedPage savedIds={savedIds} handleToggleSave={handleToggleSave} />
-            </PrivateRoute>
-          } />
-        </Routes>
+  <Route path="/explore" element={<PrivateRoute><ExplorePage /></PrivateRoute>} />
+  <Route path="/mytrips" element={<PrivateRoute><MyTripsPage /></PrivateRoute>} />
+  <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
+  <Route
+    path="/saved"
+    element={<PrivateRoute><SavedPage savedIds={savedIds} handleToggleSave={handleToggleSave} /></PrivateRoute>}
+  />
+</Routes>
+
       </div>
 
       <ToastContainer position="top-right" autoClose={3000} theme="light" />
