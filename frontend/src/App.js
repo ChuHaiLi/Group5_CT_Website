@@ -16,7 +16,7 @@ import RegisterPage from "./pages/RegisterPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 
-import API from "./untils/axios"; // Axios instance with baseURL + interceptors
+import API from "./untils/axios";
 
 // ------------------- PrivateRoute -------------------
 function PrivateRoute({ isAuthenticated, children }) {
@@ -30,10 +30,10 @@ function AppContent() {
   const hideNavbar = ["/login", "/register", "/reset-password", "/forgot-password"].includes(location.pathname);
 
   const [checkingAuth, setCheckingAuth] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(null); // null = not checked yet
+  const [isAuthenticated, setIsAuthenticated] = useState(null); // null = chưa check
   const [savedIds, setSavedIds] = useState(new Set());
 
-  // ---------------- Check authentication on app load ----------------
+  // Check authentication on app load
   useEffect(() => {
     const accessToken = localStorage.getItem("access_token");
     if (!accessToken) {
@@ -42,7 +42,7 @@ function AppContent() {
       return;
     }
 
-    API.get("/auth/me") // backend returns user info if token valid
+    API.get("/auth/me")
       .then(() => setIsAuthenticated(true))
       .catch(() => {
         localStorage.removeItem("access_token");
@@ -52,7 +52,7 @@ function AppContent() {
       .finally(() => setCheckingAuth(false));
   }, []);
 
-  // ---------------- Fetch saved destinations ----------------
+  // Fetch saved destinations
   useEffect(() => {
     if (!isAuthenticated) {
       setSavedIds(new Set());
@@ -64,7 +64,7 @@ function AppContent() {
       .catch(() => toast.error("Failed to fetch saved list"));
   }, [isAuthenticated]);
 
-  // ---------------- Toggle save/unsave ----------------
+  // Toggle save/unsave
   const handleToggleSave = async (id) => {
     if (!isAuthenticated) {
       toast.info("Please log in to save destinations");
@@ -72,17 +72,17 @@ function AppContent() {
     }
 
     const isSaved = savedIds.has(id);
-
+    const token = localStorage.getItem("access_token");
     try {
       if (isSaved) {
-        await API.delete("/saved/remove", { data: { destination_id: id } });
+        await API.delete("/saved/remove", { data: { destination_id: id }, headers: { Authorization: `Bearer ${token}` } });
         setSavedIds(prev => {
           const s = new Set(prev);
           s.delete(id);
           return s;
         });
       } else {
-        await API.post("/saved/add", { destination_id: id });
+        await API.post("/saved/add", { destination_id: id }, {headers: { Authorization: `Bearer ${token}` }});
         setSavedIds(prev => {
           const s = new Set(prev);
           s.add(id);
@@ -108,8 +108,13 @@ function AppContent() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-          {/* Default redirect */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          {/* "/" route */}
+          <Route
+            path="/"
+            element={
+              isAuthenticated ? <Navigate to="/home" replace /> : <Navigate to="/login" replace />
+            }
+          />
 
           {/* Protected routes */}
           <Route
