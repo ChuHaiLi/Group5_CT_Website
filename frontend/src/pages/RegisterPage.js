@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "../untils/axios";
+import API from "../untils/axios";
 import { toast } from "react-toastify";
 import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import "../styles/AuthForm.css";
@@ -21,7 +21,7 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
-      const res = await axios.post("/api/auth/register", {
+      const res = await API.post("/auth/register", {
         username: form.username,
         email: form.email,
         password: form.password
