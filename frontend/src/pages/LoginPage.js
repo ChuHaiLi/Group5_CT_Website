@@ -1,11 +1,10 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 import { toast } from "react-toastify";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
-import "../styles/AuthForm.css";
+import API from "../untils/axios";
 
-export default function LoginPage() {
+export default function LoginPage({ setIsAuthenticated }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -16,12 +15,14 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.post("/api/auth/login", { email, password });
+      const res = await API.post("/auth/login", { email, password });
       localStorage.setItem("access_token", res.data.access_token);
       localStorage.setItem("refresh_token", res.data.refresh_token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
+
+      setIsAuthenticated(true); // ⚡ update app state
       toast.success(res.data.message);
-      navigate("/");
+      navigate("/home"); // navigate to home
     } catch (err) {
       toast.error(err.response?.data?.message || "Login failed");
     } finally {
