@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import RecommendCard from "../Home/Recommendations/RecommendCard";
 import CreateTripForm from "../../components/CreateTripForm";
-import axios from "axios";
+import API from "../../untils/axios";
 import "./Saved.css";
 
 export default function SavedPage({ savedIds, handleToggleSave }) {
@@ -28,8 +28,8 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
       return;
     }
 
-    axios
-      .get("/api/saved/list", { headers: { Authorization: `Bearer ${token}` } })
+    API
+      .get("/saved/list", { headers: { Authorization: `Bearer ${token}` } })
       .then(res => setDestinations(res.data))
       .catch(console.error);
   }, [token, savedIds]);
