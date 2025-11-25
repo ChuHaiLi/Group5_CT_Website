@@ -13,6 +13,7 @@ import RegisterPage from "./pages/RegisterPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import SavedPage from "./pages/Saved/Saved";
+import ChatPage from "./pages/Chat/Chat";
 import "./App.css";
 import axios from "axios";
 
@@ -93,6 +94,7 @@ function AppContent() {
           <Route path="/explore" element={<PrivateRoute><ExplorePage /></PrivateRoute>} />
           <Route path="/mytrips" element={<PrivateRoute><MyTripsPage /></PrivateRoute>} />
           <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
+          <Route path="/chat" element={<PrivateRoute><ChatPage /></PrivateRoute>} />
 
           <Route path="/saved" element={
             <PrivateRoute>

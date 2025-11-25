@@ -17,6 +17,8 @@ class User(db.Model):
     saved_destinations = db.relationship("SavedDestination", backref="user", lazy=True)
     itineraries = db.relationship("Itinerary", backref="user", lazy=True)
     reviews = db.relationship("Review", backref="user", lazy=True)
+    chat_sessions = db.relationship("ChatSession", backref="user", lazy=True, cascade="all, delete-orphan")
+    chat_messages = db.relationship("ChatMessage", backref="user", lazy=True, cascade="all, delete-orphan")
 
 # Địa điểm
 class Destination(db.Model):
@@ -56,4 +58,21 @@ class Review(db.Model):
     destination_id = db.Column(db.Integer, db.ForeignKey('destination.id'), nullable=False)
     rating = db.Column(db.Float, nullable=False)  # 1-5 sao
     comment = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class ChatSession(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    title = db.Column(db.String(150), default="Cuộc trò chuyện mới")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    messages = db.relationship("ChatMessage", backref="session", lazy=True, cascade="all, delete-orphan")
+
+class ChatMessage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    session_id = db.Column(db.Integer, db.ForeignKey('chat_session.id'), nullable=False)
+    role = db.Column(db.String(20), nullable=False)  # user | assistant
+    content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
