@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import axios from "../untils/axios";
 import { toast } from "react-toastify";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
