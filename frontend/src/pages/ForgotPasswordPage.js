@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "../untils/axios";
+import API from "../untils/axios";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import "../styles/AuthForm.css";
@@ -12,7 +12,7 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.post("/api/auth/forgot-password", { email });
+      const res = await API.post("/api/auth/forgot-password", { email });
       toast.success(res.data.message);
     } catch (err) {
       toast.error(err.response?.data?.message || "Request failed");
