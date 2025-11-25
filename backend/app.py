@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, url_for
+from flask import Flask, request, jsonify, url_for, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import (
     JWTManager, create_access_token, create_refresh_token,
@@ -10,8 +10,12 @@ from sqlalchemy.exc import IntegrityError
 from datetime import timedelta
 import re
 import secrets
+import requests
 from datetime import datetime
-from models import db, User, Destination, SavedDestination, Review, Itinerary
+from difflib import get_close_matches
+import unicodedata
+import os
+from models import db, User, Destination, Tour, SavedTour, Review, Itinerary, Booking, TourItinerary, TourInclusion, TourExclusion, TourNote
 
 # ----------------- App & Config -----------------
 app = Flask(__name__)
@@ -157,26 +161,32 @@ def reset_password():
     db.session.commit()
     return jsonify({"message": "Password reset successful"}), 200
 
-# -------- SAVED DESTINATIONS --------
+# -------- SAVED TOURS --------
 @app.route("/api/saved/add", methods=["POST"])
 @jwt_required()
-def save_destination():
+def save_tour():
     data = request.get_json() or {}
-    destination_id = data.get("destination_id")
+    tour_id = data.get("tour_id")
     user_id = int(get_jwt_identity())
 
-    if not destination_id:
-        return jsonify({"message": "Destination ID required"}), 400
+    if not tour_id:
+        return jsonify({"message": "Tour ID required"}), 400
 
-    exists = SavedDestination.query.filter_by(
+    # Kiểm tra tour có tồn tại không
+    tour = Tour.query.get(tour_id)
+    if not tour:
+        return jsonify({"message": "Tour not found"}), 404
+
+    # Kiểm tra đã save chưa
+    exists = SavedTour.query.filter_by(
         user_id=user_id,
-        destination_id=destination_id
+        tour_id=tour_id
     ).first()
 
     if exists:
         return jsonify({"message": "Already saved"}), 200
 
-    new_save = SavedDestination(user_id=user_id, destination_id=destination_id)
+    new_save = SavedTour(user_id=user_id, tour_id=tour_id)
     db.session.add(new_save)
     db.session.commit()
     return jsonify({"message": "Saved successfully"}), 201
@@ -185,12 +195,12 @@ def save_destination():
 @jwt_required()
 def remove_saved():
     data = request.get_json() or {}
-    destination_id = data.get("destination_id")
+    tour_id = data.get("tour_id")
     user_id = int(get_jwt_identity())
 
-    saved = SavedDestination.query.filter_by(
+    saved = SavedTour.query.filter_by(
         user_id=user_id,
-        destination_id=destination_id
+        tour_id=tour_id
     ).first()
 
     if not saved:
@@ -204,27 +214,23 @@ def remove_saved():
 @jwt_required()
 def get_saved_list():
     user_id = int(get_jwt_identity())
-    saved_items = SavedDestination.query.filter_by(user_id=user_id).all()
+    saved_items = SavedTour.query.filter_by(user_id=user_id).all()
     result = []
 
     for item in saved_items:
-        destination = Destination.query.get(item.destination_id)
-        if destination:
-            # Build URL đầy đủ cho ảnh
-            image_filename = destination.image_url.split("/")[-1]
-            image_full_url = request.host_url.rstrip('/') + url_for('static', filename=f'images/{image_filename}')
-
+        tour = item.tour
+        if tour:
             result.append({
-                "id": destination.id,
-                "name": destination.name,
-                "image_url": image_full_url,  # <-- dùng URL đầy đủ
-                "description": destination.description,
-                "latitude": destination.latitude,
-                "longitude": destination.longitude,
-                "rating": destination.rating or 0,
-                "category": destination.category,
-                "tags": destination.tags,
-                "weather": "Sunny 25°C",  # tùy muốn thêm
+                "id": tour.id,
+                "ma_tour": tour.ma_tour,
+                "title": tour.title,
+                "tour_name": tour.tour_name,
+                "image_url": tour.image_url,
+                "gia_tu": tour.gia_tu,
+                "rating": tour.rating or 0,
+                "thoi_gian": tour.thoi_gian,
+                "region": tour.region,
+                "saved_at": item.saved_at.isoformat()
             })
     return jsonify(result), 200
 
@@ -249,12 +255,188 @@ def get_destinations():
         })
     return jsonify(result), 200
 
+# -------- GET ALL TOURS --------
+@app.route("/api/tours", methods=["GET"])
+def get_tours():
+    # Lấy query params
+    region = request.args.get('region')  # Miền Bắc, Miền Trung, Miền Nam
+    category = request.args.get('category')
+    
+    query = Tour.query
+    
+    if region:
+        query = query.filter_by(region=region)
+    if category:
+        query = query.filter_by(category=category)
+    
+    tours = query.all()
+    result = []
+    
+    for tour in tours:
+        # Prefer serving images via the server endpoint that resolves by title
+        image_api = request.host_url.rstrip('/') + url_for('get_tour_image', tour_id=tour.id)
+        result.append({
+            "id": tour.id,
+            "ma_tour": tour.ma_tour,
+            "title": tour.title,
+            "tour_name": tour.tour_name,
+            "region": tour.region,
+            "image_url": image_api,
+            "thoi_gian": tour.thoi_gian,
+            "gia_tu": tour.gia_tu,
+            "rating": tour.rating or 0,
+            "review_count": tour.review_count or 0,
+            "description": tour.description,
+            "category": tour.category
+        })
+    
+    return jsonify(result), 200
+
+# -------- GET TOUR DETAIL --------
+@app.route("/api/tours/<int:tour_id>", methods=["GET"])
+def get_tour_detail(tour_id):
+    tour = Tour.query.get(tour_id)
+    if not tour:
+        return jsonify({"message": "Tour not found"}), 404
+    
+    # Lấy lịch trình
+    itineraries = TourItinerary.query.filter_by(tour_id=tour_id).order_by(TourItinerary.day_number).all()
+    lich_trinh = []
+    for it in itineraries:
+        lich_trinh.append({
+            "day_number": it.day_number,
+            "ngay": it.ngay,
+            "hoat_dong": it.hoat_dong
+        })
+    
+    # Lấy dịch vụ bao gồm
+    inclusions = TourInclusion.query.filter_by(tour_id=tour_id).all()
+    bao_gom = [inc.content for inc in inclusions]
+    
+    # Lấy dịch vụ không bao gồm
+    exclusions = TourExclusion.query.filter_by(tour_id=tour_id).all()
+    khong_bao_gom = [exc.content for exc in exclusions]
+    
+    # Lấy ghi chú
+    notes = TourNote.query.filter_by(tour_id=tour_id).all()
+    ghi_chu = [note.content for note in notes]
+    
+    result = {
+        "id": tour.id,
+        "ma_tour": tour.ma_tour,
+        "title": tour.title,
+        "tour_name": tour.tour_name,
+        "region": tour.region,
+        "description": tour.description,
+        # Provide an API URL that serves the image resolved by title
+        "image_url": request.host_url.rstrip('/') + url_for('get_tour_image', tour_id=tour.id),
+        "thoi_gian": tour.thoi_gian,
+        "khoi_hanh": tour.khoi_hanh,
+        "van_chuyen": tour.van_chuyen,
+        "xuat_phat": tour.xuat_phat,
+        "gia_tu": tour.gia_tu,
+        "rating": tour.rating or 0,
+        "review_count": tour.review_count or 0,
+        "trai_nghiem": tour.trai_nghiem,
+        "tags": tour.tags,
+        "category": tour.category,
+        "url": tour.url,
+        "lich_trinh": lich_trinh,
+        "bao_gom": bao_gom,
+        "khong_bao_gom": khong_bao_gom,
+        "ghi_chu": ghi_chu
+    }
+    
+    return jsonify(result), 200
+
 # -------- TEST JWT --------
 @app.route("/api/test", methods=["GET"])
 @jwt_required()
 def test_jwt():
     user_id = int(get_jwt_identity())
     return jsonify({"message": "JWT valid!", "user_id": user_id})
+
+# -------- PROXY IMAGE (để tránh CORS issues) --------
+@app.route("/api/proxy-image", methods=["GET"])
+def proxy_image():
+    """Proxy image từ external URLs để tránh CORS issue"""
+    image_url = request.args.get('url')
+    
+    if not image_url:
+        return jsonify({"message": "URL parameter required"}), 400
+    
+    try:
+        # Fetch image từ external URL
+        response = requests.get(image_url, timeout=10, verify=False)
+        response.raise_for_status()
+        
+        # Return image với correct content type + CORS headers
+        headers = {
+            'Content-Type': response.headers.get('Content-Type', 'image/jpeg'),
+            'Access-Control-Allow-Origin': '*',
+            'Cache-Control': 'public, max-age=86400',
+        }
+        return response.content, 200, headers
+    except requests.exceptions.RequestException as e:
+        # Fallback: redirect to original image URL (tuy có CORS nhưng ít nhất URL hoạt động)
+        return jsonify({"error": str(e), "url": image_url}), 400
+
+
+# -------- SERVE IMAGE BY TITLE --------
+def normalize_for_matching(s):
+    if not s:
+        return ''
+    s = s.lower()
+    s = unicodedata.normalize('NFKD', s)
+    s = ''.join(ch for ch in s if not unicodedata.combining(ch))
+    s = re.sub(r'[^0-9a-z\s]', ' ', s)
+    s = re.sub(r'\s+', ' ', s).strip()
+    return s
+
+
+@app.route('/api/tours/<int:tour_id>/image', methods=['GET'])
+def get_tour_image(tour_id):
+    """Resolve an image file for a tour by matching the tour title to filenames
+    in `static/images/tours`, and serve it. This ensures the frontend can request
+    images via tour id/title without depending on stored external URLs."""
+    tour = Tour.query.get(tour_id)
+    if not tour:
+        return jsonify({"message": "Tour not found"}), 404
+
+    images_dir = os.path.join(os.path.dirname(__file__), 'static', 'images', 'tours')
+    if not os.path.isdir(images_dir):
+        return jsonify({"message": "Images folder not found"}), 500
+
+    files = [f for f in os.listdir(images_dir) if os.path.isfile(os.path.join(images_dir, f))]
+    title_norm = normalize_for_matching(tour.title)
+
+    # Build normalized map
+    norm_map = {}
+    for f in files:
+        base, _ = os.path.splitext(f)
+        norm = normalize_for_matching(base)
+        norm_map.setdefault(norm, []).append(f)
+
+    # Exact normalized match
+    if title_norm in norm_map:
+        chosen = norm_map[title_norm][0]
+        return send_from_directory(images_dir, chosen)
+
+    # Fuzzy match against normalized keys
+    keys = list(norm_map.keys())
+    close = get_close_matches(title_norm, keys, n=1, cutoff=0.6)
+    if close:
+        chosen = norm_map[close[0]][0]
+        return send_from_directory(images_dir, chosen)
+
+    # As a last resort, if tour.image_url points to a local file, serve it
+    if tour.image_url and tour.image_url.startswith('/static'):
+        fname = tour.image_url.split('/')[-1]
+        fpath = os.path.join(images_dir, fname)
+        if os.path.exists(fpath):
+            return send_from_directory(images_dir, fname)
+
+    return jsonify({"message": "Image not found for this tour"}), 404
 
 # ----------------- Main -----------------
 if __name__ == "__main__":
