@@ -12,6 +12,7 @@ import re
 import secrets
 from datetime import datetime
 from models import db, User, Destination, SavedDestination, Review, Itinerary
+from routes.chat import chat_bp
 
 # ----------------- App & Config -----------------
 app = Flask(__name__)
@@ -29,6 +30,7 @@ app.config['JWT_HEADER_TYPE'] = "Bearer"
 
 db.init_app(app)
 jwt = JWTManager(app)
+app.register_blueprint(chat_bp, url_prefix="/api/chat")
 
 # ----------------- JWT Error Handler -----------------
 @jwt.unauthorized_loader
@@ -93,8 +95,8 @@ def login():
     if not user or not check_password_hash(user.password, password):
         return jsonify({"message": "Invalid email or password"}), 401
 
-    if not getattr(user, "is_email_verified", True):
-        return jsonify({"message": "Email not verified"}), 403
+    # if not getattr(user, "is_email_verified", True):
+    #     return jsonify({"message": "Email not verified"}), 403
 
     access_token = create_access_token(identity=str(user.id))
     refresh_token = create_refresh_token(identity=str(user.id))
