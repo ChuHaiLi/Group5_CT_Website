@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "../untils/axios";
+import API from "../untils/axios";
 import { toast } from "react-toastify";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
@@ -23,7 +23,7 @@ export default function ResetPasswordPage() {
     }
     setLoading(true);
     try {
-      const res = await axios.post("/api/auth/reset-password", { token, password });
+      const res = await API.post("/api/auth/reset-password", { token, password });
       toast.success(res.data.message);
       navigate("/login");
     } catch (err) {
