@@ -1,45 +1,73 @@
+// src/App.js
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
-import { ToastContainer } from "react-toastify";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
 import Navbar from "./components/Navbar/Navbar";
 import HomePage from "./pages/Home/HomePage";
 import ExplorePage from "./pages/Explore/ExplorePage";
 import MyTripsPage from "./pages/MyTrips/MyTripsPage";
 import ProfilePage from "./pages/ProfilePage";
-import PrivateRoute from "./components/PrivateRoute";
+import SavedPage from "./pages/Saved/Saved";
+
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
-import SavedPage from "./pages/Saved/Saved";
-import "./App.css";
-import axios from "axios";
 
+import API from "./untils/axios"; // Axios instance with baseURL + interceptors
+
+// ------------------- PrivateRoute -------------------
+function PrivateRoute({ isAuthenticated, children }) {
+  if (isAuthenticated === null) return <div>Checking authentication...</div>;
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
+}
+
+// ------------------- AppContent -------------------
 function AppContent() {
   const location = useLocation();
   const hideNavbar = ["/login", "/register", "/reset-password", "/forgot-password"].includes(location.pathname);
 
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(null); // null = not checked yet
   const [savedIds, setSavedIds] = useState(new Set());
 
-  // Lấy saved list từ backend
+  // ---------------- Check authentication on app load ----------------
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    if (!token) {
+    const accessToken = localStorage.getItem("access_token");
+    if (!accessToken) {
+      setIsAuthenticated(false);
+      setCheckingAuth(false);
+      return;
+    }
+
+    API.get("/auth/me") // backend returns user info if token valid
+      .then(() => setIsAuthenticated(true))
+      .catch(() => {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        setIsAuthenticated(false);
+      })
+      .finally(() => setCheckingAuth(false));
+  }, []);
+
+  // ---------------- Fetch saved destinations ----------------
+  useEffect(() => {
+    if (!isAuthenticated) {
       setSavedIds(new Set());
       return;
     }
 
-    axios.get("/api/saved/list", { headers: { Authorization: `Bearer ${token}` } })
+    API.get("/saved/list")
       .then(res => setSavedIds(new Set(res.data.map(d => d.id))))
-      .catch(err => console.error("Saved list error:", err.response?.status, err.response?.data));
-  }, []);
+      .catch(() => toast.error("Failed to fetch saved list"));
+  }, [isAuthenticated]);
 
-  // Xử lý save/unsave
+  // ---------------- Toggle save/unsave ----------------
   const handleToggleSave = async (id) => {
-    const token = localStorage.getItem("access_token");
-    if (!token) {
-      alert("Please log in to save destinations.");
+    if (!isAuthenticated) {
+      toast.info("Please log in to save destinations");
       return;
     }
 
@@ -47,19 +75,14 @@ function AppContent() {
 
     try {
       if (isSaved) {
-        await axios.delete("/api/saved/remove", {
-          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-          data: { destination_id: id },
-        });
+        await API.delete("/saved/remove", { data: { destination_id: id } });
         setSavedIds(prev => {
           const s = new Set(prev);
           s.delete(id);
           return s;
         });
       } else {
-        await axios.post("/api/saved/add", { destination_id: id }, {
-          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        });
+        await API.post("/saved/add", { destination_id: id });
         setSavedIds(prev => {
           const s = new Set(prev);
           s.add(id);
@@ -67,52 +90,69 @@ function AppContent() {
         });
       }
     } catch (err) {
-      console.error("Save toggle error:", err.response?.status, err.response?.data);
+      toast.error(err.response?.data?.message || "Error saving/unsaving destination");
     }
   };
+
+  if (checkingAuth) return <div>Checking authentication...</div>;
 
   return (
     <>
       {!hideNavbar && <Navbar />}
 
-      {/* Wrapper chung cho content, chỉ page có navbar mới thêm class */}
       <div className={`page-wrapper ${!hideNavbar ? "with-navbar" : ""}`}>
         <Routes>
-  {/* Auth pages */}
-  <Route path="/login" element={<LoginPage />} />
-  <Route path="/register" element={<RegisterPage />} />
-  <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-  <Route path="/reset-password" element={<ResetPasswordPage />} />
+          {/* Public routes */}
+          <Route path="/login" element={<LoginPage setIsAuthenticated={setIsAuthenticated} />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-  {/* Luôn chuyển "/" → login nếu chưa đăng nhập */}
-  <Route
-    path="/"
-    element={
-      localStorage.getItem("access_token")
-        ? <Navigate to="/home" replace />
-        : <Navigate to="/login" replace />
-    }
-  />
+          {/* Default redirect */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
 
-  {/* HomePage sau khi đăng nhập */}
-  <Route
-    path="/home"
-    element={
-      <PrivateRoute>
-        <HomePage savedIds={savedIds} handleToggleSave={handleToggleSave} />
-      </PrivateRoute>
-    }
-  />
-
-  <Route path="/explore" element={<PrivateRoute><ExplorePage /></PrivateRoute>} />
-  <Route path="/mytrips" element={<PrivateRoute><MyTripsPage /></PrivateRoute>} />
-  <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
-  <Route
-    path="/saved"
-    element={<PrivateRoute><SavedPage savedIds={savedIds} handleToggleSave={handleToggleSave} /></PrivateRoute>}
-  />
-</Routes>
-
+          {/* Protected routes */}
+          <Route
+            path="/home"
+            element={
+              <PrivateRoute isAuthenticated={isAuthenticated}>
+                <HomePage savedIds={savedIds} handleToggleSave={handleToggleSave} />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/explore"
+            element={
+              <PrivateRoute isAuthenticated={isAuthenticated}>
+                <ExplorePage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/mytrips"
+            element={
+              <PrivateRoute isAuthenticated={isAuthenticated}>
+                <MyTripsPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <PrivateRoute isAuthenticated={isAuthenticated}>
+                <ProfilePage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/saved"
+            element={
+              <PrivateRoute isAuthenticated={isAuthenticated}>
+                <SavedPage savedIds={savedIds} handleToggleSave={handleToggleSave} />
+              </PrivateRoute>
+            }
+          />
+        </Routes>
       </div>
 
       <ToastContainer position="top-right" autoClose={3000} theme="light" />
@@ -120,6 +160,7 @@ function AppContent() {
   );
 }
 
+// ------------------- App -------------------
 export default function App() {
   return (
     <Router>
