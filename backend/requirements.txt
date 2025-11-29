@@ -1,0 +1,50 @@
+# --------------------------------------------------------------
+# Backend (Python 3.11+ recommended)
+# Install with: python -m pip install -r requirements.txt
+# --------------------------------------------------------------
+Flask==3.0.3
+Flask-SQLAlchemy==3.1.1
+SQLAlchemy==2.0.35
+Flask-JWT-Extended==4.6.0
+Flask-Cors==4.0.0
+Werkzeug==3.0.4
+itsdangerous==2.2.0
+Jinja2==3.1.4
+click==8.1.7
+requests==2.32.3
+openai==1.57.4
+python-dotenv==1.0.1
+
+# --------------------------------------------------------------
+# Frontend (Node.js 18+ with npm). Install separately via npm:
+#   cd frontend && npm install
+#   cd frontend/auth-frontend && npm install
+# Listed here for convenience so a fresh machine knows everything to fetch.
+# --------------------------------------------------------------
+# frontend dependencies:
+#   @testing-library/dom@^10.4.1
+#   @testing-library/jest-dom@^6.9.1
+#   @testing-library/react@^16.3.0
+#   @testing-library/user-event@^13.5.0
+#   axios@^1.13.2
+#   react@^19.2.0
+#   react-dom@^19.2.0
+#   react-icons@^5.5.0
+#   react-router-dom@^7.9.5
+#   react-scripts@5.0.1
+#   react-toastify@^11.0.5
+#   web-vitals@^2.1.4
+# 
+# auth-frontend dependencies (same as above):
+#   @testing-library/dom@^10.4.1
+#   @testing-library/jest-dom@^6.9.1
+#   @testing-library/react@^16.3.0
+#   @testing-library/user-event@^13.5.0
+#   axios@^1.13.2
+#   react@^19.2.0
+#   react-dom@^19.2.0
+#   react-icons@^5.5.0
+#   react-router-dom@^7.9.5
+#   react-scripts@5.0.1
+#   react-toastify@^11.0.5
+#   web-vitals@^2.1.4
