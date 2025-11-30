@@ -14,6 +14,9 @@ from datetime import datetime
 from models import db, User, Destination, SavedDestination, Review, Itinerary
 from routes.chat import chat_bp
 from routes.search import search_bp
+from utils.env_loader import load_backend_env
+
+load_backend_env()
 
 # ----------------- App & Config -----------------
 app = Flask(__name__)

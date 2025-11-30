@@ -1,7 +1,11 @@
 import os
+import time
 from typing import List, Dict, Any, Optional
 
 from openai import OpenAI
+from openai import APIConnectionError, APIError, APIStatusError, APITimeoutError, RateLimitError
+
+from .openai_rate_limiter import get_shared_openai_limiter
 
 
 class OpenAIImageRecognizer:
@@ -11,6 +15,9 @@ class OpenAIImageRecognizer:
         self._cached_client: Optional[OpenAI] = None
         self._model = os.getenv("OPENAI_IMAGE_MODEL", "gpt-4o-mini")
         self._base_url = (os.getenv("OPENAI_API_IMAGE") or "").rstrip("/")
+        self._rate_limiter = get_shared_openai_limiter()
+        self._max_retries = int(os.getenv("OPENAI_MAX_RETRIES", "2"))
+        self._retry_delay = float(os.getenv("OPENAI_RETRY_DELAY", "5"))
 
     def _get_client(self) -> OpenAI:
         if self._cached_client is None:
@@ -18,7 +25,7 @@ class OpenAIImageRecognizer:
             if not api_key:
                 raise RuntimeError("OPENAI_API_KEY is not configured")
 
-            client_kwargs: Dict[str, Any] = {"api_key": api_key}
+            client_kwargs: Dict[str, Any] = {"api_key": api_key, "max_retries": 0}
             if self._base_url:
                 client_kwargs["base_url"] = self._base_url
 
@@ -45,15 +52,15 @@ class OpenAIImageRecognizer:
 
         client = self._get_client()
         system_prompt = (
-            "Bạn là Travel Lens, trợ lý AI vui tính chuyên nhận dạng địa điểm du lịch từ ảnh. "
-            "Luôn trả lời bằng tiếng Việt, giọng hài hước, thân thiện. "
-            "Hãy dùng đúng FORMAT cố định sau (không thêm JSON, không thêm thẻ HTML, không thay đổi tiêu đề):\n\n"
-            "Ảnh đẹp kiểu khiến người ta muốn nghỉ làm một ngày để đi chơi ngay!\n"
-            "<1-2 câu tả vibe ảnh như: 'Tấm ảnh này nhìn vào thấy chill dễ sợ...'>\n\n"
-            "Tôi nghĩ địa điểm du lịch đó là: <địa điểm hoặc 'mình chưa chắc lắm'>\n\n"
-            "Vài nét về địa điểm đó: <liệt kê gạch đầu dòng, mỗi gạch đầu dòng bắt đầu bằng dấu '-' mô tả đặc điểm nổi bật>\n\n"
-            "Bạn cũng có thể tham khảo thử với: <liệt kê tối đa 3 gợi ý, dạng '- Tên địa điểm – lý do ngắn'>\n\n"
-            "Nếu ảnh không liên quan đến du lịch, nói thẳng lý do và khuyên người dùng gửi ảnh khác."
+            "Bạn là Travel Lens, một storyteller du lịch tinh tế. "
+            "Hãy nhìn các bức ảnh bằng ánh mắt của người bạn mê xê dịch: mở đầu bằng cảm xúc đầu tiên khi vừa chạm mắt,"
+            " sau đó mô tả sinh động màu sắc, ánh sáng, vibe, âm thanh tưởng tượng, mùi vị nếu có. "
+            "Khi suy đoán địa điểm, diễn đạt tự nhiên, tự tin nhưng vẫn mềm mại (không dùng câu 'Tôi nghĩ địa điểm...' hay xin lỗi). "
+            "Nếu chưa chắc chắn, khéo léo kể theo kiểu 'khung cảnh này gợi mình nhớ đến...' thay vì phủ nhận thẳng. "
+            "Gợi ý điểm tương tự như lời khuyên của người bạn am hiểu du lịch, không liệt kê khô khan. "
+            "Tránh hoàn toàn các format cố định, tiêu đề, bullet list, hoặc nhắc lại cùng cấu trúc mỗi lần. "
+            "Văn phong ấm áp, giàu hình ảnh, mang hơi thở của hành trình thực thụ. "
+            "Nếu ảnh không liên quan đến du lịch, hãy nói rõ một cách duyên dáng và rủ người dùng gửi ảnh khác."
         )
         if destination_context:
             system_prompt += (
@@ -78,13 +85,57 @@ class OpenAIImageRecognizer:
                 }
             )
 
-        response = client.chat.completions.create(
-            model=self._model,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_content},
-            ],
-            temperature=float(os.getenv("OPENAI_TEMPERATURE", "0.5")),
-        )
+        temperature = float(os.getenv("OPENAI_TEMPERATURE", "0.5"))
 
+        def _call_openai():
+            return client.chat.completions.create(
+                model=self._model,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_content},
+                ],
+                temperature=temperature,
+            )
+
+        response = self._run_with_retry(_call_openai)
         return (response.choices[0].message.content or "").strip()
+
+    def _run_with_retry(self, call):
+        last_exc: Optional[Exception] = None
+        attempts = max(self._max_retries, 0) + 1
+        for attempt in range(attempts):
+            try:
+                self._rate_limiter.acquire()
+                return call()
+            except RateLimitError as exc:
+                last_exc = exc
+                if attempt == attempts - 1:
+                    raise RuntimeError(
+                        "OpenAI đang tạm khóa vì vượt giới hạn 1 phút. Đợi khoảng 20s rồi thử lại nhé."
+                    ) from exc
+            except (APITimeoutError, APIConnectionError) as exc:
+                last_exc = exc
+                if attempt == attempts - 1:
+                    raise RuntimeError(
+                        "Không thể kết nối tới OpenAI lúc này. Hãy thử gửi lại ảnh sau ít phút."
+                    ) from exc
+            except APIStatusError as exc:
+                last_exc = exc
+                status = getattr(exc, "status_code", None)
+                if status and 500 <= status < 600 and attempt < attempts - 1:
+                    time.sleep(self._retry_delay * (attempt + 1))
+                    continue
+                if status == 429:
+                    raise RuntimeError(
+                        "OpenAI yêu cầu tạm nghỉ vài giây do giới hạn tốc độ. Vui lòng thử lại sau."
+                    ) from exc
+                message = "OpenAI trả về lỗi không xác định. Hãy thử lại sau."
+                if status:
+                    message = f"OpenAI trả về lỗi {status}. Hãy thử lại sau."
+                raise RuntimeError(message) from exc
+            except APIError as exc:
+                raise RuntimeError(f"OpenAI gặp lỗi: {exc}") from exc
+
+            time.sleep(self._retry_delay * (attempt + 1))
+
+        raise RuntimeError("Không thể gọi OpenAI Vision thành công.") from last_exc

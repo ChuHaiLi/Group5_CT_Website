@@ -4,8 +4,9 @@ from typing import List, Optional
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from sqlalchemy import desc
+from sqlalchemy.orm import joinedload
 
-from models import db, ChatMessage, ChatSession, Destination, User
+from models import db, ChatAttachment, ChatMessage, ChatSession, Destination, User
 from utils.openai_client import OpenAIChatClient
 
 chat_bp = Blueprint("chat", __name__)
@@ -18,6 +19,15 @@ def _serialize_message(message: ChatMessage) -> dict:
         "role": message.role,
         "content": message.content,
         "created_at": message.created_at.isoformat() if message.created_at else None,
+        "attachments": [
+            {
+                "id": attachment.id,
+                "name": attachment.name,
+                "previewUrl": attachment.data_url,
+                "thumbnailUrl": attachment.data_url,
+            }
+            for attachment in getattr(message, "attachments", []) or []
+        ],
     }
 
 
@@ -106,6 +116,29 @@ def _build_prompt_messages(
     return messages
 
 
+def _persist_attachments(message: ChatMessage, attachments_payload) -> None:
+    if not attachments_payload:
+        return
+
+    for item in attachments_payload:
+        if not isinstance(item, dict):
+            continue
+        data_url = (
+            item.get("data_url")
+            or item.get("dataUrl")
+            or item.get("previewUrl")
+            or item.get("preview_url")
+        )
+        if not data_url:
+            continue
+        attachment = ChatAttachment(
+            message_id=message.id,
+            name=(item.get("name") or item.get("filename") or "")[:255] or None,
+            data_url=data_url,
+        )
+        db.session.add(attachment)
+
+
 @chat_bp.route("/sessions", methods=["GET"])
 @jwt_required()
 def list_sessions():
@@ -182,7 +215,8 @@ def get_session_messages(session_id: int):
         return jsonify({"message": "Session not found"}), 404
 
     history = (
-        ChatMessage.query.filter_by(session_id=session.id)
+        ChatMessage.query.options(joinedload(ChatMessage.attachments))
+        .filter_by(session_id=session.id)
         .order_by(ChatMessage.created_at.asc())
         .all()
     )
@@ -218,6 +252,8 @@ def send_session_message(session_id: int):
         content=content,
     )
     db.session.add(user_msg)
+    db.session.flush()
+    _persist_attachments(user_msg, payload.get("attachments"))
 
     if (session.title or "").startswith("Cuộc trò chuyện") and content:
         session.title = content[:90] + ("…" if len(content) > 90 else "")
@@ -268,7 +304,8 @@ def widget_history():
     user_id = int(get_jwt_identity())
     session = _get_or_create_user_session(user_id)
     history = (
-        ChatMessage.query.filter_by(session_id=session.id)
+        ChatMessage.query.options(joinedload(ChatMessage.attachments))
+        .filter_by(session_id=session.id)
         .order_by(ChatMessage.created_at.asc())
         .all()
     )
@@ -302,6 +339,8 @@ def widget_message():
         content=content,
     )
     db.session.add(user_msg)
+    db.session.flush()
+    _persist_attachments(user_msg, payload.get("attachments"))
     session.updated_at = datetime.utcnow()
     db.session.commit()
 
@@ -337,3 +376,41 @@ def widget_message():
     db.session.commit()
 
     return jsonify(_serialize_message(assistant_msg)), 201
+
+
+@chat_bp.route("/widget/log", methods=["POST"])
+@jwt_required()
+def widget_log_messages():
+    user_id = int(get_jwt_identity())
+    session = _get_or_create_user_session(user_id)
+
+    payload = request.get_json() or {}
+    entries = payload.get("messages")
+    if not isinstance(entries, list) or not entries:
+        return jsonify({"message": "Messages payload is required"}), 400
+
+    created = []
+    for entry in entries:
+        role = (entry or {}).get("role")
+        content = ((entry or {}).get("content") or "").strip()
+        if role not in ("user", "assistant") or not content:
+            continue
+
+        message = ChatMessage(
+            user_id=user_id,
+            session_id=session.id,
+            role="user" if role == "user" else "assistant",
+            content=content[:4000],
+        )
+        db.session.add(message)
+        db.session.flush()
+        _persist_attachments(message, entry.get("attachments"))
+        created.append(message)
+
+    if not created:
+        return jsonify({"message": "No valid messages to log"}), 400
+
+    session.updated_at = datetime.utcnow()
+    db.session.commit()
+
+    return jsonify([_serialize_message(msg) for msg in created]), 201

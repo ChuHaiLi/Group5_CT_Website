@@ -76,3 +76,18 @@ class ChatMessage(db.Model):
     role = db.Column(db.String(20), nullable=False)  # user | assistant
     content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    attachments = db.relationship(
+        "ChatAttachment",
+        backref="message",
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
+
+
+class ChatAttachment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    message_id = db.Column(db.Integer, db.ForeignKey('chat_message.id'), nullable=False)
+    name = db.Column(db.String(255))
+    data_url = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
