@@ -33,21 +33,13 @@
                         ],
                         "entry_fee": 1304970,
                         "tags": [
-                            "núi",
-                            "đồi",
-                            "hồ",
-                            "vịnh",
-                            "rừng",
-                            "công viên",
-                            "chợ",
-                            "ẩm thực",
-                            "cầu",
-                            "cáp treo",
-                            "cả ngày",
-                            "dễ",
-                            "gia đình",
-                            "tham quan",
-                            "truyền thống"
+                            "Mountain",
+                            "Cultural Site",
+                            "Shopping",
+                            "Sightseeing",
+                            "Full Day",
+                            "<=2000000 VND",
+                            "Scenic Views"
                         ],
                         "source": "https://www.klook.com/vi/activity/13283-ba-na-hills-ticket-da-nang/?spm=City.Activity_LIST&clickId=864f6f2c71"
                     },
@@ -74,14 +66,12 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 09:00-19:00",
                         "entry_fee": 475000,
                         "tags": [
-                            "hồ",
-                            "đảo",
-                            "công viên",
-                            "spa",
-                            "cầu",
-                            "cả ngày",
-                            "thư giãn",
-                            "ẩm thực"
+                            "Island",
+                            "Relaxation/Resort",
+                            "Morning",
+                            "Evening",
+                            "Full Day",
+                            "<=500000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/69492-mikazuki-water-park-ticket-in-da-nang/?spm=City.Activity_LIST&clickId=0fa3ce5c8c"
                     },
@@ -111,23 +101,15 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 14:00-17:30",
                         "entry_fee": 380000,
                         "tags": [
-                            "lăng mộ",
-                            "núi",
-                            "hồ",
-                            "suối",
-                            "đảo",
-                            "công viên",
-                            "spa",
-                            "chợ",
-                            "rạp chiếu phim",
-                            "ẩm thực",
-                            "2 giờ 30 phút",
-                            "ngắn hạn (< 4 giờ)",
-                            "tham quan",
-                            "thiên nhiên",
-                            "thư giãn",
-                            "truyền thống",
-                            "văn hóa"
+                            "Mountain",
+                            "Gastronomy",
+                            "Relaxation/Resort",
+                            "Shopping",
+                            "Sightseeing",
+                            "Afternoon",
+                            "Half Day",
+                            "2 hours 30 minutes",
+                            "<=500000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/16861-nui-than-tai-hot-springs-da-nang/"
                     },
@@ -155,13 +137,15 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 09:00-23:00",
                         "entry_fee": 398125,
                         "tags": [
-                            "lăng mộ",
-                            "hồ",
-                            "spa",
-                            "chợ",
-                            "1 giờ",
-                            "ngắn hạn (< 4 giờ)",
-                            "thư giãn"
+                            "Urban Area",
+                            "Island",
+                            "Relaxation/Resort",
+                            "Shopping",
+                            "Morning",
+                            "Evening",
+                            "Half Day",
+                            "1 hours",
+                            "<=500000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/119654-nguon-spa-massage-da-nang/"
                     },
@@ -186,24 +170,17 @@
                             "lat": 16.121869986712515,
                             "lng": 108.28668084355625
                         },
-                        "opening_hours": null,
+                        "opening_hours": "6:00 AM - 18:00 (Hoạt động trên biển, thường diễn ra trong ngày)",
                         "entry_fee": 494000,
                         "tags": [
-                            "lăng mộ",
-                            "hồ",
-                            "bãi biển",
-                            "đảo",
-                            "bơi lội",
-                            "câu cá",
-                            "2 giờ",
-                            "biển",
-                            "chụp ảnh",
-                            "lặn biển",
-                            "mạo hiểm",
-                            "ngắn hạn (< 4 giờ)",
-                            "tham quan",
-                            "truyền thống",
-                            "văn hóa"
+                            "Beach",
+                            "Island",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "2 hours",
+                            "<=500000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/36331-son-tra-peninsula-snorkeling-fishing-tour/"
                     },
@@ -227,19 +204,17 @@
                             "lat": 15.879657831464927,
                             "lng": 108.33675029325418
                         },
-                        "opening_hours": null,
+                        "opening_hours": "6:30 - 17:30",
                         "entry_fee": 375000,
                         "tags": [
-                            "lăng mộ",
-                            "hồ",
-                            "đảo",
-                            "5 giờ",
-                            "lịch sử",
-                            "tham quan",
-                            "truyền thống",
-                            "tầm trung (4-6 giờ)",
-                            "văn hóa",
-                            "ẩm thực"
+                            "Historical Site",
+                            "Cultural Site",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "5 hours",
+                            "<=500000 VND"
                         ],
                         "source": ""
                     },
@@ -266,19 +241,13 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 07:30-17:00",
                         "entry_fee": 150000,
                         "tags": [
-                            "lăng mộ",
-                            "hồ",
-                            "sông",
-                            "suối",
-                            "công viên",
-                            "khách sạn",
-                            "chợ",
-                            "chụp ảnh",
-                            "cả ngày",
-                            "dễ",
-                            "hiện đại",
-                            "tham quan",
-                            "thác nước"
+                            "Adventure",
+                            "Island",
+                            "Shopping",
+                            "Morning",
+                            "Afternoon",
+                            "Full Day",
+                            "<=200000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/37856-hoa-phu-thanh-rafting-combo-tickets-shared-transfers/"
                     },
@@ -305,15 +274,11 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 06:30-17:30",
                         "entry_fee": 1807500,
                         "tags": [
-                            "lăng mộ",
-                            "hồ",
-                            "vịnh",
-                            "đảo",
-                            "15 phút",
-                            "biển",
-                            "chụp ảnh",
-                            "ngắn hạn (< 4 giờ)",
-                            "tham quan"
+                            "Island",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "<=2000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/90127-paragliding-experience-in-da-nang/"
                     },
@@ -340,18 +305,14 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 07:30-15:30",
                         "entry_fee": 662500,
                         "tags": [
-                            "đền chùa",
-                            "lăng mộ",
-                            "bảo tàng",
-                            "hồ",
-                            "đảo",
-                            "bơi lội",
-                            "8 giờ",
-                            "biển",
-                            "dài hạn (> 6 giờ)",
-                            "lặn biển",
-                            "tham quan",
-                            "ẩm thực"
+                            "Cultural Site",
+                            "Island",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "8 hours",
+                            "<=1000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/41384-cham-islands-day-tour-da-nang-vietnam/"
                     },
@@ -375,18 +336,16 @@
                             "lat": 15.877946563937954,
                             "lng": 108.37277209549619
                         },
-                        "opening_hours": null,
+                        "opening_hours": "7:00 - 17:00",
                         "entry_fee": 343700,
                         "tags": [
-                            "hồ",
-                            "sông",
-                            "rừng",
-                            "4-5 giờ",
-                            "tham quan",
-                            "truyền thống",
-                            "tầm trung (4-6 giờ)",
-                            "văn hóa",
-                            "ẩm thực"
+                            "Island",
+                            "Lake/River",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "4 hours",
+                            "<=500000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/146578-bay-mau-coconut-forest-meal-hoi-an/?spm=City.Activity_LIST&clickId=935c4c5cf5"
                     },
@@ -412,15 +371,14 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 08:00-23:00",
                         "entry_fee": 87500,
                         "tags": [
-                            "lăng mộ",
-                            "spa",
-                            "15 phút",
-                            "hiện đại",
-                            "luxury",
-                            "ngắn hạn (< 4 giờ)",
-                            "núi",
-                            "thiên nhiên",
-                            "thư giãn"
+                            "Mountain",
+                            "Island",
+                            "Trekking/Hiking",
+                            "Relaxation/Resort",
+                            "Morning",
+                            "Evening",
+                            "Half Day",
+                            "<=100000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/148246-tigon-spa-massage-experience-in-da-nang/?spm=City.Activity_LIST&clickId=e3bcb70a81"
                     },
@@ -447,11 +405,13 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 08:30-14:30",
                         "entry_fee": 1317894,
                         "tags": [
-                            "1-1 giờ",
-                            "biển",
-                            "hiện đại",
-                            "ngắn hạn (< 4 giờ)",
-                            "ẩm thực"
+                            "Beach",
+                            "Lake/River",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "1 hours 30 minutes",
+                            "<=2000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/14713-surfing-lesson-da-nang/?spm=City.Activity_LIST&clickId=b967fa4c4a"
                     },
@@ -476,14 +436,12 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 08:00-17:00",
                         "entry_fee": 120000,
                         "tags": [
-                            "bảo tàng",
-                            "hồ",
-                            "cả ngày",
-                            "hiện đại",
-                            "lịch sử",
-                            "truyền thống",
-                            "văn hóa",
-                            "ẩm thực"
+                            "Island",
+                            "Lake/River",
+                            "Morning",
+                            "Afternoon",
+                            "Full Day",
+                            "<=200000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/165573-da-nang-museum-ticket/"
                     },
@@ -513,16 +471,15 @@
                         ],
                         "entry_fee": 469000,
                         "tags": [
-                            "đền chùa",
-                            "lăng mộ",
-                            "hồ",
-                            "chợ",
-                            "ẩm thực",
-                            "nghệ thuật",
-                            "2-2 giờ",
-                            "khó",
-                            "luxury",
-                            "ngắn hạn (< 4 giờ)"
+                            "Cultural Site",
+                            "Gastronomy",
+                            "Shopping",
+                            "Morning",
+                            "Afternoon",
+                            "Evening",
+                            "Half Day",
+                            "2 hours 30 minutes",
+                            "<=500000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/107348-buffet-sheraton-hanoi-oven-dor-restaurant/"
                     },
@@ -548,18 +505,14 @@
                         "opening_hours": "Thứ Bảy: 18:00-21:30",
                         "entry_fee": 880000,
                         "tags": [
-                            "lăng mộ",
-                            "hồ",
-                            "sông",
-                            "chợ",
-                            "ẩm thực",
-                            "cầu",
-                            "3 giờ 30 phút",
-                            "chụp ảnh",
-                            "gia đình",
-                            "khó",
-                            "ngắn hạn (< 4 giờ)",
-                            "nhóm bạn"
+                            "Gastronomy",
+                            "Lake/River",
+                            "Shopping",
+                            "Afternoon",
+                            "Evening",
+                            "Half Day",
+                            "3 hours 30 minutes",
+                            "<=1000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/112092-seafood-and-bbq-dinner-buffer-novotel-premier-danang-han-river/"
                     },
@@ -583,21 +536,18 @@
                             "lat": 15.87756859702059,
                             "lng": 108.33823999578638
                         },
-                        "opening_hours": null,
+                        "opening_hours": "7:00 - 17:30",
                         "entry_fee": 461400,
                         "tags": [
-                            "lăng mộ",
-                            "núi",
-                            "hang động",
-                            "khách sạn",
-                            "leo núi",
-                            "cầu",
-                            "5 giờ",
-                            "chụp ảnh",
-                            "dễ",
-                            "tham quan",
-                            "trekking",
-                            "tầm trung (4-6 giờ)"
+                            "Mountain",
+                            "Lake/River",
+                            "Trekking/Hiking",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "5 hours",
+                            "<=500000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/9310-marble-mountain-trek-hoi-an/"
                     },
@@ -623,20 +573,14 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 14:00-16:30",
                         "entry_fee": 283000,
                         "tags": [
-                            "lăng mộ",
-                            "hồ",
-                            "vịnh",
-                            "khu nghỉ dưỡng",
-                            "chợ",
-                            "ẩm thực",
-                            "2 giờ 30 phút",
-                            "chụp ảnh",
-                            "hiện đại",
-                            "khó",
-                            "ngắn hạn (< 4 giờ)",
-                            "thư giãn",
-                            "truyền thống",
-                            "văn hóa"
+                            "Beach",
+                            "Gastronomy",
+                            "Relaxation/Resort",
+                            "Shopping",
+                            "Afternoon",
+                            "Multi-day Adventure",
+                            "2 hours 30 minutes",
+                            "<=500000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/109711-afternoon-tea-at-risemount-premier-danang-resort/?spm=City.Activity_LIST&clickId=9b9f4e5139"
                     },
@@ -660,24 +604,16 @@
                             "lat": 15.880374637878251,
                             "lng": 108.32751955307252
                         },
-                        "opening_hours": null,
+                        "opening_hours": "7:00 - 9:00 (Giờ bán vé tham quan Phố cổ)",
                         "entry_fee": 1575600,
                         "tags": [
-                            "đền chùa",
-                            "lăng mộ",
-                            "bảo tàng",
-                            "hồ",
-                            "đảo",
-                            "phố cổ",
-                            "nghệ thuật",
-                            "cầu",
-                            "8-9 giờ",
-                            "dài hạn (> 6 giờ)",
-                            "lịch sử",
-                            "tham quan",
-                            "truyền thống",
-                            "văn hóa",
-                            "ẩm thực"
+                            "Cultural Site",
+                            "Urban Area",
+                            "Sightseeing",
+                            "Morning",
+                            "Half Day",
+                            "9 hours 30 minutes",
+                            "<=2000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/136972-hoi-an-and-wood-carving-art-workshop-private-day-tour-from-da-nang/?spm=City.Activity_LIST&clickId=c92d36aa50"
                     }
@@ -711,19 +647,14 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 08:00-17:00",
                         "entry_fee": 89250,
                         "tags": [
-                            "lăng mộ",
-                            "hồ",
-                            "rừng",
-                            "phố cổ",
-                            "nghệ thuật",
-                            "1-3 giờ",
-                            "chụp ảnh",
-                            "lịch sử",
-                            "ngắn hạn (< 4 giờ)",
-                            "tham quan",
-                            "thiên nhiên",
-                            "truyền thống",
-                            "ẩm thực"
+                            "Island",
+                            "Lake/River",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "1 hours",
+                            "<=100000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/24274-basket-boat-ticket-hoi-an-coconut-forest/?spm=City.Activity_LIST&clickId=f70a050432"
                     },
@@ -745,17 +676,18 @@
                             "lat": 15.773772966312603,
                             "lng": 108.1099212193181
                         },
-                        "opening_hours": null,
+                        "opening_hours": "6:30 - 17:30",
                         "entry_fee": 448384,
                         "tags": [
-                            "đền chùa",
-                            "di tích lịch sử",
-                            "hồ",
-                            "chợ",
-                            "5 giờ 30 phút",
-                            "tham quan",
-                            "truyền thống",
-                            "tầm trung (4-6 giờ)"
+                            "Historical Site",
+                            "Island",
+                            "Shopping",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "5 hours 30 minutes",
+                            "<=500000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/1602-my-son-disc   y-hoi-an/?spm=City.Activity_LIST&clickId=f82edb1d0f"
                     },
@@ -779,22 +711,18 @@
                             "lat": 15.877573772058124,
                             "lng": 108.33823463558193
                         },
-                        "opening_hours": null,
+                        "opening_hours": "7:00 - 17:00",
                         "entry_fee": 768824,
                         "tags": [
-                            "lăng mộ",
-                            "hồ",
-                            "rừng",
-                            "chợ",
-                            "chèo thuyền",
-                            "4 giờ 45 phút",
-                            "mua sắm",
-                            "sinh thái",
-                            "tham quan",
-                            "truyền thống",
-                            "tầm trung (4-6 giờ)",
-                            "văn hóa",
-                            "ẩm thực"
+                            "Gastronomy",
+                            "Island",
+                            "Shopping",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "4 hours 45 minutes",
+                            "<=1000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/1603-eco-cooking-class-hoi-an/?spm=City.Activity_LIST&clickId=205a67a690"
                     },
@@ -820,14 +748,12 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 14h30-17h30",
                         "entry_fee": 789700,
                         "tags": [
-                            "lăng mộ",
-                            "hồ",
-                            "sông",
-                            "đảo",
-                            "chèo thuyền",
-                            "2 giờ 30 phút",
-                            "ngắn hạn (< 4 giờ)",
-                            "sinh thái"
+                            "Island",
+                            "Lake/River",
+                            "Water Sports",
+                            "Half Day",
+                            "2 hours 30 minutes",
+                            "<=1000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/33803-sunset-kayaking-experience-hoi-an/?spm=City.Activity_LIST&clickId=b2095e9a15"
                     },
@@ -855,18 +781,13 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 08:00-17:00",
                         "entry_fee": 476000,
                         "tags": [
-                            "lăng mộ",
-                            "hồ",
-                            "đảo",
-                            "nghệ thuật",
-                            "2 giờ 30 phút",
-                            "hiện đại",
-                            "khó",
-                            "ngắn hạn (< 4 giờ)",
-                            "tham quan",
-                            "truyền thống",
-                            "văn hóa",
-                            "ẩm thực"
+                            "Island",
+                            "Lake/River",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "2 hours 30 minutes",
+                            "<=500000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/136896-wood-carving-art-workshop-at-cui-lu-village-in-hoi-an/?spm=City.Activity_LIST&clickId=9fdcc4e3e2"
                     },
@@ -891,24 +812,17 @@
                             "lat": 15.862540587600009,
                             "lng": 108.3332014780676
                         },
-                        "opening_hours": null,
+                        "opening_hours": "7:00 - 17:00 (Làng nghề truyền thống)",
                         "entry_fee": 1602500,
                         "tags": [
-                            "lăng mộ",
-                            "sông",
-                            "cánh đồng",
-                            "đồng lúa",
-                            "làng nghề",
-                            "nghệ thuật",
-                            "3 giờ 45 phút",
-                            "chụp ảnh",
-                            "hiện đại",
-                            "mạo hiểm",
-                            "ngắn hạn (< 4 giờ)",
-                            "tham quan",
-                            "truyền thống",
-                            "văn hóa",
-                            "ẩm thực"
+                            "Cultural Site",
+                            "Adventure",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "3 hours 45 minutes",
+                            "<=2000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/150537-hoi-an-countryside-craft-village-jeep-tour/?spm=City.Activity_LIST&clickId=3a0974d485"
                     },
@@ -932,17 +846,16 @@
                             "lat": 15.870505931634431,
                             "lng": 108.36567088836136
                         },
-                        "opening_hours": null,
+                        "opening_hours": "6:00 - 18:00 (Hoạt động trong ngày)",
                         "entry_fee": 687300,
                         "tags": [
-                            "sông",
-                            "chèo thuyền",
-                            "3 giờ",
-                            "chụp ảnh",
-                            "mạo hiểm",
-                            "ngắn hạn (< 4 giờ)",
-                            "tham quan",
-                            "thiên nhiên"
+                            "Adventure",
+                            "Urban Area",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "3 hours",
+                            "<=1000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/33715-stand-paddle-boarding-experience-hoi-an/"
                     },
@@ -968,10 +881,11 @@
                         "opening_hours": "Thứ Ba-Chủ Nhật: 08:00-17:00",
                         "entry_fee": 110500,
                         "tags": [
-                            "nhà triển lãm",
-                            "ngân hàng",
-                            "cả ngày",
-                            "ẩm thực"
+                            "Lake/River",
+                            "Morning",
+                            "Afternoon",
+                            "Full Day",
+                            "<=200000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/113899-cso-gallery-in-hoi-an-ticket/"
                     }
@@ -1002,19 +916,17 @@
                             "lat": 16.469784200009936,
                             "lng": 107.57730324976275
                         },
-                        "opening_hours": null,
+                        "opening_hours": "7:00 - 17:30",
                         "entry_fee": 1167500,
                         "tags": [
-                            "lăng mộ",
-                            "công trình kiến trúc",
-                            "hồ",
-                            "đảo",
-                            "11-12 giờ",
-                            "dài hạn (> 6 giờ)",
-                            "tham quan",
-                            "truyền thống",
-                            "văn hóa",
-                            "ẩm thực"
+                            "Historical Site",
+                            "Island",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "11 hours",
+                            "<=2000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/147422-hue-imperial-deluxe-tour-da-nang/"
                     },
@@ -1039,25 +951,17 @@
                             "lat": 16.060609987348098,
                             "lng": 108.22337498415074
                         },
-                        "opening_hours": null,
+                        "opening_hours": "Các điểm tham quan chính (Đại Nội, Lăng Khải Định) mở cửa từ 07:00 đến 17:30 hàng ngày.",
                         "entry_fee": 1037710,
                         "tags": [
-                            "đền chùa",
-                            "lăng mộ",
-                            "công trình kiến trúc",
-                            "núi",
-                            "hồ",
-                            "sông",
-                            "vịnh",
-                            "nghệ thuật",
-                            "11-12 giờ",
-                            "biển",
-                            "chụp ảnh",
-                            "dài hạn (> 6 giờ)",
-                            "lịch sử",
-                            "tham quan",
-                            "thác nước",
-                            "ẩm thực"
+                            "Beach",
+                            "Mountain",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "11 hours",
+                            "<=2000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/4808-hue-day-tour-da-nang/?spm=City.Activity_LIST&clickId=799eb6fe80"
                     },
@@ -1084,12 +988,12 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 17h20-20h40",
                         "entry_fee": 130000,
                         "tags": [
-                            "chợ",
-                            "40 phút",
-                            "chụp ảnh",
-                            "ngắn hạn (< 4 giờ)",
-                            "tham quan",
-                            "ẩm thực"
+                            "Urban Area",
+                            "Island",
+                            "Shopping",
+                            "Sightseeing",
+                            "Half Day",
+                            "<=200000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/77855-hue-city-sightseeing-bus-ticket/?spm=City.Activity_LIST&clickId=8fa32baf25"
                     },
@@ -1114,14 +1018,12 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 07:00-17:30",
                         "entry_fee": 165000,
                         "tags": [
-                            "di tích lịch sử",
-                            "lăng mộ",
-                            "công trình kiến trúc",
-                            "cả ngày",
-                            "tham quan",
-                            "truyền thống",
-                            "văn hóa",
-                            "ẩm thực"
+                            "Historical Site",
+                            "Island",
+                            "Morning",
+                            "Afternoon",
+                            "Full Day",
+                            "<=200000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/131172-tomb-of-emperor-khai-dinh-ticket-in-unesco-complex-of-hue-monument/?spm=City.Activity_LIST&clickId=908fec2ce4"
                     },
@@ -1146,13 +1048,12 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 07:00-17:30",
                         "entry_fee": 170000,
                         "tags": [
-                            "di tích lịch sử",
-                            "lăng mộ",
-                            "chụp ảnh",
-                            "cả ngày",
-                            "tham quan",
-                            "thiên nhiên",
-                            "ẩm thực"
+                            "Historical Site",
+                            "Island",
+                            "Morning",
+                            "Afternoon",
+                            "Full Day",
+                            "<=200000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/130315-tomb-of-tu-duc-ticket-in-complex-of-hue-monument/?spm=City.Activity_LIST&clickId=ddb223c1b3"
                     },
@@ -1180,16 +1081,13 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 08:00-17:00",
                         "entry_fee": 245000,
                         "tags": [
-                            "hồ",
-                            "suối",
-                            "khu nghỉ dưỡng",
-                            "spa",
-                            "15 phút",
-                            "hiện đại",
-                            "ngắn hạn (< 4 giờ)",
-                            "tham quan",
-                            "thư giãn",
-                            "ẩm thực"
+                            "Urban Area",
+                            "Island",
+                            "Relaxation/Resort",
+                            "Morning",
+                            "Afternoon",
+                            "Multi-day Adventure",
+                            "<=500000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/71892-kawara-my-an-onsen-experience/"
                     },
@@ -1217,17 +1115,12 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 09:00-22:00",
                         "entry_fee": 150000,
                         "tags": [
-                            "hồ",
-                            "spa",
-                            "cầu",
-                            "40 phút",
-                            "hiện đại",
-                            "luxury",
-                            "ngắn hạn (< 4 giờ)",
-                            "thiên nhiên",
-                            "thư giãn",
-                            "truyền thống",
-                            "văn hóa"
+                            "Island",
+                            "Relaxation/Resort",
+                            "Morning",
+                            "Evening",
+                            "Half Day",
+                            "<=200000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/102781-maia--spa-massage-experience-hue/"
                     },
@@ -1252,16 +1145,13 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 07:30-17:30",
                         "entry_fee": 165000,
                         "tags": [
-                            "di tích lịch sử",
-                            "lăng mộ",
-                            "công trình kiến trúc",
-                            "hồ",
-                            "đảo",
-                            "cả ngày",
-                            "lịch sử",
-                            "tham quan",
-                            "văn hóa",
-                            "ẩm thực"
+                            "Historical Site",
+                            "Island",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Full Day",
+                            "<=200000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/131046-tomb-of-emperor-minh-mang-ticket-in-unesco-complex-of-hue-monument/"
                     },
@@ -1289,18 +1179,13 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 08:00-17:00",
                         "entry_fee": 97500,
                         "tags": [
-                            "di tích lịch sử",
-                            "lăng mộ",
-                            "cung điện",
-                            "công trình kiến trúc",
-                            "hồ",
-                            "đảo",
-                            "10 phút",
-                            "lịch sử",
-                            "ngắn hạn (< 4 giờ)",
-                            "tham quan",
-                            "văn hóa",
-                            "ẩm thực"
+                            "Historical Site",
+                            "Island",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "<=100000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/156959-vr-travel-flight-experience-hue-imperial-palace-200-years-ago/"
                     },
@@ -1328,23 +1213,14 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 08:00-17:00",
                         "entry_fee": 46875,
                         "tags": [
-                            "di tích lịch sử",
-                            "lăng mộ",
-                            "hồ",
-                            "đảo",
-                            "chợ",
-                            "5 phút",
-                            "chụp ảnh",
-                            "gia đình",
-                            "hiện đại",
-                            "lịch sử",
-                            "ngắn hạn (< 4 giờ)",
-                            "nhóm bạn",
-                            "tham quan",
-                            "thác nước",
-                            "truyền thống",
-                            "văn hóa",
-                            "ẩm thực"
+                            "Historical Site",
+                            "Urban Area",
+                            "Shopping",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "<=50000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/156998-dau-ho-vr-game-a-vietnamese-folk-game-experience-in-hue-city/"
                     },
@@ -1368,13 +1244,17 @@
                             "lat": 16.470761861531745,
                             "lng": 107.5972170797626
                         },
-                        "opening_hours": null,
+                        "opening_hours": "Cả ngày",
                         "entry_fee": 2515500,
                         "tags": [
-                            "5 giờ 30 phút",
-                            "tham quan",
-                            "thiên nhiên",
-                            "tầm trung (4-6 giờ)"
+                            "Cultural Site",
+                            "Island",
+                            "Sightseeing",
+                            "Morning",
+                            "Evening",
+                            "Half Day",
+                            "5 hours 30 minutes",
+                            "<=5000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/150501-a-net-zero-day-tour-in-hue/"
                     },
@@ -1398,19 +1278,16 @@
                             "lat": 16.614440155669076,
                             "lng": 107.5061000472473
                         },
-                        "opening_hours": null,
+                        "opening_hours": "Phá Tam Giang là khu vực tự nhiên nên luôn mở cửa. Tour ngắm hoàng hôn thường bắt đầu vào buổi chiều (khoảng 15:00 - 16:00) và kéo dài 4 giờ.",
                         "entry_fee": 2375000,
                         "tags": [
-                            "hồ",
-                            "đảo",
-                            "4 giờ",
-                            "chụp ảnh",
-                            "tham quan",
-                            "thiên nhiên",
-                            "truyền thống",
-                            "tầm trung (4-6 giờ)",
-                            "văn hóa",
-                            "ẩm thực"
+                            "Island",
+                            "Lake/River",
+                            "Sightseeing",
+                            "Afternoon",
+                            "Half Day",
+                            "4 hours",
+                            "<=5000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/28868-hue-tam-giang-lagoon-sunset-private-tour/"
                     },
@@ -1440,16 +1317,14 @@
                         ],
                         "entry_fee": 1512500,
                         "tags": [
-                            "đền chùa",
-                            "hồ",
-                            "ẩm thực",
-                            "nghệ thuật",
-                            "3-3 giờ",
-                            "gia đình",
-                            "ngắn hạn (< 4 giờ)",
-                            "tham quan",
-                            "thiên nhiên",
-                            "truyền thống"
+                            "Cultural Site",
+                            "Gastronomy",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "3 hours 30 minutes",
+                            "<=2000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/163072-vegeterian-dining-experience-at-an-nhien-garden/"
                     }
@@ -1484,14 +1359,11 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 07:30-17:00",
                         "entry_fee": 240000,
                         "tags": [
-                            "lăng mộ",
-                            "thác nước",
-                            "hồ",
-                            "rừng",
-                            "chụp ảnh",
-                            "cả ngày",
-                            "hiện đại",
-                            "ẩm thực"
+                            "Photography",
+                            "Morning",
+                            "Afternoon",
+                            "Full Day",
+                            "<=500000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/10072-datanla-alpine-coaster-experience-da-lat-vietnam/"
                     },
@@ -1521,15 +1393,14 @@
                         ],
                         "entry_fee": 108000,
                         "tags": [
-                            "đồi",
-                            "hồ",
-                            "chợ",
-                            "cầu",
-                            "cáp treo",
-                            "chụp ảnh",
-                            "cả ngày",
-                            "núi",
-                            "tham quan"
+                            "Urban Area",
+                            "Island",
+                            "Shopping",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Full Day",
+                            "<=200000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/19697-robin-mountain-cable-car-da-lat/"
                     },
@@ -1554,22 +1425,17 @@
                             "lat": 11.94067488867063,
                             "lng": 108.4556660516709
                         },
-                        "opening_hours": null,
+                        "opening_hours": "Tour là hoạt động săn mây, ngắm bình minh, thường bắt đầu rất sớm (khoảng 04:00 - 05:00 sáng). Các điểm đến cố định (Đồi chè Cầu Đất) mở cửa từ 07:30 - 17:00.",
                         "entry_fee": 423000,
                         "tags": [
-                            "lăng mộ",
-                            "đồi",
-                            "cao nguyên",
-                            "hồ",
-                            "đảo",
-                            "quán cà phê",
-                            "cầu",
-                            "điểm dừng chân",
-                            "6 giờ",
-                            "núi",
-                            "tham quan",
-                            "tầm trung (4-6 giờ)",
-                            "ẩm thực"
+                            "Mountain",
+                            "Urban Area",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "6 hours",
+                            "<=500000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/38075-da-lat-sunrise-tour-glow-dawn/"
                     },
@@ -1595,12 +1461,12 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 06:30-17:30",
                         "entry_fee": 300000,
                         "tags": [
-                            "cao nguyên",
-                            "hồ",
-                            "chụp ảnh",
-                            "cả ngày",
-                            "tham quan",
-                            "thác nước"
+                            "Mountain",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Full Day",
+                            "<=500000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/104858-dalat-flower-highland-ticket/"
                     },
@@ -1627,15 +1493,14 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 07:30-17:30",
                         "entry_fee": 114000,
                         "tags": [
-                            "đền chùa",
-                            "lăng mộ",
-                            "hồ",
-                            "cánh đồng",
-                            "quán cà phê",
-                            "cả ngày",
-                            "mua sắm",
-                            "tham quan",
-                            "truyền thống"
+                            "Cultural Site",
+                            "Shopping",
+                            "Sightseeing",
+                            "Wildlife Watching",
+                            "Morning",
+                            "Afternoon",
+                            "Full Day",
+                            "<=200000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/83331-fresh-garden-da-lat-ticket/"
                     },
@@ -1663,19 +1528,14 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 07:30-17:00",
                         "entry_fee": 350000,
                         "tags": [
-                            "lăng mộ",
-                            "đồi",
-                            "hồ",
-                            "rừng",
-                            "cánh đồng",
-                            "cầu",
-                            "chụp ảnh",
-                            "cả ngày",
-                            "cặp đôi",
-                            "khó",
-                            "núi",
-                            "tham quan",
-                            "ẩm thực"
+                            "Urban Area",
+                            "Lake/River",
+                            "Photography",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Full Day",
+                            "<=500000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/75307-valley-of-love-da-lat-admission-ticket/"
                     },
@@ -1699,21 +1559,16 @@
                             "lat": 11.903589390924346,
                             "lng": 108.45034591473782
                         },
-                        "opening_hours": null,
+                        "opening_hours": "Khu du lịch Thác Datanla mở cửa từ 07:30 đến 17:00 hàng ngày.",
                         "entry_fee": 1890000,
                         "tags": [
-                            "lăng mộ",
-                            "cao nguyên",
-                            "hồ",
-                            "rừng",
-                            "thể thao mạo hiểm",
-                            "6 giờ",
-                            "mạo hiểm",
-                            "sinh thái",
-                            "tham quan",
-                            "thác nước",
-                            "tầm trung (4-6 giờ)",
-                            "ẩm thực"
+                            "Mountain",
+                            "Adventure",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "6 hours",
+                            "<=2000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/9372-datanla-waterfall-canyoneering-da-lat/"
                     },
@@ -1739,15 +1594,13 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 05:30-18:00",
                         "entry_fee": 230000,
                         "tags": [
-                            "đồi",
-                            "hồ",
-                            "suối",
-                            "rừng",
-                            "chụp ảnh",
-                            "cả ngày",
-                            "dễ",
-                            "núi",
-                            "thiên nhiên"
+                            "Island",
+                            "Lake/River",
+                            "Shopping",
+                            "Morning",
+                            "Afternoon",
+                            "Full Day",
+                            "<=500000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/124624-the-florest-park-ticket-in-da-lat-city/"
                     },
@@ -1772,15 +1625,18 @@
                             "lat": 11.940177899551035,
                             "lng": 108.45621144929237
                         },
-                        "opening_hours": null,
+                        "opening_hours": "Các điểm tham quan chính (Mongo Land, God Valley, Hoàng Long Ohayo) mở cửa từ 07:30 đến 17:30 hàng ngày.",
                         "entry_fee": 585000,
                         "tags": [
-                            "hồ",
-                            "7 giờ",
-                            "dài hạn (> 6 giờ)",
-                            "hiện đại",
-                            "tham quan",
-                            "truyền thống"
+                            "Urban Area",
+                            "Island",
+                            "Photography",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "7 hours",
+                            "<=1000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/38096-da-lat-day-tour-discovering-new-tourist-attractions/"
                     },
@@ -1807,14 +1663,12 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 08:00-16:30",
                         "entry_fee": 950000,
                         "tags": [
-                            "lăng mộ",
-                            "hồ",
-                            "rừng",
-                            "40 phút",
-                            "mạo hiểm",
-                            "ngắn hạn (< 4 giờ)",
-                            "thiên nhiên",
-                            "thác nước"
+                            "Adventure",
+                            "Island",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "<=1000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/78520-datanla-zipline-experience-da-lat-vietnam/"
                     },
@@ -1841,17 +1695,13 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 08:00-16:30",
                         "entry_fee": 460000,
                         "tags": [
-                            "lăng mộ",
-                            "hồ",
-                            "rừng",
-                            "đi bộ",
-                            "thể thao mạo hiểm",
-                            "2 giờ",
-                            "khó",
-                            "mạo hiểm",
-                            "ngắn hạn (< 4 giờ)",
-                            "tham quan",
-                            "thác nước"
+                            "Adventure",
+                            "Urban Area",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "2 hours",
+                            "<=500000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/9361-high-rope-course-adventure-da-lat/"
                     },
@@ -1879,18 +1729,14 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 08:00-16:30",
                         "entry_fee": 150000,
                         "tags": [
-                            "lăng mộ",
-                            "bảo tàng",
-                            "hồ",
-                            "chợ",
-                            "ẩm thực",
-                            "cả ngày",
-                            "hiện đại",
-                            "lịch sử",
-                            "mua sắm",
-                            "núi",
-                            "tham quan",
-                            "văn hóa"
+                            "Mountain",
+                            "Gastronomy",
+                            "Trekking/Hiking",
+                            "Shopping",
+                            "Morning",
+                            "Afternoon",
+                            "Full Day",
+                            "<=200000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/114867-da-lat-long-dinh-tea-museum-ticket/"
                     },
@@ -1913,18 +1759,18 @@
                             "lat": 11.903219984559266,
                             "lng": 108.44780855418409
                         },
-                        "opening_hours": null,
+                        "opening_hours": "7:00 - 17:00",
                         "entry_fee": 970000,
                         "tags": [
-                            "công trình kiến trúc",
-                            "núi",
-                            "đồi",
-                            "hồ",
-                            "cáp treo",
-                            "9 giờ",
-                            "chụp ảnh",
-                            "dài hạn (> 6 giờ)",
-                            "tham quan"
+                            "Mountain",
+                            "Island",
+                            "Trekking/Hiking",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "9 hours",
+                            "<=1000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/138649-langbiang-datanla-falls-crazy-house/"
                     },
@@ -1952,16 +1798,14 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 08:00-17:30",
                         "entry_fee": 250000,
                         "tags": [
-                            "lăng mộ",
-                            "hồ",
-                            "chợ",
-                            "quán cà phê",
-                            "nghệ thuật",
-                            "1 giờ 30 phút",
-                            "hiện đại",
-                            "ngắn hạn (< 4 giờ)",
-                            "tham quan",
-                            "thiên nhiên"
+                            "Cultural Site",
+                            "Lake/River",
+                            "Shopping",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "1 hours 30 minutes",
+                            "<=500000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/166994-hands-on-coffee-roasting-tasting-experience-by-twin-beans-farm/"
                     },
@@ -1989,16 +1833,13 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 07:00-17:00",
                         "entry_fee": 120000,
                         "tags": [
-                            "đền chùa",
-                            "hồ",
-                            "công viên",
-                            "chợ",
-                            "nghệ thuật",
-                            "chụp ảnh",
-                            "cả ngày",
-                            "tham quan",
-                            "truyền thống",
-                            "ẩm thực"
+                            "Cultural Site",
+                            "Urban Area",
+                            "Shopping",
+                            "Morning",
+                            "Afternoon",
+                            "Full Day",
+                            "<=200000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/28137-clay-sculpture-tunnel-ticket-da-lat/"
                     },
@@ -2026,16 +1867,14 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 06:00-18:00",
                         "entry_fee": 2457500,
                         "tags": [
-                            "lăng mộ",
-                            "hồ",
-                            "đảo",
-                            "khách sạn",
-                            "chợ",
-                            "4 giờ 30 phút",
-                            "chụp ảnh",
-                            "hiện đại",
-                            "tham quan",
-                            "tầm trung (4-6 giờ)"
+                            "Island",
+                            "Lake/River",
+                            "Shopping",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "4 hours 30 minutes",
+                            "<=5000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/108785-pga-novaworld-golf-experience-phan-thiet/"
                     },
@@ -2059,18 +1898,18 @@
                             "lat": 11.944455206814236,
                             "lng": 108.43486004907352
                         },
-                        "opening_hours": null,
+                        "opening_hours": "07:00 - 17:00",
                         "entry_fee": 590000,
                         "tags": [
-                            "đền chùa",
-                            "thác nước",
-                            "hồ",
-                            "7 giờ",
-                            "dài hạn (> 6 giờ)",
-                            "tham quan",
-                            "truyền thống",
-                            "văn hóa",
-                            "ẩm thực"
+                            "Cultural Site",
+                            "Island",
+                            "Photography",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "7 hours",
+                            "<=1000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/9376-countryside-day-tour-da-lat/"
                     },
@@ -2098,14 +1937,17 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 08:30-17:30",
                         "entry_fee": 107500,
                         "tags": [
-                            "lăng mộ",
-                            "núi",
-                            "thác nước",
-                            "1-3 giờ",
-                            "chụp ảnh",
-                            "khó",
-                            "ngắn hạn (< 4 giờ)",
-                            "tham quan"
+                            "Mountain",
+                            "Cultural Site",
+                            "Trekking/Hiking",
+                            "Photography",
+                            "Shopping",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "1 hours",
+                            "<=200000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/98386-tam-trinh-coffee-experience-da-lat/"
                     }
@@ -2140,17 +1982,13 @@
                         "opening_hours": "Thứ Ba-Chủ Nhật: 07:00-17:00",
                         "entry_fee": 60000,
                         "tags": [
-                            "lăng mộ",
-                            "đồi",
-                            "vịnh",
-                            "45 phút",
-                            "biển",
-                            "ngắn hạn (< 4 giờ)",
-                            "núi",
-                            "sinh thái",
-                            "tham quan",
-                            "thiên nhiên",
-                            "thư giãn"
+                            "Beach",
+                            "Lake/River",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "<=100000 VND"
                         ],
                         "source": "https://divui.com/tour-01-tham-quan-vinh-va-ngam-san-ho-bang-tau-day-kinh"
                     },
@@ -2176,12 +2014,12 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 06:30-17:30",
                         "entry_fee": 70000,
                         "tags": [
-                            "hồ",
-                            "chèo thuyền",
-                            "chụp ảnh",
-                            "cả ngày",
-                            "tham quan",
-                            "truyền thống"
+                            "Photography",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Full Day",
+                            "<=100000 VND"
                         ],
                         "source": "https://divui.com/ve-tham-quan-tai-tanyoli"
                     },
@@ -2204,15 +2042,14 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 07:00-17:00",
                         "entry_fee": 130000,
                         "tags": [
-                            "hang động",
-                            "vịnh",
-                            "bơi lội",
-                            "cầu",
-                            "1-1 giờ",
-                            "biển",
-                            "ngắn hạn (< 4 giờ)",
-                            "tham quan",
-                            "đảo"
+                            "Beach",
+                            "Island",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "1 hours 30 minutes",
+                            "<=200000 VND"
                         ],
                         "source": "https://divui.com/tour-02-tham-quan-vinh-va-boi-ngam-san-ho"
                     },
@@ -2235,9 +2072,12 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 17:30-21:00",
                         "entry_fee": 270000,
                         "tags": [
-                            "hồ",
-                            "câu cá",
-                            "biển"
+                            "Beach",
+                            "Island",
+                            "Afternoon",
+                            "Evening",
+                            "Half Day",
+                            "<=500000 VND"
                         ],
                         "source": "https://divui.com/tour-04-cau-ca-cau-muc-dem-va-ngam-vinh-hy-ve-dem"
                     }
@@ -2271,23 +2111,15 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 09:00-20:00",
                         "entry_fee": 450000,
                         "tags": [
-                            "lăng mộ",
-                            "hồ",
-                            "bãi biển",
-                            "vịnh",
-                            "đảo",
-                            "công viên",
-                            "chợ",
-                            "cáp treo",
-                            "biển",
-                            "cả ngày",
-                            "gia đình",
-                            "khó",
-                            "mua sắm",
-                            "mạo hiểm",
-                            "nhóm bạn",
-                            "núi",
-                            "tham quan"
+                            "Beach",
+                            "Adventure",
+                            "Shopping",
+                            "Sightseeing",
+                            "Adventure Seekers",
+                            "Morning",
+                            "Evening",
+                            "Full Day",
+                            "<=500000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/11988-vinwonders-nha-trang-ticket/"
                     },
@@ -2315,18 +2147,13 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 08:30-22:30",
                         "entry_fee": 950000,
                         "tags": [
-                            "lăng mộ",
-                            "hồ",
-                            "vịnh",
-                            "ẩm thực",
-                            "nghệ thuật",
-                            "cáp treo",
-                            "biển",
-                            "cả ngày",
-                            "khó",
-                            "mua sắm",
-                            "núi",
-                            "tham quan"
+                            "Beach",
+                            "Gastronomy",
+                            "Shopping",
+                            "Morning",
+                            "Evening",
+                            "Full Day",
+                            "<=1000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/110680-nha-trang-vinpearl-harbour-cable-car-ticket/"
                     },
@@ -2354,17 +2181,15 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật 08:00-18:00",
                         "entry_fee": 170000,
                         "tags": [
-                            "lăng mộ",
-                            "hồ",
-                            "suối",
-                            "khu nghỉ dưỡng",
-                            "chợ",
-                            "cầu",
-                            "2 giờ",
-                            "luxury",
-                            "ngắn hạn (< 4 giờ)",
-                            "thư giãn",
-                            "ẩm thực"
+                            "Beach",
+                            "Island",
+                            "Relaxation/Resort",
+                            "Shopping",
+                            "Morning",
+                            "Afternoon",
+                            "Multi-day Adventure",
+                            "2 hours",
+                            "<=200000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/22826-i-resort-spa-packages-nha-trang/"
                     },
@@ -2387,16 +2212,17 @@
                             "lat": 12.169510686068458,
                             "lng": 109.2972267668419
                         },
-                        "opening_hours": null,
+                        "opening_hours": "07:00 - 17:00",
                         "entry_fee": 712000,
                         "tags": [
-                            "hồ",
-                            "đảo",
-                            "6 giờ 30 phút",
-                            "dài hạn (> 6 giờ)",
-                            "lặn biển",
-                            "tham quan",
-                            "thư giãn"
+                            "Beach",
+                            "Gastronomy",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "6 hours 30 minutes",
+                            "<=1000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/140107-nha-trang-floating-bar-party-mini-beach-and-mun-island-hopping-tour/"
                     },
@@ -2424,16 +2250,13 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 07:30-16:30",
                         "entry_fee": 420000,
                         "tags": [
-                            "hồ",
-                            "suối",
-                            "bãi biển",
-                            "đảo",
-                            "biển",
-                            "chụp ảnh",
-                            "cả ngày",
-                            "lặn biển",
-                            "tham quan",
-                            "thiên nhiên"
+                            "Beach",
+                            "Island",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Full Day",
+                            "<=500000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/41509-monkey-island-ticket-nha-trang/"
                     },
@@ -2459,8 +2282,12 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật 18:00-22:00",
                         "entry_fee": 741681,
                         "tags": [
-                            "cả ngày",
-                            "ẩm thực"
+                            "Beach",
+                            "Gastronomy",
+                            "Afternoon",
+                            "Evening",
+                            "Full Day",
+                            "<=1000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/107125-seafood-buffet-sheraton-nha-trang/"
                     },
@@ -2486,13 +2313,12 @@
                         "opening_hours": "Thứ Ba-Chủ Nhật: 17:30-00:30",
                         "entry_fee": 190000,
                         "tags": [
-                            "lăng mộ",
-                            "hồ",
-                            "đi bộ",
-                            "cả ngày",
-                            "khó",
-                            "thác nước",
-                            "ẩm thực"
+                            "Beach",
+                            "Urban Area",
+                            "Afternoon",
+                            "Morning",
+                            "Full Day",
+                            "<=200000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/133604-skylight-360-skydeck-rooftop-beach-club-ticket-in-nha-trang/"
                     },
@@ -2519,10 +2345,13 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 10:00-23:00",
                         "entry_fee": 424045,
                         "tags": [
-                            "lăng mộ",
-                            "spa",
-                            "cả ngày",
-                            "thư giãn"
+                            "Beach",
+                            "Island",
+                            "Relaxation/Resort",
+                            "Morning",
+                            "Evening",
+                            "Full Day",
+                            "<=500000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/55208-charm-spa-grand-nha-trang/"
                     },
@@ -2549,16 +2378,14 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật 08:00-17:00",
                         "entry_fee": 1215000,
                         "tags": [
-                            "hồ",
-                            "rừng",
-                            "công viên",
-                            "60 phút",
-                            "chụp ảnh",
-                            "mạo hiểm",
-                            "ngắn hạn (< 4 giờ)",
-                            "tham quan",
-                            "thiên nhiên",
-                            "đảo"
+                            "Adventure",
+                            "Nature Park",
+                            "Sightseeing",
+                            "Adventure Seekers",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "<=2000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/57628-atv-experience-in-kong-forest-adventure-park/"
                     },
@@ -2585,14 +2412,13 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật 09:00-17:00",
                         "entry_fee": 961875,
                         "tags": [
-                            "rừng",
-                            "60 phút",
-                            "hiện đại",
-                            "khó",
-                            "ngắn hạn (< 4 giờ)",
-                            "tham quan",
-                            "thiên nhiên",
-                            "thác nước"
+                            "Beach",
+                            "Gastronomy",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "<=1000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/57624-zipline-canopy-experience-at-kong-forest-adventure-park-nha-trang/"
                     },
@@ -2616,18 +2442,18 @@
                             "lat": 12.390009746045845,
                             "lng": 109.13878991426569
                         },
-                        "opening_hours": null,
+                        "opening_hours": "08:00 - 17:00",
                         "entry_fee": 812500,
                         "tags": [
-                            "lăng mộ",
-                            "thác nước",
-                            "hồ",
-                            "chợ",
-                            "đi bộ",
-                            "4 giờ",
-                            "dễ",
-                            "tham quan",
-                            "tầm trung (4-6 giờ)"
+                            "Beach",
+                            "Island",
+                            "Shopping",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "4 hours",
+                            "<=1000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/27564-ba-ho-waterfall-half-day-tour-nha-trang/"
                     },
@@ -2654,16 +2480,13 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 07:00-18:00",
                         "entry_fee": 2490000,
                         "tags": [
-                            "lăng mộ",
-                            "hồ",
-                            "vịnh",
-                            "đảo",
-                            "chợ",
-                            "20 phút",
-                            "biển",
-                            "khó",
-                            "mạo hiểm",
-                            "ngắn hạn (< 4 giờ)"
+                            "Beach",
+                            "Island",
+                            "Shopping",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "<=5000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/59132-paragliding-experience-in-nha-trang/"
                     },
@@ -2687,17 +2510,17 @@
                             "lat": 12.241389581885645,
                             "lng": 109.19866057145397
                         },
-                        "opening_hours": null,
+                        "opening_hours": "07:00 - 17:00",
                         "entry_fee": 950000,
                         "tags": [
-                            "lăng mộ",
-                            "đảo",
-                            "khách sạn",
-                            "6 giờ 30 phút",
-                            "biển",
-                            "dài hạn (> 6 giờ)",
-                            "lặn biển",
-                            "tham quan"
+                            "Beach",
+                            "Island",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "6 hours 30 minutes",
+                            "<=1000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/40409-lan-bien-o-nha-trang/"
                     },
@@ -2726,14 +2549,13 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật: 08:00-20:00",
                         "entry_fee": 500000,
                         "tags": [
-                            "lăng mộ",
-                            "hồ",
-                            "rừng",
-                            "1 giờ 30 phút",
-                            "biển",
-                            "lặn biển",
-                            "ngắn hạn (< 4 giờ)",
-                            "tham quan"
+                            "Beach",
+                            "Cultural Site",
+                            "Morning",
+                            "Evening",
+                            "Half Day",
+                            "1 hours 30 minutes",
+                            "<=500000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/184898-explore-the-underwater-world-of-pearls-in-nha-trang/"
                     },
@@ -2761,19 +2583,14 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật 08:00-15:30",
                         "entry_fee": 1687500,
                         "tags": [
-                            "lăng mộ",
-                            "hồ",
-                            "bãi biển",
-                            "vịnh",
-                            "đảo",
-                            "6 giờ",
-                            "biển",
-                            "chèo thuyền",
-                            "chụp ảnh",
-                            "hiện đại",
-                            "lặn biển",
-                            "tham quan",
-                            "tầm trung (4-6 giờ)"
+                            "Beach",
+                            "Island",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Multi-day Adventure",
+                            "6 hours",
+                            "<=2000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/20125-speedboat-tour-nha-trang/"
                     }
@@ -2807,14 +2624,14 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật 07:00-18:00",
                         "entry_fee": 135000,
                         "tags": [
-                            "bảo tàng",
-                            "công trình kiến trúc",
-                            "hồ",
-                            "chợ",
-                            "cả ngày",
-                            "tham quan",
-                            "thác nước",
-                            "ẩm thực"
+                            "Gastronomy",
+                            "Island",
+                            "Shopping",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Full Day",
+                            "<=200000 VND"
                         ],
                         "source": "https://divui.com/ve-tham-quan-bao-tang-the-gioi-ca-phe"
                     }
@@ -2846,25 +2663,17 @@
                             "lat": 17.58181244284792,
                             "lng": 106.28382677624514
                         },
-                        "opening_hours": null,
+                        "opening_hours": "07:00 - 16:30",
                         "entry_fee": 1125000,
                         "tags": [
-                            "lăng mộ",
-                            "núi",
-                            "hang động",
-                            "hồ",
-                            "sông",
-                            "đảo",
-                            "công viên quốc gia",
-                            "vườn quốc gia",
-                            "9 giờ",
-                            "chụp ảnh",
-                            "dài hạn (> 6 giờ)",
-                            "mạo hiểm",
-                            "tham quan",
-                            "truyền thống",
-                            "văn hóa",
-                            "ẩm thực"
+                            "Mountain",
+                            "Historical Site",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "9 hours",
+                            "<=2000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/28775-paradise-cave-phong-nha-day-tour/"
                     },
@@ -2888,24 +2697,19 @@
                             "lat": 17.61585602164594,
                             "lng": 106.32447723320804
                         },
-                        "opening_hours": null,
+                        "opening_hours": "07:00 - 17:00",
                         "entry_fee": 1950000,
                         "tags": [
-                            "lăng mộ",
-                            "núi",
-                            "hang động",
-                            "hồ",
-                            "đảo",
-                            "công viên quốc gia",
-                            "vườn quốc gia",
-                            "chợ",
-                            "trekking",
-                            "9-10 giờ",
-                            "chụp ảnh",
-                            "dài hạn (> 6 giờ)",
-                            "mạo hiểm",
-                            "tham quan",
-                            "thiên nhiên"
+                            "Mountain",
+                            "Historical Site",
+                            "Trekking/Hiking",
+                            "Shopping",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "9 hours",
+                            "<=2000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/56749-Elephant-Cave-Ma-Da-Valley-exploration/"
                     },
@@ -2930,20 +2734,17 @@
                             "lat": 17.171716784705133,
                             "lng": 106.80872197290329
                         },
-                        "opening_hours": null,
+                        "opening_hours": "07:30 - 17:30",
                         "entry_fee": 1950000,
                         "tags": [
-                            "hồ",
-                            "suối",
-                            "thể thao mạo hiểm",
-                            "10 giờ",
-                            "chụp ảnh",
-                            "dài hạn (> 6 giờ)",
-                            "mạo hiểm",
-                            "tham quan",
-                            "thiên nhiên",
-                            "thác nước",
-                            "thư giãn"
+                            "Adventure",
+                            "Island",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "10 hours",
+                            "<=2000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/36808-duong-cam-waterfall-day-tour/?spm=City.Activity_LIST&clickId=d95ea7d57b"
                     }
@@ -2974,20 +2775,18 @@
                             "lat": 13.781484587779799,
                             "lng": 109.21785843538792
                         },
-                        "opening_hours": null,
+                        "opening_hours": "07:00 - 18:00",
                         "entry_fee": 808000,
                         "tags": [
-                            "nhà thờ",
-                            "di tích lịch sử",
-                            "lăng mộ",
-                            "công trình kiến trúc",
-                            "hồ",
-                            "10-12 giờ",
-                            "chụp ảnh",
-                            "dài hạn (> 6 giờ)",
-                            "lịch sử",
-                            "tham quan",
-                            "ẩm thực"
+                            "Historical Site",
+                            "Cultural Site",
+                            "Photography",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "10 hours",
+                            "<=1000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/55318-phu-yen-join-bus-tour-quy-nhon/"
                     },
@@ -3011,20 +2810,17 @@
                             "lat": 13.875938473254942,
                             "lng": 109.16257520888821
                         },
-                        "opening_hours": null,
+                        "opening_hours": "07:00 - 18:00",
                         "entry_fee": 1812500,
                         "tags": [
-                            "di tích lịch sử",
-                            "lăng mộ",
-                            "công trình kiến trúc",
-                            "hồ",
-                            "5-6 giờ",
-                            "chụp ảnh",
-                            "lịch sử",
-                            "tham quan",
-                            "tầm trung (4-6 giờ)",
-                            "văn hóa",
-                            "ẩm thực"
+                            "Historical Site",
+                            "Cultural Site",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "5 hours",
+                            "<=2000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/55232-1-day-quy-nhon-cultural-trip/"
                     },
@@ -3047,17 +2843,18 @@
                             "lat": 13.76622455765117,
                             "lng": 109.29627253974266
                         },
-                        "opening_hours": null,
+                        "opening_hours": "07:00 - 18:00",
                         "entry_fee": 641000,
                         "tags": [
-                            "cầu",
-                            "5-6 giờ",
-                            "biển",
-                            "chụp ảnh",
-                            "lặn biển",
-                            "tham quan",
-                            "tầm trung (4-6 giờ)",
-                            "đảo"
+                            "Island",
+                            "Lake/River",
+                            "Photography",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "5 hours",
+                            "<=1000000 VND"
                         ],
                         "source": "https://divui.com/tour-chua-thien-hung-chua-ba-nha-tho-lang-song-thap-doi-quy-nhon-1-ngay"
                     },
@@ -3085,15 +2882,14 @@
                         "opening_hours": "Thứ Hai-Chủ Nhật 07:30-15:30",
                         "entry_fee": 650000,
                         "tags": [
-                            "thành cổ",
-                            "bảo tàng",
-                            "7-8 giờ",
-                            "dài hạn (> 6 giờ)",
-                            "lịch sử",
-                            "sinh thái",
-                            "tham quan",
-                            "thư giãn",
-                            "truyền thống"
+                            "Historical Site",
+                            "Lake/River",
+                            "Sightseeing",
+                            "Morning",
+                            "Afternoon",
+                            "Half Day",
+                            "7 hours",
+                            "<=1000000 VND"
                         ],
                         "source": "https://divui.com/tour-tam-kiet-tay-son"
                     }
