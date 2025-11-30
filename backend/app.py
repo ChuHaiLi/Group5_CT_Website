@@ -13,6 +13,7 @@ import secrets
 from datetime import datetime
 from models import db, User, Destination, SavedDestination, Review, Itinerary
 from routes.chat import chat_bp
+from routes.search import search_bp
 
 # ----------------- App & Config -----------------
 app = Flask(__name__)
@@ -33,6 +34,7 @@ jwt = JWTManager(app)
 
 # Register blueprints
 app.register_blueprint(chat_bp, url_prefix="/api/chat")
+app.register_blueprint(search_bp, url_prefix="/api/search")
 
 # ----------------- JWT Error Handler -----------------
 @jwt.unauthorized_loader

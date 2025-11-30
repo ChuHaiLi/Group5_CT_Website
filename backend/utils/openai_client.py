@@ -34,3 +34,34 @@ class OpenAIChatClient:
             temperature=self._temperature,
         )
         return (response.choices[0].message.content or "").strip()
+
+    def generate_multimodal_reply(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+        image_data_urls: List[str],
+    ) -> str:
+        client = self._load_client()
+        if client is None:
+            raise RuntimeError("OPENAI_API_KEY is not configured")
+
+        user_content: List[Dict[str, object]] = [
+            {"type": "text", "text": user_prompt}
+        ]
+        for url in image_data_urls:
+            if not url:
+                continue
+            user_content.append({
+                "type": "image_url",
+                "image_url": {"url": url},
+            })
+
+        response = client.chat.completions.create(
+            model=self._model,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_content},
+            ],
+            temperature=self._temperature,
+        )
+        return (response.choices[0].message.content or "").strip()

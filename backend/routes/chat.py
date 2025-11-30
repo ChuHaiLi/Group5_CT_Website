@@ -46,6 +46,21 @@ def _get_session_or_404(user_id: int, session_id: int) -> Optional[ChatSession]:
     return ChatSession.query.filter_by(id=session_id, user_id=user_id).first()
 
 
+def _get_or_create_user_session(user_id: int) -> ChatSession:
+    session = (
+        ChatSession.query.filter_by(user_id=user_id)
+        .order_by(ChatSession.created_at.asc())
+        .first()
+    )
+    if session:
+        return session
+
+    session = ChatSession(user_id=user_id, title="Travel Planner")
+    db.session.add(session)
+    db.session.commit()
+    return session
+
+
 def _build_destination_context() -> str:
     featured = (
         Destination.query.order_by(desc(Destination.rating)).limit(5).all()
@@ -64,16 +79,25 @@ def _build_prompt_messages(
     user: User,
     history: List[ChatMessage],
     preferred_name: Optional[str] = None,
+    page_context: Optional[str] = None,
 ) -> List[dict]:
     travel_context = _build_destination_context()
     display_name = (preferred_name or "").strip() or getattr(user, "full_name", "") or user.username
+    context_block = (
+        f"\nHere is everything currently visible on the user's screen:\n{page_context}\n"
+        "Leverage that UI context to answer faster and reference concrete data (lists, cards, totals) the user sees."
+        if (page_context or "").strip()
+        else "\nIf the current screen context is unclear, ask a quick clarifying question before giving recommendations."
+    )
     system_prompt = (
-        "Bạn là Astra, trợ lý du lịch của Travel Smart Planner. "
-        f"Người dùng hiện tại tên là {display_name}. "
-        "Luôn giữ ngữ giọng thân thiện, nhất quán và nhớ lại các thông tin đã trò chuyện trước đó. "
-        "Sử dụng dữ liệu điểm đến sau đây khi phù hợp để cá nhân hóa gợi ý:\n"
-        f"{travel_context}\n"
-        "Nếu thiếu thông tin, hãy đặt câu hỏi để hiểu thêm nhu cầu của người dùng."
+        "You are Travel Planner, the friendly-yet-professional AI concierge of Travel Smart Planner. "
+        f"The current user is {display_name}. "
+        "Prioritize English responses. If the user writes in Vietnamese or explicitly asks for it, seamlessly switch to Vietnamese, otherwise stay in clear English. "
+        "Keep answers playful and welcoming while remaining focused on travel, itineraries, destinations, local culture, dining, and trip logistics. "
+        "If a question falls outside travel, politely decline and steer the conversation back to travel help. "
+        f"Use the featured destination data below whenever it enriches your answer:\n{travel_context}\n"
+        f"{context_block}"
+        "Always deliver concrete suggestions (places, dates, dishes, activities) and end with a helpful call-to-action or next step."
     )
 
     messages = [{"role": "system", "content": system_prompt}]
@@ -176,6 +200,7 @@ def send_session_message(session_id: int):
     payload = request.get_json() or {}
     content = (payload.get("message") or "").strip()
     display_name = (payload.get("display_name") or "").strip()
+    page_context = (payload.get("page_context") or "").strip()
     if not content:
         return jsonify({"message": "Message is required"}), 400
 
@@ -207,7 +232,12 @@ def send_session_message(session_id: int):
         .all()
     )
     history.reverse()
-    openai_messages = _build_prompt_messages(user, history, preferred_name=display_name)
+    openai_messages = _build_prompt_messages(
+        user,
+        history,
+        preferred_name=display_name,
+        page_context=page_context,
+    )
 
     try:
         reply_text = chat_client.generate_reply(openai_messages)
@@ -230,3 +260,80 @@ def send_session_message(session_id: int):
         "reply": _serialize_message(assistant_msg),
         "session": _serialize_session(session),
     })
+
+
+@chat_bp.route("/widget/history", methods=["GET"])
+@jwt_required()
+def widget_history():
+    user_id = int(get_jwt_identity())
+    session = _get_or_create_user_session(user_id)
+    history = (
+        ChatMessage.query.filter_by(session_id=session.id)
+        .order_by(ChatMessage.created_at.asc())
+        .all()
+    )
+    return jsonify([_serialize_message(msg) for msg in history])
+
+
+@chat_bp.route("/widget/message", methods=["POST"])
+@jwt_required()
+def widget_message():
+    user_id = int(get_jwt_identity())
+    session = _get_or_create_user_session(user_id)
+
+    payload = request.get_json() or {}
+    content = (payload.get("message") or "").strip()
+    page_context = (payload.get("page_context") or "").strip()
+    display_name = (payload.get("display_name") or "").strip()
+    if not content:
+        return jsonify({"message": "Message is required"}), 400
+
+    if not chat_client.is_ready():
+        return jsonify({"message": "OPENAI_API_KEY is missing on the server"}), 500
+
+    user = session.user or User.query.get(user_id)
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+
+    user_msg = ChatMessage(
+        user_id=user_id,
+        session_id=session.id,
+        role="user",
+        content=content,
+    )
+    db.session.add(user_msg)
+    session.updated_at = datetime.utcnow()
+    db.session.commit()
+
+    history = (
+        ChatMessage.query.filter_by(session_id=session.id)
+        .order_by(ChatMessage.created_at.desc())
+        .limit(30)
+        .all()
+    )
+    history.reverse()
+    openai_messages = _build_prompt_messages(
+        user,
+        history,
+        preferred_name=display_name,
+        page_context=page_context,
+    )
+
+    try:
+        reply_text = chat_client.generate_reply(openai_messages)
+    except Exception as exc:  # pragma: no cover
+        db.session.delete(user_msg)
+        db.session.commit()
+        return jsonify({"message": str(exc)}), 500
+
+    assistant_msg = ChatMessage(
+        user_id=user_id,
+        session_id=session.id,
+        role="assistant",
+        content=reply_text,
+    )
+    db.session.add(assistant_msg)
+    session.updated_at = datetime.utcnow()
+    db.session.commit()
+
+    return jsonify(_serialize_message(assistant_msg)), 201
