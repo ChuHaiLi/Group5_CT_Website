@@ -701,6 +701,8 @@
             },
             {
                 "province_name": "Vũng Tàu",
+                "overview": "Thành phố thuộc tỉnh Bà Rịa – Vũng Tàu, là trung tâm kinh tế, văn hóa và du lịch biển của vùng Đông Nam Bộ. Vũng Tàu nổi tiếng với các bãi biển đẹp, Tượng Chúa Ki-tô Vua trên núi Nhỏ và ngọn Hải đăng.",
+                "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQhSG4pif_P0v7Fxq9yjzFf37vzoAF13bPgFw&s",
                 "places": [
                     {
                         "name": "Tour Tham Quan Vũng Tàu",
@@ -843,6 +845,8 @@
             },
             {
                 "province_name": "Phan Thiết",
+                "overview": "Thành phố thuộc tỉnh Bình Thuận, nổi tiếng là trung tâm du lịch biển và nghỉ dưỡng với các bãi biển đẹp, đồi cát bay, và di tích lịch sử văn hóa Chăm Pa. Đây là một trong những điểm đến du lịch hàng đầu Việt Nam.",
+                "image_url": "https://vietnamtouristvn.com/thumbs/1009x673x2/upload/product/screenshot_1684489175-1388.png",
                 "places": [
                     {
                         "name": "Tour Phan Thiết - Mũi Né 2N1Đ",
@@ -1821,9 +1825,11 @@
             },
             {
                 "province_name": "Cần Thơ",
+                "overview": "Thành phố trực thuộc Trung ương, là trung tâm kinh tế, văn hóa, y tế và giáo dục của vùng ĐBSCL. Cần Thơ nổi tiếng với Chợ nổi Cái Răng, Bến Ninh Kiều và là cửa ngõ giao thương quan trọng của khu vực.",
+                "image_url": "https://r2.nucuoimekong.com/wp-content/uploads/can-tho-co-gi-vui-dao-cau-tinh-yeu-cung-nguoi-thuong.jpg",
                 "places": [
                     {
-                        "name": "Tour Nửa Ngày Khám Phá Vùng Quê Xanh Mát của Victoria Cần Thơ",
+                        "name": "Khám Phá Vùng Quê Xanh Mát của Victoria Cần Thơ",
                         "type": "Văn hóa địa phương",
                         "description": [
                             "Khám phá cuộc sống thường nhật nhộn nhịp của người dân địa phương trên thuyền sampan, chứng kiến hoạt động buôn bán sôi động trên sông.",
@@ -2360,6 +2366,8 @@
             },
             {
                 "province_name": "Phú Quốc",
+                "overview": "Hòn đảo lớn nhất Việt Nam, nay là thành phố thuộc tỉnh Kiên Giang. Phú Quốc nổi tiếng với các bãi biển cát trắng tuyệt đẹp, vườn quốc gia, và là trung tâm du lịch nghỉ dưỡng, giải trí hàng đầu.",
+                "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTAGwA69MUurbj6t5HUTXkD6y-mZswpRKQ2cQ&s",
                 "places": [
                     {
                         "name": "Khám phá 2 đảo, Sun World Hòn Thơm, Bữa trưa buffet tại Phú Quốc",
@@ -3062,6 +3070,8 @@
             },
             {
                 "province_name": "Tiền Giang",
+                "overview": "Tỉnh thuộc ĐBSCL, nổi tiếng với chợ nổi Cái Bè và các cù lao trên sông Tiền, vườn cây ăn trái bạt ngàn. Mỹ Tho là trung tâm của tỉnh, là điểm du lịch sinh thái miệt vườn phổ biến.",
+                "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSHBHiMi8XprB0J5BPlQ6KtX89G0a3D5OUkw&s",
                 "places": [
                     {
                         "name": "Chợ nổi Cái Bè",
@@ -3825,6 +3835,8 @@
             },
             {
                 "province_name": "Trà Vinh",
+                "overview": "Tỉnh ven biển ĐBSCL, có đông đảo đồng bào Khmer sinh sống, nổi tiếng với những ngôi chùa cổ kính (như chùa Âng), văn hóa và ẩm thực đa dạng. Trà Vinh cũng phát triển du lịch sinh thái rừng ngập mặn.",
+                "image_url": "https://i.ytimg.com/vi/mdtG1Cps6bo/maxresdefault.jpg",
                 "places": [
                     {
                         "name": "Hoa kèn vàng",
@@ -4277,6 +4289,8 @@
             },
             {
                 "province_name": "Vĩnh Long",
+                "overview": "Tỉnh nằm ở trung tâm ĐBSCL, giữa sông Tiền và sông Hậu. Vĩnh Long nổi tiếng với các cù lao, vườn cây ăn trái, và du lịch sinh thái. Nơi đây có khu lưu niệm Thủ tướng Chính phủ Võ Văn Kiệt.",
+                "image_url": "https://img.youtube.com/vi/NMbNkstkEt8/maxresdefault.jpg",
                 "places": [
                     [
                         {
@@ -4578,6 +4592,8 @@
             },
             {
                 "province_name": "Tây Ninh",
+                "overview": "Tỉnh thuộc vùng Đông Nam Bộ, giáp Campuchia, nổi tiếng với Núi Bà Đen linh thiêng và Tòa Thánh Cao Đài Tây Ninh kiến trúc độc đáo. Đây là cửa ngõ giao thương quan trọng của khu vực phía Nam.",
+                "image_url": "https://vietnamtouristvn.com/thumbs/1280x720x2/upload/product/nui-ba-den-tay-ninh-7200.jpg",
                 "places": [
                     {
                         "name": "Núi Bà Đen",
@@ -4953,6 +4969,8 @@
             },
             {
                 "province_name": "Sóc Trăng",
+                "overview": "Tỉnh ven biển ĐBSCL, nổi bật với sự đa dạng văn hóa của ba dân tộc Kinh – Khmer – Hoa. Nơi đây có nhiều chùa Khmer cổ kính và lễ hội truyền thống như Oóc Om Bóc (Đua ghe Ngo).",
+                "image_url": "https://cdn-media.sforum.vn/storage/app/media/ctvseo_16/danh%20lam%20th%E1%BA%AFng%20c%E1%BA%A3nh%20S%C3%B3c%20Tr%C4%83ng/danh-lam-thang-canh-soc-trang-thumbnail.jpg",
                 "places": [
                     {
                         "name": "Chợ Nổi Ngã Năm",
@@ -5512,6 +5530,8 @@
             },
             {
                 "province_name": "Long An",
+                "overview": "Tỉnh nằm giữa TP.HCM và ĐBSCL, có vai trò là cửa ngõ kinh tế. Long An nổi tiếng với Vùng Đồng Tháp Mười, phát triển công nghiệp và nông nghiệp, cùng với các di tích lịch sử như Khu di tích lịch sử Vàm Cỏ Đông.",
+                "image_url": "https://cdn-media.sforum.vn/storage/app/media/ctvseo_MH/long%20an%20mi%E1%BB%81n%20n%C3%A0o/long-an-thuoc-mien-nao-thumbnail.jpg",
                 "places": [
                     {
                         "name": "Nhà cổ trăm cột",
@@ -6104,6 +6124,8 @@
             },
             {
                 "province_name": "Kiên Giang",
+                "overview": "Tỉnh ven biển Tây Nam, có diện tích lớn nhất ĐBSCL, nổi tiếng với du lịch biển đảo. Kiên Giang là nơi có Quần đảo Phú Quốc (nay là thành phố Phú Quốc), Quần đảo Nam Du và Di tích lịch sử Hòn Đất.",
+                "image_url": "https://cdn-media.sforum.vn/storage/app/media/ctvseo_MH/ki%C3%AAn%20giang%20mi%E1%BB%81n%20n%C3%A0o/kien-giang-mien-nao-thumbnail.jpg",
                 "places": [
                     {
                         "name": "Chùa Sắc Tứ Tam Bảo",
@@ -6511,6 +6533,8 @@
             },
             {
                 "province_name": "Hậu Giang",
+                "overview": "Tỉnh nằm ở trung tâm ĐBSCL, nổi bật với hệ thống kênh rạch chằng chịt, các vườn cây ăn trái rộng lớn và du lịch sinh thái miệt vườn. Nơi đây có Chợ nổi Ngã Bảy (Phụng Hiệp) nổi tiếng.",
+                "image_url": "https://cdn-media.sforum.vn/storage/app/media/wp-content/uploads/2024/03/dia-diem-du-lich-hau-giang-thumb.jpg",
                 "places": [
                     {
                         "name": "Khu du lịch sinh thái Tây Đô",
@@ -6731,6 +6755,8 @@
             },
             {
                 "province_name": "Đồng Tháp",
+                "overview": "Tỉnh nằm ở trung tâm ĐBSCL, nổi tiếng với du lịch sinh thái và văn hóa lịch sử, đặc biệt là Khu di tích Gò Tháp và Làng hoa Sa Đéc. Đây là vùng đất của những cánh đồng sen Tháp Mười.",
+                "image_url": "https://cdnmedia.baotintuc.vn/Upload/c2tvplmdloSDblsn03qN2Q/files/2024/05/17/tranh-bich-hoa-le-hoi-sen-dong-thap-1752024a.jpg",
                 "places": [
                     {
                         "name": "Làng hoa Sa Đéc",
@@ -7236,6 +7262,8 @@
             },
             {
                 "province_name": "Đồng Nai",
+                "overview": "Tỉnh thuộc vùng Đông Nam Bộ, là cửa ngõ kinh tế quan trọng nối liền TP.HCM với các tỉnh Tây Nguyên và Nam Trung Bộ. Đồng Nai có nhiều khu công nghiệp lớn, cùng với Khu dự trữ sinh quyển Đồng Nai.",
+                "image_url": "https://phuquoctv.vn/assets/posts/1720516645-du-lich-dong-nai2.jpg",
                 "places": [
                     {
                         "name": "Khu Du Lịch Bò Cạp Vàng",
@@ -7630,6 +7658,8 @@
             },
             {
                 "province_name": "Cà Mau",
+                "overview": "Tỉnh cực Nam của Việt Nam, nơi có Mũi Cà Mau. Nổi tiếng với hệ sinh thái rừng ngập mặn phong phú, đặc biệt là Rừng Quốc gia U Minh Hạ, và là trung tâm nghề nuôi trồng, đánh bắt hải sản lớn.",
+                "image_url": "https://cdn-media.sforum.vn/storage/app/media/ctv_seo4/danh-lam-thang-canh-ca-mau-thumbnail.jpg",
                 "places": [
                     {
                         "name": "Chùa Monivongsa Bopharam",
@@ -7987,6 +8017,8 @@
             },
             {
                 "province_name": "Bình Phước",
+                "overview": "Tỉnh thuộc vùng Đông Nam Bộ, có đường biên giới dài với Campuchia. Bình Phước được xem là 'thủ phủ điều' của Việt Nam, nổi tiếng với các di tích lịch sử và phát triển nông nghiệp, lâm nghiệp.",
+                "image_url": "https://media.baobinhphuoc.com.vn/upload/news/5_2024/44444_16323110052024.jpg",
                 "places": [
                     {
                         "name": "Trảng cỏ Bù Lạch",
@@ -8197,6 +8229,8 @@
             },
             {
                 "province_name": "Bình Dương",
+                "overview": "Tỉnh thuộc vùng Đông Nam Bộ, là trung tâm công nghiệp lớn và hiện đại, liền kề TP.HCM. Bình Dương có tốc độ đô thị hóa và phát triển kinh tế nhanh chóng, với các khu công nghiệp tập trung và thành phố mới.",
+                "image_url": "https://i.ex-cdn.com/taichinhdoanhnghiep.net.vn/files/content/2022/04/01/binh-duong-1316.jpg",
                 "places": [
                     {
                         "name": "Chùa Châu Thới",
@@ -8569,6 +8603,8 @@
             },
             {
                 "province_name": "Bến Tre",
+                "overview": "Được mệnh danh là 'xứ dừa', thuộc vùng ĐBSCL. Bến Tre nổi bật với các cù lao, kênh rạch chằng chịt, vườn cây ăn trái, và nghề thủ công mỹ nghệ từ dừa. Đây là điểm du lịch sinh thái miệt vườn đặc trưng.",
+                "image_url": "https://cdn-media.sforum.vn/storage/app/media/ctv_seo4/danh-lam-thang-canh-ben-tre-thumbnail.jpg",
                 "places": [
                     {
                         "name": "Du lịch sinh thái dưới nước Cồn Quy",
@@ -8848,6 +8884,8 @@
             },
             {
                 "province_name": "Bạc Liêu",
+                "overview": "Tỉnh ven biển thuộc bán đảo Cà Mau, nổi tiếng với công tử Bạc Liêu, những cánh đồng muối và sự giao thoa văn hóa của ba dân tộc Kinh – Khmer – Hoa. Nơi đây cũng có các công trình điện gió ven biển độc đáo.",
+                "image_url": "https://i.ytimg.com/vi/BMVaH6OA10Y/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLBRfD-q1xJZ6p9lJFtzxbm65RVl_Q",
                 "places": [
                     {
                         "name": "Cánh Đồng Quạt Gió Bạc Liêu",
@@ -9379,6 +9417,8 @@
             },
             {
                 "province_name": "An Giang",
+                "overview": "Tỉnh nằm ở đầu nguồn sông Cửu Long, giáp Campuchia. An Giang nổi tiếng với Lễ hội Vía Bà Chúa Xứ Núi Sam, là nơi có Khu di tích lịch sử và danh lam thắng cảnh Núi Sam, cùng với nền văn hóa đa dạng của người Kinh, Chăm, Hoa, Khmer.",
+                "image_url": "https://intour.vn/upload/img/0f70a9710eb8c8bd31bb847ec81b5dd0/2022/03/29/gia_ve_cac_diem_tham_quan_tai_an_giang_moi_nhat_1648526372.jpg",
                 "places": [
                     {
                         "name": "Miếu Bà Chúa Xứ Núi Sam",
