@@ -4,9 +4,11 @@
         "provinces": [
             {
                 "province_name": "TP. Hồ Chí Minh",
+                "overview": "Thành phố Hồ Chí Minh (TP.HCM), hay còn gọi là Sài Gòn, là trung tâm k,kinh tế, văn hóa và giáo dục lớn nhất Việt Nam. Là đầu tàu kinh tế phía Nam, thành phố nổi tiếng với nhịp sống sôi động và sự pha trộn độc đáo giữa lịch sử và hiện đại. Nơi đây có những công trình kiến trúc Pháp cổ kính (Nhà thờ Đức Bà, Bưu điện Trung tâm) đối lập với các tòa nhà chọc trời. TP.HCM cũng là thiên đường ẩm thực đường phố và là cửa ngõ giao thương quan trọng.",
+                "image_url": "https://i.ytimg.com/vi/-_rgR27c1ag/maxresdefault.jpg",
                 "places": [
                     {
-                        "name": "Nửa Ngày Tham Quan Khám Phá Địa Đạo Củ Chi",
+                        "name": "Tham Quan Khám Phá Địa Đạo Củ Chi",
                         "type": "Di tích lịch sử",
                         "description": [
                             "Khám phá tour nửa ngày Củ Chi, kết hợp với tour Sài Gòn (có trong các tùy chọn)",
@@ -42,7 +44,7 @@
                         "source": "https://www.klook.com/vi/activity/1471-cu-chi-tunnels-experience-ho-chi-minh-city/"
                     },
                     {
-                        "name": "Vé đài quan sát Landmark 81 SkyView",
+                        "name": "Đài quan sát Landmark 81 SkyView",
                         "type": "Thành phố",
                         "description": [
                             "Chiêm ngưỡng toàn cảnh thành phố từ độ cao 390m của đài quan sát Landmark 81 Skyview, tòa nhà cao nhất Việt Nam",
@@ -73,7 +75,7 @@
                         "source": "https://www.klook.com/vi/activity/27021-saigon-skyview-ticket-ho-chi-minh-city/"
                     },
                     {
-                        "name": "Vé Thảo Cầm Viên",
+                        "name": "Thảo Cầm Viên",
                         "type": "Công viên giải trí",
                         "description": [
                             "🦒 Nơi đây là mái nhà của hơn 100 loài động vật, bao gồm cả những loài bản địa độc đáo của Việt Nam và những sinh vật ngoại lai kỳ thú.",
@@ -106,7 +108,7 @@
                         "source": "https://www.klook.com/vi/activity/144068-saigon-zoo-botanical-gardens-ticket-in-ho-chi-minh-city/"
                     },
                     {
-                        "name": "Vé triển Lãm Nghệ Thuật Ánh Sáng Metashow tại Thiso Mall",
+                        "name": "Triển Lãm Nghệ Thuật Ánh Sáng Metashow tại Thiso Mall",
                         "type": "Nghệ thuật",
                         "description": [
                             "Khám phá không gian triển lãm về ánh sáng với công nghệ thực tế ảo tiên tiến, nơi bạn sẽ được đắm chìm trong những tiết mục ánh sáng lung linh, âm nhạc sôi động và hình ảnh 3D hấp dẫn.",
@@ -137,7 +139,7 @@
                         "source": "https://www.klook.com/vi/activity/125520-metashow-art-lighting-exhibition-ticket-at-thiso-mall/"
                     },
                     {
-                        "name": "Vé Công Viên Văn Hoá Suối Tiên",
+                        "name": "Công Viên Văn Hoá Suối Tiên",
                         "type": "Công viên giải trí",
                         "description": [
                             "Kỷ niệm 30 năm Suối Tiên với nhiều hoạt động triển lãm và show nghệ thuật đặc sắc",
@@ -169,7 +171,7 @@
                         "source": "https://www.klook.com/vi/activity/97746-suoi-tien-theme-park-ticket/"
                     },
                     {
-                        "name": "Vé Bảo Tàng Chứng Tích Chiến Tranh TP. Hồ Chí Minh",
+                        "name": "Bảo Tàng Chứng Tích Chiến Tranh TP. Hồ Chí Minh",
                         "type": "Di tích lịch sử",
                         "description": [
                             "Không cần xếp hàng để mua vé",
@@ -199,7 +201,7 @@
                         "source": "https://www.klook.com/vi/activity/130780-war-remnants-museum-ticket-in-ho-chi-minh-city/"
                     },
                     {
-                        "name": "Vé Công Viên Grand Park",
+                        "name": "Công Viên Grand Park",
                         "type": "Công viên giải trí",
                         "description": [
                             "🎡 Khu vườn mộng mơ: Chinh phục hơn 50 trò chơi đa cấp độ đầy sáng tạo, phù hợp mọi lứa tuổi.",
@@ -234,7 +236,7 @@
                         "source": "https://www.klook.com/vi/activity/140311-vinwonders-grand-park-ticket-in-ho-chi-minh-city/"
                     },
                     {
-                        "name": "Vé Triển Lãm Claude Monet Art Lighting",
+                        "name": "Triển Lãm Claude Monet Art Lighting",
                         "type": "Nghệ thuật",
                         "description": [
                             "Tìm hiểu các giai đoạn trong cuộc đời và sự nghiệp sáng tác của danh họa Claude Monet",
@@ -266,7 +268,7 @@
                         "source": "https://www.klook.com/vi/activity/113541-van-gogh-art-lighting-experience-ticket-in-ho-chi-minh-city/"
                     },
                     {
-                        "name": "Vé Dinh Độc Lập",
+                        "name": "Dinh Độc Lập",
                         "type": "Di tích lịch sử",
                         "description": [
                             "Bỏ qua hàng đợi mua vé và lựa chọn từ nhiều khung giờ khác nhau để tận dụng tối đa chuyến tham quan của bạn",
@@ -365,7 +367,7 @@
                         "source": "https://www.klook.com/vi/activity/105232-lotte-hotel-saigon-buffet-voucher/"
                     },
                     {
-                        "name": "Vé Bảo Tàng Y Học Cổ Truyền Việt Nam",
+                        "name": "Bảo Tàng Y Học Cổ Truyền Việt Nam",
                         "type": "Bảo tàng",
                         "description": [
                             "Tham quan Bảo tàng Y học cổ truyền Việt Nam (Bảo tàng Fito) nơi trưng bày nhiều hiện vật độc đáo - tái hiện lại rõ nét hình ảnh, hoạt động của các vị lương y, thái y từ xưa đến nay",
@@ -494,7 +496,7 @@
                         "source": "https://www.klook.com/vi/activity/180573-shooting-experience-at-sai-gon-shooting-club-thao-dien-branch/"
                     },
                     {
-                        "name": "Vé vui chơi Go Kart, Bắn súng sơn & Bắn cung",
+                        "name": "Vui chơi Go Kart, Bắn súng sơn & Bắn cung",
                         "type": "Thể thao",
                         "description": [
                             "Cảm giác mạnh tột độ: Đua Go Kart trong nhà và ngoài trời để nhân đôi cảm giác hồi hộp.",
@@ -529,7 +531,7 @@
                         "source": "https://www.klook.com/vi/activity/177338-ho-chi-minh-city-go-kart-paintball-archery-action-pass/"
                     },
                     {
-                        "name": "Tour ngày Làng nổi Tân Lập Thành phố Hồ Chí Minh",
+                        "name": "Làng nổi Tân Lập Thành phố Hồ Chí Minh",
                         "type": "Văn hóa địa phương",
                         "description": [
                             "Tham quan Làng nổi Tân Lập ở Long An, bối cảnh của bộ phim \"Vó ngựa trời Nam\" ở Đồng Tháp và khám phá vẻ đẹp mà thiên nhiên ban tặng cho miền nam Việt Nam.",
@@ -599,7 +601,7 @@
                         "source": "https://www.klook.com/vi/activity/49956-stand-up-paddle-boarding-ho-chi-minh-city/"
                     },
                     {
-                        "name": "Tour Tàu Cao Tốc Cao Cấp Ở Địa Đạo Củ Chi",
+                        "name": "Tàu Cao Tốc Cao Cấp Ở Địa Đạo Củ Chi",
                         "type": "Di tích lịch sử",
                         "description": [
                             "Dành trọn kỳ nghỉ của bạn để tận hưởng chuyến tham quan bằng tàu cao tốc cao cấp qua Địa đạo Củ Chi của Việt Nam!",
@@ -631,7 +633,7 @@
                         "source": "https://www.klook.com/vi/activity/30077-cu-chi-tunnels-premium-speedboat-tour/"
                     },
                     {
-                        "name": "Tour Ngày khám phá Rừng Quốc gia Cát Tiên từ Thành phố Hồ Chí Minh",
+                        "name": "Khám phá Rừng Quốc gia Cát Tiên từ Thành phố Hồ Chí Minh",
                         "type": "Rừng & Sinh thái",
                         "description": [
                             "Đắm mình trong vẻ đẹp tươi tốt của Vườn quốc gia Cát Tiên trong chuyến đi một ngày",
@@ -666,7 +668,7 @@
                         "source": "https://www.klook.com/vi/activity/157301-cat-tien-national-park-jungle-day-tour-from-ho-chi-minh-city/"
                     },
                     {
-                        "name": "Vé Workshop Nghệ Thuật Tăm Giang tại BOARC TP. Hồ Chí Minh",
+                        "name": "Workshop Nghệ Thuật Tăm Giang tại BOARC TP. Hồ Chí Minh",
                         "type": "Nghệ thuật",
                         "description": [
                             "Boarc là một nghệ thuật mới kết hợp giữa kỹ thuật cắt laser với độ chính xác cao với tăm giang truyền thống của Việt Nam",
@@ -705,7 +707,7 @@
                 "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQhSG4pif_P0v7Fxq9yjzFf37vzoAF13bPgFw&s",
                 "places": [
                     {
-                        "name": "Tour Tham Quan Vũng Tàu",
+                        "name": "Tham Quan Vũng Tàu",
                         "type": "Thành phố biển",
                         "description": [
                             "Tận hưởng sự mịn màng của bãi cát vàng, hương trời gió biển sau những ngày làm việc mệt mỏi",
@@ -740,7 +742,7 @@
                         "source": "https://www.klook.com/vi/activity/41303-vung-tau-day-tour-vietnamese-speaking-guide/"
                     },
                     {
-                        "name": "Vé Suối Nước Nóng Minera Bình Châu",
+                        "name": "Suối Nước Nóng Minera Bình Châu",
                         "type": "Spa & Wellness",
                         "description": [
                             "Tận hưởng kỳ nghỉ cuối tuần hoàn hảo tại Minera Hot Springs Bình Châu, một trong những khu nghỉ dưỡng chăm sóc sức khỏe hàng đầu Việt Nam!",
@@ -772,7 +774,7 @@
                         "source": "https://www.klook.com/vi/activity/47205-minera-hot-springs-binh-chau-ticket-binh-chau-vung-tau/"
                     },
                     {
-                        "name": "Vé Công Viên Hồ Mây Ở Vũng Tàu",
+                        "name": "Công Viên Hồ Mây Ở Vũng Tàu",
                         "type": "Công viên giải trí",
                         "description": [
                             "Tham gia 1 hành trình hấp dẫn đến 1 trong những điểm tham quan nổi tiếng và được yêu thích nhất ở Vũng Tàu, Công Viên Hồ Mây",
@@ -811,7 +813,7 @@
                         "source": "https://www.klook.com/vi/activity/15824-ho-may-park-ho-chi-minh-city/"
                     },
                     {
-                        "name": "Vé Bảo Tàng Vũ Khí Cổ Robert Taylor ở Vũng Tàu",
+                        "name": "Bảo Tàng Vũ Khí Cổ Robert Taylor ở Vũng Tàu",
                         "type": "Bảo tàng",
                         "description": [
                             "Khám phá Bảo tàng vũ khí cổ Robert Taylor - toạ lạc trong một ngôi nhà Pháp cổ ở thành phố biển Vũng Tàu",
@@ -849,38 +851,7 @@
                 "image_url": "https://vietnamtouristvn.com/thumbs/1009x673x2/upload/product/screenshot_1684489175-1388.png",
                 "places": [
                     {
-                        "name": "Tour Phan Thiết - Mũi Né 2N1Đ",
-                        "type": "Biển",
-                        "description": [
-                            "Tìm hiểu về cuộc sống của làng chài địa phương và có một trải nghiệm đáng nhớ tại Suối Tiên nơi có một dòng suối nhỏ chảy giữa những cồn cát đỏ",
-                            "Khám phá đồi cát bay được mệnh danh là một trong những điểm nhấn độc đáo của Mũi Né",
-                            "Tận hưởng một mùa hè sôi động với nắng vàng, biển xanh tại Mũi Né",
-                            "Thời lượng: 2 ngày 1 đêm."
-                        ],
-                        "images": [
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_971/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/hxzozipd4aa3s2em4oic/TourM%C5%A9iN%C3%A9-PhanThi%E1%BA%BFt2N1%C4%90kh%E1%BB%9Fih%C3%A0nht%E1%BB%ABTPH%E1%BB%93Ch%C3%ADMinh.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_971/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/uyg9kcqxzs2met9smfzh/TourM%C5%A9iN%C3%A9-PhanThi%E1%BA%BFt2N1%C4%90kh%E1%BB%9Fih%C3%A0nht%E1%BB%ABTPH%E1%BB%93Ch%C3%ADMinh.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_727/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/hm2igxsgkehjnmwkeiwi/TourM%C5%A9iN%C3%A9-PhanThi%E1%BA%BFt2N1%C4%90kh%E1%BB%9Fih%C3%A0nht%E1%BB%ABTPH%E1%BB%93Ch%C3%ADMinh.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1280,h_960/w_79,x_14,y_14,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/euhfqnfvx219oefleyxb/TourM%C5%A9iN%C3%A9-PhanThi%E1%BA%BFt2N1%C4%90kh%E1%BB%9Fih%C3%A0nht%E1%BB%ABTPH%E1%BB%93Ch%C3%ADMinh.webp"
-                        ],
-                        "gps": {
-                            "lat": 10.933611491681566,
-                            "lng": 108.28407748580372
-                        },
-                        "opening_hours": "Cả ngày",
-                        "entry_fee": 1125000,
-                        "tags": [
-                            "Lake/River",
-                            "Sightseeing",
-                            "Morning",
-                            "Evening",
-                            "Multi-day Adventure",
-                            "<=2000000 VND"
-                        ],
-                        "source": "https://www.klook.com/vi/activity/88282-mui-ne-tour/?spm=Country.Activity_LIST&clickId=5396cce60a"
-                    },
-                    {
-                        "name": "Vé Lâu Đài Rượu Vang RĐ tại Mũi Né",
+                        "name": "Lâu Đài Rượu Vang RĐ tại Mũi Né",
                         "type": "Văn hóa & Trải nghiệm ẩm thực",
                         "description": [
                             "Khám phá lâu đài cùng với những Hướng Dẫn Viên Rượu am hiểu, mang đến cái nhìn sâu sắc về lịch sử và kiến trúc độc đáo của nơi đây.",
@@ -915,7 +886,7 @@
                         "source": "https://www.klook.com/vi/activity/130189-rd-wine-castle-ticket-in-mui-ne/?spm=Country.Activity_LIST&clickId=638ff1e1e1"
                     },
                     {
-                        "name": "Vé Mango Beach Phan Thiết",
+                        "name": "Mango Beach Phan Thiết",
                         "type": "Công viên giải trí",
                         "description": [
                             "Check-in Mango Beach - tổ hợp vui chơi giải trí độc đáo, thú vị tràn ngập sắc màu bên bờ biển thành phố Phan Thiết",
@@ -981,41 +952,7 @@
                         "source": "https://www.klook.com/vi/activity/21080-sea-link-golf-club-experience-mui-ne/?spm=Country.Activity_LIST&clickId=c58bdbc3ba"
                     },
                     {
-                        "name": "Tour 3N2Đ Khám Phá Đảo Phú Quý",
-                        "type": "Du lịch đảo",
-                        "description": [
-                            "Khám phá đảo Phú Quý còn được gọi là cù lao Thu hay cù lao Khoai Xứ - một trong 5 cù lao đẹp nhất Việt Nam với tour đảo 3N2Đ",
-                            "Đắm mình trong làn nước trong vắt và mát lạnh với những bãi biển có bờ cát trắng và xanh ngát",
-                            "Ngắm hoàng hôn rực rỡ trên đảo cùng với gia đình và người thân là một trong những trải nghiệm khó quên của chuyến đi",
-                            "Cảm nhận làn gió mát rượi khi bạn \"chạy bon bon\" trên chiếc xe gắn máy, đi qua các cung đường biển thơ mộng, ghé thăm các địa điểm nổi tiếng tại Đảo Phú Quý như: Bãi Nhỏ, Gành Hang, chùa Linh Sơn, núi Cao Cát,...",
-                            "Lên núi và xuống biển, trải nghiệm nhiều hoạt động hấp dẫn như lặn ngắm san hô, thưởng thức hải sản tươi ngon tại đảo Phú Quý",
-                            "Thời lượng: 3 ngày. "
-                        ],
-                        "images": [
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1200,h_680/w_74,x_13,y_13,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/xdipjs7hqupxvhlkfv13/Tour3N2%C4%90Kh%C3%A1mPh%C3%A1%C4%90%E1%BA%A3oPh%C3%BAQu%C3%BDt%E1%BB%ABPhanThi%E1%BA%BFt.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1080,h_1440/w_66,x_12,y_12,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/i307w4kutchkyllvn6nk/Tour3N2%C4%90Kh%C3%A1mPh%C3%A1%C4%90%E1%BA%A3oPh%C3%BAQu%C3%BDt%E1%BB%ABPhanThi%E1%BA%BFt.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_737/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/ztszsbu6g5ephetu8phx/Tour3N2%C4%90Kh%C3%A1mPh%C3%A1%C4%90%E1%BA%A3oPh%C3%BAQu%C3%BDt%E1%BB%ABPhanThi%E1%BA%BFt.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_741/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/cfdtgjw5j0ncexl3kg7y/Tour3N2%C4%90Kh%C3%A1mPh%C3%A1%C4%90%E1%BA%A3oPh%C3%BAQu%C3%BDt%E1%BB%ABPhanThi%E1%BA%BFt.webp"
-                        ],
-                        "gps": {
-                            "lat": 10.533884239411783,
-                            "lng": 108.95029913022891
-                        },
-                        "opening_hours": "Cả ngày",
-                        "entry_fee": 2359550,
-                        "tags": [
-                            "Beach",
-                            "Mountain",
-                            "Sightseeing",
-                            "Morning",
-                            "Evening",
-                            "Multi-day Adventure",
-                            "<=5000000 VND"
-                        ],
-                        "source": "https://www.klook.com/vi/activity/58150-phu-quy-island-2d1n-tour/?spm=Country.Activity_LIST&clickId=1c2d2463f4"
-                    },
-                    {
-                        "name": "Tour Tham Quan Núi Tà Cú Trong Ngày Từ Mũi Né",
+                        "name": "Tham Quan Núi Tà Cú Trong Ngày Từ Mũi Né",
                         "type": "Núi",
                         "description": [
                             "Đưa đón bằng xe riêng từ Mũi Né cho nhóm từ 1 đến 15 khách",
@@ -2403,41 +2340,7 @@
                         "source": "https://www.traveloka.com/vi-vn/activities/vietnam/product/two-islands-excursion-sun-world-hon-thom-lunch-buffet-in-phu-quoc-by-rooty-trip-day-tour-3658898400568?funnel_source=Merchandising.AA.AgnosticLandingPage-GLP&funnel_id=S_1_0cf000f0b75c923ba0c6fcd6372219e49c780a39_0_649692d79515a87281de239d3cd73a11b7865ad7&internal_source=true"
                     },
                     {
-                        "name": "Tour ngắm hoàng hôn và câu mực đêm trên đảo Phú Quốc",
-                        "type": "Văn hóa & Trải nghiệm ẩm thực",
-                        "description": [
-                            "Đắm chìm dưới ánh hoàng hôn rực rỡ trên đảo Phú Quốc",
-                            "Học kỹ thuật câu mực từ ngư dân",
-                            "Thưởng thức bữa tối hải sản ngon miệng trên thuyền",
-                            "Chụp những bức ảnh độc đáo bạn bè phải ganh tỵ!",
-                            "Thời lượng: 4 giờ 30 phút."
-                        ],
-                        "images": [
-                            "https://ik.imagekit.io/tvlk/xpe-asset/AyJ40ZAo1DOyPyKLZ9c3RGQHTP2oT4ZXW+QmPVVkFQiXFSv42UaHGzSmaSzQ8DO5QIbWPZuF+VkYVRk6gh-Vg4ECbfuQRQ4pHjWJ5Rmbtkk=/2001485599955/Phu-Quoc-Sunset-Viewing-and-Night-Squid-Fishing---Half-Day-Tour-e13c4de8-8a8c-4f8d-9590-13ff70a5a171.jpeg?_src=imagekit&tr=dpr-2,c-at_max,h-500,q-60,w-740",
-                            "https://ik.imagekit.io/tvlk/xpe-asset/AyJ40ZAo1DOyPyKLZ9c3RGQHTP2oT4ZXW+QmPVVkFQiXFSv42UaHGzSmaSzQ8DO5QIbWPZuF+VkYVRk6gh-Vg4ECbfuQRQ4pHjWJ5Rmbtkk=/2001485599955/Phu-Quoc-Sunset-Viewing-and-Night-Squid-Fishing---Half-Day-Tour-8dbef632-7c45-423f-b103-2000ff2ae709.jpeg?_src=imagekit&tr=dpr-2,c-at_max,h-500,q-60,w-740",
-                            "https://ik.imagekit.io/tvlk/xpe-asset/AyJ40ZAo1DOyPyKLZ9c3RGQHTP2oT4ZXW+QmPVVkFQiXFSv42UaHGzSmaSzQ8DO5QIbWPZuF+VkYVRk6gh-Vg4ECbfuQRQ4pHjWJ5Rmbtkk=/2001485599955/Phu-Quoc-Sunset-Viewing-and-Night-Squid-Fishing---Half-Day-Tour-56d019ed-b863-40b7-b3b0-52132cc011c5.jpeg?_src=imagekit&tr=dpr-2,c-at_max,h-500,q-60,w-740",
-                            "https://ik.imagekit.io/tvlk/xpe-asset/AyJ40ZAo1DOyPyKLZ9c3RGQHTP2oT4ZXW+QmPVVkFQiXFSv42UaHGzSmaSzQ8DO5QIbWPZuF+VkYVRk6gh-Vg4ECbfuQRQ4pHjWJ5Rmbtkk=/2001485599955/Phu-Quoc-Sunset-Viewing-and-Night-Squid-Fishing---Half-Day-Tour-642f1cf8-7fa9-4c51-b397-46372c935cee.jpeg?_src=imagekit&tr=dpr-2,c-at_max,h-500,q-60,w-740"
-                        ],
-                        "gps": {
-                            "lat": 10.19444787431969,
-                            "lng": 103.96746226256512
-                        },
-                        "opening_hours": "17:00 - 21:30 (Giờ tour buổi tối phổ biến)",
-                        "entry_fee": 253968,
-                        "tags": [
-                            "Gastronomy",
-                            "Island",
-                            "Sightseeing",
-                            "Afternoon",
-                            "Evening",
-                            "Half Day",
-                            "4 hours 30 minutes",
-                            "<=500000 VND"
-                        ],
-                        "source": "https://www.traveloka.com/vi-vn/activities/vietnam/product/phu-quoc-sunset-viewing-and-night-squid-fishing-half-day-tour-2001485599955?funnel_source=Merchandising.AA.AgnosticLandingPage-GLP&funnel_id=S_1_0cf000f0b75c923ba0c6fcd6372219e49c780a39_2_14616f728b4392e1ba6fec12c740ecfda4c255ec&internal_source=true"
-                    },
-                    {
-                        "name": "Tour khám phá nam đảo, trải nghiệm cáp treo 2 chiều đến Hòn Thơm và công viên nước Aquatopia ở Phú Quốc",
+                        "name": "Khám phá nam đảo, trải nghiệm cáp treo 2 chiều đến Hòn Thơm và công viên nước Aquatopia ở Phú Quốc",
                         "type": "Đảo & Cáp treo",
                         "description": [
                             "Khám phá phía nam đảo Phú Quốc trong 1 ngày",
@@ -2934,6 +2837,8 @@
             },
             {
                 "province_name": "Côn Đảo",
+                "overview": "Côn Đảo là một quần đảo, huyện đảo trực thuộc tỉnh Bà Rịa – Vũng Tàu, nằm ngoài khơi bờ biển Nam Bộ. Nổi tiếng với lịch sử đau thương gắn liền với hệ thống Nhà tù Côn Đảo (được mệnh danh là 'Địa ngục trần gian') trong thời kỳ chiến tranh. Ngày nay, Côn Đảo là 'thiên đường nghỉ dưỡng' thu hút khách du lịch nhờ vẻ đẹp thiên nhiên hoang sơ, hệ sinh thái Vườn Quốc gia Côn Đảo phong phú (nơi bảo tồn rùa biển và bò biển Dugong), các bãi biển cát trắng tuyệt đẹp (như Bãi Đầm Trầu, Bãi Nhát) và du lịch tâm linh, khám phá di tích lịch sử.",
+                "image_url": "https://condao.com.vn/uploads/news/2024_07/image-20240703162858-1.jpeg",
                 "places": [
                     {
                         "name": "Khám Phá Hòn Bảy Cạnh",

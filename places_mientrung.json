@@ -8,7 +8,7 @@
                 "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Han_River_Bridge_in_Vietnam_Night_View.jpg/960px-Han_River_Bridge_in_Vietnam_Night_View.jpg",
                 "places": [
                     {
-                        "name": "Vé Cáp Treo Sun World Ba Na Hills Đà Nẵng",
+                        "name": "Cáp Treo Sun World Ba Na Hills Đà Nẵng",
                         "type": "Công viên giải trí",
                         "description": [
                             "Trải nghiệm cáp treo: Chinh phục đỉnh Núi Chúa bằng tuyến cáp treo Bà Nà Hills, nổi tiếng với chiều dài ấn tượng cùng hướng nhìn ngoạn ra núi rừng bạt ngàn và đồi núi uốn lượn",
@@ -44,7 +44,7 @@
                         "source": "https://www.klook.com/vi/activity/13283-ba-na-hills-ticket-da-nang/?spm=City.Activity_LIST&clickId=864f6f2c71"
                     },
                     {
-                        "name": "Vé Công Viên Nước Mikazuki 365",
+                        "name": "Công Viên Nước Mikazuki 365",
                         "type": "Công viên nước",
                         "description": [
                             "Trải nghiệm công viên nước phong cách Nhật Bản tại Công viên nước Mikazuki 365 - công viên nước nóng trong nhà đầu tiên tại Việt Nam",
@@ -76,7 +76,7 @@
                         "source": "https://www.klook.com/vi/activity/69492-mikazuki-water-park-ticket-in-da-nang/?spm=City.Activity_LIST&clickId=0fa3ce5c8c"
                     },
                     {
-                        "name": "Vé Công Viên Suối Khoáng Nóng Núi Thần Tài Đà Nẵng",
+                        "name": "Công Viên Suối Khoáng Nóng Núi Thần Tài Đà Nẵng",
                         "type": "Khu Du lịch Suối Khoáng Nóng & Thư giãn/Spa",
                         "description": [
                             "Khu Du Lịch Suối Khoáng Nóng Núi Thần Tài, một điểm tham quan dành cho những người yêu thiên nhiên ở Đà Nẵng!",
@@ -150,41 +150,6 @@
                         "source": "https://www.klook.com/vi/activity/119654-nguon-spa-massage-da-nang/"
                     },
                     {
-                        "name": "Tour nửa ngày lặn biển ngắm san hô & câu cá Bán đảo Sơn Trà",
-                        "type": "Tour Biển/Lặn biển & Câu cá)",
-                        "description": [
-                            "Tham gia chuyến phiêu lưu nửa ngày đầy thú vị đến Bán đảo Sơn Trà bằng tàu cao tốc",
-                            "Chiêm ngưỡng cảnh quan Bán đảo Sơn Trà, được mệnh danh là \"lá phổi xanh\" của Đà Nẵng từ một góc nhìn khác",
-                            "Bơi lội và lặn biển tại điểm lặn với làn nước trong vắt cùng hệ sinh vật biển rực rỡ và các rạn san hô đầy màu sắc",
-                            "Ghé thăm các bãi biển hoang sơ như Hòn Sụp, Bãi Nồm và Bãi Đá",
-                            "Thử sức với các kỹ thuật đánh bắt cá truyền thống, thả câu từ thuyền và thu hoạch mẻ cá trong ngày",
-                            "Thời lượng: 2 giờ "
-                        ],
-                        "images": [
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_972/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/lk1h0r4tpvbweean2slg/Tourn%E1%BB%ADang%C3%A0yl%E1%BA%B7nbi%E1%BB%83nng%E1%BA%AFmsanh%C3%B4c%C3%A2uc%C3%A1B%C3%A1n%C4%91%E1%BA%A3oS%C6%A1nTr%C3%A0.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1080,h_810/w_66,x_12,y_12,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/fxc53gggejsopvr5wqjq/Tourn%E1%BB%ADang%C3%A0yl%E1%BA%B7nbi%E1%BB%83nng%E1%BA%AFmsanh%C3%B4c%C3%A2uc%C3%A1B%C3%A1n%C4%91%E1%BA%A3oS%C6%A1nTr%C3%A0.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1080,h_810/w_66,x_12,y_12,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/lhmkaxigar7bmbcwimhu/Tourn%E1%BB%ADang%C3%A0yl%E1%BA%B7nbi%E1%BB%83nng%E1%BA%AFmsanh%C3%B4c%C3%A2uc%C3%A1B%C3%A1n%C4%91%E1%BA%A3oS%C6%A1nTr%C3%A0.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_728/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/at6uhesk5ui0t5lzu26c/Tourn%E1%BB%ADang%C3%A0yl%E1%BA%B7nbi%E1%BB%83nng%E1%BA%AFmsanh%C3%B4c%C3%A2uc%C3%A1B%C3%A1n%C4%91%E1%BA%A3oS%C6%A1nTr%C3%A0.webp"
-                        ],
-                        "gps": {
-                            "lat": 16.121869986712515,
-                            "lng": 108.28668084355625
-                        },
-                        "opening_hours": "6:00 AM - 18:00 (Hoạt động trên biển, thường diễn ra trong ngày)",
-                        "entry_fee": 494000,
-                        "tags": [
-                            "Beach",
-                            "Island",
-                            "Sightseeing",
-                            "Morning",
-                            "Afternoon",
-                            "Half Day",
-                            "2 hours",
-                            "<=500000 VND"
-                        ],
-                        "source": "https://www.klook.com/vi/activity/36331-son-tra-peninsula-snorkeling-fishing-tour/"
-                    },
-                    {
                         "name": "Khám phá Thánh địa Mỹ Sơn",
                         "type": "Di tích lịch sử",
                         "description": [
@@ -219,39 +184,6 @@
                         "source": ""
                     },
                     {
-                        "name": "Combo Vé Trượt Thác Hoà Phú Thành",
-                        "type": "Trò chơi cảm giác mạnh",
-                        "description": [
-                            "Bước vào công viên Hòa Phú Thành và tận hưởng những khoảnh khắc tuyệt vời với những trò chơi cảm giác mạnh mới như đi bè và zipline khi mua vé này!",
-                            "Với những dòng sông êm đềm cùng những dòng suối chảy xiết, Hòa Phú Thành mang đến cho bạn hoạt động trượt thác với chiều dài 3km",
-                            "Chỉ cần mặc áo phao và đội mũ bảo hiểm, sau đó ngồi trên những chiếc xuồng cao su và bạn sẽ bắt đầu vượt sông",
-                            "Di chuyển dễ dàng đến hoặc về khách sạn ở trung tâm Đà Nẵng với dịch vụ trung chuyển công cộng vô cùng tiện lợi",
-                            "Có nhiều lựa chọn để bạn khám phá Hòa Phú Thành, bạn có thể trải nghiệm trượt thác và đi zipline trong một ngày",
-                            "Thời lượng: Cả buổi."
-                        ],
-                        "images": [
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_810,h_1080/w_50,x_9,y_9,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/xvzuszxqx4gaywzhgbzi/ComboV%C3%A9Tr%C6%B0%E1%BB%A3tTh%C3%A1cHo%C3%A0Ph%C3%BATh%C3%A0nh.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_863/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/xkunnq71c4xgg1cpwtjh/ComboV%C3%A9Tr%C6%B0%E1%BB%A3tTh%C3%A1cHo%C3%A0Ph%C3%BATh%C3%A0nh.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_971/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/mfb8klb5udn5litfl2ga/ComboV%C3%A9Tr%C6%B0%E1%BB%A3tTh%C3%A1cHo%C3%A0Ph%C3%BATh%C3%A0nh.webp"
-                        ],
-                        "gps": {
-                            "lat": 15.958728172694574,
-                            "lng": 107.99313703984159
-                        },
-                        "opening_hours": "Thứ Hai-Chủ Nhật: 07:30-17:00",
-                        "entry_fee": 150000,
-                        "tags": [
-                            "Adventure",
-                            "Island",
-                            "Shopping",
-                            "Morning",
-                            "Afternoon",
-                            "Full Day",
-                            "<=200000 VND"
-                        ],
-                        "source": "https://www.klook.com/vi/activity/37856-hoa-phu-thanh-rafting-combo-tickets-shared-transfers/"
-                    },
-                    {
                         "name": "Trải Nghiệm Bay Dù Lượn ở Bán Đảo Sơn Trà Đà Nẵng",
                         "type": "Trò chơi cảm giác mạnh",
                         "description": [
@@ -283,7 +215,7 @@
                         "source": "https://www.klook.com/vi/activity/90127-paragliding-experience-in-da-nang/"
                     },
                     {
-                        "name": "Tour Tham Quan Cù Lao Chàm",
+                        "name": "Tham Quan Cù Lao Chàm",
                         "type": "Lặn biển & Ngắm san hô",
                         "description": [
                             "Dành một ngày tham quan hòn đảo tuyệt đẹp của miền Trung, nơi được công nhận là Khu Bảo Tồn Sinh Quyển Thế giới của UNESCO",
@@ -315,39 +247,6 @@
                             "<=1000000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/41384-cham-islands-day-tour-da-nang-vietnam/"
-                    },
-                    {
-                        "name": "Đi thuyền thúng tại Rừng Dừa, câu cua kèm bữa trưa hoặc bữa tối",
-                        "type": "Rừng & Sinh thái",
-                        "description": [
-                            "Khám phá những con kênh nhỏ của rừng ngập mặn trên thuyền thúng tre cùng với hướng dẫn viên địa phương.",
-                            "Tận hưởng các hoạt động độc đáo như xoay thuyền, hát karaoke và quăng lưới đánh cá cùng người dân địa phương.",
-                            "Trải nghiệm các buổi biểu diễn âm nhạc dân gian truyền thống và thử tài bắt cua dọc bờ sông.",
-                            "Kết thúc bằng bữa ăn địa phương ngon miệng tại nhà hàng, có tùy chọn đưa đón từ Hội An hoặc Đà Nẵng.",
-                            "Thời lượng: 4 giờ - 5 giờ."
-                        ],
-                        "images": [
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1080,h_608/w_66,x_12,y_12,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/jogxblfcc5q5nyathiig/%C4%90ithuy%E1%BB%81nth%C3%BAngt%E1%BA%A1iR%E1%BB%ABngD%E1%BB%ABa,c%C3%A2ucuak%C3%A8mb%E1%BB%AFatr%C6%B0aho%E1%BA%B7cb%E1%BB%AFat%E1%BB%91i.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1080,h_608/w_66,x_12,y_12,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/efl5gantozggogt8nepc/%C4%90ithuy%E1%BB%81nth%C3%BAngt%E1%BA%A1iR%E1%BB%ABngD%E1%BB%ABa,c%C3%A2ucuak%C3%A8mb%E1%BB%AFatr%C6%B0aho%E1%BA%B7cb%E1%BB%AFat%E1%BB%91i.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1080,h_608/w_66,x_12,y_12,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/dp4adb4ah9g8nwi5pkyx/%C4%90ithuy%E1%BB%81nth%C3%BAngt%E1%BA%A1iR%E1%BB%ABngD%E1%BB%ABa,c%C3%A2ucuak%C3%A8mb%E1%BB%AFatr%C6%B0aho%E1%BA%B7cb%E1%BB%AFat%E1%BB%91i.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1080,h_608/w_66,x_12,y_12,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/zokemuglvuyinnj0ayic/%C4%90ithuy%E1%BB%81nth%C3%BAngt%E1%BA%A1iR%E1%BB%ABngD%E1%BB%ABa,c%C3%A2ucuak%C3%A8mb%E1%BB%AFatr%C6%B0aho%E1%BA%B7cb%E1%BB%AFat%E1%BB%91i.webp"
-                        ],
-                        "gps": {
-                            "lat": 15.877946563937954,
-                            "lng": 108.37277209549619
-                        },
-                        "opening_hours": "7:00 - 17:00",
-                        "entry_fee": 343700,
-                        "tags": [
-                            "Island",
-                            "Lake/River",
-                            "Morning",
-                            "Afternoon",
-                            "Half Day",
-                            "4 hours",
-                            "<=500000 VND"
-                        ],
-                        "source": "https://www.klook.com/vi/activity/146578-bay-mau-coconut-forest-meal-hoi-an/?spm=City.Activity_LIST&clickId=935c4c5cf5"
                     },
                     {
                         "name": "Trải nghiệm Tigon Massa Spa & Massage ",
@@ -383,40 +282,7 @@
                         "source": "https://www.klook.com/vi/activity/148246-tigon-spa-massage-experience-in-da-nang/?spm=City.Activity_LIST&clickId=e3bcb70a81"
                     },
                     {
-                        "name": "Lớp học lướt sóng của Surf Shack ở Đà Nẵng",
-                        "type": "Thể thao nước",
-                        "description": [
-                            "Lướt theo những đợt sóng tại biển Mỹ Khê thật thành thạo sau khi tham gia lớp học lướt sóng tại Surf Shack Đà Nẵng!",
-                            "Học cách chế ngự những đoạn giãn cách và đoạn thủy triều với các kỹ năng bạn sẽ được học từ hướng dẫn lướt sóng lành nghề",
-                            "Người mới biết lướt sóng hay người mới học lần đầu đều được chào đón, hãy kết bạn và cùng đặt lớp học theo nhóm!",
-                            "Buổi học phù hợp với người mới bắt đầu chơi. Nếu đã có kinh nghiệm lướt sóng, bạn có thể thuê ván lươt sóng và trải nghiệm ngay thôi!",
-                            "Thời lượng: 1 giờ - 1 giờ 30 phút."
-                        ],
-                        "images": [
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_513/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/adkvdacgx5jj85hnllmr/L%E1%BB%9Bph%E1%BB%8Dcl%C6%B0%E1%BB%9Bts%C3%B3ngc%E1%BB%A7aSurfShack%E1%BB%9F%C4%90%C3%A0N%E1%BA%B5ng.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_863/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/qmit7ubkzevds5zfou3l/L%E1%BB%9Bph%E1%BB%8Dcl%C6%B0%E1%BB%9Bts%C3%B3ngc%E1%BB%A7aSurfShack%E1%BB%9F%C4%90%C3%A0N%E1%BA%B5ng.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_863/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/c19hhp0awkm0cmzztj2k/L%E1%BB%9Bph%E1%BB%8Dcl%C6%B0%E1%BB%9Bts%C3%B3ngc%E1%BB%A7aSurfShack%E1%BB%9F%C4%90%C3%A0N%E1%BA%B5ng.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_863/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/je4ewl6rb4wdkgkeu9f0/L%E1%BB%9Bph%E1%BB%8Dcl%C6%B0%E1%BB%9Bts%C3%B3ngc%E1%BB%A7aSurfShack%E1%BB%9F%C4%90%C3%A0N%E1%BA%B5ng.webp"
-                        ],
-                        "gps": {
-                            "lat": 16.049072276059757,
-                            "lng": 108.24659622000657
-                        },
-                        "opening_hours": "Thứ Hai-Chủ Nhật: 08:30-14:30",
-                        "entry_fee": 1317894,
-                        "tags": [
-                            "Beach",
-                            "Lake/River",
-                            "Morning",
-                            "Afternoon",
-                            "Half Day",
-                            "1 hours 30 minutes",
-                            "<=2000000 VND"
-                        ],
-                        "source": "https://www.klook.com/vi/activity/14713-surfing-lesson-da-nang/?spm=City.Activity_LIST&clickId=b967fa4c4a"
-                    },
-                    {
-                        "name": "Vé Bảo Tàng Đà Nẵng",
+                        "name": "Bảo Tàng Đà Nẵng",
                         "type": "Bảo tàng",
                         "description": [
                             "Bảo tàng Đà Nẵng là điểm đến không thể bỏ lỡ để hiểu sâu sắc về bản sắc, lịch sử và văn hoá của Đà Nẵng",
@@ -517,7 +383,7 @@
                         "source": "https://www.klook.com/vi/activity/112092-seafood-and-bbq-dinner-buffer-novotel-premier-danang-han-river/"
                     },
                     {
-                        "name": "Tour Nửa ngày ở Ngũ Hành Sơn",
+                        "name": "Ngũ Hành Sơn",
                         "type": "Núi & Trekking",
                         "description": [
                             "Tham gia chuyến leo núi ngắm cảnh Ngũ Hành Sơn, một cụm năm ngọn núi đá vôi phía nam Đà Nẵng",
@@ -625,41 +491,7 @@
                 "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/PhoCoHoiAn.jpg/500px-PhoCoHoiAn.jpg",
                 "places": [
                     {
-                        "name": "Vé Đi Thuyền Thúng Vào Rừng Dừa Bảy Mẫu Ở Hội An",
-                        "type": "Rừng & Sinh thái",
-                        "description": [
-                            "Dành một ngày hoà mình với thiên nhiên ở Hội An và tham quan Rừng Dừa Bảy Mẫu tuyệt đẹp",
-                            "Ngồi trên thuyền thúng và chiêm ngưỡng vẻ đẹp của cây cối, hít thở không khí trong lành với làn nước mát lạnh",
-                            "Thưởng thức màn trình diễn múa thúng và ra khơi đặc sắc của người dân địa phương",
-                            "Tìm hiểu về lịch sử hình thành và phát triển ở Hội An cùng với nét văn hoá đặc trưng phố cổ trong chương trình biểu diễn nghệ thuật thực cảnh Ký Ức Hội An",
-                            "Thời lượng: 1 giờ - 3 giờ."
-                        ],
-                        "images": [
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_971/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/aarlfaqw8xpgquxpvnsk/V%C3%A9%C4%90iThuy%E1%BB%81nTh%C3%BAngV%C3%A0oR%E1%BB%ABngD%E1%BB%ABaB%E1%BA%A3yM%E1%BA%ABu%E1%BB%9EH%E1%BB%99iAnv%E1%BB%9BiTu%E1%BB%B3ch%E1%BB%8DnV%C3%A9ThamQuanPh%E1%BB%91C%E1%BB%95H%E1%BB%99iAnv%C3%A0ComboV%C3%A9K%C3%BD%E1%BB%A8cH%E1%BB%99iAn.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_971/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/tozhtxgks7xwpqrfjpxv/V%C3%A9%C4%90iThuy%E1%BB%81nTh%C3%BAngV%C3%A0oR%E1%BB%ABngD%E1%BB%ABaB%E1%BA%A3yM%E1%BA%ABu%E1%BB%9EH%E1%BB%99iAnv%E1%BB%9BiTu%E1%BB%B3ch%E1%BB%8DnV%C3%A9ThamQuanPh%E1%BB%91C%E1%BB%95H%E1%BB%99iAnv%C3%A0ComboV%C3%A9K%C3%BD%E1%BB%A8cH%E1%BB%99iAn.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1200,h_720/w_74,x_13,y_13,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/l7f5hw61vi0r3trdqicl/V%C3%A9%C4%90iThuy%E1%BB%81nTh%C3%BAngV%C3%A0oR%E1%BB%ABngD%E1%BB%ABaB%E1%BA%A3yM%E1%BA%ABu%E1%BB%9EH%E1%BB%99iAnv%E1%BB%9BiTu%E1%BB%B3ch%E1%BB%8DnV%C3%A9ThamQuanPh%E1%BB%91C%E1%BB%95H%E1%BB%99iAnv%C3%A0ComboV%C3%A9K%C3%BD%E1%BB%A8cH%E1%BB%99iAn.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_720/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/msydvcwb4fo7dldytqn0/V%C3%A9%C4%90iThuy%E1%BB%81nTh%C3%BAngV%C3%A0oR%E1%BB%ABngD%E1%BB%ABaB%E1%BA%A3yM%E1%BA%ABu%E1%BB%9EH%E1%BB%99iAnv%E1%BB%9BiTu%E1%BB%B3ch%E1%BB%8DnV%C3%A9ThamQuanPh%E1%BB%91C%E1%BB%95H%E1%BB%99iAnv%C3%A0ComboV%C3%A9K%C3%BD%E1%BB%A8cH%E1%BB%99iAn.webp"
-                        ],
-                        "gps": {
-                            "lat": 15.877821446168237,
-                            "lng": 108.3728143690145
-                        },
-                        "opening_hours": "Thứ Hai-Chủ Nhật: 08:00-17:00",
-                        "entry_fee": 89250,
-                        "tags": [
-                            "Island",
-                            "Lake/River",
-                            "Sightseeing",
-                            "Morning",
-                            "Afternoon",
-                            "Half Day",
-                            "1 hours",
-                            "<=100000 VND"
-                        ],
-                        "source": "https://www.klook.com/vi/activity/24274-basket-boat-ticket-hoi-an-coconut-forest/?spm=City.Activity_LIST&clickId=f70a050432"
-                    },
-                    {
-                        "name": "Tour Khám Phá Mỹ Sơn Bằng Xe Bus",
+                        "name": "Khám Phá Mỹ Sơn Bằng Xe Bus",
                         "type": "Di tích lịch sử",
                         "description": [
                             "Ngắm mặt trời mọc trên những ngôi đền Hindu được xây dựng trong khoảng từ thế kỷ 4 đến thế kỷ 14 bởi Vua Chăm Pa mà không gặp phải nắng gắt vào buổi sáng",
@@ -690,72 +522,6 @@
                             "<=500000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/1602-my-son-disc   y-hoi-an/?spm=City.Activity_LIST&clickId=f82edb1d0f"
-                    },
-                    {
-                        "name": "Lớp Nấu Ăn Eco Cooking và Tour Thuyền Thúng",
-                        "type": "Ẩm thực",
-                        "description": [
-                            "Làm chủ các món ăn Việt Nam ngon nhất từ chả giò và salad đu đủ cho thịt heo nồi đất và bánh xèo trong lớp học nấu ăn tương tác",
-                            "Đi mua sắm tại một chợ địa phương, làm sắc bén kỹ năng trả giá của bạn và mua các sản phẩm hữu cơ từ một ngôi làng nhỏ",
-                            "Con đường của bạn đến bữa trưa được lát bằng niềm vui: tham gia vào một cuộc đua chèo thuyền, vượt qua một khu rừng kỳ lạ và nhiều hơn nữa",
-                            "Xem cách bắt cá với phương thức truyền thống",
-                            "Thời lượng: 4 giờ 45 phút."
-                        ],
-                        "images": [
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_720/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/nitcwbengwtt7zdzu1f6/L%E1%BB%9BpN%E1%BA%A5u%C4%82nEcoCookingv%C3%A0TourThuy%E1%BB%81nTh%C3%BAng.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_720/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/k18xnhfwd7yzeo66zg1f/L%E1%BB%9BpN%E1%BA%A5u%C4%82nEcoCookingv%C3%A0TourThuy%E1%BB%81nTh%C3%BAng.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_720/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/fnnaol7hpscz0u9voxw8/L%E1%BB%9BpN%E1%BA%A5u%C4%82nEcoCookingv%C3%A0TourThuy%E1%BB%81nTh%C3%BAng.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_720/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/zivopxehnkpvnslsgrrk/L%E1%BB%9BpN%E1%BA%A5u%C4%82nEcoCookingv%C3%A0TourThuy%E1%BB%81nTh%C3%BAng.webp"
-                        ],
-                        "gps": {
-                            "lat": 15.877573772058124,
-                            "lng": 108.33823463558193
-                        },
-                        "opening_hours": "7:00 - 17:00",
-                        "entry_fee": 768824,
-                        "tags": [
-                            "Gastronomy",
-                            "Island",
-                            "Shopping",
-                            "Sightseeing",
-                            "Morning",
-                            "Afternoon",
-                            "Half Day",
-                            "4 hours 45 minutes",
-                            "<=1000000 VND"
-                        ],
-                        "source": "https://www.klook.com/vi/activity/1603-eco-cooking-class-hoi-an/?spm=City.Activity_LIST&clickId=205a67a690"
-                    },
-                    {
-                        "name": "Trải Nghiệm Chèo Thuyền Kayak Ngắm Hoàng Hôn ở Hội An",
-                        "type": "Rừng & Sinh thái",
-                        "description": [
-                            "Trải nghiệm xuôi mái chèo theo dòng nước mát dưới hoàng hôn trên những chiếc thuyền kayak ở Hội An!",
-                            "Được trang bị đầy đủ các thiết bị an toàn với thuyền kayak chất lượng, túi khô chống nước và áo phao",
-                            "Tận mắt chiêm nghiệm một Hội An rất khác với hệ sinh thái phong phú hai bên bờ sông từ góc nhìn khi bạn chèo thuyền",
-                            "Thời lượng: 2 giờ 30 phút."
-                        ],
-                        "images": [
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_720/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/pa9zccniwcgcssfwr1t2/Tr%E1%BA%A3iNghi%E1%BB%87mCh%C3%A8oThuy%E1%BB%81nKayakNg%E1%BA%AFmHo%C3%A0ngH%C3%B4n%E1%BB%9FH%E1%BB%99iAn.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_720/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/kxeydjrthha5wrpt6ezx/Tr%E1%BA%A3iNghi%E1%BB%87mCh%C3%A8oThuy%E1%BB%81nKayakNg%E1%BA%AFmHo%C3%A0ngH%C3%B4n%E1%BB%9FH%E1%BB%99iAn.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_971/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/zdoax5ygavnukjttkgdy/Tr%E1%BA%A3iNghi%E1%BB%87mCh%C3%A8oThuy%E1%BB%81nKayakNg%E1%BA%AFmHo%C3%A0ngH%C3%B4n%E1%BB%9FH%E1%BB%99iAn.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_960,h_1280/w_59,x_11,y_11,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/bcnzsvbzwj0vi6q4crkp/Tr%E1%BA%A3iNghi%E1%BB%87mCh%C3%A8oThuy%E1%BB%81nKayakNg%E1%BA%AFmHo%C3%A0ngH%C3%B4n%E1%BB%9FH%E1%BB%99iAn.webp"
-                        ],
-                        "gps": {
-                            "lat": 15.870366293137236,
-                            "lng": 108.36636133387404
-                        },
-                        "opening_hours": "Thứ Hai-Chủ Nhật: 14h30-17h30",
-                        "entry_fee": 789700,
-                        "tags": [
-                            "Island",
-                            "Lake/River",
-                            "Water Sports",
-                            "Half Day",
-                            "2 hours 30 minutes",
-                            "<=1000000 VND"
-                        ],
-                        "source": "https://www.klook.com/vi/activity/33803-sunset-kayaking-experience-hoi-an/?spm=City.Activity_LIST&clickId=b2095e9a15"
                     },
                     {
                         "name": "Xưởng Nghệ Thuật Khắc Gỗ tại Làng Cẩm Hà ở Hội An",
@@ -792,75 +558,7 @@
                         "source": "https://www.klook.com/vi/activity/136896-wood-carving-art-workshop-at-cui-lu-village-in-hoi-an/?spm=City.Activity_LIST&clickId=9fdcc4e3e2"
                     },
                     {
-                        "name": "Tour Jeep tương tác cả ngày vùng nông thôn Hội An",
-                        "type": "Hoạt động mạo hiểm (zipline, canyoning, ATV)",
-                        "description": [
-                            "Hãy lên xe Jeep mui trần để tham gia chuyến phiêu lưu nửa ngày khám phá các làng nghề truyền thống của Hội An.",
-                            "Khám phá nghệ thuật làm gốm cổ xưa—hãy thử tài nặn đất sét và mang về nhà món quà lưu niệm thủ công của riêng bạn.",
-                            "Chiêm ngưỡng nghề mộc điêu luyện và tìm hiểu cách các thế hệ đã bảo tồn nghề thủ công văn hóa này.",
-                            "Tận hưởng chuyến đi ngắm cảnh dọc theo Sông Thu Bồn yên bình, đi qua những cánh đồng lúa xanh tươi và vùng quê quyến rũ.",
-                            "Tham gia vào nghề dệt chiếu và làm bánh tráng truyền thống—xắn tay áo lên và thưởng thức bánh tráng mới ra lò.",
-                            "Thời lượng: 3 giờ 45 phút."
-                        ],
-                        "images": [
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_863/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/rofqrtr00w44ctghhas9/TourJeept%C6%B0%C6%A1ngt%C3%A1cc%E1%BA%A3ng%C3%A0yv%C3%B9ngn%C3%B4ngth%C3%B4nH%E1%BB%99iAn.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_855/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/ls01j5gvkjrlpjq4y4ts/TourJeept%C6%B0%C6%A1ngt%C3%A1cc%E1%BA%A3ng%C3%A0yv%C3%B9ngn%C3%B4ngth%C3%B4nH%E1%BB%99iAn.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_921/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/nsf9kpwscdkzpyffy1iu/TourJeept%C6%B0%C6%A1ngt%C3%A1cc%E1%BA%A3ng%C3%A0yv%C3%B9ngn%C3%B4ngth%C3%B4nH%E1%BB%99iAn.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_968/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/sqdzl4q5nnmxvznahhmp/TourJeept%C6%B0%C6%A1ngt%C3%A1cc%E1%BA%A3ng%C3%A0yv%C3%B9ngn%C3%B4ngth%C3%B4nH%E1%BB%99iAn.webp"
-                        ],
-                        "gps": {
-                            "lat": 15.862540587600009,
-                            "lng": 108.3332014780676
-                        },
-                        "opening_hours": "7:00 - 17:00 (Làng nghề truyền thống)",
-                        "entry_fee": 1602500,
-                        "tags": [
-                            "Cultural Site",
-                            "Adventure",
-                            "Sightseeing",
-                            "Morning",
-                            "Afternoon",
-                            "Half Day",
-                            "3 hours 45 minutes",
-                            "<=2000000 VND"
-                        ],
-                        "source": "https://www.klook.com/vi/activity/150537-hoi-an-countryside-craft-village-jeep-tour/?spm=City.Activity_LIST&clickId=3a0974d485"
-                    },
-                    {
-                        "name": "Trải Nghiệm Chèo Ván Đứng (SUP) Ở Hội An",
-                        "type": "Hoạt động mạo hiểm (zipline, canyoning, ATV)",
-                        "description": [
-                            "Khám phá sông Thu Bồn qua trải nghiệm chèo ván đứng thú vị ở Hội An!",
-                            "Ngắm nhìn cận cảnh vẻ đẹp thiên nhiên của Hội An khi chèo thuyền trên dòng sông êm đềm",
-                            "Bạn sẽ được sử dụng các thiết bị chèo ván chất lượng để đảm bảo an toàn và tiện lợi",
-                            "Bạn cũng có thể đưa con bạn tham gia chuyến phiêu lưu dưới nước thú vị này tại thành phố Hội An!",
-                            "Thời lượng: 3 giờ"
-                        ],
-                        "images": [
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_720/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/soyg3nol2nsoqbbclzeq/Tr%E1%BA%A3iNghi%E1%BB%87mCh%C3%A8oV%C3%A1n%C4%90%E1%BB%A9ng(SUP)%E1%BB%9EH%E1%BB%99iAn.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_720/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/hlvzsc6dfwghqyjluhgl/Tr%E1%BA%A3iNghi%E1%BB%87mCh%C3%A8oV%C3%A1n%C4%90%E1%BB%A9ng(SUP)%E1%BB%9EH%E1%BB%99iAn.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_971/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/mebjko9844ybwuzjnxov/Tr%E1%BA%A3iNghi%E1%BB%87mCh%C3%A8oV%C3%A1n%C4%90%E1%BB%A9ng(SUP)%E1%BB%9EH%E1%BB%99iAn.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1031,h_773/w_63,x_11,y_11,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/rvif0toxbr9krbent3hx/Tr%E1%BA%A3iNghi%E1%BB%87mCh%C3%A8oV%C3%A1n%C4%90%E1%BB%A9ng(SUP)%E1%BB%9EH%E1%BB%99iAn.webp"
-                        ],
-                        "gps": {
-                            "lat": 15.870505931634431,
-                            "lng": 108.36567088836136
-                        },
-                        "opening_hours": "6:00 - 18:00 (Hoạt động trong ngày)",
-                        "entry_fee": 687300,
-                        "tags": [
-                            "Adventure",
-                            "Urban Area",
-                            "Morning",
-                            "Afternoon",
-                            "Half Day",
-                            "3 hours",
-                            "<=1000000 VND"
-                        ],
-                        "source": "https://www.klook.com/vi/activity/33715-stand-paddle-boarding-experience-hoi-an/"
-                    },
-                    {
-                        "name": "Vé Triển Lãm CSO Gallery Hội An",
+                        "name": "Triển Lãm CSO Gallery Hội An",
                         "type": "Bảo tàng",
                         "description": [
                             "Hàng ngàn bộ sưu tập từ văn học đến tiền xu và tem",
@@ -897,7 +595,7 @@
                 "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Th%C3%A0nh_ph%E1%BB%91_Hu%E1%BA%BF_nh%C3%ACn_t%E1%BB%AB_tr%C3%AAn_cao_%282%29.jpg/500px-Th%C3%A0nh_ph%E1%BB%91_Hu%E1%BA%BF_nh%C3%ACn_t%E1%BB%AB_tr%C3%AAn_cao_%282%29.jpg",
                 "places": [
                     {
-                        "name": "Tour khám phá cố đô Huế",
+                        "name": "Cố đô Huế",
                         "type": "Tour Văn hóa & Lịch sử",
                         "description": [
                             "Tìm hiểu thêm về cố đô của Việt Nam với những thông tin chi tiết được cung cấp bởi hướng dẫn viên du lịch am hiểu và giàu kinh nghiệm",
@@ -931,7 +629,7 @@
                         "source": "https://www.klook.com/vi/activity/147422-hue-imperial-deluxe-tour-da-nang/"
                     },
                     {
-                        "name": "Tham Quan Huế & Vịnh Lăng Cô",
+                        "name": "Huế & Vịnh Lăng Cô",
                         "type": "Di tích lịch sử",
                         "description": [
                             "Ngắm nhìn toàn cảnh Vịnh Lăng Cô khi bạn xuyên qua hầm đường bộ Hải Vân dài nhất khi vực Đông Nam Á với chiều dài 6km xuyên qua đèo Hải Vân",
@@ -966,39 +664,7 @@
                         "source": "https://www.klook.com/vi/activity/4808-hue-day-tour-da-nang/?spm=City.Activity_LIST&clickId=799eb6fe80"
                     },
                     {
-                        "name": "Vé Xe Buýt 2 Tầng Ngắm Cảnh Ở Huế từ City Sightseeing",
-                        "type": "Tham quan",
-                        "description": [
-                            "Khám phá các điểm tham quan nổi tiếng của thành phố Huế trong tour xe buýt hai tầng như bến thuyền Toà Khâm, chợ Đông Ba, Phu Văn Lâu, Quốc Học Huế...",
-                            "Dịch vụ xe buýt vô cùng tiện lợi khi bạn có thể tùy chọn điểm xuống",
-                            "Miễn phí sách hướng dẫn với bản đồ, lịch trình và các điểm tham quan phổ biến",
-                            "Hỗ trợ thuyết minh nhiều ngôn ngữ: tiếng Anh, Trung Quốc, Nhật Bản, Hàn Quốc, Pháp và tiếng Việt",
-                            "Thời lượng: 40 phút."
-                        ],
-                        "images": [
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_863/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/uwnabot2tzsbn3l0gcy7/V%C3%A9XeBu%C3%BDt2T%E1%BA%A7ngNg%E1%BA%AFmC%E1%BA%A3nh%E1%BB%9EHu%E1%BA%BFt%E1%BB%ABCitySightseeing.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_863/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/umeuunxn2f5yp2yavniz/V%C3%A9XeBu%C3%BDt2T%E1%BA%A7ngNg%E1%BA%AFmC%E1%BA%A3nh%E1%BB%9EHu%E1%BA%BFt%E1%BB%ABCitySightseeing.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_863/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/mq7hjm8ik33266jeghx4/V%C3%A9XeBu%C3%BDt2T%E1%BA%A7ngNg%E1%BA%AFmC%E1%BA%A3nh%E1%BB%9EHu%E1%BA%BFt%E1%BB%ABCitySightseeing.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_863/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/eq3tojpfnfhpsrm1nbjm/V%C3%A9XeBu%C3%BDt2T%E1%BA%A7ngNg%E1%BA%AFmC%E1%BA%A3nh%E1%BB%9EHu%E1%BA%BFt%E1%BB%ABCitySightseeing.webp"
-                        ],
-                        "gps": {
-                            "lat": 16.465965498763357,
-                            "lng": 107.58817072023739
-                        },
-                        "opening_hours": "Thứ Hai-Chủ Nhật: 17h20-20h40",
-                        "entry_fee": 130000,
-                        "tags": [
-                            "Urban Area",
-                            "Island",
-                            "Shopping",
-                            "Sightseeing",
-                            "Half Day",
-                            "<=200000 VND"
-                        ],
-                        "source": "https://www.klook.com/vi/activity/77855-hue-city-sightseeing-bus-ticket/?spm=City.Activity_LIST&clickId=8fa32baf25"
-                    },
-                    {
-                        "name": "Vé Lăng Vua Khải Định tại Quần Thể Di Tích Cố Đô Huế",
+                        "name": "Lăng Vua Khải Định",
                         "type": "Di tích lịch sử",
                         "description": [
                             "Khám phá sự kết hợp ấn tượng giữa kiến trúc truyền thống Việt Nam và châu Âu, đặc trưng của lăng mộ Khải Định.",
@@ -1028,7 +694,7 @@
                         "source": "https://www.klook.com/vi/activity/131172-tomb-of-emperor-khai-dinh-ticket-in-unesco-complex-of-hue-monument/?spm=City.Activity_LIST&clickId=908fec2ce4"
                     },
                     {
-                        "name": "Vé Lăng Vua Tự Đức tại Quần Thể Di Tích Cố Đô Huế",
+                        "name": "Lăng Vua Tự Đức",
                         "type": "Di tích lịch sử",
                         "description": [
                             "Khám phá câu chuyện hấp dẫn về vua Tự Đức và triều đại Nguyễn qua những hướng dẫn chuyên nghiệp.",
@@ -1125,7 +791,7 @@
                         "source": "https://www.klook.com/vi/activity/102781-maia--spa-massage-experience-hue/"
                     },
                     {
-                        "name": "Vé Lăng Vua Minh Mạng tại Quần Thể Di Tích Cố Đô Huế",
+                        "name": "Lăng Vua Minh Mạng",
                         "type": "Di tích lịch sử",
                         "description": [
                             "Khám phá lịch sử và tín ngưỡng của triều đại Nguyễn khi tham quan lăng mộ Minh Mạng được bảo tồn tốt.",
@@ -1225,7 +891,7 @@
                         "source": "https://www.klook.com/vi/activity/156998-dau-ho-vr-game-a-vietnamese-folk-game-experience-in-hue-city/"
                     },
                     {
-                        "name": "Tour Ngày Net Zero Ở Huế",
+                        "name": "Ngày Net Zero Ở Huế",
                         "type": "Làng nghề truyền thống",
                         "description": [
                             "Du lịch xanh: Đi xe điện và xe đạp, giảm lượng khí thải carbon.",
@@ -1259,7 +925,7 @@
                         "source": "https://www.klook.com/vi/activity/150501-a-net-zero-day-tour-in-hue/"
                     },
                     {
-                        "name": "Tour Riêng Ngắm Hoàng Hôn Tại Phá Tam Giang ở Huế",
+                        "name": "Phá Tam Giang",
                         "type": "Du thuyền & Tàu",
                         "description": [
                             "Khám phá thêm nhiều cảnh quan thiên nhiên tuyệt đẹp của Huế trong chuyến du ngoạn yên bình trên phá Tam Giang",
@@ -1292,7 +958,7 @@
                         "source": "https://www.klook.com/vi/activity/28868-hue-tam-giang-lagoon-sunset-private-tour/"
                     },
                     {
-                        "name": "Trải nghiệm ẩm thực chay tại An Nhiên Garden",
+                        "name": "An Nhiên Garden",
                         "type": "Ẩm thực",
                         "description": [
                             "Tham quan ngôi nhà cổ 450 năm tuổi ở Huế và lắng nghe những câu chuyện gia đình hấp dẫn từ hậu duệ đời thứ 21",
@@ -1368,7 +1034,7 @@
                         "source": "https://www.klook.com/vi/activity/10072-datanla-alpine-coaster-experience-da-lat-vietnam/"
                     },
                     {
-                        "name": "Vé Cáp Treo Đồi Robin Đà Lạt",
+                        "name": "Cáp Treo Đồi Robin Đà Lạt",
                         "type": "Cáp treo",
                         "description": [
                             "Trải nghiệm tuyến cáp treo Đà Lạt đi thẳng đến Thiền Viện Trúc Lâm và ngắm nhìn toàn cảnh Đà Lạt",
@@ -1405,7 +1071,7 @@
                         "source": "https://www.klook.com/vi/activity/19697-robin-mountain-cable-car-da-lat/"
                     },
                     {
-                        "name": "Tour Săn Mây và Ngắm Bình Minh Tại Đà Lạt",
+                        "name": "Săn Mây và Ngắm Bình Minh Tại Đà Lạt",
                         "type": "Ngắm cảnh & sinh thái",
                         "description": [
                             "Đón bình minh trên cao nguyên và ngắm nhìn vẻ đẹp của mặt trời lên khi tham gia tour bình minh khởi hành từ Đà Lạt!",
@@ -1440,10 +1106,10 @@
                         "source": "https://www.klook.com/vi/activity/38075-da-lat-sunrise-tour-glow-dawn/"
                     },
                     {
-                        "name": "Vé Tham Quan Cao Nguyên Hoa Đà Lạt",
+                        "name": "Tham Quan Cao Nguyên Hoa Đà Lạt",
                         "type": "Khu vui chơi & Tham quan sinh thái",
                         "description": [
-                            "Vé Tham Quan Cao Nguyên Hoa Đà Lạt",
+                            "Tham Quan Cao Nguyên Hoa Đà Lạt",
                             "Thử thách tốc độ trên Đường trượt Greenline Luge 2.5km độc đáo giữa cao nguyên hoa",
                             "Trải nghiệm trò chơi xích đu độc đáo, ngắm nhìn toàn cảnh cao nguyên và đèo Tà Nung xanh mướt",
                             "Thời lượng: Cả buổi."
@@ -1471,7 +1137,7 @@
                         "source": "https://www.klook.com/vi/activity/104858-dalat-flower-highland-ticket/"
                     },
                     {
-                        "name": "Vé Khu Du Lịch Fresh Garden và Fresh Zoo Đà Lạt",
+                        "name": "Khu Du Lịch Fresh Garden và Fresh Zoo Đà Lạt",
                         "type": "Khu vườn & Sinh thái",
                         "description": [
                             "Tham quan một trong những khu vườn hoa lớn nhất tại Đà Lạt tại làng hoa Vạn Thành và trải nghiệm Fresh Zoo - sở thú mini trong nhà đầu tiên tại Đà Lạt",
@@ -1505,7 +1171,7 @@
                         "source": "https://www.klook.com/vi/activity/83331-fresh-garden-da-lat-ticket/"
                     },
                     {
-                        "name": "Vé Tham Quan Thung Lũng Tình Yêu ở Đà Lạt",
+                        "name": "Tham Quan Thung Lũng Tình Yêu ở Đà Lạt",
                         "type": "Khu vui chơi & Tham quan sinh thái",
                         "description": [
                             "Thoát khỏi sự ồn ào và tấp nập của thị thành với hành trình khám phá Thung Lũng Tình Yêu - một trong những biểu tượng của tình yêu tại thành phố mộng mơ Đà Lạt",
@@ -1573,7 +1239,7 @@
                         "source": "https://www.klook.com/vi/activity/9372-datanla-waterfall-canyoneering-da-lat/"
                     },
                     {
-                        "name": "Vé Hoa Trong Rừng ở Đà Lạt",
+                        "name": "Tham quan Hoa Trong Rừng ở Đà Lạt",
                         "type": "Rừng & Sinh thái",
                         "description": [
                             "Lạc vào vùng rộng lớn 60 hecta của Hoa Trong Rừng, vườn hoa lớn nhất ở Đà Lạt, được bao quanh bởi khu rừng nguyên sinh tươi tốt và nở rộ với vô số loài hoa đầy màu sắc.",
@@ -1603,42 +1269,6 @@
                             "<=500000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/124624-the-florest-park-ticket-in-da-lat-city/"
-                    },
-                    {
-                        "name": "Tour tham quan Đà Lạt trong ngày: Khám phá những điểm tham quan mới nhất",
-                        "type": "Tham quan tổng hợp & Check-in",
-                        "description": [
-                            "Khám phá những điểm tham quan mới và lạ nhất ở Đà Lạt với tour tham quan trong ngày!",
-                            "Đến Mongo Land, Hoàng Long Ohayo, vườn dâu công nghệ cao và nhiều hơn nữa",
-                            "Lạc vào xử sở thần tiên sống động và hấp dẫn với Thần Rùa, Thần Rồng, Thần Cây… kích thước khổng lồ tại God Valley",
-                            "Tham quan Mongo Land và lạc bước giữa thảo nguyên xanh Mông Cổ đại ngàn ngay tại thành phố \"ngàn hoa\"",
-                            "Biến chuyến đi thêm phần trọn vẹn khi lựa chọn gói có kèm tham quan Vườn ánh sáng Lumiere",
-                            "Thời lượng: 7 giờ."
-                        ],
-                        "images": [
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1280,h_720/w_79,x_14,y_14,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/hmyu5m0vlbs8msjk24nx/Tourthamquan%C4%90%C3%A0L%E1%BA%A1ttrongng%C3%A0y:Kh%C3%A1mph%C3%A1nh%E1%BB%AFng%C4%91i%E1%BB%83mthamquanm%E1%BB%9Binh%E1%BA%A5t.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_crop,x_0,y_683,h_683,w_1476/activities/v17evibdj07qut3kxxkm/Tourthamquan%C4%90%C3%A0L%E1%BA%A1ttrongng%C3%A0y:Kh%C3%A1mph%C3%A1nh%E1%BB%AFng%C4%91i%E1%BB%83mthamquanm%E1%BB%9Binh%E1%BA%A5t.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1080,h_672/w_66,x_12,y_12,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/lh0nzybvasrpmdjtgju0/Tourthamquan%C4%90%C3%A0L%E1%BA%A1ttrongng%C3%A0y:Kh%C3%A1mph%C3%A1nh%E1%BB%AFng%C4%91i%E1%BB%83mthamquanm%E1%BB%9Binh%E1%BA%A5t.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_863/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/ssatzj4aiqv4j4jvxvye/Tourthamquan%C4%90%C3%A0L%E1%BA%A1ttrongng%C3%A0y:Kh%C3%A1mph%C3%A1nh%E1%BB%AFng%C4%91i%E1%BB%83mthamquanm%E1%BB%9Binh%E1%BA%A5t.webp"
-                        ],
-                        "gps": {
-                            "lat": 11.940177899551035,
-                            "lng": 108.45621144929237
-                        },
-                        "opening_hours": "Các điểm tham quan chính (Mongo Land, God Valley, Hoàng Long Ohayo) mở cửa từ 07:30 đến 17:30 hàng ngày.",
-                        "entry_fee": 585000,
-                        "tags": [
-                            "Urban Area",
-                            "Island",
-                            "Photography",
-                            "Sightseeing",
-                            "Morning",
-                            "Afternoon",
-                            "Half Day",
-                            "7 hours",
-                            "<=1000000 VND"
-                        ],
-                        "source": "https://www.klook.com/vi/activity/38096-da-lat-day-tour-discovering-new-tourist-attractions/"
                     },
                     {
                         "name": "Trải nghiệm trượt Zipline xuyên rừng tại Datanla Đà Lạt",
@@ -1706,7 +1336,7 @@
                         "source": "https://www.klook.com/vi/activity/9361-high-rope-course-adventure-da-lat/"
                     },
                     {
-                        "name": "Vé Bảo Tàng Trà Long Đỉnh tại Đà Lạt",
+                        "name": "Tham quan Bảo Tàng Trà Long Đỉnh tại Đà Lạt",
                         "type": "Núi & Trekking",
                         "description": [
                             "Trải nghiệm câu chuyện hấp dẫn về trà, từ ý nghĩa lịch sử đến quy trình sản xuất hiện đại, và thỏa sức thưởng thức hương vị của trà và hương trầm.",
@@ -1739,40 +1369,6 @@
                             "<=200000 VND"
                         ],
                         "source": "https://www.klook.com/vi/activity/114867-da-lat-long-dinh-tea-museum-ticket/"
-                    },
-                    {
-                        "name": "Tour trong ngày Langbiang & Cáp treo Đà Lạt",
-                        "type": "Núi & Trekking & Cáp treo",
-                        "description": [
-                            "Khung cảnh ngoạn mục từ Núi Langbiang và Đồi Robin (tùy chọn)",
-                            "Sự thanh bình tại Thiền viện Trúc Lâm và khám phá kiến trúc độc đáo tại Crazy House",
-                            "Tìm hiểu về các hoạt động nông nghiệp tại các trang trại và quy trình sản xuất cà phê tại nhà máy",
-                            "Thời lượng: 9 giờ."
-                        ],
-                        "images": [
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1281,h_720/w_79,x_14,y_14,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/odkakycha1cvguu1wooa/Tourtrongng%C3%A0yLangbiangC%C3%A1ptreo%C4%90%C3%A0L%E1%BA%A1t.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_857/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/qxjq7tfjqnvbkqpoglac/Tourtrongng%C3%A0yLangbiangC%C3%A1ptreo%C4%90%C3%A0L%E1%BA%A1t.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_866/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/irss9abcgprvbrvpdbpd/Tourtrongng%C3%A0yLangbiangC%C3%A1ptreo%C4%90%C3%A0L%E1%BA%A1t.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_719/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/jz0uaow1rhyonwdc5cen/Tourtrongng%C3%A0yLangbiangC%C3%A1ptreo%C4%90%C3%A0L%E1%BA%A1t.webp"
-                        ],
-                        "gps": {
-                            "lat": 11.903219984559266,
-                            "lng": 108.44780855418409
-                        },
-                        "opening_hours": "7:00 - 17:00",
-                        "entry_fee": 970000,
-                        "tags": [
-                            "Mountain",
-                            "Island",
-                            "Trekking/Hiking",
-                            "Sightseeing",
-                            "Morning",
-                            "Afternoon",
-                            "Half Day",
-                            "9 hours",
-                            "<=1000000 VND"
-                        ],
-                        "source": "https://www.klook.com/vi/activity/138649-langbiang-datanla-falls-crazy-house/"
                     },
                     {
                         "name": "Trải Nghiệm Thực Hành Rang & Nếm Cà Phê tại Nông Trại Twin Beans",
@@ -1810,7 +1406,7 @@
                         "source": "https://www.klook.com/vi/activity/166994-hands-on-coffee-roasting-tasting-experience-by-twin-beans-farm/"
                     },
                     {
-                        "name": "Vé Đường Hầm Điêu Khắc (Đất Sét) ở Đà Lạt",
+                        "name": "Tham quan Đường Hầm Điêu Khắc (Đất Sét) ở Đà Lạt",
                         "type": "Làng nghề truyền thống & Vui chơi giải trí",
                         "description": [
                             "Khám phá đường hầm Điêu khắc ở Đà Lạt và đắm chìm trong những tác phẩm nghệ thuật độc đáo được làm từ nguyên liệu đất sét rất thân thiện với môi trường",
@@ -1879,7 +1475,7 @@
                         "source": "https://www.klook.com/vi/activity/108785-pga-novaworld-golf-experience-phan-thiet/"
                     },
                     {
-                        "name": "Tour Tham Quan Vùng Nông Thôn Đà Lạt",
+                        "name": "Tham Quan Vùng Nông Thôn Đà Lạt",
                         "type": "Tham quan tổng hợp & Check-in",
                         "description": [
                             "Khám phá vùng nông thôn tuyệt đẹp của Đà Lạt và tìm hiểu thêm về văn hóa và lối sống của người dân địa phương",
@@ -1993,7 +1589,7 @@
                         "source": "https://divui.com/tour-01-tham-quan-vinh-va-ngam-san-ho-bang-tau-day-kinh"
                     },
                     {
-                        "name": "Vé Tham Quan Tại TANYOLI",
+                        "name": "Tham Quan TANYOLI",
                         "type": "Khu vui chơi & Trải nghiệm văn hóa",
                         "description": [
                             "Khám phá làng Mông Cổ duy nhất tại Việt Nam",
@@ -2052,34 +1648,6 @@
                             "<=200000 VND"
                         ],
                         "source": "https://divui.com/tour-02-tham-quan-vinh-va-boi-ngam-san-ho"
-                    },
-                    {
-                        "name": "Câu Cá, Câu Mực, Câu Tôm Đêm và Ngắm Vĩnh Hy Về Đêm",
-                        "type": "Du thuyền & Tàu",
-                        "description": [
-                            "Ngồi Tàu đáy kính du ngoạn Vịnh Vĩnh Hy và ngắm hoàng hôn trên biển",
-                            "Trải nghiệm câu cá, câu mực",
-                            "Thưởng thức hải sản tươi do chính mình bắt được và món cháo hải sản của miền biển",
-                            "Thời lượng: "
-                        ],
-                        "images": [
-                            "https://divui.com/content/images/thumbs/0026985_tour-01-tham-quan-vinh-va-ngam-san-ho-bang-tau-day-kinh.jpeg"
-                        ],
-                        "gps": {
-                            "lat": 11.723674055480217,
-                            "lng": 109.19717810703591
-                        },
-                        "opening_hours": "Thứ Hai-Chủ Nhật: 17:30-21:00",
-                        "entry_fee": 270000,
-                        "tags": [
-                            "Beach",
-                            "Island",
-                            "Afternoon",
-                            "Evening",
-                            "Half Day",
-                            "<=500000 VND"
-                        ],
-                        "source": "https://divui.com/tour-04-cau-ca-cau-muc-dem-va-ngam-vinh-hy-ve-dem"
                     }
                 ]
             },
@@ -2089,7 +1657,7 @@
                 "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Nha_Trang%2C_Kh%C3%A1nh_H%C3%B2a.png/500px-Nha_Trang%2C_Kh%C3%A1nh_H%C3%B2a.png",
                 "places": [
                     {
-                        "name": "Vé VinWonders Nha Trang",
+                        "name": "VinWonders Nha Trang",
                         "type": "Công viên giải trí",
                         "description": [
                             "Tận hưởng một ngày thật vui cùng gia đình và bạn bè tại công viên giải trí với vô số các trò chơi cảm giác mạnh và công viên nước cực đỉnh",
@@ -2158,7 +1726,7 @@
                         "source": "https://www.klook.com/vi/activity/110680-nha-trang-vinpearl-harbour-cable-car-ticket/"
                     },
                     {
-                        "name": "Gói Tắm Bùn I Resort Nha Trang",
+                        "name": "Tắm Bùn I Resort Nha Trang",
                         "type": "Suối nước nóng",
                         "description": [
                             "Thư giãn tâm trí, cơ thể và tâm hồn ở I Resort, một không gian thiền định kết hợp các nhân tố tự nhiên",
@@ -2194,40 +1762,7 @@
                         "source": "https://www.klook.com/vi/activity/22826-i-resort-spa-packages-nha-trang/"
                     },
                     {
-                        "name": "Tour nửa ngày Nha Trang: Lặn ống thở và tiệc BBQ trên tàu",
-                        "type": "Lặn biển & Ẩm thực",
-                        "description": [
-                            "Lặn ống thở thư giãn tại 3 hòn đảo.",
-                            "Tiệc BBQ trên tàu ngon miệng cùng âm nhạc thư giãn.",
-                            "Du thuyền theo phong cách Tiki độc đáo",
-                            "Thời lượng: 6 giờ 30 phút."
-                        ],
-                        "images": [
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_crop,x_0,y_1500,h_750,w_3000/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/dkyj3h1pdhtznbv9j99m/Tourn%E1%BB%ADang%C3%A0yNhaTrang:L%E1%BA%B7n%E1%BB%91ngth%E1%BB%9Fv%C3%A0ti%E1%BB%87cBBQtr%C3%AAnt%C3%A0u.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_crop,x_0,y_693,h_693,w_3000/activities/ixpxh1nleiab3zwmvwbn/Tourn%E1%BB%ADang%C3%A0yNhaTrang:L%E1%BA%B7n%E1%BB%91ngth%E1%BB%9Fv%C3%A0ti%E1%BB%87cBBQtr%C3%AAnt%C3%A0u.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_crop,x_0,y_750,h_750,w_3000/activities/gdqyk8qwizza8ayo7vaj/Tourn%E1%BB%ADang%C3%A0yNhaTrang:L%E1%BA%B7n%E1%BB%91ngth%E1%BB%9Fv%C3%A0ti%E1%BB%87cBBQtr%C3%AAnt%C3%A0u.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_crop,x_0,y_674,h_674,w_3000/activities/kzhdxg7ifuj5sombljjv/Tourn%E1%BB%ADang%C3%A0yNhaTrang:L%E1%BA%B7n%E1%BB%91ngth%E1%BB%9Fv%C3%A0ti%E1%BB%87cBBQtr%C3%AAnt%C3%A0u.webp"
-                        ],
-                        "gps": {
-                            "lat": 12.169510686068458,
-                            "lng": 109.2972267668419
-                        },
-                        "opening_hours": "07:00 - 17:00",
-                        "entry_fee": 712000,
-                        "tags": [
-                            "Beach",
-                            "Gastronomy",
-                            "Sightseeing",
-                            "Morning",
-                            "Afternoon",
-                            "Half Day",
-                            "6 hours 30 minutes",
-                            "<=1000000 VND"
-                        ],
-                        "source": "https://www.klook.com/vi/activity/140107-nha-trang-floating-bar-party-mini-beach-and-mun-island-hopping-tour/"
-                    },
-                    {
-                        "name": "Vé Đảo Khỉ Nha Trang",
+                        "name": "Đảo Khỉ Nha Trang",
                         "type": "Du lịch đảo & vui chơi giải trí",
                         "description": [
                             "Khám phá “hoa quả sơn” giữa đại dương - nơi có thiên nhiên xanh mát, phong cảnh đẹp như tranh là nơi sinh sống của hàng ngàn con khỉ.",
@@ -2292,7 +1827,7 @@
                         "source": "https://www.klook.com/vi/activity/107125-seafood-buffet-sheraton-nha-trang/"
                     },
                     {
-                        "name": "Vé Skylight Nha Trang",
+                        "name": "Skylight Nha Trang",
                         "type": "Giải trí về đêm / Ngắm cảnh đô thị",
                         "description": [
                             "Cùng check in tại 360° Skydeck ngay hôm nay và trải nghiệm Nha Trang từ một góc nhìn vô cùng độc đáo",
@@ -2323,7 +1858,7 @@
                         "source": "https://www.klook.com/vi/activity/133604-skylight-360-skydeck-rooftop-beach-club-ticket-in-nha-trang/"
                     },
                     {
-                        "name": "Trải nghiệm Charm Spa Grand ở Nha Trang",
+                        "name": "Charm Spa Grand ở Nha Trang",
                         "type": "Spa & Massage",
                         "description": [
                             "Hãy nuông chiều bản thân bằng trải nghiệm spa thư giãn tại Charm Spa Grand, tọa lạc ngay trung tâm Nha Trang!",
@@ -2423,7 +1958,7 @@
                         "source": "https://www.klook.com/vi/activity/57624-zipline-canopy-experience-at-kong-forest-adventure-park-nha-trang/"
                     },
                     {
-                        "name": "Tour Nửa Ngày Tham Quan Ba Hồ, Nha Trang",
+                        "name": "Tham Quan Ba Hồ, Nha Trang",
                         "type": "Tour tham quan sinh thái / thác nước",
                         "description": [
                             "Tận hưởng ngày khám phá thú vị tại Nha Trang khi bạn tham gia tour tham quan Thác nước Ba Hồ và Cảng cá Vĩnh Lương",
@@ -2491,40 +2026,6 @@
                         "source": "https://www.klook.com/vi/activity/59132-paragliding-experience-in-nha-trang/"
                     },
                     {
-                        "name": "Tour Lặn Biển tại Rạn san hô Nha Trang Với Hướng Dẫn Viên Người Việt",
-                        "type": "Lặn biển & Ngắm san hô",
-                        "description": [
-                            "Tour lặn biển ngắm san hô trọn gói tại Hòn Mun, Nha Trang với hướng dẫn viên người Việt",
-                            "Khám phá vẻ đẹp của thế giới đại dương sâu thẳm với dịch vụ lặn biển Nha Trang",
-                            "Trải nghiệm hai bãi lặn biển được yêu thích nhất trên đảo Hòn Mun",
-                            "Dùng bữa trưa thật ngon tại nhà hàng An Nam - một trong những nhà hàng được thợ lặn đánh giá cao",
-                            "Có xe đến đón khách tại khách sạn ở trung tâm TP. Nha Trang",
-                            "Thời lượng: 6 giờ 30 phút."
-                        ],
-                        "images": [
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_971/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/ptf6dmhdmakxa9hc0g0h/TourL%E1%BA%B7nBi%E1%BB%83nt%E1%BA%A1iR%E1%BA%A1nsanh%C3%B4NhaTrangV%E1%BB%9BiH%C6%B0%E1%BB%9BngD%E1%BA%ABnVi%C3%AAnNg%C6%B0%E1%BB%9DiVi%E1%BB%87t.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_971/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/hhhqb6kn39jwg3hoqv0y/TourL%E1%BA%B7nBi%E1%BB%83nt%E1%BA%A1iR%E1%BA%A1nsanh%C3%B4NhaTrangV%E1%BB%9BiH%C6%B0%E1%BB%9BngD%E1%BA%ABnVi%C3%AAnNg%C6%B0%E1%BB%9DiVi%E1%BB%87t.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_971/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/x4jj3myn3oocmqvaoxe2/TourL%E1%BA%B7nBi%E1%BB%83nt%E1%BA%A1iR%E1%BA%A1nsanh%C3%B4NhaTrangV%E1%BB%9BiH%C6%B0%E1%BB%9BngD%E1%BA%ABnVi%C3%AAnNg%C6%B0%E1%BB%9DiVi%E1%BB%87t.webp"
-                        ],
-                        "gps": {
-                            "lat": 12.241389581885645,
-                            "lng": 109.19866057145397
-                        },
-                        "opening_hours": "07:00 - 17:00",
-                        "entry_fee": 950000,
-                        "tags": [
-                            "Beach",
-                            "Island",
-                            "Sightseeing",
-                            "Morning",
-                            "Afternoon",
-                            "Half Day",
-                            "6 hours 30 minutes",
-                            "<=1000000 VND"
-                        ],
-                        "source": "https://www.klook.com/vi/activity/40409-lan-bien-o-nha-trang/"
-                    },
-                    {
                         "name": "Khám phá Thế giới ngầm của Ngọc trai ở Nha Trang",
                         "type": "Làng nghề truyền thống & Trải nghiệm biển",
                         "description": [
@@ -2560,7 +2061,7 @@
                         "source": "https://www.klook.com/vi/activity/184898-explore-the-underwater-world-of-pearls-in-nha-trang/"
                     },
                     {
-                        "name": "Tour Lặn Ống Thở và Vui Chơi Trên Bãi Biển Green Oasis từ Nha Trang",
+                        "name": "Bãi Biển Green Oasis ở Nha Trang",
                         "type": "Lặn biển & Ngắm san hô & Vui chơi giải trí",
                         "description": [
                             "Khám phá Nha Trang trên chuyến tàu cano lướt sóng đạp gió vi vu trên mặt nước trong xanh, ngắm toàn cảnh Vịnh Nha Trang - một trong những vịnh biển đẹp nhất thế giới",
@@ -2643,7 +2144,7 @@
                 "image_url": "https://upload.wikimedia.org/wikipedia/commons/5/5e/Son_Doong_Cave_1.jpg",
                 "places": [
                     {
-                        "name": "Tour Động Thiên Đường và Động Phong Nha",
+                        "name": "Động Thiên Đường và Động Phong Nha",
                         "type": "Di tích lịch sử",
                         "description": [
                             "Dạo quanh từ hang này sang hang khác trong Vườn quốc gia Phong Nha-Kẻ Bàng - một trong những Di sản Thế giới của UNESCO",
@@ -2678,7 +2179,7 @@
                         "source": "https://www.klook.com/vi/activity/28775-paradise-cave-phong-nha-day-tour/"
                     },
                     {
-                        "name": "Tour Trekking Trong Ngày: Khám Phá Hang Voi & Thung Lũng Ma Đa",
+                        "name": "Hang Voi & Thung Lũng Ma Đa",
                         "type": "Núi & Trekking & Di tích lịch sử",
                         "description": [
                             "Hành trình khám phá Hang Voi và thung lũng Ma Đa trong ngày là sự lựa chọn hoàn hảo cho du khách có ít kinh nghiệm trong môn trekking, nhưng vẫn đam mê chinh phục thiên nhiên và hang động",
@@ -2714,7 +2215,7 @@
                         "source": "https://www.klook.com/vi/activity/56749-Elephant-Cave-Ma-Da-Valley-exploration/"
                     },
                     {
-                        "name": "Tour Ngày Khám Phá & Chinh Phục Thác Dương Cầm Quảng Bình",
+                        "name": "Thác Dương Cầm Quảng Bình",
                         "type": "Trò chơi cảm giác mạnh",
                         "description": [
                             "Hành trình mạo hiểm 1 ngày bao gồm nhiều hoạt động mang tính thử thách khác nhau ở thác Dương Cầm, Quảng Bình",
@@ -2756,7 +2257,7 @@
                 "image_url": "https://upload.wikimedia.org/wikipedia/commons/4/43/Haiminh.jpg",
                 "places": [
                     {
-                        "name": "Tham Quan Phú Yên Trong Ngày Từ Quy Nhơn: Nhà Thờ Mằng Lăng, Ghềnh Đá Đĩa, Bãi Xép",
+                        "name": "Nhà Thờ Mằng Lăng, Ghềnh Đá Đĩa, Bãi Xép",
                         "type": "Di tích lịch sử",
                         "description": [
                             "Đặt ngay tour này trên Klook và đến Phú Yên - một vùng đất xinh đẹp, nổi tiếng với danh lam thắng cảnh và các di tích lịch sử",
@@ -2825,7 +2326,7 @@
                         "source": "https://www.klook.com/vi/activity/55232-1-day-quy-nhon-cultural-trip/"
                     },
                     {
-                        "name": "Tour Hòn Khô – Lặn ngắm san hô",
+                        "name": "Hòn Khô – Lặn ngắm san hô",
                         "type": "Lặn biển & Ngắm san hô",
                         "description": [
                             "Check-in Cầu Thị Nại - Cây cầu vượt biển với chiều dài 2,5 km",
@@ -2859,7 +2360,7 @@
                         "source": "https://divui.com/tour-chua-thien-hung-chua-ba-nha-tho-lang-song-thap-doi-quy-nhon-1-ngay"
                     },
                     {
-                        "name": "Tour Tam Kiệt Tây Sơn",
+                        "name": "Tam Kiệt Tây Sơn",
                         "type": "Tour Văn hóa & Sinh thái/Lịch sử",
                         "description": [
                             "Tham quan Đàn Tế Trời Đất linh thiêng",
