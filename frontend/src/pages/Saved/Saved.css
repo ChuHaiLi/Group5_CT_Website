@@ -1,48 +1,141 @@
-/* SavedPage.css */
-
-/* Wrapper ngoài để căn giữa toàn bộ page */
-.saved-page-wrapper {
+/* Wrapper chính */
+.saved-wrapper {
+  padding: 2rem 4rem;
+  font-family: "Inter", sans-serif;
+  background: #f9fafb;
+  min-height: 100vh;
+  box-sizing: border-box;
   width: 100%;
-  background-color: #f9f9f9;
-  display: flex;
-  justify-content: center; /* căn giữa container */
-  padding-top: calc(50px + 70px);
-  padding-bottom: 70px;
-}
-
-/* Container chính giống Home */
-.saved-page-container {
-  width: 100%;
-  max-width: 1200px; /* giới hạn chiều ngang giống Home */
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0 20px;
 }
 
-/* Title */
-.saved-page-title {
+.saved-wrapper > * {
   width: 100%;
-  text-align: center;
-  font-size: 32px;
-  font-weight: 700;
-  margin-bottom: 25px;
-  font-family: "Poppins", sans-serif;
+  max-width: 1200px;
 }
 
-/* Khi không có item */
-.no-saved-text {
-  font-size: 18px;
-  color: #666;
-  margin-top: 15px;
-  text-align: center;
-}
-
-/* Grid chứa card */
-.saved-cards-container {
+/* Header */
+.saved-header {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+}
+
+.saved-header h1 {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  color: #111827;
+}
+
+.saved-header p {
+  margin-bottom: 1.5rem;
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+/* Tabs */
+.saved-tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.saved-tabs button {
+  padding: 0.6rem 1.4rem;
+  border-radius: 25px;
+  border: 1px solid #d1d5db;
+  background: white;
+  cursor: pointer;
+  font-weight: 600;
+  color: #374151;
+  transition: 0.2s;
+}
+
+.saved-tabs button.active {
+  background: #111827;
+  color: white;
+  border-color: #111827;
+}
+
+.saved-tabs button:hover {
+  background: #f3f4f6;
+}
+
+/* Search */
+.saved-search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+.saved-search input {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  font-size: 1rem;
+}
+
+.saved-search .search-icon {
+  color: #6b7280;
+  font-size: 1.2rem;
+}
+
+/* Nội dung chính */
+.saved-content {
+  width: 100%;
+}
+
+/* ----------------------------- */
+/*   GRID KHÔNG BỊ CHỒNG LÊN    */
+/* ----------------------------- */
+.saved-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 25px;
-  justify-items: center; /* căn card trong ô grid */
+  grid-template-columns: 1fr;   /* Mobile: 1 cột */
+  gap: 2rem;
+  box-sizing: border-box;
+}
+
+@media screen and (min-width: 640px) {
+  .saved-grid {
+    grid-template-columns: repeat(2, 1fr);  /* Tablet nhỏ: 2 cột */
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  .saved-grid {
+    grid-template-columns: repeat(3, 1fr);  /* Desktop: 3 cột */
+  }
+}
+
+/* Empty state */
+.saved-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #4b5563;
+}
+
+.saved-empty img {
+  width: 180px;
+  opacity: 0.6;
+  margin-bottom: 1rem;
+}
+
+.saved-empty h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Coming soon */
+.coming-soon {
+  text-align: center;
+  padding: 4rem 1rem;
+  color: #4b5563;
 }
