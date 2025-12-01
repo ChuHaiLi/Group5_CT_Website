@@ -1,3 +1,4 @@
+import json
 import os
 import time
 from typing import List, Dict, Any, Optional
@@ -99,6 +100,76 @@ class OpenAIImageRecognizer:
 
         response = self._run_with_retry(_call_openai)
         return (response.choices[0].message.content or "").strip()
+
+    def describe_location_structured(
+        self,
+        user_prompt: str,
+        image_data_urls: List[str],
+        destination_context: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Return structured JSON with a narrative summary, predictions, and suggestions."""
+
+        if not image_data_urls:
+            raise ValueError("At least one image is required")
+
+        client = self._get_client()
+        base_system_prompt = (
+            "Bạn là Travel Lens, một storyteller du lịch tinh tế. "
+            "Phản hồi LUÔN luôn là JSON hợp lệ với cấu trúc: "
+            "{\"summary\": string, \"predictions\": [ {\"place\": string, \"confidence\": number, \"reason\": string} ], "
+            "\"suggestions\": [ {\"name\": string, \"confidence\": number, \"reason\": string} ] }. "
+            "summary phải là đoạn văn duy nhất, giàu hình ảnh và cảm xúc: mở đầu bằng ấn tượng đầu tiên, "
+            "kể tiếp về màu sắc, ánh sáng, không khí, cảm giác, và khéo léo gợi ra địa điểm phù hợp mà không xin lỗi hay lặp cấu trúc. "
+            "Không dùng bullet list, không viết kiểu công thức. Viết hệt như một người bạn mê xê dịch đang kể lại. "
+            "predictions liệt kê tối đa 3 phỏng đoán địa điểm (confidence 0-1) cùng lý do ngắn gọn. "
+            "suggestions là 3-5 điểm đến liên quan, ưu tiên các địa điểm có trong danh sách đã cho và lý giải vì sao hợp vibe. "
+            "Nếu ảnh không liên quan tới du lịch, nói rõ trong summary với giọng điệu duyên dáng. "
+            "Không thêm text ngoài JSON, không dùng markdown."
+        )
+        if destination_context:
+            base_system_prompt += (
+                "\nDanh mục địa điểm để tham chiếu:\n" + destination_context
+            )
+
+        user_content: List[Dict[str, Any]] = [
+            {
+                "type": "text",
+                "text": user_prompt
+                or "Giúp tôi nhận dạng địa điểm du lịch và gợi ý những nơi tương tự.",
+            }
+        ]
+
+        for url in image_data_urls:
+            if not url:
+                continue
+            user_content.append(
+                {
+                    "type": "image_url",
+                    "image_url": {"url": url},
+                }
+            )
+
+        temperature = float(os.getenv("OPENAI_TEMPERATURE", "0.4"))
+
+        def _call_openai():
+            return client.chat.completions.create(
+                model=self._model,
+                messages=[
+                    {"role": "system", "content": base_system_prompt},
+                    {"role": "user", "content": user_content},
+                ],
+                temperature=temperature,
+                response_format={"type": "json_object"},
+            )
+
+        response = self._run_with_retry(_call_openai)
+        payload = (response.choices[0].message.content or "{}").strip()
+        try:
+            return json.loads(payload)
+        except json.JSONDecodeError as exc:  # pragma: no cover - defensive
+            raise RuntimeError(
+                "OpenAI trả về dữ liệu không hợp lệ. Hãy thử lại trong giây lát."
+            ) from exc
 
     def _run_with_retry(self, call):
         last_exc: Optional[Exception] = None

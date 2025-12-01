@@ -1,3 +1,6 @@
+const TARGET_SIZE = 96; // smaller square keeps payloads light for vision APIs
+const JPEG_QUALITY = 0.72;
+
 export const resizeImageTo128 = (file) =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -7,18 +10,20 @@ export const resizeImageTo128 = (file) =>
       img.onload = () => {
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
-        const size = 128;
-        canvas.width = size;
-        canvas.height = size;
+        canvas.width = TARGET_SIZE;
+        canvas.height = TARGET_SIZE;
         ctx.fillStyle = "#000";
-        ctx.fillRect(0, 0, size, size);
-        const scale = Math.min(size / img.width, size / img.height);
+        ctx.fillRect(0, 0, TARGET_SIZE, TARGET_SIZE);
+        const scale = Math.min(
+          TARGET_SIZE / img.width,
+          TARGET_SIZE / img.height
+        );
         const drawWidth = img.width * scale;
         const drawHeight = img.height * scale;
-        const dx = (size - drawWidth) / 2;
-        const dy = (size - drawHeight) / 2;
+        const dx = (TARGET_SIZE - drawWidth) / 2;
+        const dy = (TARGET_SIZE - drawHeight) / 2;
         ctx.drawImage(img, dx, dy, drawWidth, drawHeight);
-        const thumbnailDataUrl = canvas.toDataURL("image/jpeg", 0.82);
+        const thumbnailDataUrl = canvas.toDataURL("image/jpeg", JPEG_QUALITY);
         const base64 = thumbnailDataUrl.split(",")[1];
         resolve({
           dataUrl: thumbnailDataUrl,

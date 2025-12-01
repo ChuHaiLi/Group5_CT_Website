@@ -3,15 +3,16 @@ import { toast } from "react-toastify";
 import API from "../../untils/axios";
 import { usePageContext } from "../../context/PageContext";
 import { resizeImageTo128 } from "../../untils/imageResizer";
-import {
-  sendVisionRequestToWidget,
-  sendVisionResultToWidget,
-  refreshChatWidgetHistory,
-} from "../../untils/chatWidgetEvents";
 import "./HomePage.css";
 import HeroSection from "./hero/hero";
 import HomeRecommendations from "./Recommendations/HomeRecommendations";
 import CreateTripForm from "../../components/CreateTripForm";
+import {
+  sendHeroTextRequestToWidget,
+  sendHeroTextResultToWidget,
+  sendVisionRequestToWidget,
+  sendVisionResultToWidget,
+} from "../../untils/chatWidgetEvents";
 
 const MAX_VISION_IMAGES = 4;
 
@@ -22,10 +23,12 @@ export default function HomePage({ savedIds, handleToggleSave }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [visionImages, setVisionImages] = useState([]);
   const [visionResult, setVisionResult] = useState(null);
+  const [textResults, setTextResults] = useState(null);
   const [visionLoading, setVisionLoading] = useState(false);
+  const [textLoading, setTextLoading] = useState(false);
+  const [activePreview, setActivePreview] = useState(null);
   const { setPageContext } = usePageContext();
 
-  // Load all destinations
   useEffect(() => {
     API.get("/destinations")
       .then((res) => setAllDestinations(res.data))
@@ -70,101 +73,104 @@ export default function HomePage({ savedIds, handleToggleSave }) {
     filteredDestinations,
   ]);
 
-  const renderVisionResult = (result) => {
-    if (!result) return null;
-    const text =
-      typeof result === "string"
-        ? result
-        : result?.plain_text || result?.summary || "";
-    const segments = text
-      .split(/\n\s*\n/)
-      .map((segment) => segment.trim())
-      .filter(Boolean);
+  const persistHeroConversation = async ({
+    userContent,
+    assistantContent,
+    attachments = [],
+  }) => {
+    if (!userContent && !assistantContent) return;
+    const entries = [];
+    if (userContent) {
+      entries.push({
+        role: "user",
+        content: userContent,
+        attachments: attachments
+          .map((img) => ({
+            name: img?.name,
+            data_url: img?.thumbnailUrl || img?.previewUrl,
+          }))
+          .filter((img) => Boolean(img.data_url)),
+      });
+    }
 
-    return segments.map((segment, index) => {
-      const lines = segment
-        .split(/\n+/)
-        .map((line) => line.trim())
-        .filter(Boolean);
-      const isList =
-        lines.length > 1 && lines.every((line) => line.startsWith("- "));
+    if (assistantContent) {
+      entries.push({ role: "assistant", content: assistantContent });
+    }
 
-      if (isList) {
-        return (
-          <div
-            key={`vision-chip-${index}`}
-            className="vision-results-chip-list"
-          >
-            {lines.map((line, chipIndex) => (
-              <span key={chipIndex} className="vision-results-chip">
-                {line.replace(/^[-–]\s*/, "")}
-              </span>
-            ))}
-          </div>
-        );
-      }
-
-      return (
-        <p
-          key={`vision-paragraph-${index}`}
-          className={`vision-results-paragraph ${index === 0 ? "lead" : ""}`}
-        >
-          {segment.replace(/\s+/g, " ")}
-        </p>
-      );
-    });
-  };
-
-  const logWidgetConversation = async (entries) => {
-    const prepared = (entries || []).filter(
-      (entry) => entry && entry.role && entry.content
-    );
-    if (!prepared.length) return;
     try {
-      const payload = prepared.map((entry) => ({
-        role: entry.role,
-        content: entry.content,
-        attachments: Array.isArray(entry.attachments)
-          ? entry.attachments
-              .map((att) => ({
-                name: att?.name,
-                data_url:
-                  att?.data_url || att?.dataUrl || att?.previewUrl || "",
-              }))
-              .filter((att) => att.data_url)
-          : undefined,
-      }));
-      await API.post("/chat/widget/log", { messages: payload });
-      refreshChatWidgetHistory();
+      await API.post("/chat/widget/log", { messages: entries });
     } catch (error) {
-      console.warn("Unable to persist widget log", error);
+      console.warn("Unable to persist hero conversation", error);
     }
   };
 
-  const handleVisionImagesAdd = async (fileList) => {
-    const files = Array.from(fileList || []);
-    if (!files.length) return;
-    const availableSlots = MAX_VISION_IMAGES - visionImages.length;
-    if (availableSlots <= 0) {
-      toast.info(`You can add up to ${MAX_VISION_IMAGES} reference photos.`);
+  const handleTextSearch = async () => {
+    const query = (searchTerm || "").trim();
+    if (!query) {
+      toast.info("Nhập câu hỏi du lịch trước khi tìm kiếm nhé.");
       return;
     }
-    const usableFiles = files.slice(0, availableSlots);
+    setTextLoading(true);
+    setVisionResult(null);
+    const requestId = `hero-text-${Date.now()}`;
+    sendHeroTextRequestToWidget({ requestId, content: query });
     try {
-      const resized = await Promise.all(usableFiles.map(resizeImageTo128));
-      setVisionImages((prev) => [
-        ...prev,
-        ...resized.map((item, index) => ({
-          id: `${Date.now()}-${index}`,
-          name: usableFiles[index].name,
-          previewUrl: item.originalDataUrl || item.dataUrl,
-          thumbnailUrl: item.dataUrl,
-          base64: item.base64,
-        })),
-      ]);
+      const res = await API.post("/search/text", { query });
+      setTextResults(res.data);
+      const friendly =
+        res.data?.message || res.data?.summary || res.data?.analysis;
+      sendHeroTextResultToWidget({ requestId, response: friendly });
+      persistHeroConversation({
+        userContent: query,
+        assistantContent: friendly,
+      });
     } catch (error) {
       console.error(error);
-      toast.error("Could not process one of the selected photos.");
+      const fallback =
+        error.response?.data?.message ||
+        "Không thể tìm kiếm gợi ý từ văn bản lúc này.";
+      toast.error(fallback);
+      setTextResults(null);
+      sendHeroTextResultToWidget({ requestId, response: fallback });
+      persistHeroConversation({
+        userContent: query,
+        assistantContent: fallback,
+      });
+    } finally {
+      setTextLoading(false);
+      setSearchTerm("");
+    }
+  };
+
+  const handleVisionImagesAdd = async (newFiles) => {
+    if (!newFiles?.length) return;
+    const availableSlots = MAX_VISION_IMAGES - visionImages.length;
+    if (availableSlots <= 0) {
+      toast.info(`Bạn chỉ có thể chọn tối đa ${MAX_VISION_IMAGES} ảnh.`);
+      return;
+    }
+
+    const files = Array.from(newFiles).slice(0, availableSlots);
+    try {
+      const processed = await Promise.all(
+        files.map(async (file, idx) => {
+          const resized = await resizeImageTo128(file);
+          return {
+            id: `${Date.now()}-${idx}-${Math.random().toString(16).slice(2)}`,
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            dataUrl: resized.dataUrl,
+            base64: resized.base64,
+            thumbnailUrl: resized.dataUrl,
+            previewUrl: resized.originalDataUrl,
+          };
+        })
+      );
+      setVisionImages((prev) => [...prev, ...processed]);
+    } catch (error) {
+      console.error(error);
+      toast.error("Không thể xử lý một số ảnh, vui lòng thử lại.");
     }
   };
 
@@ -172,87 +178,76 @@ export default function HomePage({ savedIds, handleToggleSave }) {
     setVisionImages((prev) => prev.filter((img) => img.id !== id));
   };
 
+  const handleVisionImagePreview = (image) => {
+    if (!image) return;
+    setActivePreview({
+      src: image.previewUrl || image.originalDataUrl || image.dataUrl,
+      name: image.name,
+    });
+  };
+
   const handleVisionSearch = async () => {
-    const question = (searchTerm || "").trim();
-    const queuedImages = visionImages.map((img) => ({ ...img }));
-    if (!queuedImages.length) {
-      toast.info("Please add at least one reference photo first.");
+    if (!visionImages.length) {
+      toast.info("Hãy thêm ít nhất một ảnh trước khi tìm kiếm.");
       return;
     }
-    const requestId = `vision-${Date.now()}`;
-    const widgetAttachments = queuedImages.map((img) => ({
-      id: img.id,
-      previewUrl: img.previewUrl,
-      thumbnailUrl: img.thumbnailUrl,
-      name: img.name,
-    }));
-    const apiImages = queuedImages.map((img) => img.base64);
-    const userNarrative = question || "Tìm kiếm bằng ảnh";
-
-    setVisionLoading(true);
-    setVisionImages([]);
-    setSearchTerm("");
-
+    const queuedImages = visionImages.map((img) => ({ ...img }));
+    const requestId = `hero-vision-${Date.now()}`;
+    const question = (searchTerm || "").trim();
     sendVisionRequestToWidget({
       requestId,
       question: question || "Tìm kiếm bằng ảnh",
-      attachments: widgetAttachments,
+      attachments: queuedImages.map((img, index) => ({
+        id: img.id || `${requestId}-${index}`,
+        previewUrl: img.previewUrl || img.thumbnailUrl,
+        thumbnailUrl: img.thumbnailUrl || img.previewUrl,
+        name: img.name,
+      })),
     });
 
-    let assistantLogContent = "";
+    setVisionLoading(true);
+    setTextResults(null);
+    setVisionImages([]);
+    setSearchTerm("");
     try {
-      const res = await API.post(
-        "/search/vision",
-        {
-          images: apiImages,
-          question,
-        },
-        { responseType: "text" }
-      );
-      const textResult = res.data || "";
-      setVisionResult(textResult);
-      assistantLogContent = textResult;
+      const payload = {
+        images: queuedImages.map((img) => img.dataUrl),
+        question: question || undefined,
+      };
+      const res = await API.post("/search/vision", payload);
+      setVisionResult(res.data);
       sendVisionResultToWidget({
         requestId,
-        response: { plain_text: textResult },
+        response: res.data?.message || res.data?.summary,
+      });
+      persistHeroConversation({
+        userContent: question || "Tìm kiếm bằng ảnh",
+        assistantContent:
+          res.data?.message ||
+          res.data?.summary ||
+          "AI đã trả lời ảnh của bạn.",
+        attachments: queuedImages,
       });
     } catch (error) {
       console.error(error);
-      const fallbackMessage =
+      const fallback =
         error.response?.data?.message ||
-        "Unable to analyze these photos right now. Please try again shortly.";
-      toast.error(fallbackMessage);
-      assistantLogContent = fallbackMessage;
-      sendVisionResultToWidget({
-        requestId,
-        response: {
-          guess: "",
-          plain_text: fallbackMessage,
-        },
+        "Không thể phân tích ảnh lúc này, vui lòng thử lại.";
+      toast.error(fallback);
+      setVisionResult(null);
+      sendVisionResultToWidget({ requestId, response: fallback });
+      persistHeroConversation({
+        userContent: question || "Tìm kiếm bằng ảnh",
+        assistantContent: fallback,
+        attachments: queuedImages,
       });
     } finally {
       setVisionLoading(false);
-      logWidgetConversation(
-        [
-          {
-            role: "user",
-            content: userNarrative,
-            attachments: widgetAttachments.map((attachment) => ({
-              name: attachment.name,
-              data_url: attachment.previewUrl,
-              previewUrl: attachment.previewUrl,
-            })),
-          },
-          assistantLogContent
-            ? { role: "assistant", content: assistantLogContent }
-            : null,
-        ].filter(Boolean)
-      );
     }
   };
 
   const handleCreateTrip = (destinationObj) => {
-    setSelectedDestination(destinationObj); // lưu trực tiếp object
+    setSelectedDestination(destinationObj);
     setShowForm(true);
   };
 
@@ -269,33 +264,30 @@ export default function HomePage({ savedIds, handleToggleSave }) {
         visionImages={visionImages}
         onVisionImagesAdd={handleVisionImagesAdd}
         onVisionImageRemove={handleVisionImageRemove}
+        onVisionImagePreview={handleVisionImagePreview}
         onVisionSearch={handleVisionSearch}
-        visionSearching={visionLoading}
+        onTextSearch={handleTextSearch}
+        searching={visionLoading || textLoading}
       />
 
+      {textResults && (
+        <SearchResultsPanel
+          type="text"
+          result={textResults}
+          onClear={() => setTextResults(null)}
+        />
+      )}
+
       {visionResult && (
-        <section className="vision-results">
-          <div className="vision-results-header">
-            <div>
-              <p className="vision-results-title">Photo-based suggestions</p>
-            </div>
-            <button
-              type="button"
-              className="vision-results-clear"
-              onClick={() => setVisionResult(null)}
-            >
-              Clear
-            </button>
-          </div>
-          <div className="vision-results-body">
-            {renderVisionResult(visionResult)}
-          </div>
-        </section>
+        <SearchResultsPanel
+          type="vision"
+          result={visionResult}
+          onClear={() => setVisionResult(null)}
+        />
       )}
 
       <h2 className="recommendations-title">Recommended Destinations</h2>
 
-      {/* Container card */}
       <div className="home-recommendations-container">
         {filteredDestinations.length === 0 ? (
           <div className="home-empty">
@@ -311,13 +303,147 @@ export default function HomePage({ savedIds, handleToggleSave }) {
         )}
       </div>
 
-      {/* Form tạo trip */}
       {showForm && selectedDestination && (
         <CreateTripForm
           initialDestination={selectedDestination}
           onClose={handleCloseForm}
         />
       )}
+
+      {activePreview && (
+        <div
+          className="home-image-preview"
+          onClick={() => setActivePreview(null)}
+          role="button"
+          tabIndex={-1}
+        >
+          <div
+            className="home-image-preview-body"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="home-image-preview-close"
+              onClick={() => setActivePreview(null)}
+              aria-label="Đóng hình ảnh"
+            >
+              ×
+            </button>
+            <img
+              src={activePreview.src}
+              alt={activePreview.name || "preview"}
+            />
+            {activePreview.name && (
+              <p className="home-image-preview-caption">{activePreview.name}</p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+const confidenceLabel = (value) => {
+  if (typeof value !== "number" || Number.isNaN(value)) return null;
+  return `${Math.round(value * 100)}% match`;
+};
+
+function SearchResultsPanel({ type, result, onClear }) {
+  if (!result) return null;
+  const isVision = type === "vision";
+  const title = isVision
+    ? "Photo-based suggestions"
+    : "Smart text search results";
+  const summary = isVision ? result.summary : result.analysis || result.summary;
+  const friendlyMessage = result.message;
+  const suggestions = result.suggestions || [];
+  const predictions = isVision ? result.predictions || [] : [];
+
+  return (
+    <section className="vision-results">
+      <div className="vision-results-header">
+        <div>
+          <p className="vision-results-title">{title}</p>
+          {isVision && predictions.length > 0 && (
+            <span className="vision-results-guess">Top predictions</span>
+          )}
+        </div>
+        <button
+          type="button"
+          className="vision-results-clear"
+          onClick={onClear}
+        >
+          Clear
+        </button>
+      </div>
+
+      {friendlyMessage && (
+        <p className="vision-results-message">{friendlyMessage}</p>
+      )}
+
+      {summary && summary !== friendlyMessage && (
+        <p className="vision-results-summary">{summary}</p>
+      )}
+
+      {predictions.length > 0 && (
+        <ul className="vision-results-list predictions">
+          {predictions.map((prediction, index) => (
+            <li key={`prediction-${index}`}>
+              {prediction.image_url && (
+                <img
+                  src={prediction.image_url}
+                  alt={prediction.place}
+                  className="vision-results-prediction-image"
+                />
+              )}
+              <div className="vision-results-prediction-text">
+                <strong>{prediction.place}</strong>
+                {confidenceLabel(prediction.confidence) && (
+                  <span>{confidenceLabel(prediction.confidence)}</span>
+                )}
+                {prediction.reason && <span>{prediction.reason}</span>}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {suggestions.length > 0 && (
+        <div className="vision-results-grid">
+          {suggestions.map((item, index) => (
+            <article
+              key={`suggestion-${index}`}
+              className="vision-results-card"
+            >
+              <div className="vision-results-card-header">
+                <div>
+                  <p className="vision-results-card-title">{item.name}</p>
+                  {item.category && (
+                    <span className="vision-results-card-tag">
+                      {item.category}
+                    </span>
+                  )}
+                </div>
+                {confidenceLabel(item.confidence) && (
+                  <span className="vision-results-card-conf">
+                    {confidenceLabel(item.confidence)}
+                  </span>
+                )}
+              </div>
+              {item.image_url && (
+                <img
+                  src={item.image_url}
+                  alt={item.name}
+                  className="vision-results-card-image"
+                />
+              )}
+              {item.reason && (
+                <p className="vision-results-card-reason">{item.reason}</p>
+              )}
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
   );
 }

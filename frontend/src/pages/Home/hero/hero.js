@@ -10,8 +10,10 @@ export default function Hero({
   visionImages = [],
   onVisionImagesAdd,
   onVisionImageRemove,
+  onVisionImagePreview,
   onVisionSearch,
-  visionSearching,
+  onTextSearch,
+  searching,
 }) {
   const [isRecording, setIsRecording] = useState(false);
   const recognitionRef = useRef(null);
@@ -34,7 +36,15 @@ export default function Hero({
   };
 
   const handleSubmit = () => {
-    onVisionSearch?.();
+    if (visionImages.length > 0) {
+      onVisionSearch?.();
+      return;
+    }
+    const query = (searchTerm || "").trim();
+    if (!query) {
+      return;
+    }
+    onTextSearch?.(query);
   };
 
   const handleKeyDown = (event) => {
@@ -103,14 +113,24 @@ export default function Hero({
             {visionImages.length > 0 && (
               <div className="hero-inline-attachments">
                 {visionImages.map((img) => (
-                  <div key={img.id} className="hero-inline-attachment">
+                  <div
+                    key={img.id || img.name}
+                    className="hero-inline-attachment"
+                    title={img.name}
+                    onClick={() => onVisionImagePreview?.(img)}
+                    role="button"
+                    tabIndex={0}
+                  >
                     <img
-                      src={img.thumbnailUrl || img.previewUrl}
+                      src={img.thumbnailUrl || img.previewUrl || img.dataUrl}
                       alt={img.name || "reference"}
                     />
                     <button
                       type="button"
-                      onClick={() => onVisionImageRemove?.(img.id)}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onVisionImageRemove?.(img.id || img.name);
+                      }}
                       aria-label="Remove image"
                     >
                       ×
@@ -151,11 +171,11 @@ export default function Hero({
               className="hero-icon-button primary"
               onClick={handleSubmit}
               disabled={
-                visionSearching ||
+                searching ||
                 (!visionImages.length && !(searchTerm || "").trim())
               }
             >
-              {visionSearching ? "..." : <FiSend size={18} />}
+              {searching ? "..." : <FiSend size={18} />}
             </button>
           </div>
         </div>

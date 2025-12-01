@@ -16,6 +16,12 @@ export const sendVisionRequestToWidget = (payload) =>
 export const sendVisionResultToWidget = (payload) =>
   emitWidgetEvent({ action: "vision-result", payload });
 
+export const sendHeroTextRequestToWidget = (payload) =>
+  emitWidgetEvent({ action: "hero-text-request", payload });
+
+export const sendHeroTextResultToWidget = (payload) =>
+  emitWidgetEvent({ action: "hero-text-result", payload });
+
 export const refreshChatWidgetHistory = () =>
   emitWidgetEvent({ action: "history-refresh" });
 

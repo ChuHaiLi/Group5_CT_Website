@@ -26,24 +26,16 @@ const formatVisionResponse = (vision) => {
   if (typeof vision === "string") {
     return vision;
   }
+  if (vision.message) {
+    return vision.message;
+  }
+  if (vision.summary) {
+    return vision.summary;
+  }
   if (vision.plain_text) {
     return vision.plain_text;
   }
-  const lines = [];
-  if (vision.guess) {
-    lines.push(`Gợi ý địa điểm: ${vision.guess}`);
-  }
-  if (vision.summary) {
-    lines.push(vision.summary);
-  }
-  if (Array.isArray(vision.recommendations) && vision.recommendations.length) {
-    const recLines = vision.recommendations.map((rec, idx) => {
-      const title = rec.name || `Gợi ý ${idx + 1}`;
-      return `• ${title}${rec.reason ? `: ${rec.reason}` : ""}`;
-    });
-    lines.push(recLines.join("\n"));
-  }
-  return lines.join("\n\n").trim();
+  return "";
 };
 
 export default function ChatWidget({ isAuthenticated, pageContext }) {
@@ -125,6 +117,40 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
       ({ action = "toggle", payload }) => {
         if (action === "history-refresh") {
           fetchHistory();
+          return;
+        }
+
+        if (action === "hero-text-request" && payload) {
+          setIsOpen(true);
+          const userMessage = {
+            id: payload.requestId || `hero-user-${Date.now()}`,
+            role: "user",
+            content: payload.content || payload.question || "",
+            attachments: (payload.attachments || []).map((item, index) => ({
+              id: item.id || `${payload.requestId || Date.now()}-${index}`,
+              previewUrl: item.previewUrl || item.thumbnailUrl,
+              thumbnailUrl: item.thumbnailUrl || item.previewUrl,
+              name: item.name,
+            })),
+            _isExternal: true,
+          };
+          setMessages((prev) => [...prev, userMessage]);
+          return;
+        }
+
+        if (action === "hero-text-result" && payload) {
+          setIsOpen(true);
+          if (payload.response) {
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: `hero-bot-${payload.requestId || Date.now()}`,
+                role: "bot",
+                content: payload.response,
+                _isExternal: true,
+              },
+            ]);
+          }
           return;
         }
 
@@ -238,8 +264,21 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
         return [...updated, res.data];
       });
     } catch (error) {
-      setMessages((prev) => prev.filter((m) => m.id !== optimistic.id));
-      toast.error(error.response?.data?.message || "Failed to send message");
+      const fallback =
+        error.response?.data?.message || "Failed to send message";
+      toast.error(fallback);
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === optimistic.id
+            ? {
+                ...msg,
+                error:
+                  "Tin nhắn chưa được gửi tới máy chủ. Vui lòng thử lại sau.",
+                error_detail: fallback,
+              }
+            : msg
+        )
+      );
     } finally {
       setSending(false);
     }
@@ -407,12 +446,23 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
         ];
       });
     } catch (error) {
-      setMessages((prev) => prev.filter((msg) => msg.id !== optimistic.id));
       const fallback =
         error.response?.data?.message ||
         "Không thể phân tích ảnh vào lúc này. Thử lại sau.";
       toast.error(fallback);
       assistantText = fallback;
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === optimistic.id
+            ? {
+                ...msg,
+                error:
+                  "Hệ thống chưa thể phân tích ảnh. Bạn có thể thử gửi lại.",
+                error_detail: fallback,
+              }
+            : msg
+        )
+      );
     } finally {
       setSending(false);
       setVisionLoading(false);
@@ -513,6 +563,9 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
                         </button>
                       ))}
                     </div>
+                  )}
+                  {message.error && (
+                    <p className="chat-widget-error-note">{message.error}</p>
                   )}
                 </div>
               </div>

@@ -22,12 +22,12 @@ def main():
     with app.app_context():
         db.create_all()  # ensure tables exist when running the script standalone
         context = _build_destination_snapshot()
-    text = client.describe_location_text(
+    payload = client.describe_location_structured(
         user_prompt="Nhận dạng giúp mình",
         image_data_urls=[data_url],
         destination_context=context,
     )
-    print(text)
+    print(payload)
 
 if __name__ == "__main__":
     main()
