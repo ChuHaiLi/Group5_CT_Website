@@ -34,11 +34,22 @@ export default function RecommendCard({
 
     return stars;
   };
+  
+  // Chuẩn bị mô tả (như đã sửa trước đó)
+  const descriptionText = Array.isArray(destination.description)
+    ? destination.description.join(' ')
+    : destination.description || '';
+
+  // LOGIC MỚI: Chỉ lấy ảnh đầu tiên nếu image_url là một mảng
+  const cardImageUrl = Array.isArray(destination.image_url) 
+    ? destination.image_url[0] 
+    : destination.image_url;
 
   return (
     <div
       className="recommend-card"
-      style={{ backgroundImage: `url(${destination.image_url})` }}
+      // SỬ DỤNG cardImageUrl ĐÃ ĐƯỢC XỬ LÝ
+      style={{ backgroundImage: `url(${cardImageUrl})` }}
       onClick={() => onViewDetails?.(destination.id)}
     >
       <div className="card-overlay" />
@@ -53,7 +64,9 @@ export default function RecommendCard({
       {/* CONTENT */}
       <div className="card-content">
         <h3>{destination.name}</h3>
-        <p>{destination.description}</p>
+        
+        {/* ÁP DỤNG CLASS CSS ĐỂ CẮT CHUỖI */}
+        <p className="card-description-text">{descriptionText}</p>
 
         <div className="weather">
           <strong>Weather:</strong> {destination.weather || "Sunny 25°C"}

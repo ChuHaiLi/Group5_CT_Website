@@ -3,7 +3,30 @@ from datetime import datetime
 
 db = SQLAlchemy()
 
-# Người dùng
+
+class Region(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)
+    
+    provinces = db.relationship("Province", backref="region", lazy=True)
+
+    def __repr__(self):
+        return f"<Region {self.name}>"
+
+class Province(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True, nullable=False)
+    overview = db.Column(db.Text) # Giới thiệu chung về tỉnh
+    image_url = db.Column(db.String(255)) # Ảnh đại diện cho Tỉnh
+    
+    region_id = db.Column(db.Integer, db.ForeignKey("region.id"), nullable=False)
+    
+    destinations = db.relationship("Destination", backref="province", lazy=True)
+
+    def __repr__(self):
+        return f"<Province {self.name}>"
+
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
@@ -13,50 +36,67 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     reset_token = db.Column(db.String(200), nullable=True)
     
-    # Relationship
     saved_destinations = db.relationship("SavedDestination", backref="user", lazy=True)
     itineraries = db.relationship("Itinerary", backref="user", lazy=True)
     reviews = db.relationship("Review", backref="user", lazy=True)
+    chat_sessions = db.relationship("ChatSession", backref="user", lazy=True) # Đã có sẵn
 
-# Địa điểm
 class Destination(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    
+    province_id = db.Column(db.Integer, db.ForeignKey("province.id"), nullable=False)
+    
     name = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.Text)
-    image_url = db.Column(db.String(200))
+    place_type = db.Column(db.String(50)) 
+    description = db.Column(db.Text) 
+    
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
-    rating = db.Column(db.Float, default=0)  # đánh giá trung bình
-    tags = db.Column(db.Text)  # JSON hoặc danh sách tag
-    category = db.Column(db.String(50))  # ví dụ: beach, city, mountain
+    
+    opening_hours = db.Column(db.String(100))
+    entry_fee = db.Column(db.Float)
+    source = db.Column(db.String(255))
+
+    image_url = db.Column(db.String(200)) 
+    rating = db.Column(db.Float, default=0)
+    tags = db.Column(db.Text) 
+    category = db.Column(db.String(50)) 
 
     # Relationship
     reviews = db.relationship("Review", backref="destination", lazy=True)
     saved_by_users = db.relationship("SavedDestination", backref="destination", lazy=True)
 
-# Lịch trình cá nhân của user
+class DestinationImage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    image_url = db.Column(db.String(255), nullable=False)
+    destination_id = db.Column(db.Integer, db.ForeignKey('destination.id'), nullable=False)
+    destination = db.relationship("Destination", backref=db.backref("images", lazy=True, cascade="all, delete-orphan"))
+
+
 class Itinerary(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     title = db.Column(db.String(100))
-    data = db.Column(db.Text)  # JSON lưu các địa điểm và ngày
+    data = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-# Nơi lưu địa điểm yêu thích
+# Nơi lưu địa điểm yêu thích (Không cần thay đổi)
 class SavedDestination(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     destination_id = db.Column(db.Integer, db.ForeignKey('destination.id'), nullable=False)
     saved_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-# Đánh giá địa điểm
+# Đánh giá địa điểm (Không cần thay đổi)
 class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     destination_id = db.Column(db.Integer, db.ForeignKey('destination.id'), nullable=False)
-    rating = db.Column(db.Float, nullable=False)  # 1-5 sao
+    rating = db.Column(db.Float, nullable=False) 
     comment = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+# --- 4. MODEL CHATBOT ---
 
 class ChatSession(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -65,15 +105,13 @@ class ChatSession(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # Relationship back to owning user for convenient access in chat routes
-    user = db.relationship("User", backref=db.backref("chat_sessions", lazy=True))
-    messages = db.relationship("ChatMessage", backref="session", lazy=True, cascade="all, delete-orphan")
+    # messages đã có sẵn
 
 class ChatMessage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     session_id = db.Column(db.Integer, db.ForeignKey('chat_session.id'), nullable=False)
-    role = db.Column(db.String(20), nullable=False)  # user | assistant
+    role = db.Column(db.String(20), nullable=False)
     content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -83,7 +121,6 @@ class ChatMessage(db.Model):
         lazy=True,
         cascade="all, delete-orphan"
     )
-
 
 class ChatAttachment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
