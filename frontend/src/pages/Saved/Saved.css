@@ -1,0 +1,48 @@
+/* SavedPage.css */
+
+/* Wrapper ngoài để căn giữa toàn bộ page */
+.saved-page-wrapper {
+  width: 100%;
+  background-color: #f9f9f9;
+  display: flex;
+  justify-content: center; /* căn giữa container */
+  padding-top: calc(50px + 70px);
+  padding-bottom: 70px;
+}
+
+/* Container chính giống Home */
+.saved-page-container {
+  width: 100%;
+  max-width: 1200px; /* giới hạn chiều ngang giống Home */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 20px;
+}
+
+/* Title */
+.saved-page-title {
+  width: 100%;
+  text-align: center;
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 25px;
+  font-family: "Poppins", sans-serif;
+}
+
+/* Khi không có item */
+.no-saved-text {
+  font-size: 18px;
+  color: #666;
+  margin-top: 15px;
+  text-align: center;
+}
+
+/* Grid chứa card */
+.saved-cards-container {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 25px;
+  justify-items: center; /* căn card trong ô grid */
+}

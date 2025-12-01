@@ -1,0 +1,173 @@
+.home-container {
+  width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.vision-results {
+  width: min(960px, 92vw);
+  background: #f8fafc;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+  border-radius: 24px;
+  padding: 24px 28px;
+  margin-top: 24px;
+  margin-bottom: 32px;
+  position: relative;
+  z-index: 3;
+}
+
+.vision-results-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.vision-results-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.vision-results-guess {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 0.85rem;
+  color: #2563eb;
+  background: rgba(59, 130, 246, 0.1);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.vision-results-clear {
+  border: none;
+  background: transparent;
+  color: #475569;
+  cursor: pointer;
+  font-size: 0.85rem;
+  text-decoration: underline;
+}
+
+.vision-results-summary {
+  margin: 16px 0 0;
+  color: #1e293b;
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
+.vision-results-body {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.vision-results-paragraph {
+  margin: 0;
+  color: #1f2937;
+  line-height: 1.65;
+  font-size: 0.98rem;
+}
+
+.vision-results-paragraph.lead {
+  font-size: 1.08rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.vision-results-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.vision-results-chip {
+  background: rgba(37, 99, 235, 0.08);
+  color: #1d4ed8;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  line-height: 1.2;
+  border: 1px solid rgba(37, 99, 235, 0.25);
+}
+
+.vision-results-list {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0 0;
+  display: grid;
+  gap: 14px;
+}
+
+.vision-results-list li {
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.vision-results-list strong {
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.vision-results-list span {
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+/* Title riêng, căn giữa */
+.recommendations-title {
+  font-size: 30px;
+  font-weight: 700;
+  margin: 40px 0 12px 0; /* khoảng cách trên/dưới */
+  color: #000;
+  font-family: "Poppins", sans-serif;
+  text-align: center;
+  width: 100%;
+}
+
+/* Container bao card */
+.home-recommendations-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 25px; /* khoảng cách giữa các card */
+  width: 100%;
+  max-width: 1200px; /* giới hạn chiều ngang */
+  padding: 0 20px;
+  justify-items: center; /* căn card trong ô grid */
+  margin-bottom: 50px;
+}
+
+/* Hero overlay nếu dùng */
+.home-overlay {
+  background: rgba(0, 0, 0, 0.4);
+  color: white;
+  padding: 30px 50px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.home-overlay h1 {
+  font-size: 3rem;
+  margin-bottom: 15px;
+}
+
+.home-overlay p {
+  font-size: 1.2rem;
+  color: white;
+}
+
+.home-empty {
+  font-size: 1rem;
+  color: #6b7280;
+  text-align: center;
+  padding: 60px 0;
+}
