@@ -11,10 +11,13 @@ from datetime import timedelta
 import re
 import secrets
 from datetime import datetime
-from models import db, User, Destination, SavedDestination, Review, Itinerary
+from models import db, User, Destination, SavedDestination, Review, Itinerary, Region, Province, DestinationImage
 from routes.chat import chat_bp
 from routes.search import search_bp
 from utils.env_loader import load_backend_env
+import json
+from sqlalchemy.orm import joinedload
+from flask_migrate import Migrate
 
 load_backend_env()
 
@@ -26,6 +29,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = 'your_super_secret_key'
 
+# Cấu hình để hiển thị tiếng Việt chính xác
+app.config['JSON_AS_ASCII'] = False 
+app.config['JSON_SORT_KEYS'] = False
+
 # Token expiration
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=7)
 app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
@@ -34,6 +41,7 @@ app.config['JWT_HEADER_TYPE'] = "Bearer"
 
 db.init_app(app)
 jwt = JWTManager(app)
+migrate = Migrate(app, db)
 
 # Register blueprints
 app.register_blueprint(chat_bp, url_prefix="/api/chat")
@@ -53,6 +61,43 @@ def invalid_token_callback(reason):
 # ----------------- Utils -----------------
 def is_valid_email(email):
     return re.match(r"[^@]+@[^@]+\.[^@]+", email)
+
+# Hàm tiện ích để giải mã JSON string từ DB thành List Python
+def decode_db_json_string(data_string, default_type='list'):
+    if not data_string:
+        return [] if default_type == 'list' else None
+    try:
+        return json.loads(data_string)
+    except (json.JSONDecodeError, TypeError):
+        return [data_string] if default_type == 'list' else data_string
+
+# HÀM MỚI: Xử lý ưu tiên URL ảnh cho RecommendCard
+def get_card_image_url(destination):
+    """
+    Ưu tiên lấy URL ảnh: 
+    1. image_url chính (cột đơn). 
+    2. DUYỆT qua danh sách DestinationImage cho đến khi tìm thấy URL hợp lệ.
+    """
+    # 1. Kiểm tra cột image_url chính
+    if destination.image_url:
+        source_url = destination.image_url
+        if source_url.startswith('http://') or source_url.startswith('https://'):
+            return source_url # URL mạng
+        else:
+            # Đường dẫn cục bộ (ví dụ: halong.png)
+            image_filename = source_url.split("/")[-1]
+            return request.host_url.rstrip('/') + url_for('static', filename=f'images/{image_filename}')
+
+    # 2. Duyệt qua danh sách DestinationImage (ảnh mạng)
+    # Nếu ảnh chính NULL, ta duyệt qua các ảnh chi tiết
+    elif destination.images: 
+        for image_obj in destination.images:
+            url = image_obj.image_url
+            if url and (url.startswith('http://') or url.startswith('https://')):
+                # Trả về URL mạng đầu tiên hợp lệ tìm thấy
+                return url
+        
+    return None # Trả về None nếu không có ảnh nào hợp lệ tìm thấy
 
 # ----------------- Routes -----------------
 
@@ -128,7 +173,8 @@ def refresh():
 @jwt_required()
 def me():
     user_id = int(get_jwt_identity())
-    user = User.query.get(user_id)
+    # Sửa cú pháp SQLAlchemy 2.0
+    user = db.session.get(User, user_id) 
     if not user:
         return jsonify({"message": "User not found"}), 404
     return jsonify({"id": user.id, "username": user.username, "email": user.email})
@@ -217,44 +263,49 @@ def get_saved_list():
     result = []
 
     for item in saved_items:
-        destination = Destination.query.get(item.destination_id)
+        destination = db.session.get(Destination, item.destination_id, options=[db.joinedload(Destination.images)])
+        
         if destination:
-            # Build URL đầy đủ cho ảnh
-            image_filename = destination.image_url.split("/")[-1]
-            image_full_url = request.host_url.rstrip('/') + url_for('static', filename=f'images/{image_filename}')
+            province = destination.province
+            region = province.region if province else None
+
+            image_full_url = get_card_image_url(destination)
 
             result.append({
                 "id": destination.id,
                 "name": destination.name,
-                "image_url": image_full_url,  # <-- dùng URL đầy đủ
-                "description": destination.description,
+                "province_name": province.name if province else None,
+                "region_name": region.name if region else None,
+                "image_url": image_full_url, 
+                "description": decode_db_json_string(destination.description),
                 "latitude": destination.latitude,
                 "longitude": destination.longitude,
                 "rating": destination.rating or 0,
                 "category": destination.category,
-                "tags": destination.tags,
-                "weather": "Sunny 25°C",  # tùy muốn thêm
+                "tags": decode_db_json_string(destination.tags, default_type='text'),
+                "weather": "Sunny 25°C",
             })
     return jsonify(result), 200
 
 # -------- GET ALL DESTINATIONS --------
 @app.route("/api/destinations", methods=["GET"])
 def get_destinations():
-    destinations = Destination.query.all()
+    destinations = Destination.query.options(db.joinedload(Destination.images)).all()
     result = []
     for dest in destinations:
-        image_filename = dest.image_url.split("/")[-1]
-        image_full_url = request.host_url.rstrip('/') + url_for('static', filename=f'images/{image_filename}')
+        
+        image_full_url = get_card_image_url(dest)
+            
         result.append({
             "id": dest.id,
             "name": dest.name,
-            "description": dest.description,
-            "image_url": image_full_url,
+            "description": decode_db_json_string(dest.description),
+            "image_url": image_full_url, 
             "latitude": dest.latitude,
             "longitude": dest.longitude,
             "rating": dest.rating or 0,
             "category": dest.category,
-            "tags": dest.tags,
+            "tags": decode_db_json_string(dest.tags, default_type='text'),
         })
     return jsonify(result), 200
 
@@ -264,6 +315,57 @@ def get_destinations():
 def test_jwt():
     user_id = int(get_jwt_identity())
     return jsonify({"message": "JWT valid!", "user_id": user_id})
+
+# -------- GET HIERARCHICAL DESTINATIONS --------
+@app.route("/api/locations/vietnam", methods=["GET"])
+def get_vietnam_locations():
+    regions = Region.query.options(
+        joinedload(Region.provinces)
+          .joinedload(Province.destinations)
+          .joinedload(Destination.images)
+    ).all()
+    
+    result = []
+    
+    for region in regions:
+        region_data = {
+            "region_name": region.name,
+            "provinces": []
+        }
+        
+        for province in region.provinces:
+            province_data = {
+                "province_name": province.name,
+                "overview": province.overview,
+                "image_url": province.image_url, 
+                "places": []
+            }
+            
+            for destination in province.destinations:
+                
+                place_data = {
+                    "id": destination.id,
+                    "name": destination.name,
+                    "type": destination.place_type,
+                    "description": decode_db_json_string(destination.description),
+                    
+                    "images": [img.image_url for img in destination.images],
+                    "gps": {
+                        "lat": destination.latitude,
+                        "lng": destination.longitude
+                    },
+                    "opening_hours": destination.opening_hours,
+                    "entry_fee": destination.entry_fee,
+                    "tags": decode_db_json_string(destination.tags, default_type='text'),
+                    "source": destination.source
+                }
+                province_data["places"].append(place_data)
+                
+            region_data["provinces"].append(province_data)
+        
+        result.append(region_data)
+        
+    return jsonify(result), 200
 
 # ----------------- Main -----------------
 if __name__ == "__main__":

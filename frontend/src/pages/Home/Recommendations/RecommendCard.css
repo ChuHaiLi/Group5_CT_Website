@@ -21,8 +21,11 @@
 
 .card-overlay {
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.01); /* mờ nền */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.01); /* mờ nền */
   z-index: 1;
 }
 
@@ -39,7 +42,7 @@
 
 .card-content {
   padding: 15px;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0, 0, 0, 0.4);
   border-radius: 0 0 15px 15px;
   display: flex;
   flex-direction: column;
@@ -60,8 +63,24 @@
   line-height: 1.2;
 }
 
-/* Thời tiết & Rating */
-.weather, .rating {
+/* THUỘC TÍNH CẮT 3 DÒNG TỐI ƯU */
+.card-content .card-description-text {
+  /* Bộ thuộc tính WebKit bắt buộc để cắt dòng và thêm ba chấm */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Thêm dấu ba chấm */
+
+  /* Fallback/Tương thích: Giới hạn chiều cao cứng nếu trình duyệt không hỗ trợ -webkit-line-clamp */
+  max-height: calc(1.2em * 3); 
+}
+
+.weather,
+.rating {
   font-size: 14px;
   display: flex;
   gap: 5px;
