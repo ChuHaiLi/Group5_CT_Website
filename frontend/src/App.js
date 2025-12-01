@@ -188,7 +188,10 @@ function AppContent() {
             path="/explore"
             element={
               <PrivateRoute isAuthenticated={isAuthenticated}>
-                <ExplorePage />
+                <ExplorePage
+                  savedIds={savedIds}
+                  handleToggleSave={handleToggleSave}
+                />
               </PrivateRoute>
             }
           />
