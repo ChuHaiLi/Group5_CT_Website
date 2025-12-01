@@ -19,8 +19,7 @@ export default function CreateTripForm({ initialDestination, onClose }) {
 
   const durationOptions = ["1-3 days", "4-7 days", "8-14 days", "15+ days"];
   const peopleOptions = ["1 person", "2-4 people", "5-10 people", "10+ people"];
-  const budgetOptions = ["Low", "Medium", "High", "Luxury"];
-
+  const budgetOptions = ["< 5 triệu", "5-10 triệu", "10-20 triệu", "> 20 triệu"];
   const handleAddDestination = () => {
     if (newDestination && !destinations.includes(newDestination)) {
       setDestinations(prev => [...prev, newDestination]);
