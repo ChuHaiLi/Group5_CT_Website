@@ -10,6 +10,7 @@ from sqlalchemy.exc import IntegrityError
 from datetime import timedelta
 import re
 import secrets
+import random
 from datetime import datetime
 from models import db, User, Destination, SavedDestination, Review, Itinerary, Region, Province, DestinationImage
 from routes.chat import chat_bp
@@ -20,6 +21,13 @@ from sqlalchemy.orm import joinedload
 from flask_migrate import Migrate
 
 load_backend_env()
+
+# CẤU HÌNH RANDOM THEO VÙNG (Copy từ seed.py)
+REGION_CONFIG = {
+    "Miền Bắc": {"temp_min": 15, "temp_max": 35, "weather_types": ["Sunny", "Cloudy", "Rainy"]},
+    "Miền Trung": {"temp_min": 27, "temp_max": 39, "weather_types": ["Sunny", "Hot", "Clear"]},
+    "Miền Nam": {"temp_min": 25, "temp_max": 36, "weather_types": ["Sunny", "Hot", "Cloudy", "Rainy"]},
+}
 
 # ----------------- App & Config -----------------
 app = Flask(__name__)
@@ -62,6 +70,14 @@ def invalid_token_callback(reason):
 def is_valid_email(email):
     return re.match(r"[^@]+@[^@]+\.[^@]+", email)
 
+# HÀM MỚI: Tạo Weather ngẫu nhiên theo Vùng
+def generate_random_weather(region_name):
+    config = REGION_CONFIG.get(region_name, REGION_CONFIG["Miền Nam"])
+    temp = random.randint(config["temp_min"], config["temp_max"])
+    weather_type = random.choice(config["weather_types"])
+    return f"{weather_type} {temp}°C"
+
+
 # Hàm tiện ích để giải mã JSON string từ DB thành List Python
 def decode_db_json_string(data_string, default_type='list'):
     if not data_string:
@@ -81,7 +97,7 @@ def get_card_image_url(destination):
     # 1. Kiểm tra cột image_url chính
     if destination.image_url:
         source_url = destination.image_url
-        if source_url.startswith('http://') or source_url.startswith('https://'):
+        if source_url and (source_url.startswith('http://') or source_url.startswith('https://')):
             return source_url # URL mạng
         else:
             # Đường dẫn cục bộ (ví dụ: halong.png)
@@ -263,36 +279,49 @@ def get_saved_list():
     result = []
 
     for item in saved_items:
-        destination = db.session.get(Destination, item.destination_id, options=[db.joinedload(Destination.images)])
+        # Eager load ảnh và sửa cú pháp SQLAlchemy 2.0
+        destination = db.session.get(Destination, item.destination_id, options=[db.joinedload(Destination.images), db.joinedload(Destination.province).joinedload(Province.region)])
         
         if destination:
             province = destination.province
             region = province.region if province else None
-
+            region_name = region.name if region else "Miền Nam" # Default cho weather
+            
             image_full_url = get_card_image_url(destination)
 
             result.append({
                 "id": destination.id,
                 "name": destination.name,
                 "province_name": province.name if province else None,
-                "region_name": region.name if region else None,
+                "region_name": region_name,
                 "image_url": image_full_url, 
                 "description": decode_db_json_string(destination.description),
                 "latitude": destination.latitude,
                 "longitude": destination.longitude,
+                # SỬA LỖI: Lấy Rating từ DB
                 "rating": destination.rating or 0,
                 "category": destination.category,
                 "tags": decode_db_json_string(destination.tags, default_type='text'),
-                "weather": "Sunny 25°C",
+                # SỬA LỖI: Tạo Weather ngẫu nhiên
+                "weather": generate_random_weather(region_name),
             })
     return jsonify(result), 200
 
 # -------- GET ALL DESTINATIONS --------
 @app.route("/api/destinations", methods=["GET"])
 def get_destinations():
-    destinations = Destination.query.options(db.joinedload(Destination.images)).all()
+    # SỬA LỖI: Tách joinedload thành các lệnh song song
+    destinations = Destination.query.options(
+        db.joinedload(Destination.images), 
+        db.joinedload(Destination.province).joinedload(Province.region)
+    ).all()
+    
     result = []
     for dest in destinations:
+        
+        province = dest.province
+        region = province.region if province else None
+        region_name = region.name if region else "Miền Nam" # Default cho weather
         
         image_full_url = get_card_image_url(dest)
             
@@ -306,6 +335,7 @@ def get_destinations():
             "rating": dest.rating or 0,
             "category": dest.category,
             "tags": decode_db_json_string(dest.tags, default_type='text'),
+            "weather": generate_random_weather(region_name),
         })
     return jsonify(result), 200
 
