@@ -8,12 +8,15 @@ body {
 .page-wrapper {
   width: 100%;
   min-height: auto;
-
   display: flex;
   flex-direction: column;
-  align-items: center;     /* ⭐ THÊM DÒNG NÀY */
+  align-items: center;
+  overflow-x: hidden; /* Ẩn scroll ngang */
+  overflow-y: visible; /* Cho phép dropdown tràn theo chiều dọc */
 }
 
 .page-wrapper.with-navbar {
   padding-top: 70px;
+  overflow-x: hidden;
+  overflow-y: visible;
 }
