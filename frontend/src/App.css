@@ -8,12 +8,13 @@ body {
 .page-wrapper {
   width: 100%;
   min-height: auto;
-
   display: flex;
   flex-direction: column;
-  align-items: center;     /* ⭐ THÊM DÒNG NÀY */
+  align-items: center;
+  overflow: visible; /* ← THÊM DÒNG NÀY */
 }
 
 .page-wrapper.with-navbar {
   padding-top: 70px;
+  overflow: visible; /* ← THÊM DÒNG NÀY */
 }
