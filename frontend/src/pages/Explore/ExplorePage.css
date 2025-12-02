@@ -1,9 +1,3 @@
-/* Fix cho parent wrapper */
-.page-wrapper,
-.page-wrapper.with-navbar {
-  overflow: visible !important;
-}
-
 /* Container ExplorePage */
 .explore-container {
   padding: 2rem 4rem;
@@ -11,8 +5,6 @@
   min-height: 100vh;
   font-family: "Poppins", sans-serif;
   box-sizing: border-box;
-  overflow: visible !important;
-  position: relative;
 }
 
 /* Header */
@@ -35,9 +27,8 @@
   width: 100%;
   max-width: 600px;
   border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
-
 .search-bar input {
   flex: 1;
   border: none;
@@ -45,51 +36,26 @@
   font-size: 1rem;
   color: #111827;
 }
-
-.search-bar input:focus {
-  outline: none;
-}
-
-.search-icon {
-  font-size: 1.3rem;
-  color: #6b7280;
-}
+.search-bar input:focus { outline: none; }
+.search-icon { font-size: 1.3rem; color: #6b7280; }
 
 /* Categories row */
 .categories-row {
   display: flex;
   gap: 1rem;
   overflow-x: auto;
-  overflow-y: visible !important;
   padding: 0.5rem 0;
-  padding-bottom: 1rem;
   scrollbar-width: thin;
   justify-content: flex-start;
-  margin-bottom: 1rem;
 }
-
-.categories-row::-webkit-scrollbar {
-  height: 6px;
-}
-
+.categories-row::-webkit-scrollbar { height: 6px; }
 .categories-row::-webkit-scrollbar-thumb {
   background: #6366f1;
   border-radius: 3px;
 }
 
 /* Category item */
-.category-item {
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  min-width: 180px;
-  z-index: 1;
-}
-
-.category-item.open {
-  z-index: 999;
-}
-
+.category-item { display: flex; flex-direction: column; position: relative; min-width: 180px; }
 .category-btn {
   padding: 0.75rem 1rem;
   border-radius: 14px;
@@ -102,28 +68,16 @@
   justify-content: space-between;
   align-items: center;
   transition: all 0.25s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  position: relative;
-  z-index: 2;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
-
-.category-btn:hover {
-  background: #e3e7ff;
-}
-
+.category-btn:hover { background: #e3e7ff; }
 .category-btn.active {
   background: #6366f1;
   color: #fff;
   border-color: #6366f1;
-  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.25);
+  box-shadow: 0 4px 15px rgba(99,102,241,0.25);
 }
-
-.category-left {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-}
-
+.category-left { display: flex; align-items: center; gap: 0.7rem; }
 .category-icon-bubble {
   width: 32px;
   height: 32px;
@@ -134,33 +88,17 @@
   justify-content: center;
   font-size: 1.1rem;
 }
-
-.category-arrow {
-  display: flex;
-  align-items: center;
-  font-size: 1rem;
-}
-
-/* Tag list dropdown */
+.category-arrow { display: flex; align-items: center; font-size: 1rem; }
 .tag-list-vertical {
-  position: fixed !important;
-  display: none;
+  display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 0.75rem;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  z-index: 99999 !important;
-  min-width: 200px;
-  max-height: 400px;
-  overflow-y: auto;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: all 0.3s ease;
 }
-
-.tag-list-vertical.open {
-  display: flex !important;
-}
-
+.tag-list-vertical.open { max-height: 500px; opacity: 1; margin-top: 0.5rem; }
 .tag-btn {
   padding: 0.55rem 0.9rem;
   border-radius: 12px;
@@ -172,44 +110,33 @@
   align-items: center;
   gap: 0.65rem;
   transition: all 0.25s ease;
-  white-space: nowrap;
 }
-
-.tag-btn:hover,
-.tag-btn.active {
+.tag-btn:hover, .tag-btn.active {
   background: #6366f1;
   color: #fff;
   border-color: #6366f1;
   transform: translateX(3px);
-  box-shadow: 0px 2px 10px rgba(99, 102, 241, 0.25);
+  box-shadow: 0px 2px 10px rgba(99,102,241,0.25);
 }
-
-.tag-icon {
-  display: flex;
-  align-items: center;
-  font-size: 1rem;
-}
+.tag-icon { display: flex; align-items: center; font-size: 1rem; }
 
 /* Recommendations */
 .recommend-header {
   font-size: 2rem;
   font-weight: 600;
-  margin-top: 3rem;
+  margin-top: 2rem;
   margin-bottom: 1rem;
   color: #1f2937;
   text-align: left;
-  position: relative;
-  z-index: 1;
 }
 
 /* Slider container */
 .recommend-container {
   display: flex;
   align-items: center;
-  position: relative;
+  position: relative; /* quan trọng để nút arrow position absolute */
   padding: 2rem 0;
-  overflow: visible;
-  z-index: 1;
+  overflow: visible; /* đảm bảo mũi tên không bị cắt */
 }
 
 /* Arrow buttons */
@@ -224,26 +151,26 @@
   padding: 12px;
   cursor: pointer;
   font-size: 22px;
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 3px 12px rgba(0,0,0,0.15);
   transition: all 0.25s ease;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+/* Đặt 2 mũi tên 2 bên slider */
 .arrow-btn.left {
-  left: -25px;
+  left: -25px; /* ra ngoài một chút */
 }
-
 .arrow-btn.right {
-  right: -25px;
+  right: -25px; /* ra ngoài một chút */
 }
 
+/* Hover và disabled */
 .arrow-btn:hover {
   background: #6366f1;
   color: #fff;
 }
-
 .arrow-btn:disabled {
   opacity: 0.3;
   cursor: default;
@@ -265,7 +192,7 @@
   height: 350px;
   border-radius: 16px;
   overflow: visible;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
   background: #fff;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   display: flex;
@@ -273,41 +200,17 @@
   align-items: center;
   position: relative;
 }
-
 .recommend-item:hover {
   transform: scale(1.05) translateY(5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.2);
   z-index: 5;
 }
 
 /* Responsive */
-@media (max-width: 1200px) {
-  .recommend-item {
-    flex: 0 0 300px;
-    height: 300px;
-  }
-}
-
-@media (max-width: 900px) {
-  .recommend-item {
-    flex: 0 0 260px;
-    height: 260px;
-  }
-}
-
-@media (max-width: 600px) {
-  .recommend-item {
-    flex: 0 0 220px;
-    height: 220px;
-  }
-}
-
-@media (max-width: 480px) {
-  .recommend-item {
-    flex: 0 0 180px;
-    height: 180px;
-  }
-}
+@media (max-width: 1200px) { .recommend-item { flex: 0 0 300px; height: 300px; } }
+@media (max-width: 900px)  { .recommend-item { flex: 0 0 260px; height: 260px; } }
+@media (max-width: 600px)  { .recommend-item { flex: 0 0 220px; height: 220px; } }
+@media (max-width: 480px)  { .recommend-item { flex: 0 0 180px; height: 180px; } }
 
 /* No results */
 .no-result {
