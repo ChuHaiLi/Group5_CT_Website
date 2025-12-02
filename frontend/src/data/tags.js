@@ -70,11 +70,11 @@ export const TAG_CATEGORIES = [
   {
     title: "Budget",
     tags: [
-      "Budget Friendly",
-      "Mid-range",
-      "Luxury",
-      "Free/Low Cost",
-      "Premium Experience"
+      "Free",
+      "< 5 Triệu",
+      "5 - 10 Triệu",
+      "10 - 20 Triệu",
+      "> 20 Triệu",
     ]
   },
   {

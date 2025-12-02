@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import API from "../../untils/axios";
 import { TAG_CATEGORIES } from "../../data/tags.js";
 import { toast } from "react-toastify";
@@ -9,7 +9,7 @@ import {
   FaUsers, FaUser, FaClock, FaCalendarAlt, FaSun, FaCloudSun, FaLeaf, FaSnowflake,
   FaMoon, FaStar, FaMoneyBillWave, FaDollarSign, FaGem, FaGift, FaEye, FaImage,
   FaMapMarkedAlt, FaFireAlt, FaPaw, FaSearch, FaChevronUp, FaChevronDown,
-  FaChevronLeft, FaChevronRight, FaMusic, FaSpa, FaChild
+  FaChevronLeft, FaChevronRight, FaMusic, FaSpa, FaChild, FaCrown
 } from "react-icons/fa";
 
 import RecommendCard from "../Home/Recommendations/RecommendCard";
@@ -31,9 +31,9 @@ const ICON_MAP = {
   "Full Day": <FaClock />, "2 Days": <FaClock />, "3+ Days": <FaClock />, "Weekend Trip": <FaClock />,
   Overnight: <FaClock />, "Multi-day Adventure": <FaClock />, Spring: <FaLeaf />, Summer: <FaSun />,
   Autumn: <FaCloudSun />, Winter: <FaSnowflake />, Morning: <FaSun />, Afternoon: <FaCloudSun />,
-  Evening: <FaCalendarAlt />, Night: <FaMoon />, "Budget Friendly": <FaMoneyBillWave />,
-  "Mid-range": <FaDollarSign />, Luxury: <FaGem />, "Free/Low Cost": <FaMoneyBillWave />,
-  "Premium Experience": <FaGem />, "Scenic Views": <FaEye />, "Instagrammable Spots": <FaImage />,
+  Evening: <FaCalendarAlt />, Night: <FaMoon />, "Free": <FaGift />, "< 5 Triệu": <FaMoneyBillWave />,
+  "5 - 10 Triệu": <FaDollarSign />, "10 - 20 Triệu": <FaGem />,
+  "> 20 Triệu": <FaCrown />, "Scenic Views": <FaEye />, "Instagrammable Spots": <FaImage />,
   "Local Cuisine": <FaUtensils />, "Festivals & Events": <FaFireAlt />, "Adventure Sports": <FaHiking />,
   "Relaxing Spots": <FaSpa />, "Cultural Immersion": <FaLandmark />, "Hidden Gems": <FaMapMarkedAlt />
 };
@@ -52,6 +52,7 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
   const [showForm, setShowForm] = useState(false);
   const [selectedDestination, setSelectedDestination] = useState(null);
   const [openCategory, setOpenCategory] = useState(null);
+  const categoryRefs = useRef({});
 
   // Slider state
   const [recommendIndex, setRecommendIndex] = useState(0);
@@ -73,6 +74,33 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
   const toggleCategory = (title) => {
     setOpenCategory((prev) => (prev === title ? null : title));
   };
+
+  useEffect(() => {
+  if (openCategory) {
+    const categoryElement = categoryRefs.current[openCategory];
+    const dropdown = categoryElement?.querySelector('.tag-list-vertical');
+    
+    if (categoryElement && dropdown) {
+      const rect = categoryElement.getBoundingClientRect();
+      const dropdownWidth = dropdown.offsetWidth; // Lấy width của dropdown
+      
+      dropdown.style.top = `${rect.bottom + 8}px`; // Xuống dưới
+      dropdown.style.left = `${rect.left + (rect.width - dropdownWidth) / 2}px`; // Căn giữa
+    }
+  }
+}, [openCategory]);
+
+  // Hoặc nếu muốn đóng dropdown khi scroll (đơn giản hơn):
+  useEffect(() => {
+    const handleScroll = () => {
+      if (openCategory) {
+        setOpenCategory(null);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [openCategory]);
 
   const filteredDestinations = destinations.filter((dest) => {
     const matchesSearch = dest.name.toLowerCase().includes(search.toLowerCase());
@@ -103,7 +131,11 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
       {/* Tag Categories */}
       <div className="categories-row">
         {TAG_CATEGORIES.map((cat) => (
-          <div key={cat.title} className="category-item">
+          <div
+            key={cat.title}
+            className={`category-item ${openCategory === cat.title ? "open" : ""}`}
+            ref={(el) => (categoryRefs.current[cat.title] = el)}
+          >
             <button
               className={`category-btn ${openCategory === cat.title ? "active" : ""}`}
               onClick={() => toggleCategory(cat.title)}
