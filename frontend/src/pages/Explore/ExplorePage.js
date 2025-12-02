@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import API from "../../untils/axios";
 import { TAG_CATEGORIES } from "../../data/tags.js";
 import { toast } from "react-toastify";
@@ -52,6 +52,7 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
   const [showForm, setShowForm] = useState(false);
   const [selectedDestination, setSelectedDestination] = useState(null);
   const [openCategory, setOpenCategory] = useState(null);
+  const categoryRefs = useRef({}); // ← THÊM DÒNG NÀY
 
   // Slider state
   const [recommendIndex, setRecommendIndex] = useState(0);
@@ -73,6 +74,32 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
   const toggleCategory = (title) => {
     setOpenCategory((prev) => (prev === title ? null : title));
   };
+
+  useEffect(() => {
+    if (openCategory) {
+      const categoryElement = categoryRefs.current[openCategory];
+      const dropdown = categoryElement?.querySelector('.tag-list-vertical');
+
+      if (categoryElement && dropdown) {
+        const rect = categoryElement.getBoundingClientRect();
+        const dropdownWidth = dropdown.offsetWidth; // Lấy width của dropdown
+
+        dropdown.style.top = `${rect.bottom + 0}px`; // Xuống dưới
+        dropdown.style.left = `${rect.left + (rect.width - dropdownWidth) / 2}px`; // Căn giữa
+      }
+    }
+  }, [openCategory]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (openCategory) {
+        setOpenCategory(null); // Đóng dropdown khi scroll
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [openCategory]);
 
   const filteredDestinations = destinations.filter((dest) => {
     const matchesSearch = dest.name.toLowerCase().includes(search.toLowerCase());
@@ -103,7 +130,11 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
       {/* Tag Categories */}
       <div className="categories-row">
         {TAG_CATEGORIES.map((cat) => (
-          <div key={cat.title} className="category-item">
+          <div
+            key={cat.title}
+            className={`category-item ${openCategory === cat.title ? "open" : ""}`}
+            ref={(el) => (categoryRefs.current[cat.title] = el)}
+          >
             <button
               className={`category-btn ${openCategory === cat.title ? "active" : ""}`}
               onClick={() => toggleCategory(cat.title)}
