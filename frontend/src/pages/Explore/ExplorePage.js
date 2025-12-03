@@ -104,8 +104,9 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
 
   const filteredDestinations = destinations.filter((dest) => {
     const matchesSearch = dest.name.toLowerCase().includes(search.toLowerCase());
+    const safeTags = dest.tags || [];
     const matchesTags =
-      selectedTags.length === 0 || selectedTags.every((tag) => dest.tags.includes(tag));
+      selectedTags.length === 0 || selectedTags.every((tag) => safeTags.includes(tag));
     return matchesSearch && matchesTags;
   });
 

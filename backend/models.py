@@ -74,12 +74,23 @@ class DestinationImage(db.Model):
 
 
 class Itinerary(db.Model):
+    __tablename__ = 'itineraries'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    title = db.Column(db.String(100))
-    data = db.Column(db.Text)
+    name = db.Column(db.String(150), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    province_id = db.Column(db.Integer, db.ForeignKey('provinces.id'), nullable=False)
+    duration = db.Column(db.Integer, nullable=False, default=1) # Số ngày của chuyến đi
+    
+    # 💡 LỘ TRÌNH CHIA NGÀY (Lưu trữ JSON string)
+    itinerary_json = db.Column(db.Text, nullable=True) 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    user = db.relationship('User', backref='trips')  
+    province = db.relationship('Province', backref='itineraries')
 
+    def __repr__(self):
+        return f"<Itinerary {self.id}: {self.name} - Province {self.province_id}>"
+    
 # Nơi lưu địa điểm yêu thích (Không cần thay đổi)
 class SavedDestination(db.Model):
     id = db.Column(db.Integer, primary_key=True)

@@ -14,6 +14,8 @@ export default function RecommendCard({
   onToggleSave,
   onViewDetails,
   onCreateTrip,
+  onSelectPlace,
+  mode = "explore"
 }) {
   const handleToggle = (e) => {
     e.stopPropagation();
@@ -35,58 +37,64 @@ export default function RecommendCard({
     return stars;
   };
   
-  // Chuẩn bị mô tả (như đã sửa trước đó)
   const descriptionText = Array.isArray(destination.description)
     ? destination.description.join(' ')
     : destination.description || '';
 
-  // LOGIC MỚI: Chỉ lấy ảnh đầu tiên nếu image_url là một mảng
   const cardImageUrl = Array.isArray(destination.image_url) 
     ? destination.image_url[0] 
     : destination.image_url;
 
-  return (
-    <div
-      className="recommend-card"
-      // SỬ DỤNG cardImageUrl ĐÃ ĐƯỢC XỬ LÝ
-      style={{ backgroundImage: `url(${cardImageUrl})` }}
-      onClick={() => onViewDetails?.(destination.id)}
-    >
-      <div className="card-overlay" />
+// --- LOGIC NÚT TÙY CHỈNH DỰA TRÊN MODE ---
+  const buttonText = mode === "select" ? "Select Place" : "Create a Trip";
+  
+  const buttonAction = (e) => {
+    e.stopPropagation();
+    if (mode === "select" && onSelectPlace) {
+      onSelectPlace(destination); // Chế độ select: gửi toàn bộ object destination
+    } else if (mode === "explore" && onCreateTrip) {
+      onCreateTrip(destination); // Chế độ explore: gửi object để mở form
+    }
+  };
 
-      {/* SAVE ICON */}
-      <div className="card-header">
-        <div className="save-icon" onClick={handleToggle}>
-          {isSaved ? <FaHeart color="red" /> : <FaRegHeart color="white" />}
-        </div>
-      </div>
+return (
+    <div
+      className="recommend-card"
+      style={{ backgroundImage: `url(${cardImageUrl})` }}
+      onClick={() => onViewDetails?.(destination.id)}
+    >
+      <div className="card-overlay" />
 
-      {/* CONTENT */}
-      <div className="card-content">
-        <h3>{destination.name}</h3>
-        
-        {/* ÁP DỤNG CLASS CSS ĐỂ CẮT CHUỖI */}
-        <p className="card-description-text">{descriptionText}</p>
+      {/* SAVE ICON: Chỉ hiển thị ở chế độ explore */}
+      {mode === "explore" && (
+        <div className="card-header">
+          <div className="save-icon" onClick={handleToggle}>
+            {isSaved ? <FaHeart color="red" /> : <FaRegHeart color="white" />}
+          </div>
+        </div>
+      )}
 
-        <div className="weather">
-          <strong>Weather:</strong> {destination.weather || "Sunny 25°C"}
-        </div>
+      {/* CONTENT */}
+      <div className="card-content">
+        <h3>{destination.name}</h3>
+        
+        <p className="card-description-text">{descriptionText}</p>
 
-        <div className="rating">
-          <strong>Rating:</strong> {renderStars(destination.rating)}
-        </div>
+        <div className="weather">
+          <strong>Weather:</strong> {destination.weather || "Sunny 25°C"}
+        </div>
 
-        {/* BUTTON */}
-        <button
-          className="create-trip-btn"
-          onClick={(e) => {
-            e.stopPropagation();
-            onCreateTrip?.(destination); // gửi object ra ngoài
-          }}
-        >
-          Create a Trip
-        </button>
-      </div>
-    </div>
-  );
+        <div className="rating">
+          <strong>Rating:</strong> {renderStars(destination.rating)}
+        </div>
+
+        <button
+          className="create-trip-btn"
+          onClick={buttonAction} 
+        >
+          {buttonText} 
+        </button>
+      </div>
+    </div>
+  );
 }
