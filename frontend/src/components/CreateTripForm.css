@@ -1,43 +1,333 @@
-/* Thêm vào CreateTripForm.css */
+/* CreateTripForm.css */
 
-.destinations-search-group {
-    position: relative; /* Quan trọng để overlay căn theo */
-    margin-bottom: 25px;
-}
-
-.search-results-overlay {
-    position: absolute;
-    top: calc(100% + 5px); /* Đặt ngay dưới input */
+/* --- Modal Overlay (Form Chính) --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
     left: 0;
     right: 0;
-    background: rgba(255,255,255,0.95);
-    backdrop-filter: blur(8px);
-    border: 1px solid #ddd;
-    border-radius: 14px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-    z-index: 10;
-    max-height: 400px;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* --- Form Container --- */
+.create-trip-form {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    max-height: 90vh;
     overflow-y: auto;
-    padding: 10px;
 }
 
-.loading-text, .no-results {
-    text-align: center;
-    padding: 10px;
-    color: #888;
+.create-trip-form h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #0381ff;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 10px;
 }
 
-.hint-text {
-    font-style: italic;
+/* --- Input Groups & Styles --- */
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.trip-name-input,
+.search-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+/* --- Province Select (Dropdown) --- */
+.province-select-group {
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 8px;
+    background: #fcfcfc;
+}
+
+.province-select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 16px;
+    appearance: none; /* Xóa style mặc định */
+    background-color: #fff;
+    /* Thêm mũi tên dropdown (SVG base64) */
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23000000%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13%205.5L146.2%20208.7L18%2075a17.6%2017.6%200%200%200-25%2025.5l136%20136%20136%20-136c6.5-6.8%206.3-17.9-.5-24.5z%22%2F%3E%3C%2Fsvg%3E');
+    background-repeat: no-repeat;
+    background-position: right 10px top 50%;
+    background-size: 10px auto;
+}
+
+.province-select:disabled {
+    background-color: #f0f0f0;
+    cursor: not-allowed;
+}
+
+/* --- Search Results Box (Dropdown) --- */
+.destinations-search-group {
+    position: relative;
+}
+
+.search-results-box {
+    position: absolute;
+    width: 100%;
+    max-height: 250px;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    z-index: 10; 
+    margin-top: 5px;
+}
+
+.loading-text, .no-results, .hint-text {
+    padding: 10px;
     color: #999;
-    font-size: 0.9em;
+    font-style: italic;
+    text-align: center;
+}
+
+/* --- Summary --- */
+.summary-box {
+    border: 1px solid #eee;
+    padding: 15px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.main-province-info {
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #ddd;
+    font-size: 14px;
 }
 
 .main-province-tag {
-    background-color: #d8c2ff;
-    color: #6c5ce7;
-    padding: 4px 8px;
-    border-radius: 10px;
-    font-weight: 600;
+    background-color: #0381ff;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 15px;
     margin-left: 10px;
+    font-weight: normal;
+    display: inline-block;
+}
+
+.warning-text {
+    color: #ff4500;
+    font-style: italic;
+    margin-left: 10px;
+}
+
+.must-include-label {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.destination-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 5px;
+}
+
+.destination-item {
+    background: #e0f7fa;
+    color: #00796b;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+}
+
+.destination-item button {
+    background: #00bcd4;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    line-height: 1;
+    text-align: center;
+    margin-left: 8px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+/* --- Option Pills --- */
+.options-group {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.option-card {
+    border: 1px solid #f0f0f0;
+    padding: 10px;
+    border-radius: 8px;
+    background: #fafafa;
+}
+
+.option-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.pill {
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 13px;
+    color: #333;
+}
+
+.pill:hover {
+    background: #eee;
+}
+
+.pill.selected {
+    background: #0381ff;
+    color: white;
+    border-color: #0381ff;
+}
+
+/* --- Form Buttons --- */
+.form-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 15px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.form-buttons button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.form-buttons button[type="submit"] {
+    background: #00bfa5;
+    color: white;
+}
+
+.form-buttons button[type="submit"]:hover:not(:disabled) {
+    background: #009e8c;
+}
+
+.form-buttons button[type="submit"]:disabled {
+    background: #cccccc;
+    cursor: not-allowed;
+}
+
+.cancel-btn {
+    background: #f44336;
+    color: white;
+}
+
+.cancel-btn:hover {
+    background: #d32f2f;
+}
+
+/* --- MODAL XEM CHI TIẾT ĐỊA ĐIỂM (Details Modal) --- */
+
+.details-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.details-modal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    background: transparent; 
+}
+
+.details-modal .recommend-card {
+    width: 380px; 
+    height: 400px;
+    margin: 0; 
+}
+
+.close-details-btn {
+    padding: 10px 20px;
+    background: #f44336;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+    z-index: 2001; 
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.close-details-btn:hover {
+    background: #d32f2f;
+}
+
+/* Responsive adjustment for options group */
+@media (max-width: 768px) {
+    .options-group {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 480px) {
+    .options-group {
+        grid-template-columns: 1fr;
+    }
+    .details-modal .recommend-card {
+        width: 90vw;
+        height: 350px;
+    }
 }
