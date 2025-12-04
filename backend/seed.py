@@ -6,6 +6,7 @@ from app import app
 from models import db, Region, Province, Destination, DestinationImage
 from datetime import datetime
 from sqlalchemy.exc import IntegrityError
+from unidecode import unidecode # <--- THƯ VIỆN CẦN THIẾT CHO CHUẨN HÓA
 
 # Danh sách các file JSON cần đọc
 JSON_FILES = ["data/mienbac.json", "data/mientrung.json", "data/miennam.json"]
@@ -32,7 +33,6 @@ def load_data_from_json(file_paths):
                 with open(full_path, 'r', encoding='utf-8') as f:
                     data = json.load(f)
                 
-                # Đảm bảo data là list (nếu file JSON chứa một region duy nhất, nó sẽ là dict)
                 if isinstance(data, dict):
                     all_regions_data.append(data)
                 elif isinstance(data, list):
@@ -114,7 +114,6 @@ def seed_database():
                 continue
 
             # 2. Tạo/Lấy Region
-            # Tách riêng commit cho Region/Province để tránh rollback lớn
             region = Region.query.filter_by(name=region_name).first()
             if not region:
                 try:
@@ -123,7 +122,6 @@ def seed_database():
                     db.session.commit() 
                 except IntegrityError:
                     db.session.rollback()
-                    # Lấy lại nếu bị lỗi do Race Condition (rất hiếm trong seed.py)
                     region = Region.query.filter_by(name=region_name).first() 
 
             print(f"Đang xử lý Vùng: {region_name}")
@@ -133,12 +131,17 @@ def seed_database():
                 if not province_name:
                     continue
 
+                # --- BƯỚC SỬA 1: TẠO TÊN TỈNH KHÔNG DẤU ---
+                # Loại bỏ dấu và chuyển thành chữ thường để lưu vào name_unaccented
+                province_name_unaccented = unidecode(province_name).lower()
+
                 # 3. Tạo/Lấy Province
                 province = Province.query.filter_by(name=province_name).first()
                 if not province:
                     try:
                         province = Province(
                             name=province_name,
+                            name_unaccented=province_name_unaccented, # <--- LƯU TRƯỜNG MỚI
                             overview=province_data.get("overview"),
                             image_url=province_data.get("image_url"),
                             region_id=region.id 
@@ -147,9 +150,12 @@ def seed_database():
                         db.session.commit() 
                     except IntegrityError:
                         db.session.rollback()
-                        province = Province.query.filter_by(name=province_name).first() 
+                        province = Province.query.filter_by(name=province_name).first()
+                else:
+                    # CẬP NHẬT TRƯỜNG MỚI NẾU TỈNH ĐÃ TỒN TẠI
+                    province.name_unaccented = province_name_unaccented
 
-                print(f"  Đang xử lý Tỉnh: {province_name}")
+                print(f"  Đang xử lý Tỉnh: {province_name}")
 
                 # --- DÀN PHẲNG PLACES ---
                 places_raw = province_data.get("places", [])
@@ -160,8 +166,7 @@ def seed_database():
                     elif isinstance(item, dict):
                         places_list.append(item)
                 
-                # SỬ DỤNG NO_AUTOFLUSH ĐỂ TRÁNH LỖI INTEGRITY ERROR VÌ DESTINATION.query
-                # Nếu không dùng no_autoflush, cần phải flush sau khi thêm Destination mới.
+                # SỬ DỤNG NO_AUTOFLUSH
                 with db.session.no_autoflush:
                     # Lặp qua từng Địa điểm (Destination)
                     for dest_data in places_list:
@@ -172,6 +177,9 @@ def seed_database():
                         dest_name = dest_data.get("name")
                         if not dest_name:
                             continue
+                            
+                        # --- BƯỚC SỬA 2: TẠO TÊN ĐỊA ĐIỂM KHÔNG DẤU ---
+                        dest_name_unaccented = unidecode(dest_name).lower()
                             
                         # RANDOM METRICS CHO DESTINATION
                         rating, weather_str, category_str = generate_random_metrics(region_name)
@@ -190,6 +198,7 @@ def seed_database():
                             try:
                                 d = Destination(
                                     name=dest_name,
+                                    name_unaccented=dest_name_unaccented, # <--- LƯU TRƯỜNG MỚI
                                     province_id=province.id,
                                     place_type=dest_data.get("type"),
                                     description=description_json,
@@ -206,30 +215,26 @@ def seed_database():
                                 )
                                 db.session.add(d)
 
-                                # ✨ KHẮC PHỤC LỖI: FLUSH để gán ID cho 'd' trước khi tạo ảnh liên quan ✨
-                                # Nếu không có dòng này, d.id là None, gây lỗi IntegrityError
+                                # FLUSH để gán ID cho 'd' trước khi tạo ảnh liên quan
                                 db.session.flush()
 
                                 # 5. Tạo DestinationImage cho bản ghi mới
                                 for image_url in dest_data.get("images", []):
                                     if image_url:
-                                        # destination_id=d.id lúc này đã có giá trị hợp lệ
                                         img = DestinationImage(image_url=image_url, destination_id=d.id)
                                         db.session.add(img)
 
                             except IntegrityError as e:
-                                # Lỗi này hiếm xảy ra nếu dùng filter_by(name) ở trên
                                 print(f"Lỗi Integrity khi tạo Destination {dest_name}: {e}")
                                 db.session.rollback()
                         else:
-                            # TRƯỜNG HỢP 2: CẬP NHẬT (Chỉ cập nhật rating và category)
+                            # TRƯỜNG HỢP 2: CẬP NHẬT 
                             destination.rating = rating
                             destination.category = category_str
                             destination.description = description_json
                             destination.tags = tags_json
-                            # Cập nhật ảnh chính (nếu có)
                             destination.image_url = dest_data.get("image_url")
-
+                            destination.name_unaccented = dest_name_unaccented # <--- CẬP NHẬT TRƯỜNG MỚI
 
                 # Commit tất cả thay đổi sau khi đã duyệt qua hết Destination trong Province
                 try:
