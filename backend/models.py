@@ -21,6 +21,7 @@ class Province(db.Model):
     __tablename__ = 'provinces' # <-- THÊM: Đồng bộ tên bảng số nhiều
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
+    name_unaccented = db.Column(db.String(100), index=True)
     overview = db.Column(db.Text)
     image_url = db.Column(db.String(255))
     
@@ -59,6 +60,7 @@ class Destination(db.Model):
     province_id = db.Column(db.Integer, db.ForeignKey("provinces.id"), nullable=False) 
     
     name = db.Column(db.String(100), nullable=False)
+    name_unaccented = db.Column(db.String(128), index=True)
     place_type = db.Column(db.String(50)) 
     description = db.Column(db.Text) 
     # ... (Các cột khác)

@@ -20,6 +20,8 @@ import json
 from sqlalchemy.orm import joinedload
 from flask_migrate import Migrate
 import random
+from flask import request, jsonify
+from unidecode import unidecode
 
 load_backend_env()
 
@@ -314,24 +316,60 @@ def get_saved_list():
 # -------- GET ALL DESTINATIONS --------
 @app.route("/api/destinations", methods=["GET"])
 def get_destinations():
-    # SỬA LỖI: Tách joinedload thành các lệnh song song
-    destinations = Destination.query.options(
+    # Lấy các tham số từ query string
+    search_term = request.args.get("search", "").strip()
+    tags_string = request.args.get("tags")
+
+    # Bắt đầu truy vấn
+    query = Destination.query.options(
         db.joinedload(Destination.images), 
         db.joinedload(Destination.province).joinedload(Province.region)
-    ).all()
+    )
+
+    # 1. Lọc theo Search Term (Tên địa điểm HOẶC Tên tỉnh)
+    if search_term:
+        # BƯỚC 1: Chuẩn hóa chuỗi tìm kiếm từ client trong Python
+        # Ví dụ: "Ha Noi" -> unidecode('Ha Noi').lower() -> "ha noi"
+        normalized_search = unidecode(search_term).lower()
+        search_pattern = f"%{normalized_search}%"
+        
+        query = query.filter(
+            db.or_(
+                # 1. So sánh với cột tên Địa điểm không dấu (name_unaccented)
+                Destination.name_unaccented.ilike(search_pattern),
+                
+                # 2. So sánh tên Tỉnh không dấu (Province.name_unaccented)
+                Destination.province.has(
+                    Province.name_unaccented.ilike(search_pattern)
+                )
+            )
+        )
+    
+    # 2. Lọc theo Tags (Filter - Giữ nguyên logic cũ)
+    if tags_string:
+        required_tags = tags_string.split(',')
+        
+        # Áp dụng bộ lọc cho TẤT CẢ các tag yêu cầu
+        for tag in required_tags:
+            # Giả định cột 'tags' là chuỗi JSON hoặc có thể dùng LIKE để tìm kiếm chuỗi con
+            query = query.filter(Destination.tags.ilike(f'%"{tag.strip()}"%')) 
+    
+    # Thực thi truy vấn đã được lọc
+    destinations = query.all()
     
     result = []
     for dest in destinations:
-        
         province = dest.province
         region = province.region if province else None
-        region_name = region.name if region else "Miền Nam" # Default cho weather
+        region_name = region.name if region else "Miền Nam" 
         
         image_full_url = get_card_image_url(dest)
             
         result.append({
             "id": dest.id,
             "name": dest.name,
+            "province_name": province.name if province else None,
+            "region_name": region_name, 
             "description": decode_db_json_string(dest.description),
             "image_url": image_full_url, 
             "latitude": dest.latitude,
@@ -369,6 +407,7 @@ def get_vietnam_locations():
         
         for province in region.provinces:
             province_data = {
+                "id": province.id,
                 "province_name": province.name,
                 "overview": province.overview,
                 "image_url": province.image_url, 
@@ -481,8 +520,12 @@ def create_trip():
     user_id = int(get_jwt_identity())
     
     name = data.get("name")
-    province_id = data.get("province_id")
-    duration_days = data.get("duration")
+    try:
+        province_id = data.get("province_id")
+        duration_days = data.get("duration")
+    except:
+        return jsonify({"message": "Province ID hoặc số ngày không hợp lệ."}), 400
+    
     must_include_place_ids = data.get("must_include_place_ids", []) 
 
     if not all([name, province_id, duration_days]):

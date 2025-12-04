@@ -1,4 +1,4 @@
-// CreateTripFormOptimized.jsx (patched: robust province id handling + initialDestination by name)
+// CreateTripFormOptimized.jsx (patched & commented)
 import React, { useEffect, useRef, useState } from "react";
 import {
   FaClock,
@@ -43,9 +43,11 @@ const normalize = (str) =>
 const normalizeProvince = (input, provinceList) => {
   if (!input) return null;
   const normalizedInput = normalize(input);
+  // exact match name
   for (const p of provinceList) {
     if (normalize(p.name) === normalizedInput) return p;
   }
+  // substring match
   for (const p of provinceList) {
     if (normalize(p.name).includes(normalizedInput)) return p;
   }
@@ -94,14 +96,14 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
       .then((res) => {
         const provinces = [];
         if (Array.isArray(res.data)) {
-          res.data.forEach((region) => {
+          res.data.forEach((region, regionIdx) => {
             if (Array.isArray(region.provinces)) {
               region.provinces.forEach((p, idx) => {
                 // if backend doesn't provide an id for province, use province_name as stable id string
-                const idStr = String(p.id ?? p.province_id ?? p.province_name ?? `prov-${idx}`);
+                const idStr = String(p.id ?? p.province_id ?? p.province_name ?? `prov-${regionIdx}-${idx}`);
                 provinces.push({
                   id: idStr,
-                  name: p.province_name,
+                  name: p.province_name || p.name || "Unknown",
                   regionName: region.region_name || "",
                 });
               });
@@ -118,52 +120,59 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
   }, []);
 
   // ---------------------------------------------------------
-  // Initialize from initialDestination (support both province_id and province_name)
+  // Initialize from initialDestination (robust matching)
   // ---------------------------------------------------------
   useEffect(() => {
     if (!initialDestination || vietnamLocations.length === 0) return;
     if (initialLoaded.current) return;
 
-    const { id, name, province_id, province_name } = initialDestination;
+    const { id: destId, name: destName, province_id, province_name } = initialDestination;
 
-    // 1) try match by numeric province_id (if provided)
-    if (province_id) {
-      const match = vietnamLocations.find((p) => String(p.id) === String(province_id) || String(p.id) === String(province_id));
+    // 1) Try match by id (string equality) - safest
+    if (province_id != null) {
+      const provIdStr = String(province_id);
+      const match = vietnamLocations.find((p) => String(p.id) === provIdStr);
       if (match) {
         setSelectedProvince({ id: match.id, name: match.name });
-        setMustIncludeDetails([{ id, name, province_id, province_name }]);
-        if (!tripName) setTripName(`Khám phá ${name}`);
+        setMustIncludeDetails([{ id: destId, name: destName, province_id: province_id, province_name: match.name }]);
+        if (!tripName) setTripName(`Khám phá ${destName}`);
         initialLoaded.current = true;
         return;
       }
     }
 
-    // 2) try match by province_name (fuzzy)
+    // 2) Try match by numeric id if province_id is numeric-like and provinces ids are numeric-like
+    const numericTry = Number(province_id);
+    if (Number.isFinite(numericTry) && numericTry > 0) {
+      const matchNum = vietnamLocations.find((p) => {
+        const pid = Number(p.id);
+        return Number.isFinite(pid) && pid === numericTry;
+      });
+      if (matchNum) {
+        setSelectedProvince({ id: matchNum.id, name: matchNum.name });
+        setMustIncludeDetails([{ id: destId, name: destName, province_id: numericTry, province_name: matchNum.name }]);
+        if (!tripName) setTripName(`Khám phá ${destName}`);
+        initialLoaded.current = true;
+        return;
+      }
+    }
+
+    // 3) Try match by province_name (normalize)
     if (province_name) {
       const matchByName = normalizeProvince(province_name, vietnamLocations);
       if (matchByName) {
         setSelectedProvince({ id: matchByName.id, name: matchByName.name });
-        setMustIncludeDetails([{ id, name, province_id: matchByName.id, province_name: matchByName.name }]);
-        if (!tripName) setTripName(`Khám phá ${name}`);
+        // attempt to preserve numeric province_id if possible else keep as original
+        const pid = Number(matchByName.id);
+        setMustIncludeDetails([{ id: destId, name: destName, province_id: Number.isFinite(pid) ? pid : matchByName.id, province_name: matchByName.name }]);
+        if (!tripName) setTripName(`Khám phá ${destName}`);
         initialLoaded.current = true;
         return;
       }
     }
 
-    // 3) fallback: try find any province whose name includes the destination name (rare)
-    if (name) {
-      const matchFallback = vietnamLocations.find((p) => normalize(p.name).includes(normalize(name)) || normalize(name).includes(normalize(p.name)));
-      if (matchFallback) {
-        setSelectedProvince({ id: matchFallback.id, name: matchFallback.name });
-        setMustIncludeDetails([{ id, name, province_id: matchFallback.id, province_name: matchFallback.name }]);
-        if (!tripName) setTripName(`Khám phá ${name}`);
-        initialLoaded.current = true;
-        return;
-      }
-    }
-
-    // else: at least set trip name
-    if (!tripName && name) setTripName(`Khám phá ${name}`);
+    // fallback: at least set trip name
+    if (!tripName && destName) setTripName(`Khám phá ${destName}`);
     initialLoaded.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialDestination, vietnamLocations]);
@@ -178,7 +187,10 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
       return;
     }
 
-    const alreadyFromProvince = mustIncludeDetails.some((d) => String(d.province_id) === String(selectedProvince.id) || normalize(d.province_name) === normalize(selectedProvince.name));
+    const alreadyFromProvince = mustIncludeDetails.some((d) => {
+      const dPid = d.province_id != null ? String(d.province_id) : "";
+      return dPid === String(selectedProvince.id) || normalize(d.province_name || "") === normalize(selectedProvince.name);
+    });
     if (alreadyFromProvince) {
       setSearchResults([]);
       setSearchTerm("");
@@ -186,11 +198,18 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
     }
 
     setSearchLoading(true);
-    // try call with province_id if the province id is numeric-like; otherwise backend may accept province_name param — try both
-    const numericId = Number(selectedProvince.id);
-    const param = Number.isFinite(numericId) && numericId > 0 ? `province_id=${numericId}` : `province_name=${encodeURIComponent(selectedProvince.name)}`;
 
-    API.get(`/destinations?${param}&top=6`)
+    // choose param: if selectedProvince.id looks like positive integer, send as province_id; otherwise send province_name
+    const numericId = Number(selectedProvince.id);
+    let queryUrl;
+    if (Number.isFinite(numericId) && numericId > 0) {
+      queryUrl = `/destinations?province_id=${numericId}&top=6`;
+    } else {
+      // encode name to avoid issues
+      queryUrl = `/destinations?province_name=${encodeURIComponent(selectedProvince.name)}&top=6`;
+    }
+
+    API.get(queryUrl)
       .then((res) => {
         if (Array.isArray(res.data) && res.data.length > 0) {
           const top = res.data.slice(0, 5).map((p) => ({
@@ -228,15 +247,21 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
     setSearchLoading(true);
     searchTimer.current = setTimeout(() => {
       const q = encodeURIComponent(searchTerm.trim());
+      // same logic: use province_id if numeric, else province_name
       const numericId = Number(selectedProvince.id);
-      const param = Number.isFinite(numericId) && numericId > 0 ? `province_id=${numericId}` : `province_name=${encodeURIComponent(selectedProvince.name)}`;
+      let paramPart;
+      if (Number.isFinite(numericId) && numericId > 0) {
+        paramPart = `province_id=${numericId}`;
+      } else {
+        paramPart = `province_name=${encodeURIComponent(selectedProvince.name)}`;
+      }
 
-      API.get(`/destinations?search=${q}&${param}`)
+      API.get(`/destinations?search=${q}&${paramPart}`)
         .then((res) => {
           const filtered = Array.isArray(res.data)
             ? res.data.filter((p) => {
-                // accept if place.province_id matches or province_name matches (normalized)
-                const pidMatch = p.province_id ? String(p.province_id) === String(selectedProvince.id) : false;
+                // accept if place.province_id matches (string/number) or province_name matches (normalized)
+                const pidMatch = p.province_id != null && String(p.province_id) === String(selectedProvince.id);
                 const pnameMatch = p.province_name ? normalize(p.province_name) === normalize(selectedProvince.name) : false;
                 return pidMatch || pnameMatch;
               })
@@ -268,20 +293,23 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
       return;
     }
     // val will be our idStr (string)
-    const found = vietnamLocations.find((p) => String(p.id) === String(val));
+    const found = vietnamLocations.find((p) => p.id === val);
     if (!found) {
       toast.error("Tỉnh/Thành không hợp lệ.");
       return;
     }
 
-    // remove mustInclude items not from this province (based on either id or name)
-    setMustIncludeDetails((prev) => prev.filter((d) => {
-      const pidMatch = d.province_id ? String(d.province_id) === String(found.id) : false;
-      const pnameMatch = d.province_name ? normalize(d.province_name) === normalize(found.name) : false;
-      return pidMatch || pnameMatch;
-    }));
+    // remove mustInclude items not from this province (compare as strings OR by normalized province_name)
+    setMustIncludeDetails((prev) =>
+      prev.filter((d) => {
+        const dPid = d.province_id != null ? String(d.province_id) : "";
+        const foundId = String(found.id);
+        const pnameMatch = d.province_name ? normalize(d.province_name) === normalize(found.name) : false;
+        return dPid === foundId || pnameMatch;
+      })
+    );
 
-    setSelectedProvince({ id: String(found.id), name: found.name });
+    setSelectedProvince({ id: found.id, name: found.name });
   };
 
   const addPlaceToMustInclude = (place) => {
@@ -290,10 +318,11 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
       return;
     }
 
-    // check belonging by ID OR by province_name fuzzy-match
-    const placeBelongs =
-      (place.province_id && String(place.province_id) === String(selectedProvince.id)) ||
-      (place.province_name && normalize(place.province_name) === normalize(selectedProvince.name));
+    // check belonging: compare by stringified province_id OR normalized province_name
+    const placePid = place.province_id != null ? String(place.province_id) : "";
+    const selectedPid = String(selectedProvince.id);
+    const nameMatch = place.province_name ? normalize(place.province_name) === normalize(selectedProvince.name) : false;
+    const placeBelongs = placePid === selectedPid || nameMatch;
 
     if (!placeBelongs) {
       toast.error(`"${place.name}" không thuộc ${selectedProvince.name}.`);
@@ -347,14 +376,22 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
       return;
     }
 
-    // Try to send numeric id if possible (if selectedProvince.id looks numeric), otherwise send null and backend should accept province_name
-    const maybeNumeric = Number(selectedProvince.id);
-    const provincePayload = Number.isFinite(maybeNumeric) && maybeNumeric > 0 ? maybeNumeric : undefined;
+    // BƯỚC 1: Xác định ID số nguyên hợp lệ
+    const provinceIdAsString = String(selectedProvince.id);
+    const provinceIdToSend = Number(provinceIdAsString);
 
+    // BƯỚC 2: Thêm kiểm tra cuối cùng để đảm bảo ID là số hợp lệ
+    if (!Number.isFinite(provinceIdToSend) || provinceIdToSend <= 0) {
+      // Nếu backend chấp nhận province_name thay vì numeric id, bạn có thể gửi province_name làm fallback.
+      // Hiện tại ta giữ nguyên logic: yêu cầu numeric id. Nếu muốn fallback theo tên, uncomment phần dưới.
+      toast.error("Lỗi nội bộ: ID tỉnh thành không hợp lệ. Hãy tải lại trang.");
+      return;
+    }
+
+    // BƯỚC 3: Tạo Payload (BẮT BUỘC GỬI province_id và duration)
     const payload = {
       name: tripName.trim(),
-      // If backend requires province_id and we have it, send it. If not, send province_name in metadata.
-      ...(provincePayload ? { province_id: provincePayload } : { province_name: selectedProvince.name }),
+      province_id: provinceIdToSend,
       duration: durationDays,
       must_include_place_ids: mustIncludeDetails.map((d) => d.id),
       metadata: {
@@ -363,6 +400,7 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
       },
     };
 
+    // BƯỚC 4: Gọi API
     API.post("/trips", payload)
       .then((res) => {
         const created = res.data?.trip || res.data;
