@@ -1,15 +1,43 @@
 import React, { useState } from "react";
-import {
-  FaChevronRight,
-  FaChevronLeft,
-  FaBolt,
-  FaRobot,
-  FaMapMarkedAlt,
-} from "react-icons/fa";
+import { FaChevronRight, FaChevronLeft } from "react-icons/fa";
 import "./HowItWorksPanel.css";
 
 export default function HowItWorksPanel() {
   const [isOpen, setIsOpen] = useState(false);
+  const steps = [
+    {
+      icon: "⚡",
+      title: "1. Capture your vibe",
+      lines: [
+        "Tell us what you dream of — a feeling, a place, or simply drop in a reference photo.",
+        "WonderAI reads the atmosphere, the colors, and the mood to instantly understand the style of trip you want.",
+      ],
+    },
+    {
+      icon: "🧭",
+      title: "2. Blend AI with real local insight",
+      lines: [
+        "Our engine pairs OpenAI intelligence with curated Vietnam travel knowledge.",
+        "Every suggestion is cross-checked to stay realistic, seasonal, and aligned with what locals truly recommend.",
+      ],
+    },
+    {
+      icon: "✨",
+      title: "3. Get a smart trip plan",
+      lines: [
+        "Receive personalized ideas, destinations, and routes crafted around your vibe.",
+        "Clear, friendly, and ready to explore.",
+      ],
+    },
+    {
+      icon: "❤️",
+      title: "4. Save, refine, and perfect",
+      lines: [
+        "Add suggestions to your trip, save your favorites, and keep chatting with WonderAI.",
+        "Your itinerary updates in real time as your inspiration grows.",
+      ],
+    },
+  ];
 
   return (
     <div className={`howitworks-shell ${isOpen ? "open" : ""}`}>
@@ -22,38 +50,21 @@ export default function HowItWorksPanel() {
       </button>
 
       <aside className="howitworks-panel" aria-hidden={!isOpen}>
-        <p className="howitworks-title">How WonderAI Works</p>
+        <p className="howitworks-title">🌟 How WonderAI Works</p>
         <ul>
-          <li>
-            <FaBolt />
-            <div>
-              <strong>Capture your vibe</strong>
-              <span>
-                Ask anything in your own words or upload a reference photo to
-                let the assistant understand your travel mood instantly.
+          {steps.map((step) => (
+            <li key={step.title}>
+              <span className="howitworks-step-icon" aria-hidden="true">
+                {step.icon}
               </span>
-            </div>
-          </li>
-          <li>
-            <FaRobot />
-            <div>
-              <strong>Blend AI + local knowledge</strong>
-              <span>
-                We cross-check OpenAI recommendations with our curated Vietnam
-                destination graph so every idea stays realistic.
-              </span>
-            </div>
-          </li>
-          <li>
-            <FaMapMarkedAlt />
-            <div>
-              <strong>Plan, save, repeat</strong>
-              <span>
-                Send the ideas to your trips, save favorites, and keep chatting
-                to refine the itinerary in real time.
-              </span>
-            </div>
-          </li>
+              <div>
+                <strong>{step.title}</strong>
+                {step.lines.map((line, idx) => (
+                  <span key={`${step.title}-${idx}`}>{line}</span>
+                ))}
+              </div>
+            </li>
+          ))}
         </ul>
       </aside>
     </div>

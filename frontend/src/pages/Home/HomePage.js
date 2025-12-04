@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import API from "../../untils/axios";
 import { usePageContext } from "../../context/PageContext";
@@ -28,6 +28,10 @@ export default function HomePage({ savedIds, handleToggleSave }) {
   const [textLoading, setTextLoading] = useState(false);
   const [activePreview, setActivePreview] = useState(null);
   const { setPageContext } = usePageContext();
+
+  const handleSearchTermChange = useCallback((value) => {
+    setSearchTerm((prev) => (prev === value ? prev : value));
+  }, []);
 
   useEffect(() => {
     API.get("/destinations")
@@ -269,7 +273,7 @@ export default function HomePage({ savedIds, handleToggleSave }) {
       <HowItWorksPanel />
       <HeroSection
         searchTerm={searchTerm}
-        onSearchChange={(value) => setSearchTerm(value)}
+        onSearchChange={handleSearchTermChange}
         visionImages={visionImages}
         onVisionImagesAdd={handleVisionImagesAdd}
         onVisionImageRemove={handleVisionImageRemove}

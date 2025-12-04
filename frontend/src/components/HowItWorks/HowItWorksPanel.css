@@ -27,7 +27,7 @@
 }
 
 .howitworks-panel {
-  width: 580px;
+  width: 520px;
   margin-left: 12px;
   padding: 20px;
   border-radius: 20px;
@@ -63,13 +63,24 @@
 
 .howitworks-panel li {
   display: flex;
-  gap: 14px;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.howitworks-panel li svg {
-  flex-shrink: 0;
-  margin-top: 4px;
-  color: #7ec4ff;
+.howitworks-panel li:last-child {
+  border-bottom: none;
+}
+
+.howitworks-step-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
 }
 
 .howitworks-panel strong {
@@ -81,6 +92,8 @@
   color: #bcd2ea;
   font-size: 0.9rem;
   line-height: 1.4;
+  display: block;
+  margin-bottom: 4px;
 }
 
 @media (max-width: 768px) {
@@ -91,6 +104,6 @@
   }
 
   .howitworks-panel {
-    width: 240px;
+    width: 260px;
   }
 }
