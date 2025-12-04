@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { FaChevronRight, FaChevronLeft, FaBolt, FaRobot, FaMapMarkedAlt } from "react-icons/fa";
+import {
+  FaChevronRight,
+  FaChevronLeft,
+  FaBolt,
+  FaRobot,
+  FaMapMarkedAlt,
+} from "react-icons/fa";
 import "./HowItWorksPanel.css";
 
 export default function HowItWorksPanel() {
@@ -23,7 +29,8 @@ export default function HowItWorksPanel() {
             <div>
               <strong>Capture your vibe</strong>
               <span>
-                Ask anything in your own words or upload a reference photo to let the assistant understand your travel mood instantly.
+                Ask anything in your own words or upload a reference photo to
+                let the assistant understand your travel mood instantly.
               </span>
             </div>
           </li>
@@ -32,7 +39,8 @@ export default function HowItWorksPanel() {
             <div>
               <strong>Blend AI + local knowledge</strong>
               <span>
-                We cross-check OpenAI recommendations with our curated Vietnam destination graph so every idea stays realistic.
+                We cross-check OpenAI recommendations with our curated Vietnam
+                destination graph so every idea stays realistic.
               </span>
             </div>
           </li>
@@ -41,7 +49,8 @@ export default function HowItWorksPanel() {
             <div>
               <strong>Plan, save, repeat</strong>
               <span>
-                Send the ideas to your trips, save favorites, and keep chatting to refine the itinerary in real time.
+                Send the ideas to your trips, save favorites, and keep chatting
+                to refine the itinerary in real time.
               </span>
             </div>
           </li>
