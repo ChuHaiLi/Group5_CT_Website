@@ -16,7 +16,7 @@ import ExplorePage from "./pages/Explore/ExplorePage";
 import MyTripsPage from "./pages/MyTrips/MyTripsPage";
 import ProfilePage from "./pages/ProfilePage";
 import SavedPage from "./pages/Saved/Saved";
-
+import TripDetailsPage from "./pages/MyTrips/TripDetailsPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
@@ -205,6 +205,15 @@ function AppContent() {
               </PrivateRoute>
             }
           />
+
+          <Route
+            path="/trips/:tripId" // Lưu ý: Đường dẫn này phải khớp với hàm navigate trong MyTripsPage.jsx
+            element={
+              <PrivateRoute isAuthenticated={isAuthenticated}>
+                <TripDetailsPage /> 
+              </PrivateRoute>
+            }
+          />
 
           <Route
             path="/profile"

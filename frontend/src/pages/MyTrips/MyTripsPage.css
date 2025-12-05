@@ -1,13 +1,185 @@
+/* --- CSS CHUNG CHO TRANG TỔNG QUAN VÀ CHI TIẾT --- */
 .itinerary-container {
-  text-align: center;
-  margin: 50px auto;
-  background: #fff;
-  padding: 30px;
-  border-radius: 12px;
-  width: 60%;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    max-width: 900px;
+    margin: 50px auto;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    text-align: center;
 }
-.itinerary-container h2 {
-  color: #28a745;
-  margin-bottom: 10px;
+
+/* --- PHẦN MYTRIPS PAGE (TỔNG QUAN) --- */
+.trip-groups-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+.trip-group h3 {
+    margin-top: 0;
+    padding-bottom: 5px;
+    border-bottom: 2px solid #eee;
+    text-align: left;
+    color: #333;
+    font-size: 1.5em;
+    font-weight: 600;
+}
+.trip-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; 
+}
+
+/* Trip Card */
+.trip-card {
+    position: relative;
+    background: #ffffff; 
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start; 
+}
+
+/* Tag Trạng thái */
+.status-tag {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 6px 12px;
+    font-size: 0.8em;
+    font-weight: 700;
+    border-top-right-radius: 12px;
+    border-bottom-left-radius: 12px;
+    color: white;
+}
+
+.status-draft { background-color: #6c757d; }
+.status-upcoming { background-color: #ffc107; color: #333; }
+.status-ongoing { background-color: #17a2b8; }
+.status-completed { background-color: #28a745; }
+
+.trip-info h3 {
+    margin-top: 10px; 
+    margin-bottom: 8px;
+    font-size: 1.5em;
+    color: #007bff;
+}
+
+.trip-metadata {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed #eee;
+    display: flex;
+    gap: 25px;
+}
+.trip-metadata p {
+    margin: 0;
+    font-size: 0.9em;
+    color: #555;
+}
+
+.action-view {
+    background-color: #007bff;
+    color: white;
+}
+.action-edit {
+    background-color: #ffc107;
+    color: #333;
+}
+.action-delete {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* --- PHẦN TRIPDETAILS PAGE (CHI TIẾT LỘ TRÌNH) --- */
+
+.back-button {
+    background: none;
+    border: none;
+    color: #007bff;
+    font-size: 16px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    padding: 5px 0;
+    float: left;
+}
+
+.trip-header {
+    text-align: center;
+    margin-bottom: 20px;
+    position: relative; 
+}
+
+.trip-summary {
+    text-align: left;
+    margin-bottom: 30px;
+    border: 1px solid #eee;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #f7f7f7;
+}
+
+.itinerary-schedule {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+.day-card {
+    background: #fdfdfd;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.day-card .day-header {
+    color: #007bff;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 10px;
+    margin-top: 0;
+}
+
+.place-list li {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px dashed #eee;
+}
+
+.time-slot-display {
+    font-weight: bold;
+    color: #343a40;
+    min-width: 120px;
+    margin-right: 15px;
+    display: flex;
+    align-items: center;
+}
+.time-slot-display svg {
+    margin-right: 5px;
+}
+
+/* Style cho các mục đặc biệt */
+.item-lunch {
+    background-color: #fff3cd; 
+    border-radius: 4px;
+    border-left: 3px solid #ffc107;
+}
+.item-travel {
+    background-color: #e9ecef; 
+    border-radius: 4px;
+    border-left: 3px solid #6c757d;
+}
+
+.destination-link {
+    background: none;
+    border: none;
+    color: #17a2b8; 
+    cursor: pointer;
+    font-weight: bold;
+    text-decoration: underline;
+    text-align: left;
 }
