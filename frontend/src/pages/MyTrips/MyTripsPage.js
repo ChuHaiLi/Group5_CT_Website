@@ -6,7 +6,7 @@ import "./MyTripsPage.css";
 // Giả định hàm này tồn tại để lấy token JWT
 const getAuthToken = () => localStorage.getItem("access_token"); 
 
-// --- HÀM HỖ TRỢ HIỂN THỊ ---
+// --- HÀM HỖ TRỢ HIỂN THỊ (Cần thiết cho cả 2 component) ---
 const getStatusTag = (status) => {
     switch (status) {
         case 'UPCOMING':
@@ -30,6 +30,7 @@ const getMetadataDisplay = (metadata) => {
 const TripCard = ({ trip, handleDelete, handleView }) => {
     const statusTag = getStatusTag(trip.status);
     const meta = getMetadataDisplay(trip.metadata);
+    const navigate = useNavigate(); 
     
     // Ngày hiển thị (Ưu tiên Start Date)
     const dateDisplay = trip.start_date 
@@ -55,8 +56,9 @@ const TripCard = ({ trip, handleDelete, handleView }) => {
                 <button onClick={() => handleView(trip.id)} className="action-view">
                     Xem Chi tiết
                 </button>
+                {/* Chuyển hướng đến trang chỉnh sửa bản sao */}
                 <button 
-                    onClick={() => console.log(`Mở trang chỉnh sửa ${trip.id}`)} 
+                    onClick={() => navigate(`/trips/${trip.id}/edit`)} 
                     className="action-edit"
                 >
                     Chỉnh sửa
@@ -86,7 +88,7 @@ export default function MyTripsPage() {
             });
             setTrips(response.data);
         } catch (err) {
-            setError("Không thể tải danh sách chuyến đi. Vui lòng kiểm tra kết nối.");
+            setError("Không thể tải danh sách chuyến đi.");
             console.error("Error fetching trips:", err);
         } finally {
             setIsLoading(false);
@@ -140,9 +142,9 @@ export default function MyTripsPage() {
             const dateB = new Date(b.start_date || b.created_at);
             
             if (status === 'COMPLETED') {
-                return dateB - dateA; // Mới nhất trước
+                return dateB - dateA; 
             }
-            return dateA - dateB; // Gần nhất trước
+            return dateA - dateB; 
         });
 
         return (
