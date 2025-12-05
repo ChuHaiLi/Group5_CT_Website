@@ -1,4 +1,4 @@
-// CreateTripFormOptimized.jsx (patched & commented)
+// CreateTripForm.js - With 2-column layout and preview destinations
 import React, { useEffect, useRef, useState } from "react";
 import {
   FaClock,
@@ -43,11 +43,9 @@ const normalize = (str) =>
 const normalizeProvince = (input, provinceList) => {
   if (!input) return null;
   const normalizedInput = normalize(input);
-  // exact match name
   for (const p of provinceList) {
     if (normalize(p.name) === normalizedInput) return p;
   }
-  // substring match
   for (const p of provinceList) {
     if (normalize(p.name).includes(normalizedInput)) return p;
   }
@@ -57,23 +55,28 @@ const normalizeProvince = (input, provinceList) => {
 export default function CreateTripForm({ initialDestination = null, onClose, onTripCreated }) {
   // --- Form state ---
   const [tripName, setTripName] = useState("");
-  const [duration, setDuration] = useState(""); // label
+  const [duration, setDuration] = useState("");
   const [peopleCount, setPeopleCount] = useState("");
   const [budget, setBudget] = useState("");
 
+  // --- Form ref ---
+  const formRef = useRef(null);
+
   // --- Provinces / locations ---
-  const [vietnamLocations, setVietnamLocations] = useState([]); // { id: string, name, regionName }
+  const [vietnamLocations, setVietnamLocations] = useState([]);
   const [isProvinceLoading, setIsProvinceLoading] = useState(false);
-  const [selectedProvince, setSelectedProvince] = useState(null); // { id: string, name }
+  const [selectedProvince, setSelectedProvince] = useState(null);
 
   // --- Must-include places ---
-  const [mustIncludeDetails, setMustIncludeDetails] = useState([]); // [{id, name, province_id, province_name}]
+  const [mustIncludeDetails, setMustIncludeDetails] = useState([]);
 
-  // --- Search logic ---
+  // --- Search logic (now only used for filtering preview) ---
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
-  const [searchLoading, setSearchLoading] = useState(false);
   const searchTimer = useRef(null);
+
+  // --- Preview destinations (right column) ---
+  const [previewDestinations, setPreviewDestinations] = useState([]);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
 
   // --- Modal details ---
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
@@ -88,7 +91,21 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
   const budgetOptions = ["< 5 triệu", "5-10 triệu", "10-20 triệu", "> 20 triệu"];
 
   // ---------------------------------------------------------
-  // Fetch provinces on mount - robust: handle missing province.id
+  // Close form when clicking outside
+  // ---------------------------------------------------------
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (formRef.current && !formRef.current.contains(event.target)) {
+        onClose();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [onClose]);
+
+  // ---------------------------------------------------------
+  // Fetch provinces on mount
   // ---------------------------------------------------------
   useEffect(() => {
     setIsProvinceLoading(true);
@@ -99,7 +116,6 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
           res.data.forEach((region, regionIdx) => {
             if (Array.isArray(region.provinces)) {
               region.provinces.forEach((p, idx) => {
-                // if backend doesn't provide an id for province, use province_name as stable id string
                 const idStr = String(p.id ?? p.province_id ?? p.province_name ?? `prov-${regionIdx}-${idx}`);
                 provinces.push({
                   id: idStr,
@@ -120,7 +136,7 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
   }, []);
 
   // ---------------------------------------------------------
-  // Initialize from initialDestination (robust matching)
+  // Initialize from initialDestination
   // ---------------------------------------------------------
   useEffect(() => {
     if (!initialDestination || vietnamLocations.length === 0) return;
@@ -128,7 +144,7 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
 
     const { id: destId, name: destName, province_id, province_name } = initialDestination;
 
-    // 1) Try match by id (string equality) - safest
+    // Try match by id
     if (province_id != null) {
       const provIdStr = String(province_id);
       const match = vietnamLocations.find((p) => String(p.id) === provIdStr);
@@ -141,9 +157,9 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
       }
     }
 
-    // 2) Try match by numeric id if province_id is numeric-like and provinces ids are numeric-like
+    // Try match by numeric id
     const numericTry = Number(province_id);
-    if (Number.isFinite(numericTry) && numericTry > 0) {
+    if (Number.isFinite(numericTry)) {   // <-- fix: numericTry, not numericId
       const matchNum = vietnamLocations.find((p) => {
         const pid = Number(p.id);
         return Number.isFinite(pid) && pid === numericTry;
@@ -157,12 +173,11 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
       }
     }
 
-    // 3) Try match by province_name (normalize)
+    // Try match by province_name
     if (province_name) {
       const matchByName = normalizeProvince(province_name, vietnamLocations);
       if (matchByName) {
         setSelectedProvince({ id: matchByName.id, name: matchByName.name });
-        // attempt to preserve numeric province_id if possible else keep as original
         const pid = Number(matchByName.id);
         setMustIncludeDetails([{ id: destId, name: destName, province_id: Number.isFinite(pid) ? pid : matchByName.id, province_name: matchByName.name }]);
         if (!tripName) setTripName(`Khám phá ${destName}`);
@@ -171,116 +186,57 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
       }
     }
 
-    // fallback: at least set trip name
     if (!tripName && destName) setTripName(`Khám phá ${destName}`);
     initialLoaded.current = true;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialDestination, vietnamLocations]);
+  }, [initialDestination, vietnamLocations, tripName]);
 
   // ---------------------------------------------------------
-  // When selectedProvince changes: auto-suggest top places
+  // Load preview destinations when province changes
   // ---------------------------------------------------------
   useEffect(() => {
     if (!selectedProvince) {
-      setSearchResults([]);
-      setSearchTerm("");
+      setPreviewDestinations([]);
       return;
     }
 
-    const alreadyFromProvince = mustIncludeDetails.some((d) => {
-      const dPid = d.province_id != null ? String(d.province_id) : "";
-      return dPid === String(selectedProvince.id) || normalize(d.province_name || "") === normalize(selectedProvince.name);
-    });
-    if (alreadyFromProvince) {
-      setSearchResults([]);
-      setSearchTerm("");
-      return;
-    }
+    setIsLoadingPreview(true);
 
-    setSearchLoading(true);
+    // ⭐ Sử dụng thuật toán search của ExplorePage
+    const provinceName = selectedProvince.name.trim();
+    const queryUrl = `/destinations?search=${encodeURIComponent(provinceName)}&top=20`;
 
-    // choose param: if selectedProvince.id looks like positive integer, send as province_id; otherwise send province_name
-    const numericId = Number(selectedProvince.id);
-    let queryUrl;
-    if (Number.isFinite(numericId) && numericId > 0) {
-      queryUrl = `/destinations?province_id=${numericId}&top=6`;
-    } else {
-      // encode name to avoid issues
-      queryUrl = `/destinations?province_name=${encodeURIComponent(selectedProvince.name)}&top=6`;
-    }
+    console.log(">>> Fetching destinations with:", queryUrl);
 
     API.get(queryUrl)
       .then((res) => {
-        if (Array.isArray(res.data) && res.data.length > 0) {
-          const top = res.data.slice(0, 5).map((p) => ({
-            id: p.id,
-            name: p.name,
-            province_id: p.province_id,
-            province_name: p.province_name || selectedProvince.name,
-            ...p,
-          }));
-          setSearchResults(top);
+        if (Array.isArray(res.data)) {
+          const onlySameProvince = res.data.filter(
+            (p) =>
+              normalize(p.province_name) === normalize(selectedProvince.name)
+          );
+
+          setPreviewDestinations(onlySameProvince);
         } else {
-          setSearchResults([]);
+          setPreviewDestinations([]);
         }
       })
-      .catch((err) => {
-        console.warn("Top destinations fetch failed", err);
-        setSearchResults([]);
+      .catch(() => {
+        setPreviewDestinations([]);
       })
-      .finally(() => setSearchLoading(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+      .finally(() => setIsLoadingPreview(false));
   }, [selectedProvince]);
 
   // ---------------------------------------------------------
-  // Search behavior (debounced)
+  // When selectedProvince changes: load preview destinations
+  // (Removed auto-suggest search results logic as search is now in preview)
+  // ---------------------------------------------------------
+
+  // ---------------------------------------------------------
+  // Clear search when province changes
   // ---------------------------------------------------------
   useEffect(() => {
-    if (searchTimer.current) clearTimeout(searchTimer.current);
-
-    if (!selectedProvince || (searchTerm || "").trim().length < 2) {
-      setSearchResults([]);
-      setSearchLoading(false);
-      return;
-    }
-
-    setSearchLoading(true);
-    searchTimer.current = setTimeout(() => {
-      const q = encodeURIComponent(searchTerm.trim());
-      // same logic: use province_id if numeric, else province_name
-      const numericId = Number(selectedProvince.id);
-      let paramPart;
-      if (Number.isFinite(numericId) && numericId > 0) {
-        paramPart = `province_id=${numericId}`;
-      } else {
-        paramPart = `province_name=${encodeURIComponent(selectedProvince.name)}`;
-      }
-
-      API.get(`/destinations?search=${q}&${paramPart}`)
-        .then((res) => {
-          const filtered = Array.isArray(res.data)
-            ? res.data.filter((p) => {
-                // accept if place.province_id matches (string/number) or province_name matches (normalized)
-                const pidMatch = p.province_id != null && String(p.province_id) === String(selectedProvince.id);
-                const pnameMatch = p.province_name ? normalize(p.province_name) === normalize(selectedProvince.name) : false;
-                return pidMatch || pnameMatch;
-              })
-            : [];
-          setSearchResults(filtered.slice(0, 8));
-        })
-        .catch((err) => {
-          console.error("Search failed", err);
-          toast.error("Tìm kiếm thất bại, thử lại sau.");
-          setSearchResults([]);
-        })
-        .finally(() => setSearchLoading(false));
-    }, 400);
-
-    return () => {
-      if (searchTimer.current) clearTimeout(searchTimer.current);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchTerm, selectedProvince]);
+    setSearchTerm("");
+  }, [selectedProvince]);
 
   // ---------------------------------------------------------
   // Handlers
@@ -292,14 +248,12 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
       setMustIncludeDetails([]);
       return;
     }
-    // val will be our idStr (string)
     const found = vietnamLocations.find((p) => p.id === val);
     if (!found) {
       toast.error("Tỉnh/Thành không hợp lệ.");
       return;
     }
 
-    // remove mustInclude items not from this province (compare as strings OR by normalized province_name)
     setMustIncludeDetails((prev) =>
       prev.filter((d) => {
         const dPid = d.province_id != null ? String(d.province_id) : "";
@@ -318,7 +272,6 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
       return;
     }
 
-    // check belonging: compare by stringified province_id OR normalized province_name
     const placePid = place.province_id != null ? String(place.province_id) : "";
     const selectedPid = String(selectedProvince.id);
     const nameMatch = place.province_name ? normalize(place.province_name) === normalize(selectedProvince.name) : false;
@@ -339,13 +292,12 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
       { id: place.id, name: place.name, province_id: place.province_id, province_name: place.province_name },
     ]);
     toast.success(`Đã thêm ${place.name}`);
-    setSearchTerm("");
-    setSearchResults([]);
+    // setSearchTerm("");
+    // setSearchResults([]);
   };
 
   const removePlace = (placeId) => {
-    const updated = mustIncludeDetails.filter((d) => String(d.id) !== String(placeId));
-    setMustIncludeDetails(updated);
+    setMustIncludeDetails((prev) => prev.filter((d) => String(d.id) !== String(placeId)));
   };
 
   const handleViewDetails = (place) => {
@@ -358,10 +310,11 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
     setIsDetailsModalOpen(false);
   };
 
-  // Submit trip
+  // ---------------------------------------------------------
+  // Submit trip (FIXED - always send province_id or province_name)
+  // ---------------------------------------------------------
   const handleSubmit = (e) => {
     e.preventDefault();
-    const durationDays = extractDurationDays(duration);
 
     if (!tripName?.trim()) {
       toast.error("Vui lòng nhập tên chuyến đi.");
@@ -371,27 +324,35 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
       toast.error("Vui lòng chọn tỉnh/thành chính cho chuyến đi.");
       return;
     }
-    if (durationDays === 0) {
+    if (!duration) {
       toast.error("Vui lòng chọn thời lượng chuyến đi.");
       return;
     }
 
-    // BƯỚC 1: Xác định ID số nguyên hợp lệ
-    const provinceIdAsString = String(selectedProvince.id);
-    const provinceIdToSend = Number(provinceIdAsString);
-
-    // BƯỚC 2: Thêm kiểm tra cuối cùng để đảm bảo ID là số hợp lệ
-    if (!Number.isFinite(provinceIdToSend) || provinceIdToSend <= 0) {
-      // Nếu backend chấp nhận province_name thay vì numeric id, bạn có thể gửi province_name làm fallback.
-      // Hiện tại ta giữ nguyên logic: yêu cầu numeric id. Nếu muốn fallback theo tên, uncomment phần dưới.
-      toast.error("Lỗi nội bộ: ID tỉnh thành không hợp lệ. Hãy tải lại trang.");
+    const durationDays = extractDurationDays(duration);
+    if (durationDays === 0) {
+      toast.error("Thời lượng không hợp lệ.");
       return;
     }
 
-    // BƯỚC 3: Tạo Payload (BẮT BUỘC GỬI province_id và duration)
+    const loadingToast = toast.info("Đang tạo lộ trình...", { autoClose: false });
+
+    // FIXED: Always send province_id or province_name
+    let provinceData = {};
+    const provinceIdNum = Number(selectedProvince.id);
+    if (selectedProvince.id && Number.isFinite(provinceIdNum) && provinceIdNum > 0) {
+      provinceData.province_id = provinceIdNum;
+    } else if (selectedProvince.name) {
+      provinceData.province_name = selectedProvince.name.trim();
+    } else {
+      toast.dismiss(loadingToast);
+      toast.error("Không xác định được tỉnh/thành!");
+      return;
+    }
+
     const payload = {
       name: tripName.trim(),
-      province_id: provinceIdToSend,
+      ...provinceData,
       duration: durationDays,
       must_include_place_ids: mustIncludeDetails.map((d) => d.id),
       metadata: {
@@ -400,18 +361,21 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
       },
     };
 
-    // BƯỚC 4: Gọi API
     API.post("/trips", payload)
       .then((res) => {
         const created = res.data?.trip || res.data;
-        toast.success(`Chuyến đi "${created?.name ?? payload.name}" đã tạo thành công.`);
+        toast.dismiss(loadingToast);
+        toast.success(`Chuyến đi "${created?.name ?? payload.name}" đã tạo thành công!`, {
+          autoClose: 3000,
+        });
         if (onTripCreated) onTripCreated(created);
         if (onClose) onClose();
       })
       .catch((err) => {
         console.error("Create trip error", err);
+        toast.dismiss(loadingToast);
         const msg = err?.response?.data?.message || "Tạo chuyến đi thất bại.";
-        toast.error(msg);
+        toast.error(msg, { autoClose: 5000 });
       });
   };
 
@@ -420,163 +384,209 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
   // ---------------------------------------------------------
   return (
     <div className="modal-overlay">
-      <div className="create-trip-form">
-        <h2 className="form-header">Create a Trip</h2>
+      <div className="create-trip-container" ref={formRef}>
+        {/* LEFT COLUMN: FORM */}
+        <div className="create-trip-form">
+          <h2 className="form-header">Create a Trip</h2>
 
-        <form onSubmit={handleSubmit}>
-          {/* Trip name */}
-          <div className="input-group">
-            <input
-              type="text"
-              placeholder="Trip Name"
-              value={tripName}
-              onChange={(e) => setTripName(e.target.value)}
-              className="trip-name-input"
-              required
-            />
-          </div>
-
-          {/* Province select */}
-          <div className="province-select-group input-group">
-            <label><FaGlobe /> 1. Select Main Province (Trip Focus)</label>
-            {isProvinceLoading ? (
-              <p className="loading-text">Loading provinces...</p>
-            ) : (
-              <select
-                className="province-select"
-                value={selectedProvince ? String(selectedProvince.id) : ""}
-                onChange={handleProvinceChange}
+          <form onSubmit={handleSubmit}>
+            {/* Trip name */}
+            <div className="input-group">
+              <input
+                type="text"
+                placeholder="Trip Name"
+                value={tripName}
+                onChange={(e) => setTripName(e.target.value)}
+                className="trip-name-input"
                 required
-              >
-                <option value="">--- Select a Province/City ---</option>
-                {vietnamLocations.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name} {p.regionName ? `(${p.regionName})` : ""}
-                  </option>
-                ))}
-              </select>
-            )}
-            <p className="hint-text">Chọn tỉnh/thành chính để hệ thống gợi ý lịch trình tự động.</p>
-          </div>
+              />
+            </div>
 
-          {/* Search / Suggestions */}
-          <div className="destinations-search-group input-group">
-            <label><FaSearch /> 2. Select Must-Include Places (Optional)</label>
-            <input
-              type="text"
-              placeholder={selectedProvince ? `Search places in ${selectedProvince.name}` : "Select main province first..."}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input"
-              disabled={!selectedProvince}
-            />
-
-            {selectedProvince && (searchLoading || (searchResults && searchResults.length > 0) || searchTerm.length >= 2) && (
-              <div className="search-results-box">
-                {searchLoading && <p className="loading-text">Searching...</p>}
-
-                {!searchLoading && searchResults.length === 0 && searchTerm.trim().length >= 2 && (
-                  <p className="no-results">No destinations found in {selectedProvince.name} for "{searchTerm}".</p>
-                )}
-
-                {!searchLoading && searchResults.slice(0, 6).map((place) => (
-                  <RecommendCard
-                    key={place.id}
-                    destination={place}
-                    mode="select-search"
-                    onSelectPlace={() => handleViewDetails(place)}
-                  />
-                ))}
-              </div>
-            )}
-            {!selectedProvince && <p className="warning-text">Vui lòng chọn tỉnh/thành phố trước khi tìm địa điểm.</p>}
-          </div>
-
-          {/* Summary */}
-          <div className="destination-summary-group input-group">
-            <label><FaMapMarkerAlt /> Trip Summary</label>
-            <div className="summary-box">
-              <div className="main-province-info">
-                <strong>Main Destination:</strong>{" "}
-                {selectedProvince ? (
-                  <span className="main-province-tag">{selectedProvince.name}</span>
-                ) : (
-                  <span className="warning-text">Province not yet set.</span>
-                )}
-              </div>
-
-              <div className="must-include-list">
-                <span className="must-include-label">Must-Include Places ({mustIncludeDetails.length}):</span>
-                <div className="destination-list">
-                  {mustIncludeDetails.map((dest) => (
-                    <span key={dest.id} className="destination-item">
-                      {dest.name}
-                      <button type="button" onClick={() => removePlace(dest.id)}>x</button>
-                    </span>
+            {/* Province select */}
+            <div className="province-select-group input-group">
+              <label><FaGlobe /> Select Main Province (Trip Focus)</label>
+              {isProvinceLoading ? (
+                <p className="loading-text">Loading provinces...</p>
+              ) : (
+                <select
+                  className="province-select"
+                  value={selectedProvince ? String(selectedProvince.id) : ""}
+                  onChange={handleProvinceChange}
+                  required
+                >
+                  <option value="">--- Select a Province/City ---</option>
+                  {vietnamLocations.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} {p.regionName ? `(${p.regionName})` : ""}
+                    </option>
                   ))}
-                  {mustIncludeDetails.length === 0 && <p className="hint-text">No priority places selected.</p>}
+                </select>
+              )}
+              <p className="hint-text">Chọn tỉnh/thành chính để hệ thống gợi ý lịch trình tự động.</p>
+            </div>
+
+            {/* Summary */}
+            <div className="destination-summary-group input-group">
+              <label><FaMapMarkerAlt /> Trip Summary</label>
+              <div className="summary-box">
+                <div className="main-province-info">
+                  <strong>Main Destination:</strong>{" "}
+                  {selectedProvince ? (
+                    <span className="main-province-tag">{selectedProvince.name}</span>
+                  ) : (
+                    <span className="warning-text">Province not yet set.</span>
+                  )}
+                </div>
+
+                <div className="must-include-list">
+                  <span className="must-include-label">Must-Include Places ({mustIncludeDetails.length}):</span>
+                  <div className="destination-list">
+                    {mustIncludeDetails.map((dest) => (
+                      <span key={dest.id} className="destination-item">
+                        {dest.name}
+                        <button type="button" onClick={() => removePlace(dest.id)}>×</button>
+                      </span>
+                    ))}
+                    {mustIncludeDetails.length === 0 && <p className="hint-text">No priority places selected.</p>}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Options */}
-          <div className="options-group">
-            <div className="option-card">
-              <label><FaClock /> Duration (Sets Trip Days)</label>
-              <div className="option-pills">
-                {durationOptions.map((opt) => (
-                  <button
-                    key={opt}
-                    type="button"
-                    className={duration === opt ? "pill selected" : "pill"}
-                    onClick={() => setDuration(opt)}
-                  >
-                    {opt}
-                  </button>
-                ))}
+            {/* Options */}
+            <div className="options-group">
+              <div className="option-card">
+                <label><FaClock /> Duration (Sets Trip Days)</label>
+                <div className="option-pills">
+                  {durationOptions.map((opt) => (
+                    <button
+                      key={opt}
+                      type="button"
+                      className={duration === opt ? "pill selected" : "pill"}
+                      onClick={() => setDuration(opt)}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="option-card">
+                <label><FaUser /> People</label>
+                <div className="option-pills">
+                  {peopleOptions.map((opt) => (
+                    <button
+                      key={opt}
+                      type="button"
+                      className={peopleCount === opt ? "pill selected" : "pill"}
+                      onClick={() => setPeopleCount(opt)}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="option-card">
+                <label><FaMoneyBillWave /> Budget</label>
+                <div className="option-pills">
+                  {budgetOptions.map((opt) => (
+                    <button
+                      key={opt}
+                      type="button"
+                      className={budget === opt ? "pill selected" : "pill"}
+                      onClick={() => setBudget(opt)}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
-            <div className="option-card">
-              <label><FaUser /> People</label>
-              <div className="option-pills">
-                {peopleOptions.map((opt) => (
-                  <button
-                    key={opt}
-                    type="button"
-                    className={peopleCount === opt ? "pill selected" : "pill"}
-                    onClick={() => setPeopleCount(opt)}
-                  >
-                    {opt}
-                  </button>
-                ))}
+            {/* Submit */}
+            <div className="form-buttons">
+              <button type="submit" disabled={!selectedProvince || !duration}>
+                Generate & Create Trip
+              </button>
+              <button type="button" onClick={() => onClose && onClose()} className="cancel-btn">
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+
+        {/* RIGHT COLUMN: DESTINATIONS PREVIEW */}
+        <div className="destinations-preview">
+          <h3 className="dark">
+            <FaMapMarkerAlt />
+            {selectedProvince ? `Destinations in ${selectedProvince.name}` : "Select a Province"}
+          </h3>
+
+          {/* Search box in right column */}
+          {selectedProvince && (
+            <div className="preview-search-group">
+              <div className="preview-search-wrapper">
+                <FaSearch className="search-icon" />
+                <input
+                  type="text"
+                  placeholder={`Search places in ${selectedProvince.name}...`}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="preview-search-input"
+                />
               </div>
             </div>
+          )}
 
-            <div className="option-card">
-              <label><FaMoneyBillWave /> Budget</label>
-              <div className="option-pills">
-                {budgetOptions.map((opt) => (
-                  <button
-                    key={opt}
-                    type="button"
-                    className={budget === opt ? "pill selected" : "pill"}
-                    onClick={() => setBudget(opt)}
-                  >
-                    {opt}
-                  </button>
+          {!selectedProvince && (
+            <div className="empty-preview">
+              <div className="empty-preview-icon">
+                <FaMapMarkerAlt />
+              </div>
+              <p>Select a province to see available destinations</p>
+            </div>
+          )}
+
+          {selectedProvince && isLoadingPreview && (
+            <div className="empty-preview">
+              <p>Loading destinations...</p>
+            </div>
+          )}
+
+          {selectedProvince && !isLoadingPreview && previewDestinations.length === 0 && (
+            <div className="empty-preview">
+              <p>No destinations found in {selectedProvince.name}</p>
+            </div>
+          )}
+
+          {selectedProvince && !isLoadingPreview && previewDestinations.length > 0 && (() => {
+            // Filter destinations based on search term
+            const filteredDestinations = searchTerm.trim().length > 0
+              ? previewDestinations.filter((dest) =>
+                normalize(dest.name).includes(normalize(searchTerm.trim()))
+              )
+              : previewDestinations;
+
+            return filteredDestinations.length > 0 ? (
+              <div className="preview-grid">
+                {filteredDestinations.map((dest) => (
+                  <RecommendCard
+                    key={dest.id}
+                    destination={dest}
+                    mode="select"
+                    onSelectPlace={() => addPlaceToMustInclude(dest)}
+                    onViewDetails={() => handleViewDetails(dest)}
+                  />
                 ))}
               </div>
-            </div>
-          </div>
-
-          {/* Submit */}
-          <div className="form-buttons">
-            <button type="submit" disabled={!selectedProvince || !duration}>Generate & Create Trip</button>
-            <button type="button" onClick={() => onClose && onClose()} className="cancel-btn">Cancel</button>
-          </div>
-        </form>
+            ) : (
+              <div className="empty-preview">
+                <p>No destinations match "{searchTerm}"</p>
+              </div>
+            );
+          })()}
+        </div>
       </div>
 
       {/* Details Modal */}
@@ -587,7 +597,7 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
               destination={placeToView}
               mode="select"
               onSelectPlace={() => handleSelectFromDetails(placeToView)}
-              onViewDetails={() => {}}
+              onViewDetails={() => { }}
             />
             <button className="close-details-btn" onClick={() => setIsDetailsModalOpen(false)}>
               <FaTimes /> Close
