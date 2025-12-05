@@ -1,185 +1,426 @@
-/* --- CSS CHUNG CHO TRANG TỔNG QUAN VÀ CHI TIẾT --- */
+/* ===== DESIGN SYSTEM ===== */
+:root {
+    --primary-blue: #2563eb;
+    --primary-blue-dark: #1e40af;
+    --primary-blue-light: #dbeafe;
+    
+    --success-green: #10b981;
+    --warning-yellow: #f59e0b;
+    --warning-yellow-dark: #d97706;
+    --danger-red: #ef4444;
+    --info-cyan: #06b6d4;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+    
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+    
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== CONTAINER CHÍNH ===== */
 .itinerary-container {
-    max-width: 900px;
-    margin: 50px auto;
-    padding: 30px;
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-    text-align: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 24px;
+    min-height: 100vh;
+    background: linear-gradient(to bottom, var(--gray-50), white);
 }
 
-/* --- PHẦN MYTRIPS PAGE (TỔNG QUAN) --- */
-.trip-groups-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-}
-.trip-group h3 {
-    margin-top: 0;
-    padding-bottom: 5px;
-    border-bottom: 2px solid #eee;
-    text-align: left;
-    color: #333;
-    font-size: 1.5em;
-    font-weight: 600;
-}
-.trip-list {
-    display: flex;
-    flex-direction: column;
-    gap: 15px; 
-}
-
-/* Trip Card */
-.trip-card {
-    position: relative;
-    background: #ffffff; 
-    border: 1px solid #ddd;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+/* ===== HEADER SECTION ===== */
+.trips-header {
+    margin-bottom: 40px;
     display: flex;
     justify-content: space-between;
-    align-items: flex-start; 
-}
-
-/* Tag Trạng thái */
-.status-tag {
-    position: absolute;
-    top: 0;
-    right: 0;
-    padding: 6px 12px;
-    font-size: 0.8em;
-    font-weight: 700;
-    border-top-right-radius: 12px;
-    border-bottom-left-radius: 12px;
-    color: white;
-}
-
-.status-draft { background-color: #6c757d; }
-.status-upcoming { background-color: #ffc107; color: #333; }
-.status-ongoing { background-color: #17a2b8; }
-.status-completed { background-color: #28a745; }
-
-.trip-info h3 {
-    margin-top: 10px; 
-    margin-bottom: 8px;
-    font-size: 1.5em;
-    color: #007bff;
-}
-
-.trip-metadata {
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px dashed #eee;
-    display: flex;
-    gap: 25px;
-}
-.trip-metadata p {
-    margin: 0;
-    font-size: 0.9em;
-    color: #555;
-}
-
-.action-view {
-    background-color: #007bff;
-    color: white;
-}
-.action-edit {
-    background-color: #ffc107;
-    color: #333;
-}
-.action-delete {
-    background-color: #dc3545;
-    color: white;
-}
-
-/* --- PHẦN TRIPDETAILS PAGE (CHI TIẾT LỘ TRÌNH) --- */
-
-.back-button {
-    background: none;
-    border: none;
-    color: #007bff;
-    font-size: 16px;
-    cursor: pointer;
-    margin-bottom: 20px;
-    padding: 5px 0;
-    float: left;
-}
-
-.trip-header {
-    text-align: center;
-    margin-bottom: 20px;
-    position: relative; 
-}
-
-.trip-summary {
-    text-align: left;
-    margin-bottom: 30px;
-    border: 1px solid #eee;
-    padding: 15px;
-    border-radius: 8px;
-    background-color: #f7f7f7;
-}
-
-.itinerary-schedule {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    align-items: center;
+    flex-wrap: wrap;
     gap: 20px;
 }
 
-.day-card {
-    background: #fdfdfd;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.day-card .day-header {
-    color: #007bff;
-    border-bottom: 2px solid #007bff;
-    padding-bottom: 10px;
-    margin-top: 0;
-}
-
-.place-list li {
+.trips-header h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 0;
     display: flex;
     align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px dashed #eee;
+    gap: 12px;
 }
 
-.time-slot-display {
-    font-weight: bold;
-    color: #343a40;
-    min-width: 120px;
-    margin-right: 15px;
-    display: flex;
-    align-items: center;
-}
-.time-slot-display svg {
-    margin-right: 5px;
+.trips-header h2::before {
+    content: '🧳';
+    font-size: 2.5rem;
 }
 
-/* Style cho các mục đặc biệt */
-.item-lunch {
-    background-color: #fff3cd; 
-    border-radius: 4px;
-    border-left: 3px solid #ffc107;
-}
-.item-travel {
-    background-color: #e9ecef; 
-    border-radius: 4px;
-    border-left: 3px solid #6c757d;
-}
-
-.destination-link {
-    background: none;
+/* Nút Create a Trip */
+.add-trip-btn {
+    padding: 14px 28px;
+    background: linear-gradient(135deg, var(--primary-blue), var(--primary-blue-dark));
+    color: white;
     border: none;
-    color: #17a2b8; 
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    font-weight: 600;
     cursor: pointer;
-    font-weight: bold;
-    text-decoration: underline;
+    transition: all var(--transition-base);
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.add-trip-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    background: linear-gradient(135deg, var(--primary-blue-dark), #1e3a8a);
+}
+
+.add-trip-btn:active {
+    transform: translateY(0);
+}
+
+.add-trip-btn::before {
+    content: '✈️';
+    font-size: 1.2rem;
+}
+
+/* ===== TRIP GROUPS WRAPPER ===== */
+.trip-groups-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+}
+
+/* ===== TRIP GROUP ===== */
+.trip-group {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.trip-group h3 {
+    margin: 0 0 24px 0;
+    padding-bottom: 12px;
+    border-bottom: 3px solid var(--gray-200);
     text-align: left;
+    color: var(--gray-800);
+    font-size: 1.5rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+}
+
+.trip-group h3::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    width: 80px;
+    height: 3px;
+    background: var(--primary-blue);
+    border-radius: 2px;
+}
+
+/* ===== TRIP LIST ===== */
+.trip-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 24px;
+}
+
+/* ===== TRIP CARD ===== */
+.trip-card {
+    position: relative;
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-base);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.trip-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-blue), var(--info-cyan));
+    opacity: 0;
+    transition: opacity var(--transition-base);
+}
+
+.trip-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+    border-color: var(--primary-blue-light);
+}
+
+.trip-card:hover::before {
+    opacity: 1;
+}
+
+/* ===== STATUS TAG ===== */
+.status-tag {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    padding: 6px 14px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 20px;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: var(--shadow-sm);
+    z-index: 10;
+}
+
+.status-draft {
+    background: linear-gradient(135deg, var(--gray-500), var(--gray-600));
+}
+
+.status-upcoming {
+    background: linear-gradient(135deg, var(--warning-yellow), var(--warning-yellow-dark));
+    color: white;
+}
+
+.status-ongoing {
+    background: linear-gradient(135deg, var(--info-cyan), #0891b2);
+}
+
+.status-completed {
+    background: linear-gradient(135deg, var(--success-green), #059669);
+}
+
+/* ===== TRIP INFO ===== */
+.trip-info {
+    flex: 1;
+    padding-right: 80px;
+}
+
+.trip-info h3 {
+    margin: 0 0 16px 0;
+    font-size: 1.5rem;
+    color: var(--gray-900);
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.trip-info p {
+    margin: 8px 0;
+    font-size: 0.95rem;
+    color: var(--gray-600);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    line-height: 1.6;
+}
+
+.trip-info p strong {
+    color: var(--gray-800);
+    font-weight: 600;
+}
+
+/* ===== TRIP METADATA ===== */
+.trip-metadata {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--gray-200);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.trip-metadata p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--gray-600);
+    padding: 8px 12px;
+    background: var(--gray-50);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--primary-blue);
+}
+
+/* ===== TRIP ACTIONS ===== */
+.trip-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.trip-actions button {
+    flex: 1;
+    min-width: 100px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    box-shadow: var(--shadow-sm);
+}
+
+.trip-actions button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.trip-actions button:active {
+    transform: translateY(0);
+}
+
+.action-view {
+    background: linear-gradient(135deg, var(--primary-blue), var(--primary-blue-dark));
+    color: white;
+}
+
+.action-view:hover {
+    background: linear-gradient(135deg, var(--primary-blue-dark), #1e3a8a);
+}
+
+.action-edit {
+    background: linear-gradient(135deg, var(--warning-yellow), var(--warning-yellow-dark));
+    color: white;
+}
+
+.action-edit:hover {
+    background: linear-gradient(135deg, var(--warning-yellow-dark), #b45309);
+}
+
+.action-delete {
+    background: linear-gradient(135deg, var(--danger-red), #dc2626);
+    color: white;
+}
+
+.action-delete:hover {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+}
+
+/* ===== ERROR & LOADING STATES ===== */
+.error-message {
+    padding: 16px 20px;
+    background: #fef2f2;
+    border-left: 4px solid var(--danger-red);
+    border-radius: var(--radius-sm);
+    color: #991b1b;
+    font-weight: 500;
+    margin: 20px 0;
+}
+
+.loading-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--gray-500);
+}
+
+.loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid var(--gray-200);
+    border-top-color: var(--primary-blue);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--gray-500);
+}
+
+.empty-state::before {
+    content: '✈️';
+    display: block;
+    font-size: 4rem;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    .itinerary-container {
+        padding: 24px 16px;
+    }
+    
+    .trips-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .trips-header h2 {
+        font-size: 1.75rem;
+    }
+    
+    .add-trip-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .trip-list {
+        grid-template-columns: 1fr;
+    }
+    
+    .trip-info {
+        padding-right: 0;
+        padding-bottom: 60px;
+    }
+    
+    .status-tag {
+        top: auto;
+        bottom: 16px;
+        right: 16px;
+    }
+    
+    .trip-actions {
+        flex-direction: column;
+    }
+    
+    .trip-actions button {
+        width: 100%;
+    }
+    
+    .trip-metadata {
+        grid-template-columns: 1fr;
+    }
 }

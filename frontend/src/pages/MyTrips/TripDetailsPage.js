@@ -3,8 +3,10 @@ import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaClock, FaCalendarAlt, FaRoute, FaUtensils, FaInfoCircle, FaArrowLeft, FaGlobe } from 'react-icons/fa';
 import './TripDetailsPage.css';
+// import RecommendCard from '../Home/Recommendations/RecommendCard'; // Bỏ comment nếu bạn cần dùng RecommendCard
 
-const getAuthToken = () => localStorage.getItem('access_token'); 
+// Giả định hàm này tồn tại để lấy token JWT
+const getAuthToken = () => localStorage.getItem("access_token"); 
 
 // --- HÀM HỖ TRỢ HIỂN THỊ ---
 const getStatusTag = (status) => {
@@ -52,6 +54,7 @@ export default function TripDetailsPage() {
     
     // Hàm chuyển hướng đến trang chi tiết địa điểm (Destination Card)
     const handleViewDestinationDetails = (destinationId) => {
+        // Chuyển hướng đến route chi tiết địa điểm
         navigate(`/destinations/${destinationId}`); 
     };
 
@@ -72,7 +75,7 @@ export default function TripDetailsPage() {
 
     return (
         <div className="details-container">
-            {/* Nút Quay lại My Trips (navigate(-1) để quay lại trạng thái trước đó) */}
+            {/* SỬ DỤNG navigate(-1) để quay lại trạng thái trước đó */}
             <button onClick={() => navigate(-1)} className="back-button"><FaArrowLeft /> Quay lại My Trips</button>
             
             <div className="trip-header">
@@ -82,7 +85,6 @@ export default function TripDetailsPage() {
                 </span>
             </div>
             
-            {/* Thông tin Tổng quan và Metadata */}
             <div className="trip-summary">
                 <p><FaGlobe /> **Địa điểm:** {trip.province_name}</p>
                 <p><FaCalendarAlt /> **Ngày đi:** {trip.start_date || 'Chưa xác định'}</p>
@@ -101,8 +103,8 @@ export default function TripDetailsPage() {
                         <ul className="place-list">
                             {/* Duyệt qua từng mục (Địa điểm, Lunch, Travel) */}
                             {dayPlan.places.map((item, index) => {
-                                // 🔑 HIỂN THỊ MỤC ĐẶC BIỆT
-                                if (item.id === 'LUNCH' || item.id === 'DINNER') {
+                                // 🔑 KIỂM TRA MỤC ĐẶC BIỆT
+                                if (item.id === 'LUNCH') {
                                     return (
                                         <li key={index} className="item-lunch">
                                             <span className="time-slot-display"><FaUtensils /> {item.time_slot}</span> 
@@ -140,9 +142,8 @@ export default function TripDetailsPage() {
             </div>
             
             <div className="action-footer">
-                {/* Nút chuyển hướng sang trang chỉnh sửa bản sao */}
                 <button 
-                    onClick={() => navigate(`/trips/${tripId}/edit`)} 
+                    onClick={() => console.log("Mở giao diện chỉnh sửa chi tiết")} 
                     className="action-edit-full"
                 >
                     Chỉnh sửa Lịch trình

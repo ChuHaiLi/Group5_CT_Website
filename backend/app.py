@@ -468,12 +468,6 @@ def get_place_duration(destination_obj):
 # -------------------------------------------------------------
 # LOGIC LỘ TRÌNH TỰ ĐỘNG (TỐI ƯU HÓA DỰA TRÊN THỜI LƯỢNG MỚI)
 # -------------------------------------------------------------
-LUNCH_DURATION = 1.0        # 1 tiếng cho bữa trưa
-LUNCH_WINDOW_START = 12.0   # Bắt đầu sớm nhất
-LUNCH_WINDOW_END = 14.0     # Kết thúc muộn nhất
-MAX_HOURS_BEFORE_BREAK = 4.5 # Tối đa 4.5 tiếng hoạt động liên tục
-TRAVEL_BUFFER_HOURS = 0.5 
-MAX_HOURS_PER_DAY = 9.0
 
 def generate_itinerary_optimized(province_id, duration_days, must_include_place_ids=None):
     if must_include_place_ids is None:
@@ -481,6 +475,8 @@ def generate_itinerary_optimized(province_id, duration_days, must_include_place_
         
     excluded_ids = set(must_include_place_ids)
     
+    MAX_HOURS_PER_DAY = 9.0       
+    TRAVEL_BUFFER_HOURS = 0.5     
     MAX_PLACES_LIMIT = 4    
     MAX_TOTAL_PLACES_SELECTION = duration_days * MAX_PLACES_LIMIT
     
@@ -542,40 +538,11 @@ def generate_itinerary_optimized(province_id, duration_days, must_include_place_
         
         current_daily_hours = 0.0
         current_time_slot_hour = 8.0 
-        hours_since_last_break = 0.0
-
+        
         while current_daily_hours < MAX_HOURS_PER_DAY:
             
             is_first_place = not itinerary_draft[day_index]["places"]
             
-            if hours_since_last_break >= MAX_HOURS_BEFORE_BREAK or \
-               (current_time_slot_hour >= LUNCH_WINDOW_START and current_time_slot_hour < LUNCH_WINDOW_END):
-                
-                if current_time_slot_hour < LUNCH_WINDOW_START:
-                    lunch_start = LUNCH_WINDOW_START # Bắt đầu vào 12:00
-                else:
-                    # Nếu đã trễ, bắt đầu ngay (với buffer nếu có)
-                    lunch_start = current_time_slot_hour 
-
-                lunch_end = lunch_start + LUNCH_DURATION
-                
-                # Đảm bảo giờ ăn không vượt quá giới hạn ngày quá nhiều
-                if lunch_end < MAX_HOURS_PER_DAY + 1.0: 
-                    
-                    lunch_time_slot = f"{int(lunch_start):02d}:{int((lunch_start % 1) * 60):02d} - {int(lunch_end):02d}:{int((lunch_end % 1) * 60):02d}"
-                    
-                    itinerary_draft[day_index]["places"].append({
-                        "id": "LUNCH", 
-                        "name": "Bữa Trưa/Nghỉ Ngơi", 
-                        "category": "Meal",
-                        "time_slot": lunch_time_slot
-                    })
-                    
-                    current_daily_hours += LUNCH_DURATION
-                    current_time_slot_hour = lunch_end 
-                    hours_since_last_break = 0.0 # Reset counter
-                    continue
-
             # --- TÌM ĐIỂM TIẾP THEO (Tối ưu hóa vị trí) ---
             
             if is_first_place:
@@ -606,7 +573,6 @@ def generate_itinerary_optimized(province_id, duration_days, must_include_place_
             
             duration = next_place_to_add['duration_hours']
             
-            
             time_spent = duration 
             if not is_first_place:
                 time_spent += TRAVEL_BUFFER_HOURS 
@@ -616,20 +582,6 @@ def generate_itinerary_optimized(province_id, duration_days, must_include_place_
                 
                 next_place_to_add['assigned'] = True
                 
-                if not is_first_place and TRAVEL_BUFFER_HOURS > 0:
-                    travel_start = current_time_slot_hour
-                    travel_end_float = current_time_slot_hour + TRAVEL_BUFFER_HOURS
-                    
-                    travel_time_slot = f"{int(travel_start):02d}:{int((travel_start % 1) * 60):02d} - {int(travel_end_float):02d}:{int((travel_end_float % 1) * 60):02d}"
-                    
-                    itinerary_draft[day_index]["places"].append({
-                        "id": "TRAVEL", 
-                        "name": "Di chuyển đến " + next_place_to_add['name'], 
-                        "category": "Di chuyển",
-                        "time_slot": travel_time_slot
-                    })
-                    current_time_slot_hour = travel_end_float
-
                 start_time_hour = int(current_time_slot_hour)
                 start_time_minutes = int((current_time_slot_hour % 1) * 60)
 
@@ -649,7 +601,9 @@ def generate_itinerary_optimized(province_id, duration_days, must_include_place_
                 
                 current_daily_hours += time_spent 
                 current_time_slot_hour = end_time_float
-                hours_since_last_break += duration                
+                if not is_first_place:
+                    current_time_slot_hour += TRAVEL_BUFFER_HOURS
+                
             else:
                 break
         
@@ -885,38 +839,6 @@ def add_place_to_trip(trip_id):
     
     return jsonify({"message": f"Successfully added {place.name} to Day {target_day}."}), 200
 
-@app.route("/api/trips/<int:trip_id>/itinerary", methods=["PATCH"])
-@jwt_required()
-def save_working_itinerary(trip_id):
-    data = request.get_json() or {}
-    user_id = int(get_jwt_identity())
-    
-    # 🔑 Nhận lịch trình đã chỉnh sửa (bản sao)
-    working_itinerary_draft = data.get("itinerary_draft") 
-    
-    if not working_itinerary_draft or not isinstance(working_itinerary_draft, list):
-        return jsonify({"message": "Invalid itinerary data provided."}), 400
-        
-    trip = db.session.get(Itinerary, trip_id)
-    
-    if not trip or trip.user_id != user_id:
-        return jsonify({"message": "Trip not found or unauthorized."}), 404
-        
-    try:
-        # 1. Ghi đè lịch trình cũ bằng bản đã chỉnh sửa (Dữ liệu đã được làm sạch ở Frontend)
-        trip.itinerary_json = json.dumps(working_itinerary_draft, ensure_ascii=False)
-        
-        # 2. Cập nhật thời gian sửa đổi
-        trip.updated_at = datetime.now()
-        db.session.commit()
-        
-        return jsonify({"message": "Itinerary updated and saved successfully."}), 200
-
-    except Exception as e:
-        db.session.rollback()
-        print(f"Error saving updated itinerary: {e}")
-        return jsonify({"message": "An error occurred while saving the itinerary."}), 500
-    
 @app.route("/api/trips/<int:trip_id>", methods=["DELETE"])
 @jwt_required()
 def delete_trip(trip_id):
