@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom'; 
+import CreateTripForm from '../../components/CreateTripForm';
 import "./MyTripsPage.css";
 
 // Giả định hàm này tồn tại để lấy token JWT
@@ -41,13 +42,13 @@ const TripCard = ({ trip, handleDelete, handleView }) => {
             <div className="trip-info">
                 <span className={`status-tag ${statusTag.className}`}>{statusTag.label}</span>
                 <h3>{trip.name}</h3>
-                <p>📍 **Địa điểm:** {trip.province_name}</p>
-                <p>🗓️ **Thời gian:** {dateDisplay} ({trip.duration} ngày)</p>
+                <p>📍 <strong>Địa điểm:</strong> {trip.province_name}</p>
+                <p>🗓️ <strong>Thời gian:</strong> {dateDisplay} ({trip.duration} ngày)</p>
                 
                 {/* HIỂN THỊ METADATA */}
                 <div className="trip-metadata">
-                    <p>🧑‍🤝‍🧑 **Số người:** {meta.people}</p>
-                    <p>💰 **Ngân sách:** {meta.budget}</p>
+                    <p>🧑‍🤝‍🧑 <strong>Số người:</strong> {meta.people}</p>
+                    <p>💰 <strong>Ngân sách:</strong> {meta.budget}</p>
                 </div>
             </div>
             
@@ -74,6 +75,7 @@ export default function MyTripsPage() {
     const [trips, setTrips] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showCreateForm, setShowCreateForm] = useState(false);
     const navigate = useNavigate();
 
     // Hàm gọi API lấy danh sách chuyến đi (GET /api/trips)
@@ -112,6 +114,13 @@ export default function MyTripsPage() {
             alert("Lỗi khi xóa chuyến đi.");
             console.error("Error deleting trip:", err);
         }
+    };
+
+    // Hàm xử lý khi tạo trip thành công
+    const handleTripCreated = (newTrip) => {
+        // Refresh danh sách trips
+        fetchTrips();
+        setShowCreateForm(false);
     };
 
     // Load dữ liệu khi component được mount
@@ -166,24 +175,27 @@ export default function MyTripsPage() {
     if (isLoading) {
         return (
             <div className="itinerary-container">
-                <h2>My Itineraries 🧭</h2>
-                <p>Đang tải dữ liệu chuyến đi...</p>
+                <div className="loading-state">
+                    <div className="loading-spinner"></div>
+                    <p>Đang tải dữ liệu chuyến đi...</p>
+                </div>
             </div>
         );
     }
 
     return (
         <div className="itinerary-container">
-            <h2>My Itineraries 🧭</h2>
-
-            <button 
-                onClick={() => navigate('/create-trip')} 
-                className="add-trip-btn"
-            >
-                + Tạo Chuyến đi Mới
-            </button>
+            <div className="trips-header">
+                <h2>My Itineraries</h2>
+                <button 
+                    onClick={() => setShowCreateForm(true)} 
+                    className="add-trip-btn"
+                >
+                    Create a Trip
+                </button>
+            </div>
             
-            {error && <p className="error-message">Lỗi: {error}</p>}
+            {error && <p className="error-message">{error}</p>}
 
             {!error && (
                 <div className="trip-groups-wrapper">
@@ -193,8 +205,21 @@ export default function MyTripsPage() {
                     {renderTripGroup('DRAFT', groupedTrips['DRAFT'])}
                     {renderTripGroup('COMPLETED', groupedTrips['COMPLETED'])}
 
-                    {trips.length === 0 && <p>Bạn chưa có chuyến đi nào. Hãy tạo một chuyến ngay!</p>}
+                    {trips.length === 0 && (
+                        <div className="empty-state">
+                            <p>Bạn chưa có chuyến đi nào. Hãy tạo một chuyến ngay!</p>
+                        </div>
+                    )}
                 </div>
+            )}
+
+            {/* CREATE TRIP FORM MODAL */}
+            {showCreateForm && (
+                <CreateTripForm
+                    initialDestination={null}
+                    onClose={() => setShowCreateForm(false)}
+                    onTripCreated={handleTripCreated}
+                />
             )}
         </div>
     );
