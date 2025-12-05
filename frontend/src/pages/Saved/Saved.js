@@ -1,13 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import RecommendCard from "../Home/Recommendations/RecommendCard";
 import CreateTripForm from "../../components/CreateTripForm";
 import API from "../../untils/axios";
 import { FaSearch } from "react-icons/fa";
+import CollectionsTab from "./CollectionsTab";
 import "./Saved.css";
 
 export default function SavedPage({ savedIds, handleToggleSave }) {
   const [destinations, setDestinations] = useState([]);
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("access_token");
 
   const [activeTab, setActiveTab] = useState("saved");
@@ -24,54 +26,67 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
     setShowForm(false);
   };
 
+  // --- GỌI API ---
   useEffect(() => {
-    if (!token) {
-      setDestinations([]);
-      return;
-    }
+    const fetchData = async () => {
+      if (!token) {
+        setDestinations([]);
+        setLoading(false);
+        return;
+      }
 
-    API.get("/saved/list", {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(res => setDestinations(res.data))
-      .catch(console.error);
+      setLoading(true);
+      try {
+        const res = await API.get("/saved/list");
+        // Nếu API trả về mảng thì lấy, không thì lấy rỗng
+        setDestinations(Array.isArray(res.data) ? res.data : []);
+      } catch (error) {
+        console.error("Failed to fetch saved list:", error);
+        setDestinations([]); // Lỗi thì set rỗng
+      } finally {
+        setLoading(false); // Tắt loading dù thành công hay thất bại
+      }
+    };
+
+    fetchData();
   }, [token, savedIds]);
 
   const handleUnsave = async (id) => {
     await handleToggleSave(id);
-    setDestinations(prev => prev.filter(d => d.id !== id));
+    setDestinations((prev) => prev.filter((d) => d.id !== id));
   };
 
-  // Filtered by search
-  const filteredDestinations = destinations.filter(dest =>
-    dest.name.toLowerCase().includes(search.toLowerCase())
-  );
+  // Logic tìm kiếm (Cho tab Saved)
+  const filteredDestinations = useMemo(() => {
+    return destinations.filter((dest) =>
+      dest.name.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [destinations, search]);
 
   return (
     <div className="saved-wrapper">
-
-      {/* Header */}
+      {/* HEADER */}
       <div className="saved-header">
         <h1>Collections</h1>
-        <p>All your saved destinations and places you love.</p>
+        <p>All your saved destinations organized your way.</p>
 
         <div className="saved-tabs">
-          <button 
+          <button
             className={activeTab === "saved" ? "active" : ""}
             onClick={() => setActiveTab("saved")}
           >
             Saved ({destinations.length})
           </button>
 
-          <button 
+          <button
             className={activeTab === "collections" ? "active" : ""}
             onClick={() => setActiveTab("collections")}
           >
-            Collections
+            Collections (Group & Sort)
           </button>
         </div>
 
-        {/* Search bar */}
+        {/* Thanh tìm kiếm (Chỉ hiện ở tab Saved) */}
         {activeTab === "saved" && (
           <div className="saved-search">
             <FaSearch className="search-icon" />
@@ -85,41 +100,62 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
         )}
       </div>
 
-      {/* Content */}
+      {/* CONTENT */}
       <div className="saved-content">
-        {activeTab === "saved" && (
-          <div className="saved-list">
-            {filteredDestinations.length === 0 ? (
-              <div className="saved-empty">
-                <img src="/empty-state.svg" alt="empty" />
-                <h3>No saved destinations found</h3>
-                <p>Browse destinations and save the ones you love to build your travel wishlist.</p>
-              </div>
-            ) : (
-              <div className="saved-grid">
-                {filteredDestinations.map(dest => (
-                  <RecommendCard
-                    key={dest.id}
-                    destination={dest}
-                    isSaved={true}
-                    onToggleSave={() => handleUnsave(dest.id)}
-                    onCreateTrip={() => handleCreateTrip(dest)}
-                  />
-                ))}
+        {/* Trường hợp: Đang tải */}
+        {loading ? (
+          <div className="saved-empty">
+            <p>Loading your collections...</p>
+          </div>
+        ) : destinations.length === 0 ? (
+          /* Trường hợp: Danh sách rỗng */
+          <div className="saved-empty">
+            <img
+              src="https://cdn-icons-png.flaticon.com/512/4076/4076432.png"
+              alt="empty"
+              style={{ width: "120px", opacity: 0.5, marginBottom: "1rem" }}
+              onError={(e) => (e.target.style.display = "none")}
+            />
+            <h3>No saved destinations yet</h3>
+            <p>Go to Explore page and save some amazing places!</p>
+          </div>
+        ) : (
+          /* Trường hợp: Có dữ liệu -> Hiển thị Tab */
+          <>
+            {activeTab === "saved" && (
+              <div className="saved-list">
+                {filteredDestinations.length === 0 ? (
+                  <div className="saved-empty">
+                    <p>No results found for "{search}"</p>
+                  </div>
+                ) : (
+                  <div className="saved-grid">
+                    {filteredDestinations.map((dest) => (
+                      <RecommendCard
+                        key={dest.id}
+                        destination={dest}
+                        isSaved={true}
+                        onToggleSave={() => handleUnsave(dest.id)}
+                        onCreateTrip={() => handleCreateTrip(dest)}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             )}
-          </div>
-        )}
 
-        {activeTab === "collections" && (
-          <div className="coming-soon">
-            <h3>Collections will be added soon.</h3>
-            <p>Group destinations into custom folders for better planning.</p>
-          </div>
+            {activeTab === "collections" && (
+              <CollectionsTab
+                destinations={destinations}
+                handleUnsave={handleUnsave}
+                handleCreateTrip={handleCreateTrip}
+              />
+            )}
+          </>
         )}
       </div>
 
-      {/* Trip Form */}
+      {/* Form Tạo Chuyến Đi */}
       {showForm && selectedDestination && (
         <CreateTripForm
           initialDestination={selectedDestination}
