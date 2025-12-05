@@ -90,6 +90,58 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
   const peopleOptions = ["1 person", "2-4 people", "5-10 people", "10+ people"];
   const budgetOptions = ["< 5 triệu", "5-10 triệu", "10-20 triệu", "> 20 triệu"];
 
+  // =============================================
+  // Disable body scroll + custom scroll routing
+  // =============================================
+  useEffect(() => {
+    // Khi mở form → khóa scroll nền
+    document.body.style.overflow = "hidden";
+
+    const container = document.querySelector(".create-trip-container");
+    const left = document.querySelector(".create-trip-form");
+    const right = document.querySelector(".destinations-preview");
+
+    // Xử lý scroll theo vị trí chuột
+    const handleWheel = (e) => {
+      if (!container || !left || !right) return;
+
+      const containerRect = container.getBoundingClientRect();
+      const leftRect = left.getBoundingClientRect();
+      const rightRect = right.getBoundingClientRect();
+
+      // Chuột đang nằm trong modal → chặn scroll trang
+      if (
+        e.clientY > containerRect.top &&
+        e.clientY < containerRect.bottom
+      ) {
+        e.preventDefault();
+
+        // Nếu trỏ chuột nằm trong right preview → scroll right
+        if (
+          e.clientX > rightRect.left &&
+          e.clientX < rightRect.right &&
+          e.clientY > rightRect.top &&
+          e.clientY < rightRect.bottom
+        ) {
+          right.scrollTop += e.deltaY;
+          return;
+        }
+
+        // Ngược lại → scroll left
+        left.scrollTop += e.deltaY;
+      }
+    };
+
+    // Lắng nghe wheel
+    window.addEventListener("wheel", handleWheel, { passive: false });
+
+    // Cleanup khi đóng form
+    return () => {
+      document.body.style.overflow = "auto";
+      window.removeEventListener("wheel", handleWheel);
+    };
+  }, []);
+
   // ---------------------------------------------------------
   // Close form when clicking outside
   // ---------------------------------------------------------
