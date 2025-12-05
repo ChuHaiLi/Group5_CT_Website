@@ -5,7 +5,6 @@ import { usePageContext } from "../../context/PageContext";
 import { resizeImageTo128 } from "../../untils/imageResizer";
 import "./HomePage.css";
 import HeroSection from "./hero/hero";
-import HomeRecommendations from "./Recommendations/HomeRecommendations";
 import CreateTripForm from "../../components/CreateTripForm";
 import HowItWorksPanel from "../../components/HowItWorks/HowItWorksPanel";
 import HomeIntro from "./HomeIntro";
@@ -285,23 +284,6 @@ export default function HomePage({ savedIds, handleToggleSave }) {
       />
 
       <HomeIntro />
-
-      <h2 className="recommendations-title">Recommended Destinations</h2>
-
-      <div className="home-recommendations-container">
-        {filteredDestinations.length === 0 ? (
-          <div className="home-empty">
-            No destinations matched that search. Try a different keyword.
-          </div>
-        ) : (
-          <HomeRecommendations
-            savedIds={savedIds}
-            handleToggleSave={handleToggleSave}
-            onCreateTrip={handleCreateTrip}
-            destinations={filteredDestinations}
-          />
-        )}
-      </div>
 
       {showForm && selectedDestination && (
         <CreateTripForm
