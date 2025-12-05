@@ -19,6 +19,9 @@ from utils.env_loader import load_backend_env
 import json
 from sqlalchemy.orm import joinedload
 from flask_migrate import Migrate
+import random
+from flask import request, jsonify
+from unidecode import unidecode
 
 load_backend_env()
 
@@ -70,7 +73,6 @@ def invalid_token_callback(reason):
 def is_valid_email(email):
     return re.match(r"[^@]+@[^@]+\.[^@]+", email)
 
-# HÀM MỚI: Tạo Weather ngẫu nhiên theo Vùng
 def generate_random_weather(region_name):
     config = REGION_CONFIG.get(region_name, REGION_CONFIG["Miền Nam"])
     temp = random.randint(config["temp_min"], config["temp_max"])
@@ -86,6 +88,10 @@ def decode_db_json_string(data_string, default_type='list'):
         return json.loads(data_string)
     except (json.JSONDecodeError, TypeError):
         return [data_string] if default_type == 'list' else data_string
+
+def get_province_name_by_id(province_id):
+    province = db.session.get(Province, province_id)
+    return province.name if province else "Can't find..."
 
 # HÀM MỚI: Xử lý ưu tiên URL ảnh cho RecommendCard
 def get_card_image_url(destination):
@@ -310,24 +316,60 @@ def get_saved_list():
 # -------- GET ALL DESTINATIONS --------
 @app.route("/api/destinations", methods=["GET"])
 def get_destinations():
-    # SỬA LỖI: Tách joinedload thành các lệnh song song
-    destinations = Destination.query.options(
+    # Lấy các tham số từ query string
+    search_term = request.args.get("search", "").strip()
+    tags_string = request.args.get("tags")
+
+    # Bắt đầu truy vấn
+    query = Destination.query.options(
         db.joinedload(Destination.images), 
         db.joinedload(Destination.province).joinedload(Province.region)
-    ).all()
+    )
+
+    # 1. Lọc theo Search Term (Tên địa điểm HOẶC Tên tỉnh)
+    if search_term:
+        # BƯỚC 1: Chuẩn hóa chuỗi tìm kiếm từ client trong Python
+        # Ví dụ: "Ha Noi" -> unidecode('Ha Noi').lower() -> "ha noi"
+        normalized_search = unidecode(search_term).lower()
+        search_pattern = f"%{normalized_search}%"
+        
+        query = query.filter(
+            db.or_(
+                # 1. So sánh với cột tên Địa điểm không dấu (name_unaccented)
+                Destination.name_unaccented.ilike(search_pattern),
+                
+                # 2. So sánh tên Tỉnh không dấu (Province.name_unaccented)
+                Destination.province.has(
+                    Province.name_unaccented.ilike(search_pattern)
+                )
+            )
+        )
+    
+    # 2. Lọc theo Tags (Filter - Giữ nguyên logic cũ)
+    if tags_string:
+        required_tags = tags_string.split(',')
+        
+        # Áp dụng bộ lọc cho TẤT CẢ các tag yêu cầu
+        for tag in required_tags:
+            # Giả định cột 'tags' là chuỗi JSON hoặc có thể dùng LIKE để tìm kiếm chuỗi con
+            query = query.filter(Destination.tags.ilike(f'%"{tag.strip()}"%')) 
+    
+    # Thực thi truy vấn đã được lọc
+    destinations = query.all()
     
     result = []
     for dest in destinations:
-        
         province = dest.province
         region = province.region if province else None
-        region_name = region.name if region else "Miền Nam" # Default cho weather
+        region_name = region.name if region else "Miền Nam" 
         
         image_full_url = get_card_image_url(dest)
             
         result.append({
             "id": dest.id,
             "name": dest.name,
+            "province_name": province.name if province else None,
+            "region_name": region_name, 
             "description": decode_db_json_string(dest.description),
             "image_url": image_full_url, 
             "latitude": dest.latitude,
@@ -365,6 +407,7 @@ def get_vietnam_locations():
         
         for province in region.provinces:
             province_data = {
+                "id": province.id,
                 "province_name": province.name,
                 "overview": province.overview,
                 "image_url": province.image_url, 
@@ -396,6 +439,246 @@ def get_vietnam_locations():
         result.append(region_data)
         
     return jsonify(result), 200
+
+# -------------------------------------------------------------
+# LOGIC LỘ TRÌNH TỰ ĐỘNG (RULE-BASED)
+# -------------------------------------------------------------
+def generate_itinerary(province_id, duration_days, must_include_place_ids=None): 
+    """
+    Tạo lộ trình dựa trên luật: chia đều các địa điểm trong tỉnh, ưu tiên các địa điểm yêu cầu.
+    """
+    if must_include_place_ids is None:
+        must_include_place_ids = []
+        
+    excluded_ids = set(must_include_place_ids)
+    
+    places_in_province = Destination.query.filter(
+        Destination.province_id == province_id,
+        Destination.id.notin_(excluded_ids)
+    ).all()
+    
+    must_include_places = []
+    for place_id in must_include_place_ids:
+        place = db.session.get(Destination, place_id)
+        if place:
+            must_include_places.append({
+                "id": place.id, 
+                "name": place.name, 
+                "category": place.category,
+                "rating": place.rating or 0
+            })
+    
+    remaining_place_details = [
+        {
+            "id": place.id, 
+            "name": place.name, 
+            "category": place.category, 
+            "rating": place.rating or 0
+        } 
+        for place in places_in_province
+    ]
+    random.shuffle(remaining_place_details)
+    
+    itinerary_draft = []
+    for day in range(1, duration_days + 1):
+        itinerary_draft.append({"day": day, "places": []})
+        
+    if not itinerary_draft:
+        return []
+
+    num_required = len(must_include_places)
+    for i in range(num_required):
+        day_index = i % duration_days # Phân bổ đều cho các ngày
+        itinerary_draft[day_index]["places"].append(must_include_places[i])
+
+    total_places = len(remaining_place_details)
+    base_places_per_day = total_places // duration_days
+    remainder = total_places % duration_days
+    
+    current_index = 0
+    for day in range(duration_days):
+        num_places_to_add = base_places_per_day + (1 if day < remainder else 0)
+        
+        daily_places_to_add = remaining_place_details[current_index : current_index + num_places_to_add]
+        itinerary_draft[day]["places"].extend(daily_places_to_add)
+        current_index += num_places_to_add
+        
+        random.shuffle(itinerary_draft[day]["places"]) 
+            
+    return [day_plan for day_plan in itinerary_draft if day_plan["places"]]
+
+# Assume 'generate_itinerary' (the rule-based function) is defined elsewhere
+
+# ------------------------------------------------------------------------
+
+## Trip Creation and Listing
+
+@app.route("/api/trips", methods=["POST"])
+@jwt_required()
+def create_trip():
+    data = request.get_json() or {}
+    user_id = int(get_jwt_identity())
+    
+    name = data.get("name")
+    try:
+        province_id = data.get("province_id")
+        duration_days = data.get("duration")
+    except:
+        return jsonify({"message": "Province ID hoặc số ngày không hợp lệ."}), 400
+    
+    must_include_place_ids = data.get("must_include_place_ids", []) 
+
+    if not all([name, province_id, duration_days]):
+        return jsonify({"message": "Trip name, province, and duration are required."}), 400
+        
+    try:
+        # CALL ITINERARY GENERATOR (Rule-based logic)
+        itinerary_draft = generate_itinerary(province_id, duration_days, must_include_place_ids)
+        
+        # Check if the generator could find any places
+        if not itinerary_draft and not must_include_place_ids:
+            return jsonify({"message": "No suitable destinations found in this region to create an itinerary."}), 400
+            
+        itinerary_json = json.dumps(itinerary_draft, ensure_ascii=False)
+        
+        # CREATE NEW TRIP (Using Itinerary Model fields: user_id, province_id, duration)
+        new_trip = Itinerary(
+            user_id=user_id,
+            name=name,
+            province_id=province_id,
+            duration=duration_days,
+            created_at=datetime.now(),
+            itinerary_json=itinerary_json 
+        )
+        db.session.add(new_trip)
+        db.session.commit()
+        
+        province_name = get_province_name_by_id(province_id)
+        
+        return jsonify({
+            "message": "Trip created successfully.",
+            "trip": {
+                "id": new_trip.id,
+                "name": new_trip.name,
+                "province_name": province_name,
+                "duration": new_trip.duration,
+                "itinerary": itinerary_draft
+            }
+        }), 201
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error creating trip: {e}")
+        return jsonify({"message": "An error occurred while creating the trip."}), 500
+
+
+@app.route("/api/trips", methods=["GET"])
+@jwt_required()
+def get_user_trips():
+    user_id = int(get_jwt_identity())
+    
+    # Eager load Province to get the province name
+    user_trips = Itinerary.query.options(db.joinedload(Itinerary.province)).filter_by(user_id=user_id).all()
+    
+    result = []
+    for trip in user_trips:
+        # Access province name through the relationship
+        province_name = trip.province.name if trip.province else "Unknown Province"
+        
+        result.append({
+            "id": trip.id,
+            "name": trip.name,
+            "province_name": province_name,
+            "duration": trip.duration,
+            "created_at": trip.created_at.strftime("%Y-%m-%d"),
+        })
+        
+    return jsonify(result), 200
+
+## Trip Details
+
+@app.route("/api/trips/<int:trip_id>", methods=["GET"])
+@jwt_required()
+def get_trip_details(trip_id):
+    user_id = int(get_jwt_identity())
+    
+    trip = db.session.get(Itinerary, trip_id, options=[db.joinedload(Itinerary.province)])
+    
+    if not trip or trip.user_id != user_id:
+        return jsonify({"message": "Trip not found or unauthorized access."}), 404
+    
+    itinerary_data = json.loads(trip.itinerary_json) if trip.itinerary_json else []
+    province_name = trip.province.name if trip.province else "Unknown Province"
+
+    return jsonify({
+        "id": trip.id,
+        "name": trip.name,
+        "province_name": province_name,
+        "duration": trip.duration,
+        "itinerary": itinerary_data, # The parsed list of days/places
+        "last_updated": trip.updated_at.strftime("%Y-%m-%d %H:%M:%S") if hasattr(trip, 'updated_at') and trip.updated_at else None
+    }), 200
+
+## Adding Places (From Explore Page)
+
+@app.route("/api/trips/<int:trip_id>/add-place", methods=["POST"])
+@jwt_required()
+def add_place_to_trip(trip_id):
+    data = request.get_json() or {}
+    user_id = int(get_jwt_identity())
+    place_id = data.get("place_id")
+    target_day = data.get("day", 1) # Day to add the place to (default: Day 1)
+
+    if not place_id:
+        return jsonify({"message": "Place ID is required."}), 400
+
+    trip = db.session.get(Itinerary, trip_id)
+    place = db.session.get(Destination, place_id) 
+
+    if not trip or trip.user_id != user_id:
+        return jsonify({"message": "Trip not found."}), 404
+    if not place:
+        return jsonify({"message": "Destination place not found."}), 404
+        
+    # --- Validation ---
+    if place.province_id != trip.province_id:
+        return jsonify({"message": "This destination does not belong to the trip's province."}), 400
+
+    itinerary = json.loads(trip.itinerary_json) if trip.itinerary_json else []
+    
+    added = False
+    for day_plan in itinerary:
+        if day_plan.get("day") == target_day:
+            new_place_data = {
+                "id": place.id,
+                "name": place.name,
+                "category": place.category
+            }
+            # Prevent duplication
+            if not any(p['id'] == place.id for p in day_plan["places"]):
+                 day_plan["places"].append(new_place_data)
+                 added = True
+            else:
+                 return jsonify({"message": "This place is already in the itinerary for that day."}), 400
+            break
+            
+    if not added and target_day <= trip.duration:
+        itinerary.append({
+            "day": target_day,
+            "places": [{"id": place.id, "name": place.name, "category": place.category}]
+        })
+        itinerary.sort(key=lambda x: x["day"])
+        added = True
+        
+    if not added:
+        return jsonify({"message": f"Could not add destination. Day {target_day} is invalid or outside the trip duration ({trip.duration} days)."}), 400
+        
+    trip.itinerary_json = json.dumps(itinerary, ensure_ascii=False)
+    # Assuming 'updated_at' field exists and is updated on save
+    trip.updated_at = datetime.now() 
+    db.session.commit()
+    
+    return jsonify({"message": f"Successfully added {place.name} to Day {target_day}."}), 200
 
 # ----------------- Main -----------------
 if __name__ == "__main__":

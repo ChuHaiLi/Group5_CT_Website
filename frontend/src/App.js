@@ -24,6 +24,7 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 
 import API from "./untils/axios";
 import ChatWidget from "./components/ChatWidget/ChatWidget";
+import Footer from "./components/Footer/Footer";
 import { PageContext } from "./context/PageContext";
 import "./App.css";
 
@@ -227,6 +228,8 @@ function AppContent() {
           />
         </Routes>
       </div>
+
+      {!hideNavbar && <Footer />}
 
       <ChatWidget isAuthenticated={isAuthenticated} pageContext={pageContext} />
       <ToastContainer position="top-right" autoClose={3000} theme="light" />
