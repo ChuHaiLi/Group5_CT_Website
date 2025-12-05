@@ -109,28 +109,30 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
       const leftRect = left.getBoundingClientRect();
       const rightRect = right.getBoundingClientRect();
 
-      // Chuột đang nằm trong modal → chặn scroll trang
+      // Nếu chuột nằm trong modal -> chặn scroll trang
       if (
         e.clientY > containerRect.top &&
-        e.clientY < containerRect.bottom
+        e.clientY < containerRect.bottom &&
+        e.clientX > containerRect.left &&
+        e.clientX < containerRect.right
       ) {
         e.preventDefault();
 
-        // Nếu trỏ chuột nằm trong right preview → scroll right
+        // Nếu chuột đang nằm trong vùng right preview
         if (
           e.clientX > rightRect.left &&
-          e.clientX < rightRect.right &&
+          e.clientX < rightRect.right &&   // BỔ SUNG QUAN TRỌNG
           e.clientY > rightRect.top &&
           e.clientY < rightRect.bottom
         ) {
           right.scrollTop += e.deltaY;
-          return;
         }
-
-        // Ngược lại → scroll left
-        left.scrollTop += e.deltaY;
+        else {
+          left.scrollTop += e.deltaY;
+        }
       }
     };
+
 
     // Lắng nghe wheel
     window.addEventListener("wheel", handleWheel, { passive: false });
