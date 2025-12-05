@@ -8,6 +8,7 @@ import HeroSection from "./hero/hero";
 import HomeRecommendations from "./Recommendations/HomeRecommendations";
 import CreateTripForm from "../../components/CreateTripForm";
 import HowItWorksPanel from "../../components/HowItWorks/HowItWorksPanel";
+import HomeIntro from "./HomeIntro";
 import {
   sendHeroTextRequestToWidget,
   sendHeroTextResultToWidget,
@@ -282,6 +283,8 @@ export default function HomePage({ savedIds, handleToggleSave }) {
         onTextSearch={handleTextSearch}
         searching={visionLoading || textLoading}
       />
+
+      <HomeIntro />
 
       <h2 className="recommendations-title">Recommended Destinations</h2>
 
