@@ -22,8 +22,8 @@ export const sendHeroTextRequestToWidget = (payload) =>
 export const sendHeroTextResultToWidget = (payload) =>
   emitWidgetEvent({ action: "hero-text-result", payload });
 
-export const refreshChatWidgetHistory = () =>
-  emitWidgetEvent({ action: "history-refresh" });
+export const refreshChatWidgetHistory = (payload) =>
+  emitWidgetEvent({ action: "history-refresh", payload });
 
 export const subscribeToChatWidget = (listener) => {
   const handler = (event) => {
