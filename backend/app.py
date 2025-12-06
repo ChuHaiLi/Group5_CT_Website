@@ -22,7 +22,7 @@ from flask_migrate import Migrate
 import random
 from flask import request, jsonify
 from unidecode import unidecode
-
+import math
 load_backend_env()
 
 # CẤU HÌNH RANDOM THEO VÙNG (Copy từ seed.py)
@@ -286,7 +286,14 @@ def get_saved_list():
 
     for item in saved_items:
         # Eager load ảnh và sửa cú pháp SQLAlchemy 2.0
-        destination = db.session.get(Destination, item.destination_id, options=[db.joinedload(Destination.images), db.joinedload(Destination.province).joinedload(Province.region)])
+        destination = db.session.get(
+            Destination, 
+            item.destination_id, 
+            options=[
+                db.joinedload(Destination.images), 
+                db.joinedload(Destination.province).joinedload(Province.region)
+            ]
+        )
         
         if destination:
             province = destination.province
@@ -295,25 +302,42 @@ def get_saved_list():
             
             image_full_url = get_card_image_url(destination)
 
+            # 🔥 QUAN TRỌNG: Trả về ĐẦY ĐỦ thông tin giống endpoint /api/destinations
             result.append({
                 "id": destination.id,
                 "name": destination.name,
                 "province_name": province.name if province else None,
                 "region_name": region_name,
-                "image_url": image_full_url, 
                 "description": decode_db_json_string(destination.description),
+                "image_url": image_full_url,
+                
+                # 🔥 THÊM: Thông tin chi tiết cho Modal
+                "images": [img.image_url for img in destination.images],  # Danh sách ảnh
+                "type": destination.place_type,                           # Loại địa điểm
+                "place_type": destination.place_type,                     # Alias cho type
+                "opening_hours": destination.opening_hours,               # Giờ mở cửa
+                "entry_fee": destination.entry_fee,                       # Giá vé
+                "source": destination.source,                             # Nguồn tham khảo
+                
+                # Thông tin GPS
+                "gps": {
+                    "lat": destination.latitude,
+                    "lng": destination.longitude
+                } if destination.latitude and destination.longitude else None,
+                
+                # Thông tin cơ bản (giữ nguyên cho RecommendCard)
                 "latitude": destination.latitude,
                 "longitude": destination.longitude,
-                # SỬA LỖI: Lấy Rating từ DB
                 "rating": destination.rating or 0,
                 "category": destination.category,
                 "tags": decode_db_json_string(destination.tags, default_type='text'),
-                # SỬA LỖI: Tạo Weather ngẫu nhiên
                 "weather": generate_random_weather(region_name),
             })
     return jsonify(result), 200
 
 # -------- GET ALL DESTINATIONS --------
+# Thay thế endpoint /api/destinations hiện tại bằng code này:
+
 @app.route("/api/destinations", methods=["GET"])
 def get_destinations():
     # Lấy các tham số từ query string
@@ -328,33 +352,24 @@ def get_destinations():
 
     # 1. Lọc theo Search Term (Tên địa điểm HOẶC Tên tỉnh)
     if search_term:
-        # BƯỚC 1: Chuẩn hóa chuỗi tìm kiếm từ client trong Python
-        # Ví dụ: "Ha Noi" -> unidecode('Ha Noi').lower() -> "ha noi"
         normalized_search = unidecode(search_term).lower()
         search_pattern = f"%{normalized_search}%"
         
         query = query.filter(
             db.or_(
-                # 1. So sánh với cột tên Địa điểm không dấu (name_unaccented)
                 Destination.name_unaccented.ilike(search_pattern),
-                
-                # 2. So sánh tên Tỉnh không dấu (Province.name_unaccented)
                 Destination.province.has(
                     Province.name_unaccented.ilike(search_pattern)
                 )
             )
         )
     
-    # 2. Lọc theo Tags (Filter - Giữ nguyên logic cũ)
+    # 2. Lọc theo Tags
     if tags_string:
         required_tags = tags_string.split(',')
-        
-        # Áp dụng bộ lọc cho TẤT CẢ các tag yêu cầu
         for tag in required_tags:
-            # Giả định cột 'tags' là chuỗi JSON hoặc có thể dùng LIKE để tìm kiếm chuỗi con
             query = query.filter(Destination.tags.ilike(f'%"{tag.strip()}"%')) 
     
-    # Thực thi truy vấn đã được lọc
     destinations = query.all()
     
     result = []
@@ -364,14 +379,30 @@ def get_destinations():
         region_name = region.name if region else "Miền Nam" 
         
         image_full_url = get_card_image_url(dest)
-            
+        
+        # 🔥 QUAN TRỌNG: Trả về đầy đủ thông tin cho Modal
         result.append({
             "id": dest.id,
             "name": dest.name,
             "province_name": province.name if province else None,
             "region_name": region_name, 
             "description": decode_db_json_string(dest.description),
-            "image_url": image_full_url, 
+            "image_url": image_full_url,
+            
+            # 🔥 THÊM: Thông tin chi tiết cho Modal
+            "images": [img.image_url for img in dest.images],  # Danh sách ảnh
+            "type": dest.place_type,                           # Loại địa điểm
+            "opening_hours": dest.opening_hours,               # Giờ mở cửa
+            "entry_fee": dest.entry_fee,                       # Giá vé
+            "source": dest.source,                             # Nguồn tham khảo
+            
+            # Thông tin GPS
+            "gps": {
+                "lat": dest.latitude,
+                "lng": dest.longitude
+            } if dest.latitude and dest.longitude else None,
+            
+            # Thông tin cơ bản (giữ nguyên cho RecommendCard)
             "latitude": dest.latitude,
             "longitude": dest.longitude,
             "rating": dest.rating or 0,
@@ -440,78 +471,200 @@ def get_vietnam_locations():
         
     return jsonify(result), 200
 
-# -------------------------------------------------------------
-# LOGIC LỘ TRÌNH TỰ ĐỘNG (RULE-BASED)
-# -------------------------------------------------------------
-def generate_itinerary(province_id, duration_days, must_include_place_ids=None): 
+def simple_distance(lat1, lon1, lat2, lon2):
+    """Tính khoảng cách đơn giản (Euclidean) giữa hai điểm tọa độ."""
+    return math.sqrt((lat1 - lat2)**2 + (lon1 - lon2)**2)
+def get_place_duration(destination_obj):
     """
-    Tạo lộ trình dựa trên luật: chia đều các địa điểm trong tỉnh, ưu tiên các địa điểm yêu cầu.
+    Lấy thời lượng tham quan từ trường DB estimated_duration_hours, nếu NULL/0 thì dùng fallback logic.
     """
+    db_duration = getattr(destination_obj, 'estimated_duration_hours', None)
+    
+    if db_duration is not None:
+        try:
+            duration = float(db_duration)
+            if duration > 0:
+                return duration 
+        except (ValueError, TypeError):
+            pass 
+
+    category = getattr(destination_obj, 'category', 'City')
+    
+    if category in ['Nature', 'Cultural']:
+        return 3.0
+    if category in ['City', 'Entertainment']:
+        return 2.0
+    
+    return 2.0 
+# -------------------------------------------------------------
+# LOGIC LỘ TRÌNH TỰ ĐỘNG (TỐI ƯU HÓA DỰA TRÊN THỜI LƯỢNG MỚI)
+# -------------------------------------------------------------
+
+def generate_itinerary_optimized(province_id, duration_days, must_include_place_ids=None):
     if must_include_place_ids is None:
         must_include_place_ids = []
         
     excluded_ids = set(must_include_place_ids)
+    
+    MAX_HOURS_PER_DAY = 9.0       
+    TRAVEL_BUFFER_HOURS = 0.5     
+    MAX_PLACES_LIMIT = 4    
+    MAX_TOTAL_PLACES_SELECTION = duration_days * MAX_PLACES_LIMIT
+    
+    # -----------------------------------------------------------------
+    # BƯỚC 1: TRUY VẤN VÀ CHỌN LỌC ĐỊA ĐIỂM 
+    # -----------------------------------------------------------------
     
     places_in_province = Destination.query.filter(
         Destination.province_id == province_id,
         Destination.id.notin_(excluded_ids)
     ).all()
     
+    # LƯU Ý: all_places_details chứa ĐỐI TƯỢNG MODEL Destination
+    all_places_details = []
     must_include_places = []
     for place_id in must_include_place_ids:
         place = db.session.get(Destination, place_id)
         if place:
-            must_include_places.append({
-                "id": place.id, 
-                "name": place.name, 
-                "category": place.category,
-                "rating": place.rating or 0
-            })
-    
-    remaining_place_details = [
-        {
-            "id": place.id, 
-            "name": place.name, 
-            "category": place.category, 
-            "rating": place.rating or 0
-        } 
-        for place in places_in_province
-    ]
-    random.shuffle(remaining_place_details)
-    
-    itinerary_draft = []
-    for day in range(1, duration_days + 1):
-        itinerary_draft.append({"day": day, "places": []})
-        
-    if not itinerary_draft:
-        return []
-
-    num_required = len(must_include_places)
-    for i in range(num_required):
-        day_index = i % duration_days # Phân bổ đều cho các ngày
-        itinerary_draft[day_index]["places"].append(must_include_places[i])
-
-    total_places = len(remaining_place_details)
-    base_places_per_day = total_places // duration_days
-    remainder = total_places % duration_days
-    
-    current_index = 0
-    for day in range(duration_days):
-        num_places_to_add = base_places_per_day + (1 if day < remainder else 0)
-        
-        daily_places_to_add = remaining_place_details[current_index : current_index + num_places_to_add]
-        itinerary_draft[day]["places"].extend(daily_places_to_add)
-        current_index += num_places_to_add
-        
-        random.shuffle(itinerary_draft[day]["places"]) 
+            must_include_places.append(place)
             
-    return [day_plan for day_plan in itinerary_draft if day_plan["places"]]
+    all_places_details.extend(must_include_places)
+    
+    remaining_places_sorted = sorted(
+        places_in_province, 
+        key=lambda p: p.rating or 0, 
+        reverse=True
+    )
+    
+    num_to_select = MAX_TOTAL_PLACES_SELECTION - len(must_include_places)
+    selected_remaining_places = remaining_places_sorted[:max(0, num_to_select)]
+    all_places_details.extend(selected_remaining_places)
+    
+    places_to_assign = []
+    for p in all_places_details: 
+        raw_lat = getattr(p, 'latitude', None)
+        raw_lon = getattr(p, 'longitude', None)
+        
+        lat = float(raw_lat) if raw_lat is not None else 0.0
+        lon = float(raw_lon) if raw_lon is not None else 0.0
+        
+        places_to_assign.append({
+            "id": p.id, 
+            "name": p.name, 
+            "category": p.category, 
+            "lat": lat,
+            "lon": lon, 
+            "assigned": False,
+            "duration_hours": get_place_duration(p) 
+        })
+    
+    random.shuffle(places_to_assign) 
+    
+    # -----------------------------------------------------------------
+    # BƯỚC 2: PHÂN BỔ ĐIỂM VÀ TỐI ƯU HÓA VỊ TRÍ 
+    # -----------------------------------------------------------------
+    itinerary_draft = [{"day": day, "places": []} for day in range(1, duration_days + 1)]
+    
+    for day_index in range(duration_days):
+        
+        current_daily_hours = 0.0
+        current_time_slot_hour = 8.0 
+        
+        while current_daily_hours < MAX_HOURS_PER_DAY:
+            
+            is_first_place = not itinerary_draft[day_index]["places"]
+            
+            # --- TÌM ĐIỂM TIẾP THEO (Tối ưu hóa vị trí) ---
+            
+            if is_first_place:
+                anchor_place_dict = next((p for p in places_to_assign if not p['assigned']), None)
+                if not anchor_place_dict: break 
+                
+                anchor_lat = anchor_place_dict['lat']
+                anchor_lon = anchor_place_dict['lon']
+                next_place_to_add = anchor_place_dict
+                
+            else:
+                last_place_info = itinerary_draft[day_index]["places"][-1]
+                last_place_db = db.session.get(Destination, last_place_info['id'])
+                if not last_place_db: break
+                
+                # Truy cập thuộc tính bằng DẤU CHẤM
+                anchor_lat = float(getattr(last_place_db, 'latitude', 0) or 0.0) 
+                anchor_lon = float(getattr(last_place_db, 'longitude', 0) or 0.0)
 
-# Assume 'generate_itinerary' (the rule-based function) is defined elsewhere
+                # Sắp xếp các điểm chưa gán theo khoảng cách từ điểm neo
+                candidates = sorted(
+                    [p for p in places_to_assign if not p['assigned']], 
+                    key=lambda p: simple_distance(anchor_lat, anchor_lon, p['lat'], p['lon'])
+                )
+                next_place_to_add = candidates[0] if candidates else None
 
-# ------------------------------------------------------------------------
+            if not next_place_to_add: break
+            
+            duration = next_place_to_add['duration_hours']
+            
+            time_spent = duration 
+            if not is_first_place:
+                time_spent += TRAVEL_BUFFER_HOURS 
+            
+            # 2.3. Kiểm tra Giới hạn Giờ
+            if current_daily_hours + time_spent <= MAX_HOURS_PER_DAY:
+                
+                next_place_to_add['assigned'] = True
+                
+                start_time_hour = int(current_time_slot_hour)
+                start_time_minutes = int((current_time_slot_hour % 1) * 60)
 
-## Trip Creation and Listing
+                end_time_float = current_time_slot_hour + duration
+                end_time_hour = int(end_time_float)
+                end_time_minutes = int((end_time_float % 1) * 60)
+                
+                time_slot = f"{start_time_hour:02d}:{start_time_minutes:02d} - {end_time_hour:02d}:{end_time_minutes:02d}"
+
+                itinerary_draft[day_index]["places"].append({
+                    "id": next_place_to_add['id'], 
+                    "name": next_place_to_add['name'], 
+                    "category": next_place_to_add['category'],
+                    "time_slot": time_slot,
+                    "duration_hours": duration 
+                })
+                
+                current_daily_hours += time_spent 
+                current_time_slot_hour = end_time_float
+                if not is_first_place:
+                    current_time_slot_hour += TRAVEL_BUFFER_HOURS
+                
+            else:
+                break
+        
+        # Cập nhật danh sách places_to_assign (chỉ giữ lại những điểm chưa được gán)
+        places_to_assign = [p for p in places_to_assign if not p['assigned']] 
+
+
+    # -----------------------------------------------------------------
+    # BƯỚC CUỐI: 
+    # -----------------------------------------------------------------
+    final_itinerary = []
+    for day_plan in itinerary_draft:
+        clean_places = []
+        for place in day_plan["places"]:
+            clean_place = place.copy()
+            if 'duration_hours' in clean_place:
+                del clean_place['duration_hours'] 
+            clean_places.append(clean_place)
+            
+        if clean_places:
+            final_itinerary.append({
+                "day": day_plan["day"],
+                "places": clean_places
+            })
+
+    return final_itinerary
+
+# -------------------------------------------------------------
+# ENDPOINT /api/trips (POST) 
+# -------------------------------------------------------------
 
 @app.route("/api/trips", methods=["POST"])
 @jwt_required()
@@ -520,6 +673,11 @@ def create_trip():
     user_id = int(get_jwt_identity())
     
     name = data.get("name")
+    start_date_str = data.get("start_date") # Nhận start_date từ Front-end (nếu có)
+    
+    # 🔑 NHẬN METADATA (people, budget) TỪ FRONT-END
+    metadata = data.get("metadata", {})      
+    
     try:
         province_id = data.get("province_id")
         duration_days = data.get("duration")
@@ -531,30 +689,54 @@ def create_trip():
     if not all([name, province_id, duration_days]):
         return jsonify({"message": "Trip name, province, and duration are required."}), 400
         
+    # Xử lý Ngày tháng và Trạng thái
+    calculated_start_date = None
+    calculated_end_date = None
+    status = 'DRAFT'
+    
+    if start_date_str:
+        try:
+            calculated_start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+            calculated_end_date = calculated_start_date + timedelta(days=duration_days - 1)
+            
+            # Xác định trạng thái ban đầu
+            current_date = datetime.now().date()
+            if calculated_start_date > current_date:
+                status = 'UPCOMING'
+            elif calculated_end_date >= current_date:
+                 status = 'ONGOING'
+            else:
+                 status = 'COMPLETED'
+        except ValueError:
+            return jsonify({"message": "Invalid start_date format. Use YYYY-MM-DD."}), 400
+            
     try:
-        # CALL ITINERARY GENERATOR (Rule-based logic)
-        itinerary_draft = generate_itinerary(province_id, duration_days, must_include_place_ids)
+        itinerary_draft = generate_itinerary_optimized(province_id, duration_days, must_include_place_ids)
         
-        # Check if the generator could find any places
         if not itinerary_draft and not must_include_place_ids:
             return jsonify({"message": "No suitable destinations found in this region to create an itinerary."}), 400
             
         itinerary_json = json.dumps(itinerary_draft, ensure_ascii=False)
+        metadata_json = json.dumps(metadata, ensure_ascii=False) # 🔑 LƯU METADATA VÀO DB
         
-        # CREATE NEW TRIP (Using Itinerary Model fields: user_id, province_id, duration)
         new_trip = Itinerary(
             user_id=user_id,
             name=name,
             province_id=province_id,
             duration=duration_days,
-            created_at=datetime.now(),
-            itinerary_json=itinerary_json 
+            itinerary_json=itinerary_json,
+            metadata_json=metadata_json,          # 🔑 TRƯỜNG MỚI
+            start_date=calculated_start_date,     # 🔑 TRƯỜNG MỚI
+            end_date=calculated_end_date,         # 🔑 TRƯỜNG MỚI
+            status=status,                        # 🔑 TRƯỜNG MỚI
+            created_at=datetime.now()
         )
         db.session.add(new_trip)
         db.session.commit()
         
         province_name = get_province_name_by_id(province_id)
         
+        # Trả về metadata cho Front-end
         return jsonify({
             "message": "Trip created successfully.",
             "trip": {
@@ -562,6 +744,9 @@ def create_trip():
                 "name": new_trip.name,
                 "province_name": province_name,
                 "duration": new_trip.duration,
+                "start_date": new_trip.start_date.strftime("%Y-%m-%d") if new_trip.start_date else None,
+                "status": new_trip.status,
+                "metadata": metadata, 
                 "itinerary": itinerary_draft
             }
         }), 201
@@ -570,31 +755,33 @@ def create_trip():
         db.session.rollback()
         print(f"Error creating trip: {e}")
         return jsonify({"message": "An error occurred while creating the trip."}), 500
-
-
+    
 @app.route("/api/trips", methods=["GET"])
 @jwt_required()
 def get_user_trips():
     user_id = int(get_jwt_identity())
     
-    # Eager load Province to get the province name
     user_trips = Itinerary.query.options(db.joinedload(Itinerary.province)).filter_by(user_id=user_id).all()
     
     result = []
     for trip in user_trips:
-        # Access province name through the relationship
         province_name = trip.province.name if trip.province else "Unknown Province"
+        
+        metadata = json.loads(trip.metadata_json) if trip.metadata_json else {}
         
         result.append({
             "id": trip.id,
             "name": trip.name,
             "province_name": province_name,
             "duration": trip.duration,
+            "start_date": trip.start_date.strftime("%Y-%m-%d") if trip.start_date else None, # 🔑 TRƯỜNG MỚI
+            "end_date": trip.end_date.strftime("%Y-%m-%d") if trip.end_date else None,       # 🔑 TRƯỜNG MỚI
+            "status": trip.status,                                                          # 🔑 TRƯỜNG MỚI
+            "metadata": metadata,                                                           # 🔑 TRƯỜNG MỚI
             "created_at": trip.created_at.strftime("%Y-%m-%d"),
         })
         
     return jsonify(result), 200
-
 ## Trip Details
 
 @app.route("/api/trips/<int:trip_id>", methods=["GET"])
@@ -608,6 +795,7 @@ def get_trip_details(trip_id):
         return jsonify({"message": "Trip not found or unauthorized access."}), 404
     
     itinerary_data = json.loads(trip.itinerary_json) if trip.itinerary_json else []
+    metadata = json.loads(trip.metadata_json) if trip.metadata_json else {}
     province_name = trip.province.name if trip.province else "Unknown Province"
 
     return jsonify({
@@ -615,11 +803,13 @@ def get_trip_details(trip_id):
         "name": trip.name,
         "province_name": province_name,
         "duration": trip.duration,
-        "itinerary": itinerary_data, # The parsed list of days/places
+        "start_date": trip.start_date.strftime("%Y-%m-%d") if trip.start_date else None, 
+        "end_date": trip.end_date.strftime("%Y-%m-%d") if trip.end_date else None,       
+        "status": trip.status,                                                          
+        "metadata": metadata,                                                           
+        "itinerary": itinerary_data, 
         "last_updated": trip.updated_at.strftime("%Y-%m-%d %H:%M:%S") if hasattr(trip, 'updated_at') and trip.updated_at else None
     }), 200
-
-## Adding Places (From Explore Page)
 
 @app.route("/api/trips/<int:trip_id>/add-place", methods=["POST"])
 @jwt_required()
@@ -679,6 +869,97 @@ def add_place_to_trip(trip_id):
     db.session.commit()
     
     return jsonify({"message": f"Successfully added {place.name} to Day {target_day}."}), 200
+
+@app.route("/api/trips/<int:trip_id>", methods=["DELETE"])
+@jwt_required()
+def delete_trip(trip_id):
+    user_id = int(get_jwt_identity())
+    
+    trip = db.session.get(Itinerary, trip_id)
+    
+    if not trip:
+        return jsonify({"message": "Trip not found."}), 404
+        
+    if trip.user_id != user_id:
+        # 403 Forbidden nếu không phải chủ sở hữu
+        return jsonify({"message": "Unauthorized access to delete this trip."}), 403 
+    
+    try:
+        db.session.delete(trip)
+        db.session.commit()
+        
+        return jsonify({"message": f"Trip {trip_id} deleted successfully."}), 200 # 200 OK
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error deleting trip: {e}")
+        return jsonify({"message": "An error occurred while deleting the trip."}), 500
+    
+@app.route("/api/destinations/<int:destination_id>", methods=["GET"])
+@jwt_required()
+def get_destination_details(destination_id):
+    
+    destination = db.session.get(
+        Destination, 
+        destination_id, 
+        options=[
+            db.joinedload(Destination.images),
+            db.joinedload(Destination.province)
+        ]
+    )
+    
+    if not destination:
+        return jsonify({"message": "Destination not found."}), 404
+
+    result = {
+        "id": destination.id,
+        "name": destination.name,
+        "type": destination.place_type, # Sử dụng 'place_type'
+        
+        "description": decode_db_json_string(destination.description), 
+        
+        "images": [img.image_url for img in destination.images],
+        "gps": {
+            "lat": destination.latitude,
+            "lng": destination.longitude
+        },
+        "opening_hours": destination.opening_hours,
+        "entry_fee": destination.entry_fee,
+        "tags": decode_db_json_string(destination.tags, default_type='text'),
+        "source": destination.source,
+        
+        "province_id": destination.province_id,
+        "province_name": destination.province.name if destination.province else None,
+    }
+    
+    return jsonify(result), 200
+
+@app.route("/api/destinations/by-province/<int:province_id>", methods=["GET"])
+@jwt_required()
+def get_destinations_by_province(province_id):
+    destinations = Destination.query.filter_by(province_id=province_id).options(
+        db.joinedload(Destination.images)
+    ).all()
+    
+    if not destinations:
+        return jsonify({"message": "No destinations found for this province."}), 404
+
+    result = []
+    for destination in destinations:
+        result.append({
+            "id": destination.id,
+            "name": destination.name,
+            "type": destination.place_type,
+            "description_snippet": (destination.description[:100] + '...') if destination.description else None,
+            "images": [img.image_url for img in destination.images][:1], # Chỉ lấy 1 ảnh đại diện
+            "gps": {
+                "lat": destination.latitude,
+                "lng": destination.longitude
+            },
+            "entry_fee": destination.entry_fee,
+            "tags": decode_db_json_string(destination.tags, default_type='text'),
+        })
+        
+    return jsonify(result), 200
 
 # ----------------- Main -----------------
 if __name__ == "__main__":

@@ -1,0 +1,493 @@
+/* ===== TRIP DETAILS PAGE STYLING ===== */
+
+/* Kế thừa design system từ MyTripsPage */
+:root {
+    --primary-blue: #2563eb;
+    --primary-blue-dark: #1e40af;
+    --primary-blue-light: #dbeafe;
+    --success-green: #10b981;
+    --warning-yellow: #f59e0b;
+    --danger-red: #ef4444;
+    --info-cyan: #06b6d4;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+}
+
+/* ===== MAIN CONTAINER ===== */
+.details-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 24px;
+    min-height: 100vh;
+    background: linear-gradient(to bottom, var(--gray-50), white);
+}
+
+/* ===== BACK BUTTON ===== */
+.back-button {
+    background: white;
+    border: 1px solid var(--gray-300);
+    color: var(--gray-700);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin-bottom: 32px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.back-button:hover {
+    background: var(--gray-50);
+    border-color: var(--primary-blue);
+    color: var(--primary-blue);
+    transform: translateX(-4px);
+}
+
+/* ===== TRIP HEADER ===== */
+.trip-header {
+    background: linear-gradient(135deg, var(--primary-blue), var(--primary-blue-dark));
+    padding: 40px;
+    border-radius: 16px;
+    margin-bottom: 32px;
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.trip-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 400px;
+    height: 400px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+}
+
+.trip-header h2 {
+    color: white;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0 0 16px 0;
+    position: relative;
+    z-index: 1;
+}
+
+.trip-header .status-tag {
+    position: relative;
+    display: inline-block;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    z-index: 1;
+}
+
+/* ===== TRIP SUMMARY ===== */
+.trip-summary {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    padding: 32px;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+}
+
+.trip-summary p {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--gray-700);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: var(--gray-50);
+    border-radius: 8px;
+    border-left: 4px solid var(--primary-blue);
+    transition: all 0.2s;
+}
+
+.trip-summary p:hover {
+    background: var(--primary-blue-light);
+    transform: translateX(4px);
+}
+
+.trip-summary p svg {
+    color: var(--primary-blue);
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.trip-summary p strong {
+    font-weight: 600;
+    color: var(--gray-800);
+}
+
+/* ===== SECTION DIVIDER ===== */
+hr {
+    border: none;
+    height: 2px;
+    background: linear-gradient(to right, transparent, var(--gray-200), transparent);
+    margin: 40px 0;
+}
+
+/* ===== ITINERARY SCHEDULE HEADER ===== */
+.details-container > h3 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 0 0 32px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* ===== ITINERARY SCHEDULE GRID ===== */
+.itinerary-schedule {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+/* ===== DAY CARD ===== */
+.day-card {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    padding: 0;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    transition: all 0.2s;
+    overflow: hidden;
+}
+
+.day-card:hover {
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    transform: translateY(-4px);
+}
+
+.day-card .day-header {
+    background: linear-gradient(135deg, var(--primary-blue), var(--primary-blue-dark));
+    color: white;
+    padding: 20px 24px;
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.day-card .day-header::before {
+    content: '📅';
+    font-size: 1.5rem;
+}
+
+/* ===== PLACE LIST ===== */
+.place-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.place-list li {
+    display: flex;
+    align-items: flex-start;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--gray-100);
+    transition: background 0.2s;
+    gap: 16px;
+}
+
+.place-list li:last-child {
+    border-bottom: none;
+}
+
+.place-list li:hover {
+    background: var(--gray-50);
+}
+
+/* ===== TIME SLOT DISPLAY ===== */
+.time-slot-display {
+    font-weight: 700;
+    color: var(--gray-700);
+    min-width: 110px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.time-slot-display svg {
+    color: var(--primary-blue);
+    font-size: 1rem;
+}
+
+/* ===== DESTINATION LINK ===== */
+.destination-link {
+    background: none;
+    border: none;
+    color: var(--primary-blue);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    text-decoration: none;
+    text-align: left;
+    padding: 0;
+    transition: all 0.2s;
+    position: relative;
+    flex: 1;
+}
+
+.destination-link::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--primary-blue);
+    transition: width 0.3s;
+}
+
+.destination-link:hover {
+    color: var(--primary-blue-dark);
+}
+
+.destination-link:hover::after {
+    width: 100%;
+}
+
+.place-category {
+    font-size: 0.85rem;
+    color: var(--gray-500);
+    font-style: italic;
+    margin-left: 8px;
+}
+
+/* ===== SPECIAL ITEMS ===== */
+.item-lunch {
+    background: linear-gradient(to right, #fffbeb, white);
+    border-left: 4px solid var(--warning-yellow);
+}
+
+.item-lunch:hover {
+    background: linear-gradient(to right, #fef3c7, #fffbeb);
+}
+
+.item-lunch .time-slot-display svg {
+    color: var(--warning-yellow);
+}
+
+.item-lunch strong {
+    color: var(--warning-yellow-dark);
+    font-weight: 600;
+}
+
+.item-travel {
+    background: linear-gradient(to right, var(--gray-50), white);
+    border-left: 4px solid var(--gray-400);
+}
+
+.item-travel:hover {
+    background: linear-gradient(to right, var(--gray-100), var(--gray-50));
+}
+
+.item-travel .time-slot-display svg {
+    color: var(--gray-600);
+}
+
+.item-travel em {
+    color: var(--gray-600);
+    font-style: normal;
+    font-weight: 500;
+}
+
+.item-destination {
+    border-left: 4px solid transparent;
+    transition: all 0.2s;
+}
+
+.item-destination:hover {
+    border-left-color: var(--primary-blue);
+    background: var(--primary-blue-light);
+}
+
+/* ===== ACTION FOOTER ===== */
+.action-footer {
+    margin-top: 40px;
+    padding: 32px;
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.action-edit-full {
+    padding: 14px 32px;
+    background: linear-gradient(135deg, var(--warning-yellow), var(--warning-yellow-dark));
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.action-edit-full:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    background: linear-gradient(135deg, var(--warning-yellow-dark), #b45309);
+}
+
+.action-edit-full::before {
+    content: '✏️';
+    font-size: 1.2rem;
+}
+
+/* ===== COMPARISON MODE STYLES (Chuẩn bị cho tính năng so sánh) ===== */
+.comparison-mode {
+    display: grid;
+    grid-template-columns: 1fr 40px 1fr;
+    gap: 24px;
+    margin-top: 40px;
+}
+
+.comparison-panel {
+    background: white;
+    border: 2px solid var(--gray-200);
+    border-radius: 12px;
+    padding: 24px;
+    position: relative;
+}
+
+.comparison-panel.selected {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 4px var(--primary-blue-light);
+}
+
+.comparison-divider {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--gray-400);
+    font-weight: 700;
+}
+
+.comparison-divider::before {
+    content: 'VS';
+    padding: 8px 12px;
+    background: var(--gray-100);
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+.panel-label {
+    position: absolute;
+    top: -12px;
+    left: 24px;
+    background: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--gray-600);
+    border: 2px solid var(--gray-200);
+}
+
+.comparison-panel.selected .panel-label {
+    background: var(--primary-blue);
+    color: white;
+    border-color: var(--primary-blue);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 1200px) {
+    .itinerary-schedule {
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .details-container {
+        padding: 24px 16px;
+    }
+    
+    .trip-header {
+        padding: 24px;
+    }
+    
+    .trip-header h2 {
+        font-size: 1.75rem;
+    }
+    
+    .trip-summary {
+        grid-template-columns: 1fr;
+        padding: 20px;
+    }
+    
+    .itinerary-schedule {
+        grid-template-columns: 1fr;
+    }
+    
+    .place-list li {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .time-slot-display {
+        min-width: auto;
+    }
+    
+    .action-footer {
+        flex-direction: column;
+    }
+    
+    .action-edit-full {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .comparison-mode {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+    
+    .comparison-divider {
+        display: none;
+    }
+}

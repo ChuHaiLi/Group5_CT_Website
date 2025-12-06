@@ -5,8 +5,8 @@ import { usePageContext } from "../../context/PageContext";
 import { resizeImageTo128 } from "../../untils/imageResizer";
 import "./HomePage.css";
 import HeroSection from "./hero/hero";
-import HomeRecommendations from "./Recommendations/HomeRecommendations";
 import CreateTripForm from "../../components/CreateTripForm";
+import HomeIntro from "./HomeIntro";
 import {
   sendHeroTextRequestToWidget,
   sendHeroTextResultToWidget,
@@ -281,22 +281,7 @@ export default function HomePage({ savedIds, handleToggleSave }) {
         searching={visionLoading || textLoading}
       />
 
-      <h2 className="recommendations-title">Recommended Destinations</h2>
-
-      <div className="home-recommendations-container">
-        {filteredDestinations.length === 0 ? (
-          <div className="home-empty">
-            No destinations matched that search. Try a different keyword.
-          </div>
-        ) : (
-          <HomeRecommendations
-            savedIds={savedIds}
-            handleToggleSave={handleToggleSave}
-            onCreateTrip={handleCreateTrip}
-            destinations={filteredDestinations}
-          />
-        )}
-      </div>
+      <HomeIntro />
 
       {showForm && selectedDestination && (
         <CreateTripForm
