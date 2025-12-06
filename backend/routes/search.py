@@ -64,6 +64,13 @@ def _find_destination_by_name(name: str) -> Optional[Destination]:
     return Destination.query.filter(Destination.name.ilike(name)).first()
 
 
+def _format_confidence_pct(value: Optional[float]) -> Optional[str]:
+    normalized = _normalize_confidence(value)
+    if normalized is None:
+        return None
+    return f"{int(round(normalized * 100))}%"
+
+
 def _fallback_text_suggestions(query: str, limit: int = 5) -> list[dict]:
     if not query:
         return []
@@ -138,6 +145,91 @@ def _personalize_text(text: Optional[str]) -> Optional[str]:
     for pattern, replacement in replacements:
         updated = re.sub(pattern, replacement, updated)
     return updated.strip()
+
+
+def _collect_reason_phrases(items: list[dict], limit: int = 4) -> list[str]:
+    phrases = []
+    for item in items:
+        reason = ((item or {}).get("reason") or "").strip()
+        if reason and reason not in phrases:
+            phrases.append(reason)
+        if len(phrases) >= limit:
+            break
+    return phrases
+
+
+def _build_vision_user_summary(summary: Optional[str], predictions: list[dict], suggestions: list[dict]) -> str:
+    scene_line = summary or "Chưa có mô tả chi tiết cho bức ảnh này."
+
+    primary = predictions[0] if predictions else None
+    if primary:
+        primary_conf = _format_confidence_pct(primary.get("confidence")) or "—"
+        primary_line = (
+            f"{primary.get('place')} (≈ {primary_conf}) — {primary.get('reason') or 'Phù hợp nhất với bối cảnh hiện tại.'}"
+        )
+    else:
+        primary_line = "Chưa có đủ dữ liệu để khẳng định một địa điểm cụ thể."
+
+    alt_lines = []
+    seen_names = set()
+    if primary and primary.get("place"):
+        seen_names.add(primary.get("place").lower())
+
+    def _append_alt(entry, label_key):
+        name = (entry or {}).get(label_key)
+        if not name:
+            return
+        lower = name.lower()
+        if lower in seen_names:
+            return
+        seen_names.add(lower)
+        reason = (entry or {}).get("reason") or "Gợi ý phù hợp cùng bầu không khí."
+        conf_pct = _format_confidence_pct(entry.get("confidence"))
+        if conf_pct:
+            alt_lines.append(f"{name} (≈ {conf_pct}): {reason}")
+        else:
+            alt_lines.append(f"{name}: {reason}")
+
+    for pred in predictions[1:]:
+        _append_alt(pred, "place")
+
+    for suggestion in suggestions:
+        _append_alt(suggestion, "name")
+        if len(alt_lines) >= 3:
+            break
+
+    features = _collect_reason_phrases(predictions, limit=3)
+    if len(features) < 3:
+        needed = 3 - len(features)
+        features.extend(_collect_reason_phrases(suggestions, limit=needed))
+    features_line = ", ".join(features) or "Chưa xác định được rõ nét dấu hiệu hình ảnh."
+
+    keyword_candidates = []
+    for source in (predictions + suggestions):
+        label = source.get("place") or source.get("name")
+        if label and label not in keyword_candidates:
+            keyword_candidates.append(label)
+        if len(keyword_candidates) >= 5:
+            break
+    if not keyword_candidates:
+        keyword_candidates = ["ảnh du lịch", "biển", "núi đá"]
+    keywords_line = ", ".join(keyword_candidates)
+
+    lines = [
+        f"1. Mô tả nhanh: {scene_line}",
+        f"2. Dự đoán chính: {primary_line}",
+    ]
+
+    if alt_lines:
+        alt_block = "\n".join(f"   - {line}" for line in alt_lines)
+        lines.append(f"3. Điểm đến có thể khác:\n{alt_block}")
+    else:
+        lines.append("3. Điểm đến có thể khác: Chưa có gợi ý bổ sung, bạn có thể thêm ảnh khác để mình phân tích rõ hơn.")
+
+    lines.append(f"4. Đặc trưng thị giác chú ý: {features_line}")
+    lines.append(f"5. Từ khóa kiểm chứng nhanh: {keywords_line}")
+
+    return "\n".join(lines)
 
 
 @search_bp.route("", methods=["GET"])
@@ -326,6 +418,10 @@ def search_by_photo():
         "predictions": enriched_predictions,
         "suggestions": enriched_suggestions,
     }
-    response_payload["message"] = summary_text
+    response_payload["message"] = _build_vision_user_summary(
+        summary_text,
+        enriched_predictions,
+        enriched_suggestions,
+    )
 
     return jsonify(response_payload)

@@ -21,7 +21,7 @@
     justify-content: flex-end; 
     
     color: white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Thêm box-shadow nhẹ */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 2); /* Thêm box-shadow nhẹ */
 }
 
 .recommend-card:hover {
@@ -37,7 +37,7 @@
     right: 0;
     bottom: 0;
     /* Dùng gradient nhẹ để nội dung dưới cùng nổi bật hơn */
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.1) 40%, rgba(0, 0, 0, 0) 100%);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.3) 40%, rgba(0, 0, 0, 0.1) 100%);
     z-index: 1; 
 }
 

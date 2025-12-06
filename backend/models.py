@@ -21,6 +21,7 @@ class Province(db.Model):
     __tablename__ = 'provinces' # <-- THÊM: Đồng bộ tên bảng số nhiều
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
+    name_unaccented = db.Column(db.String(100), index=True)
     overview = db.Column(db.Text)
     image_url = db.Column(db.String(255))
     
@@ -59,9 +60,10 @@ class Destination(db.Model):
     province_id = db.Column(db.Integer, db.ForeignKey("provinces.id"), nullable=False) 
     
     name = db.Column(db.String(100), nullable=False)
+    name_unaccented = db.Column(db.String(128), index=True)
     place_type = db.Column(db.String(50)) 
     description = db.Column(db.Text) 
-    # ... (Các cột khác)
+    estimated_duration_hours = db.Column(db.Float, default=2.0, nullable=True)
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
     opening_hours = db.Column(db.String(100))
@@ -91,20 +93,20 @@ class Itinerary(db.Model):
     __tablename__ = 'itineraries'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150), nullable=False)
-    
-    # Khóa ngoại chính đã đúng: trỏ đến 'users.id'
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False) 
-    # Khóa ngoại chính đã đúng: trỏ đến 'provinces.id'
     province_id = db.Column(db.Integer, db.ForeignKey('provinces.id'), nullable=False) 
-    
     duration = db.Column(db.Integer, nullable=False, default=1)
+    start_date = db.Column(db.Date, nullable=True) # Cần lấy từ Front-end
+    end_date = db.Column(db.Date, nullable=True)   # Tính từ start_date + duration
+    status = db.Column(db.String(20), default='DRAFT') # Trạng thái chuyến đi
     itinerary_json = db.Column(db.Text, nullable=True) 
+    metadata_json = db.Column(db.Text, nullable=True) # Lưu trữ Budget, People
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     user = db.relationship('User', back_populates='itineraries')
     province = db.relationship('Province', backref='itineraries')
     def __repr__(self):
-        return f"<Itinerary {self.id}: {self.name} - Province {self.province_id}>"
+        return f"<Itinerary {self.id}: {self.name} - Status: {self.status}>"
     
 # Nơi lưu địa điểm yêu thích 
 class SavedDestination(db.Model):

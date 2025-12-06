@@ -113,7 +113,7 @@ export default function RecommendCard({
 
       {/* CONTENT */}
       <div className="card-content">
-        <h3>{destination.name}</h3>
+        <h3 className="light">{destination.name}</h3>
         
         <p className="card-description-text">{descriptionText}</p>
 
