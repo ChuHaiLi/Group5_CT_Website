@@ -1,287 +1,362 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import API from "../../untils/axios";
 import { TAG_CATEGORIES } from "../../data/tags.js";
 import { toast } from "react-toastify";
 
+// Import các icon cần thiết
 import {
-    FaUmbrellaBeach, FaMountain, FaLandmark, FaUtensils, FaHiking, FaTree, FaCity,
-    FaWater, FaCamera, FaCampground, FaShoppingCart, FaSwimmer, FaBicycle, FaBinoculars,
-    FaUsers, FaUser, FaClock, FaCalendarAlt, FaSun, FaCloudSun, FaLeaf, FaSnowflake,
-    FaMoon, FaStar, FaMoneyBillWave, FaDollarSign, FaGem, FaGift, FaEye, FaImage,
-    FaMapMarkedAlt, FaFireAlt, FaPaw, FaSearch, FaChevronUp, FaChevronDown,
-    FaChevronLeft, FaChevronRight, FaMusic, FaSpa, FaChild, FaCrown
+  FaUmbrellaBeach, FaMountain, FaLandmark, FaUtensils, FaHiking, FaTree, FaCity,
+  FaWater, FaCamera, FaCampground, FaShoppingCart, FaSwimmer, FaBicycle, FaBinoculars,
+  FaUsers, FaUser, FaClock, FaCalendarAlt, FaSun, FaCloudSun, FaLeaf, FaSnowflake,
+  FaMoon, FaStar, FaMoneyBillWave, FaDollarSign, FaGem, FaGift, FaEye, FaImage,
+  FaMapMarkedAlt, FaFireAlt, FaPaw, FaSearch, FaChevronUp, FaChevronDown,
+  FaMusic, FaSpa, FaChild, FaCrown, FaTimes
 } from "react-icons/fa";
 
+// Import các component con
 import RecommendCard from "../Home/Recommendations/RecommendCard";
 import CreateTripForm from "../../components/CreateTripForm";
+import DestinationModal from "../../components/DestinationModal"; // Import Modal mới tạo
 
 import "./ExplorePage.css";
 
-/* ICON MAP */
+/* --- CẤU HÌNH ICON VÀ DANH MỤC --- */
 const ICON_MAP = {
-    Beach: <FaUmbrellaBeach />, Mountain: <FaMountain />, "Historical Site": <FaLandmark />,
-    "Cultural Site": <FaMusic />, Gastronomy: <FaUtensils />, Adventure: <FaHiking />,
-    "Nature Park": <FaTree />, "Urban Area": <FaCity />, Island: <FaWater />, "Lake/River": <FaWater />,
-    "Trekking/Hiking": <FaHiking />, Photography: <FaCamera />, Camping: <FaCampground />,
-    Relaxation: <FaSpa />, Shopping: <FaShoppingCart />, "Water Sports": <FaSwimmer />,
-    Cycling: <FaBicycle />, Sightseeing: <FaBinoculars />, "Wildlife Watching": <FaBinoculars />,
-    "Local Workshop": <FaGift />, Family: <FaUsers />, Couples: <FaUsers />, Friends: <FaUsers />,
-    "Solo Traveler": <FaUser />, "Kids Friendly": <FaChild />, "Elderly Friendly": <FaUsers />,
-    "Pet Friendly": <FaPaw />, "Adventure Seekers": <FaHiking />, "Half Day": <FaClock />,
-    "Full Day": <FaClock />, "2 Days": <FaClock />, "3+ Days": <FaClock />, "Weekend Trip": <FaClock />,
-    Overnight: <FaClock />, "Multi-day Adventure": <FaClock />, Spring: <FaLeaf />, Summer: <FaSun />,
-    Autumn: <FaCloudSun />, Winter: <FaSnowflake />, Morning: <FaSun />, Afternoon: <FaCloudSun />,
-    Evening: <FaCalendarAlt />, Night: <FaMoon />, "Free": <FaGift />, "< 5 Triệu": <FaMoneyBillWave />,
-    "5 - 10 Triệu": <FaDollarSign />, "10 - 20 Triệu": <FaGem />,
-    "> 20 Triệu": <FaCrown />, "Scenic Views": <FaEye />, "Instagrammable Spots": <FaImage />,
-    "Local Cuisine": <FaUtensils />, "Festivals & Events": <FaFireAlt />, "Adventure Sports": <FaHiking />,
-    "Relaxing Spots": <FaSpa />, "Cultural Immersion": <FaLandmark />, "Hidden Gems": <FaMapMarkedAlt />
+  Beach: <FaUmbrellaBeach />, Mountain: <FaMountain />, "Historical Site": <FaLandmark />,
+  "Cultural Site": <FaMusic />, Gastronomy: <FaUtensils />, Adventure: <FaHiking />,
+  "Nature Park": <FaTree />, "Urban Area": <FaCity />, Island: <FaWater />, "Lake/River": <FaWater />,
+  "Trekking/Hiking": <FaHiking />, Photography: <FaCamera />, Camping: <FaCampground />,
+  Relaxation: <FaSpa />, Shopping: <FaShoppingCart />, "Water Sports": <FaSwimmer />,
+  Cycling: <FaBicycle />, Sightseeing: <FaBinoculars />, "Wildlife Watching": <FaBinoculars />,
+  "Local Workshop": <FaGift />, Family: <FaUsers />, Couples: <FaUsers />, Friends: <FaUsers />,
+  "Solo Traveler": <FaUser />, "Kids Friendly": <FaChild />, "Elderly Friendly": <FaUsers />,
+  "Pet Friendly": <FaPaw />, "Adventure Seekers": <FaHiking />, "Half Day": <FaClock />,
+  "Full Day": <FaClock />, "2 Days": <FaClock />, "3+ Days": <FaClock />, "Weekend Trip": <FaClock />,
+  Overnight: <FaClock />, "Multi-day Adventure": <FaClock />, Spring: <FaLeaf />, Summer: <FaSun />,
+  Autumn: <FaCloudSun />, Winter: <FaSnowflake />, Morning: <FaSun />, Afternoon: <FaCloudSun />,
+  Evening: <FaCalendarAlt />, Night: <FaMoon />, "Free": <FaGift />, "< 5 Triệu": <FaMoneyBillWave />,
+  "5 - 10 Triệu": <FaDollarSign />, "10 - 20 Triệu": <FaGem />,
+  "> 20 Triệu": <FaCrown />, "Scenic Views": <FaEye />, "Instagrammable Spots": <FaImage />,
+  "Local Cuisine": <FaUtensils />, "Festivals & Events": <FaFireAlt />, "Adventure Sports": <FaHiking />,
+  "Relaxing Spots": <FaSpa />, "Cultural Immersion": <FaLandmark />, "Hidden Gems": <FaMapMarkedAlt />
 };
 
-/* CATEGORY ICONS */
 const CATEGORY_ICON_MAP = {
-    "Destination Type": <FaMapMarkedAlt />, Activities: <FaHiking />,
-    "Target Audience": <FaUsers />, Duration: <FaClock />, "Season/Time": <FaCalendarAlt />,
-    Budget: <FaDollarSign />, "Special Features": <FaStar />
+  "Destination Type": <FaMapMarkedAlt />, Activities: <FaHiking />,
+  "Target Audience": <FaUsers />, Duration: <FaClock />, "Season/Time": <FaCalendarAlt />,
+  Budget: <FaDollarSign />, "Special Features": <FaStar />
 };
+
+// Số lượng địa điểm hiển thị trên một trang
+const ITEMS_PER_PAGE = 30; 
 
 export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) {
-    const [destinations, setDestinations] = useState([]);
-    const [search, setSearch] = useState("");
-    const [selectedTags, setSelectedTags] = useState([]);
-    const [showForm, setShowForm] = useState(false);
-    const [selectedDestination, setSelectedDestination] = useState(null);
-    const [openCategory, setOpenCategory] = useState(null);
-    const [loading, setLoading] = useState(false); // Thêm state loading
-    const categoryRefs = useRef({});
-    const debounceTimer = useRef(null); // Ref cho Debounce
+  // --- KHAI BÁO STATE ---
+  const [destinations, setDestinations] = useState([]);
+  const [search, setSearch] = useState("");
+  const [selectedTags, setSelectedTags] = useState([]);
+  
+  // State cho Form tạo chuyến đi
+  const [showForm, setShowForm] = useState(false);
+  const [selectedDestination, setSelectedDestination] = useState(null);
+  
+  // State cho Modal xem chi tiết địa điểm (MỚI)
+  const [viewingDestination, setViewingDestination] = useState(null);
 
-    // Slider state
-    const [recommendIndex, setRecommendIndex] = useState(0);
-    const CARDS_PER_VIEW = 3;
+  // State cho Dropdown Categories
+  const [openCategory, setOpenCategory] = useState(null);
+  const categoryRefs = useRef({});
+  
+  // State cho Phân trang
+  const [currentPage, setCurrentPage] = useState(1);
 
-    // ---------------------------------------------------------
-    // HÀM GỌI API (SERVER-SIDE FILTERING)
-    // ---------------------------------------------------------
-    const fetchDestinations = useCallback((currentSearch, currentTags) => {
-        setLoading(true);
-        
-        // 1. Chuẩn bị tham số Query
-        const searchParam = currentSearch.trim();
-        const tagsParam = currentTags.join(',');
-        
-        let apiUrl = "/destinations";
-        const params = [];
-        
-        // Chỉ thêm tham số nếu có giá trị
-        if (searchParam.length > 0) {
-            params.push(`search=${encodeURIComponent(searchParam)}`);
-        }
-        if (tagsParam.length > 0) {
-            params.push(`tags=${encodeURIComponent(tagsParam)}`);
-        }
+  // --- CALL API ---
+  useEffect(() => {
+    API.get("/destinations")
+      .then((res) => setDestinations(res.data))
+      .catch(() => toast.error("Failed to fetch destinations"));
+  }, []);
 
-        if (params.length > 0) {
-            apiUrl += `?${params.join('&')}`;
-        }
-        
-        // 2. Gọi API
-        API.get(apiUrl)
-            .then((res) => {
-                setDestinations(res.data);
-                setRecommendIndex(0); // Reset slider khi kết quả mới về
-            })
-            .catch(() => toast.error("Failed to fetch destinations"))
-            .finally(() => setLoading(false));
-    }, []);
+  // --- CÁC HÀM XỬ LÝ LOGIC ---
 
-    // ---------------------------------------------------------
-    // Debounce Logic (Chạy Search khi search/tags thay đổi)
-    // ---------------------------------------------------------
-    useEffect(() => {
-        if (debounceTimer.current) {
-            clearTimeout(debounceTimer.current);
-        }
-        
-        // Logic tìm kiếm chỉ cần có search hoặc tags
-        if (search === "" && selectedTags.length === 0) {
-            // Tải toàn bộ data mặc định nếu không có bộ lọc nào
-            fetchDestinations("", []);
-        } else {
-            // Thiết lập timer cho hành vi tìm kiếm và lọc
-            debounceTimer.current = setTimeout(() => {
-                fetchDestinations(search, selectedTags); 
-            }, 400); // Độ trễ 400ms
+  // Đóng mở dropdown
+  const toggleCategory = (title) => {
+    setOpenCategory((prev) => (prev === title ? null : title));
+  };
 
-            return () => {
-                // Cleanup timer cũ khi effect chạy lại
-                if (debounceTimer.current) clearTimeout(debounceTimer.current);
-            };
-        }
-        
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [search, selectedTags]); // Re-run effect khi search hoặc selectedTags thay đổi
+  // Kiểm tra xem Category có đang chứa tag nào được chọn không (để highlight nút)
+  const isCategoryActive = (categoryTags) => {
+    return categoryTags.some(tag => selectedTags.includes(tag));
+  };
 
-    // ---------------------------------------------------------
-    // Handlers
-    // ---------------------------------------------------------
-    const toggleTag = (tag) => {
-        setSelectedTags((prev) =>
-            prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-        );
-        // KHÔNG CẦN gọi setRecommendIndex(0); ở đây vì useEffect đã làm điều đó
+  // Xử lý click ra ngoài để đóng dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (openCategory && categoryRefs.current[openCategory] && !categoryRefs.current[openCategory].contains(event.target)) {
+        setOpenCategory(null);
+      }
     };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [openCategory]);
 
-    const toggleCategory = (title) => {
-        setOpenCategory((prev) => (prev === title ? null : title));
-    };
+  // Chọn/Bỏ chọn Tag
+  const handleTagClick = (tag, e) => {
+    if (e) e.stopPropagation(); 
+    toggleTag(tag);
+  };
 
-    // Vị trí dropdown (Giữ nguyên)
-    useEffect(() => {
-        if (openCategory) {
-            const categoryElement = categoryRefs.current[openCategory];
-            const dropdown = categoryElement?.querySelector('.tag-list-vertical');
-            
-            if (categoryElement && dropdown) {
-                const rect = categoryElement.getBoundingClientRect();
-                const dropdownWidth = dropdown.offsetWidth;
-                
-                dropdown.style.top = `${rect.bottom + 8}px`; 
-                dropdown.style.left = `${rect.left + (rect.width - dropdownWidth) / 2}px`;
-            }
-        }
-    }, [openCategory]);
-
-    // Đóng dropdown khi scroll (Giữ nguyên)
-    useEffect(() => {
-        const handleScroll = () => {
-            if (openCategory) {
-                setOpenCategory(null);
-            }
-        };
-
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, [openCategory]);
-
-    // LOẠI BỎ: filteredDestinations
-    // Dữ liệu trong 'destinations' đã là kết quả lọc cuối cùng.
-
-    const maxRecommendIndex = Math.max(0, destinations.length - CARDS_PER_VIEW);
-    const handlePrevRecommend = () => setRecommendIndex((prev) => Math.max(prev - 1, 0));
-    const handleNextRecommend = () => setRecommendIndex((prev) => Math.min(prev + 1, maxRecommendIndex));
-
-    return (
-        <div className="explore-container">
-            <h1 className="explore-header">Explore</h1>
-
-            {/* Search */}
-            <div className="search-bar enhanced">
-                <FaSearch className="search-icon" />
-                <input
-                    type="text"
-                    placeholder="Search destinations..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                />
-            </div>
-
-            {/* Tag Categories */}
-            <div className="categories-row">
-                {TAG_CATEGORIES.map((cat) => (
-                    <div
-                        key={cat.title}
-                        className={`category-item ${openCategory === cat.title ? "open" : ""}`}
-                        ref={(el) => (categoryRefs.current[cat.title] = el)}
-                    >
-                        <button
-                            className={`category-btn ${openCategory === cat.title ? "active" : ""}`}
-                            onClick={() => toggleCategory(cat.title)}
-                        >
-                            <span className="category-left">
-                                <span className="category-icon-bubble">
-                                    {CATEGORY_ICON_MAP[cat.title] || <FaLandmark />}
-                                </span>
-                                {cat.title}
-                            </span>
-                            <span className="category-arrow">
-                                {openCategory === cat.title ? <FaChevronUp /> : <FaChevronDown />}
-                            </span>
-                        </button>
-
-                        <div className={`tag-list-vertical ${openCategory === cat.title ? "open" : ""}`}>
-                            {cat.tags.map((tag) => (
-                                <button
-                                    key={tag}
-                                    className={`tag-btn ${selectedTags.includes(tag) ? "active" : ""}`}
-                                    onClick={() => toggleTag(tag)}
-                                >
-                                    <span className="tag-icon">{ICON_MAP[tag]}</span>
-                                    {tag}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            {/* Recommended */}
-            <h2 className="recommend-header">
-                {loading ? "Đang tìm kiếm..." : `Recommended for you (${destinations.length} kết quả)`}
-            </h2>
-
-            <div className="recommend-container">
-                <button
-                    className="arrow-btn left"
-                    onClick={handlePrevRecommend}
-                    disabled={recommendIndex === 0 || loading}
-                >
-                    <FaChevronLeft />
-                </button>
-
-                <div className="recommend-grid">
-                    {/* Sử dụng state destinations đã được lọc từ server */}
-                    {!loading && destinations
-                        .slice(recommendIndex, recommendIndex + CARDS_PER_VIEW)
-                        .map((dest) => (
-                            <div key={dest.id} className="recommend-item">
-                                <RecommendCard
-                                    destination={dest}
-                                    isSaved={savedIds.has(dest.id)}
-                                    onToggleSave={() => handleToggleSave(dest.id)}
-                                    onCreateTrip={() => {
-                                        setSelectedDestination(dest);
-                                        setShowForm(true);
-                                    }}
-                                />
-                            </div>
-                        ))}
-                    
-                    {/* Hiển thị khi không có kết quả */}
-                    {!loading && destinations.length === 0 && (search !== "" || selectedTags.length > 0) && (
-                        <p style={{textAlign: 'center', width: '100%', margin: '40px 0'}}>
-                            Không tìm thấy địa điểm nào khớp với tiêu chí tìm kiếm/lọc của bạn.
-                        </p>
-                    )}
-                     {/* Có thể thêm loading spinner hoặc skeleton UI ở đây */}
-                </div>
-
-                <button
-                    className="arrow-btn right"
-                    onClick={handleNextRecommend}
-                    disabled={recommendIndex === maxRecommendIndex || loading}
-                >
-                    <FaChevronRight />
-                </button>
-            </div>
-
-            {/* Create Trip Form */}
-            {showForm && selectedDestination && (
-                <CreateTripForm
-                    initialDestination={selectedDestination}
-                    onClose={() => setShowForm(false)}
-                />
-            )}
-        </div>
+  const toggleTag = (tag) => {
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
+    setCurrentPage(1); // Reset về trang 1 khi lọc
+  };
+
+  const removeTag = (tag) => {
+    setSelectedTags((prev) => prev.filter((t) => t !== tag));
+    setCurrentPage(1);
+  };
+
+  // Xử lý tìm kiếm
+  const handleSearchChange = (e) => {
+    setSearch(e.target.value);
+    setCurrentPage(1);
+  };
+
+  // Xử lý xem chi tiết (Mở Modal)
+  const handleViewDetails = (dest) => {
+    setViewingDestination(dest);
+  };
+
+  // --- LOGIC LỌC DỮ LIỆU ---
+  const filteredDestinations = destinations.filter((dest) => {
+    const destName = dest.name ? dest.name.toLowerCase() : "";
+    const matchesSearch = destName.includes(search.toLowerCase());
+
+    // --- FIX LỖI NULL Ở ĐÂY ---
+    const destTags = Array.isArray(dest.tags) ? dest.tags : [];
+
+    const matchesTags =
+      selectedTags.length === 0 || 
+      selectedTags.every((tag) => destTags.includes(tag));
+
+    return matchesSearch && matchesTags;
+  });
+
+  // --- LOGIC PHÂN TRANG ---
+  const indexOfLastItem = currentPage * ITEMS_PER_PAGE;
+  const indexOfFirstItem = indexOfLastItem - ITEMS_PER_PAGE;
+  const currentItems = filteredDestinations.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredDestinations.length / ITEMS_PER_PAGE);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // --- RENDER GIAO DIỆN ---
+  return (
+    <div className="explore-container">
+      {/* Tiêu đề chính */}
+      <h1 className="explore-header">Explore Destinations</h1>
+
+      {/* Thanh tìm kiếm */}
+      <div className="search-bar">
+        <FaSearch className="search-icon" />
+        <input
+          type="text"
+          placeholder="Search destinations..."
+          value={search}
+          onChange={handleSearchChange}
+        />
+      </div>
+
+      {/* Bộ lọc Categories */}
+      <div className="categories-row">
+        {TAG_CATEGORIES.map((cat) => {
+          const hasActiveTags = isCategoryActive(cat.tags);
+          const isOpen = openCategory === cat.title;
+
+          return (
+            <div
+              key={cat.title}
+              className={`category-item ${isOpen ? "open" : ""}`}
+              ref={(el) => (categoryRefs.current[cat.title] = el)}
+            >
+              <button
+                className={`category-btn ${isOpen ? "active" : ""} ${hasActiveTags ? "active" : ""}`}
+                onClick={() => toggleCategory(cat.title)}
+              >
+                <span className="category-left">
+                  {CATEGORY_ICON_MAP[cat.title] || <FaLandmark />}
+                  {cat.title}
+                  {/* Hiển thị số lượng tag đã chọn (chỉ hiện số, không ngoặc) */}
+                  {hasActiveTags && (
+                     <span className="active-count">
+                       {cat.tags.filter(t => selectedTags.includes(t)).length}
+                     </span>
+                  )}
+                </span>
+                <span className="category-arrow">
+                  {isOpen ? <FaChevronUp /> : <FaChevronDown />}
+                </span>
+              </button>
+
+              {/* Dropdown Menu */}
+              <div className={`tag-list-vertical ${isOpen ? "open" : ""}`}>
+                {cat.tags.map((tag) => {
+                  const isActive = selectedTags.includes(tag);
+                  return (
+                    <button
+                      key={tag}
+                      className={`tag-btn ${isActive ? "active" : ""}`}
+                      onClick={(e) => handleTagClick(tag, e)} 
+                    >
+                      <div className={`checkbox-circle ${isActive ? "checked" : ""}`}></div>
+                      {tag}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Danh sách Tags đã chọn */}
+      {selectedTags.length > 0 && (
+        <div className="selected-tags-container">
+          <span className="selected-label">Filters:</span>
+          <div className="selected-tags-list">
+            {selectedTags.map((tag) => (
+              <div key={tag} className="selected-tag-chip">
+                {ICON_MAP[tag]}
+                <span className="tag-text">{tag}</span>
+                <button className="remove-tag-btn" onClick={() => removeTag(tag)}>
+                  <FaTimes />
+                </button>
+              </div>
+            ))}
+            <button className="clear-all-btn" onClick={() => setSelectedTags([])}>
+              Clear All
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Tiêu đề Grid Kết quả */}
+      <h2 className="recommend-header">
+        {search || selectedTags.length > 0 
+          ? `Showing ${filteredDestinations.length} results` 
+          : "Recommended for you"}
+      </h2>
+
+      {/* Lưới kết quả */}
+      {currentItems.length > 0 ? (
+        <>
+          <div className="explore-grid-container">
+            {currentItems.map((dest) => (
+              <div key={dest.id} className="explore-grid-item">
+                <RecommendCard
+                  destination={dest}
+                  isSaved={savedIds.has(dest.id)}
+                  onToggleSave={() => handleToggleSave(dest.id)}
+                  
+                  // Truyền hàm xem chi tiết (Mở Modal)
+                  onViewDetails={() => handleViewDetails(dest)}
+                  
+                  // Mở form tạo chuyến đi
+                  onCreateTrip={() => {
+                    setSelectedDestination(dest);
+                    setShowForm(true);
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Thanh Phân Trang */}
+          {totalPages > 1 && (
+            <div className="pagination-wrapper">
+              <button 
+                className="pagination-btn"
+                disabled={currentPage === 1}
+                onClick={() => handlePageChange(currentPage - 1)}
+              >
+                Prev
+              </button>
+              
+              <div className="pagination-scroll">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
+                  <button
+                    key={number}
+                    className={`pagination-number ${number === currentPage ? "active" : ""}`}
+                    onClick={() => handlePageChange(number)}
+                  >
+                    {number}
+                  </button>
+                ))}
+              </div>
+
+              <button 
+                className="pagination-btn"
+                disabled={currentPage === totalPages}
+                onClick={() => handlePageChange(currentPage + 1)}
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </>
+      ) : (
+        /* Trạng thái trống (Empty State) */
+        <div className="empty-state-container">
+          <img 
+            src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" 
+            alt="No destinations found" 
+            className="empty-state-img"
+          />
+          <h3 className="empty-state-title">No destinations found</h3>
+          <p className="empty-state-desc">
+            We couldn't find any trips that match your current filters. <br/>
+            Try adjusting your search or clear filters to see more.
+          </p>
+          <button 
+            className="empty-state-btn"
+            onClick={() => {
+              setSelectedTags([]); // Xóa tags
+              setSearch("");       // Xóa tìm kiếm
+              setCurrentPage(1);   // Về trang đầu
+            }}
+          >
+            Clear all filters
+          </button>
+        </div>
+      )}
+
+      {/* --- CÁC MODAL & POPUP --- */}
+
+      {/* 1. Modal xem chi tiết địa điểm */}
+      {viewingDestination && (
+        <DestinationModal 
+          destination={viewingDestination} 
+          onClose={() => setViewingDestination(null)}
+          onCreateTrip={(dest) => {
+             setViewingDestination(null); // Đóng modal xem chi tiết
+             setSelectedDestination(dest); // Mở form tạo chuyến đi
+             setShowForm(true);
+          }}
+        />
+      )}
+
+      {/* 2. Form tạo chuyến đi */}
+      {showForm && selectedDestination && (
+        <CreateTripForm
+          initialDestination={selectedDestination}
+          onClose={() => setShowForm(false)}
+        />
+      )}
+    </div>
+  );
 }

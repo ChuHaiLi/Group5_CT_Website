@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import RecommendCard from "../Home/Recommendations/RecommendCard";
 import CreateTripForm from "../../components/CreateTripForm";
+import DestinationModal from "../../components/DestinationModal";
 import API from "../../untils/axios";
 import { FaSearch } from "react-icons/fa";
 import CollectionsTab from "./CollectionsTab";
@@ -16,6 +17,22 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
   const [showForm, setShowForm] = useState(false);
   const [selectedDestination, setSelectedDestination] = useState(null);
 
+  // State cho Modal
+  const [showModal, setShowModal] = useState(false);
+  const [modalDestination, setModalDestination] = useState(null);
+
+  // Handler để mở Modal
+  const handleOpenModal = (destinationObj) => {
+    setModalDestination(destinationObj);
+    setShowModal(true);
+  };
+
+  // Handler để đóng Modal
+  const handleCloseModal = () => {
+    setModalDestination(null);
+    setShowModal(false);
+  };
+
   const handleCreateTrip = (destinationObj) => {
     setSelectedDestination(destinationObj);
     setShowForm(true);
@@ -24,6 +41,12 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
   const handleCloseForm = () => {
     setSelectedDestination(null);
     setShowForm(false);
+  };
+
+  // Handler để tạo trip từ Modal
+  const handleCreateTripFromModal = (destinationObj) => {
+    handleCloseModal();
+    handleCreateTrip(destinationObj);
   };
 
   // --- GỌI API ---
@@ -38,13 +61,12 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
       setLoading(true);
       try {
         const res = await API.get("/saved/list");
-        // Nếu API trả về mảng thì lấy, không thì lấy rỗng
         setDestinations(Array.isArray(res.data) ? res.data : []);
       } catch (error) {
         console.error("Failed to fetch saved list:", error);
-        setDestinations([]); // Lỗi thì set rỗng
+        setDestinations([]);
       } finally {
-        setLoading(false); // Tắt loading dù thành công hay thất bại
+        setLoading(false);
       }
     };
 
@@ -137,6 +159,7 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
                         isSaved={true}
                         onToggleSave={() => handleUnsave(dest.id)}
                         onCreateTrip={() => handleCreateTrip(dest)}
+                        onCardClick={() => handleOpenModal(dest)}
                       />
                     ))}
                   </div>
@@ -149,11 +172,21 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
                 destinations={destinations}
                 handleUnsave={handleUnsave}
                 handleCreateTrip={handleCreateTrip}
+                handleOpenModal={handleOpenModal}
               />
             )}
           </>
         )}
       </div>
+
+      {/* Modal hiển thị chi tiết địa điểm */}
+      {showModal && modalDestination && (
+        <DestinationModal
+          destination={modalDestination}
+          onClose={handleCloseModal}
+          onCreateTrip={handleCreateTripFromModal}
+        />
+      )}
 
       {/* Form Tạo Chuyến Đi */}
       {showForm && selectedDestination && (
