@@ -7,7 +7,6 @@ import "./HomePage.css";
 import HeroSection from "./hero/hero";
 import HomeRecommendations from "./Recommendations/HomeRecommendations";
 import CreateTripForm from "../../components/CreateTripForm";
-import HowItWorksPanel from "../../components/HowItWorks/HowItWorksPanel";
 import {
   sendHeroTextRequestToWidget,
   sendHeroTextResultToWidget,
@@ -270,7 +269,6 @@ export default function HomePage({ savedIds, handleToggleSave }) {
 
   return (
     <div className="home-container">
-      <HowItWorksPanel />
       <HeroSection
         searchTerm={searchTerm}
         onSearchChange={handleSearchTermChange}
