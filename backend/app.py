@@ -286,7 +286,14 @@ def get_saved_list():
 
     for item in saved_items:
         # Eager load ảnh và sửa cú pháp SQLAlchemy 2.0
-        destination = db.session.get(Destination, item.destination_id, options=[db.joinedload(Destination.images), db.joinedload(Destination.province).joinedload(Province.region)])
+        destination = db.session.get(
+            Destination, 
+            item.destination_id, 
+            options=[
+                db.joinedload(Destination.images), 
+                db.joinedload(Destination.province).joinedload(Province.region)
+            ]
+        )
         
         if destination:
             province = destination.province
@@ -295,25 +302,42 @@ def get_saved_list():
             
             image_full_url = get_card_image_url(destination)
 
+            # 🔥 QUAN TRỌNG: Trả về ĐẦY ĐỦ thông tin giống endpoint /api/destinations
             result.append({
                 "id": destination.id,
                 "name": destination.name,
                 "province_name": province.name if province else None,
                 "region_name": region_name,
-                "image_url": image_full_url, 
                 "description": decode_db_json_string(destination.description),
+                "image_url": image_full_url,
+                
+                # 🔥 THÊM: Thông tin chi tiết cho Modal
+                "images": [img.image_url for img in destination.images],  # Danh sách ảnh
+                "type": destination.place_type,                           # Loại địa điểm
+                "place_type": destination.place_type,                     # Alias cho type
+                "opening_hours": destination.opening_hours,               # Giờ mở cửa
+                "entry_fee": destination.entry_fee,                       # Giá vé
+                "source": destination.source,                             # Nguồn tham khảo
+                
+                # Thông tin GPS
+                "gps": {
+                    "lat": destination.latitude,
+                    "lng": destination.longitude
+                } if destination.latitude and destination.longitude else None,
+                
+                # Thông tin cơ bản (giữ nguyên cho RecommendCard)
                 "latitude": destination.latitude,
                 "longitude": destination.longitude,
-                # SỬA LỖI: Lấy Rating từ DB
                 "rating": destination.rating or 0,
                 "category": destination.category,
                 "tags": decode_db_json_string(destination.tags, default_type='text'),
-                # SỬA LỖI: Tạo Weather ngẫu nhiên
                 "weather": generate_random_weather(region_name),
             })
     return jsonify(result), 200
 
 # -------- GET ALL DESTINATIONS --------
+# Thay thế endpoint /api/destinations hiện tại bằng code này:
+
 @app.route("/api/destinations", methods=["GET"])
 def get_destinations():
     # Lấy các tham số từ query string
@@ -328,33 +352,24 @@ def get_destinations():
 
     # 1. Lọc theo Search Term (Tên địa điểm HOẶC Tên tỉnh)
     if search_term:
-        # BƯỚC 1: Chuẩn hóa chuỗi tìm kiếm từ client trong Python
-        # Ví dụ: "Ha Noi" -> unidecode('Ha Noi').lower() -> "ha noi"
         normalized_search = unidecode(search_term).lower()
         search_pattern = f"%{normalized_search}%"
         
         query = query.filter(
             db.or_(
-                # 1. So sánh với cột tên Địa điểm không dấu (name_unaccented)
                 Destination.name_unaccented.ilike(search_pattern),
-                
-                # 2. So sánh tên Tỉnh không dấu (Province.name_unaccented)
                 Destination.province.has(
                     Province.name_unaccented.ilike(search_pattern)
                 )
             )
         )
     
-    # 2. Lọc theo Tags (Filter - Giữ nguyên logic cũ)
+    # 2. Lọc theo Tags
     if tags_string:
         required_tags = tags_string.split(',')
-        
-        # Áp dụng bộ lọc cho TẤT CẢ các tag yêu cầu
         for tag in required_tags:
-            # Giả định cột 'tags' là chuỗi JSON hoặc có thể dùng LIKE để tìm kiếm chuỗi con
             query = query.filter(Destination.tags.ilike(f'%"{tag.strip()}"%')) 
     
-    # Thực thi truy vấn đã được lọc
     destinations = query.all()
     
     result = []
@@ -364,14 +379,30 @@ def get_destinations():
         region_name = region.name if region else "Miền Nam" 
         
         image_full_url = get_card_image_url(dest)
-            
+        
+        # 🔥 QUAN TRỌNG: Trả về đầy đủ thông tin cho Modal
         result.append({
             "id": dest.id,
             "name": dest.name,
             "province_name": province.name if province else None,
             "region_name": region_name, 
             "description": decode_db_json_string(dest.description),
-            "image_url": image_full_url, 
+            "image_url": image_full_url,
+            
+            # 🔥 THÊM: Thông tin chi tiết cho Modal
+            "images": [img.image_url for img in dest.images],  # Danh sách ảnh
+            "type": dest.place_type,                           # Loại địa điểm
+            "opening_hours": dest.opening_hours,               # Giờ mở cửa
+            "entry_fee": dest.entry_fee,                       # Giá vé
+            "source": dest.source,                             # Nguồn tham khảo
+            
+            # Thông tin GPS
+            "gps": {
+                "lat": dest.latitude,
+                "lng": dest.longitude
+            } if dest.latitude and dest.longitude else None,
+            
+            # Thông tin cơ bản (giữ nguyên cho RecommendCard)
             "latitude": dest.latitude,
             "longitude": dest.longitude,
             "rating": dest.rating or 0,

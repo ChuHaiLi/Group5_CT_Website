@@ -2,7 +2,12 @@ import React, { useState, useMemo } from "react";
 import RecommendCard from "../Home/Recommendations/RecommendCard";
 import { FaSortAmountUp, FaSortAmountDown, FaLayerGroup } from "react-icons/fa";
 
-export default function CollectionsTab({ destinations, handleUnsave, handleCreateTrip }) {
+export default function CollectionsTab({ 
+  destinations, 
+  handleUnsave, 
+  handleCreateTrip,
+  handleOpenModal
+}) {
   
   // HOOKS DECLARATION
   const [groupBy, setGroupBy] = useState("city"); 
@@ -156,6 +161,7 @@ export default function CollectionsTab({ destinations, handleUnsave, handleCreat
                   isSaved={true}
                   onToggleSave={() => handleUnsave(dest.id)}
                   onCreateTrip={() => handleCreateTrip(dest)}
+                  onCardClick={() => handleOpenModal(dest)}
                 />
               ))}
             </div>
