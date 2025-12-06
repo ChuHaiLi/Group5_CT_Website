@@ -21,7 +21,7 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
-
+import EditTripPage from './pages/MyTrips/EditTripPage';
 import API from "./untils/axios";
 import ChatWidget from "./components/ChatWidget/ChatWidget";
 import Footer from "./components/Footer/Footer";
@@ -214,6 +214,8 @@ function AppContent() {
               </PrivateRoute>
             }
           />
+
+          <Route path="/trips/:tripId/edit" element={<EditTripPage />} />
 
           <Route
             path="/profile"
