@@ -1,26 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-/* ==========================================================================
-   1. GLOBAL LAYOUT
-   ========================================================================== */
-.page-wrapper, .page-wrapper.with-navbar {
-  overflow: visible !important;
-}
-
+/* --- 1. GLOBAL LAYOUT --- */
 .explore-container {
-  padding: 2rem 0;
+  padding: 2rem 20px; /* Padding 2 bên an toàn */
   background: #fcfcfc;
   min-height: 100vh;
-
-  /* 2. ĐỔI TÊN FONT TẠI ĐÂY */
   font-family: "Inter", sans-serif;
   box-sizing: border-box;
-  overflow: visible !important;
-  position: relative;
   display: flex;
   flex-direction: column;
-  /* Mặc định canh giữa cho Grid và Categories, nhưng sẽ override cho Header/Search */
-  align-items: center; 
+  align-items: center; /* Căn giữa trục dọc */
 }
 
 /* ==========================================================================
@@ -39,15 +28,14 @@
   font-weight: 800;
   color: #111827;
   margin-bottom: 1rem;
-  text-align: left; /* Chữ nằm bên trái */
-  width: 100%;
+  text-align: left;
   
-  /* --- KEY FIX: Canh lề trái + thụt vào --- */
+  /* --- FIX: Căn lề trái đồng bộ --- */
   margin-left: max(20px, calc((100% - 1400px) / 2 + 40px));
-  /* Reset max-width để không bị ảnh hưởng bởi align-items center của cha */
-  max-width: 100%; 
-  padding: 0; 
-  /* Cho phép nó chiếm không gian còn lại bên phải */
+  
+  /* --- FIX QUAN TRỌNG: Không dùng width 100% để tránh bị đẩy ra ngoài --- */
+  width: auto; 
+  padding-right: 20px; /* Để khoảng thở bên phải */
   margin-right: auto;
 }
 
@@ -61,11 +49,15 @@
   border-radius: 12px;
   transition: all 0.2s ease;
   
-  /* --- KEY FIX: Kích thước gọn và canh lề trái giống Header --- */
-  width: 100%;
-  max-width: 700px; /* Thanh search ngắn gọn, không full màn hình */
+  /* --- FIX QUAN TRỌNG: Tính toán lại width để không bị tràn --- */
+  /* Width = 100% trừ đi khoảng cách lề trái và phải (40px an toàn) */
+  width: calc(100% - 40px); 
+  max-width: 700px;
+  
+  /* Căn lề trái giống Header */
   margin-left: max(20px, calc((100% - 1400px) / 2 + 40px));
-  margin-right: auto; /* Đẩy phần còn lại sang phải */
+  margin-right: auto;
+  box-sizing: border-box; /* Đảm bảo padding không làm vỡ khung */
 }
 
 .search-bar:focus-within {
@@ -90,13 +82,22 @@
   gap: 10px;
   flex-wrap: wrap; 
   overflow: visible !important;
-  padding: 0 20px 1rem 20px;
-  /* Canh giữa các nút */
-  justify-content: center; 
+  
+  /* --- FIX: Căn trái nội dung thay vì căn giữa --- */
+  justify-content: flex-start; 
+  
+  /* --- FIX: Dùng Padding thay vì Margin để nền trắng vẫn phủ full màn hình --- */
+  /* Padding trái = Công thức căn lề của Header */
+  padding-left: max(20px, calc((100% - 1400px) / 2 + 40px));
+  padding-right: 20px;
+  padding-bottom: 1rem;
+  
   margin-bottom: 0.5rem;
+  
+  /* --- FIX: Full width màn hình để nền dính (sticky) đẹp hơn --- */
   width: 100%;
-  max-width: 1400px; /* Giới hạn độ rộng để không bè ra quá */
-
+  max-width: 100%; /* Bỏ giới hạn 1400px ở container cha để background tràn viền */
+  
   position: sticky;
   top: 0;
   z-index: 900;
@@ -106,6 +107,8 @@
   padding-bottom: 15px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   margin-bottom: 2rem;
+  
+  box-sizing: border-box; /* Quan trọng để không bị thừa scroll ngang */
 }
 
 .categories-btn-highlight {
