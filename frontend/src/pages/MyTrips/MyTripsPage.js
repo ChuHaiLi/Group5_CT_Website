@@ -5,7 +5,6 @@ import CreateTripForm from '../../components/CreateTripForm';
 // Dòng import CSS này có thể gây lỗi nếu không có file, nhưng tôi giữ nguyên theo cấu trúc của bạn
 import "./MyTripsPage.css"; 
 
-// Giả định hàm này tồn tại để lấy token JWT
 const getAuthToken = () => localStorage.getItem("access_token"); 
 
 // --- HÀM HỖ TRỢ HIỂN THỊ ---
