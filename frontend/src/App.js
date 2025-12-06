@@ -25,6 +25,7 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 import API from "./untils/axios";
 import ChatWidget from "./components/ChatWidget/ChatWidget";
 import Footer from "./components/Footer/Footer";
+import HowItWorksPanel from "./components/HowItWorks/HowItWorksPanel";
 import { PageContext } from "./context/PageContext";
 import "./App.css";
 
@@ -148,6 +149,7 @@ function AppContent() {
   return (
     <PageContext.Provider value={{ pageContext, setPageContext }}>
       {!hideNavbar && <Navbar />}
+      <HowItWorksPanel />
 
       <div className={`page-wrapper ${!hideNavbar ? "with-navbar" : ""}`}>
         <Routes>

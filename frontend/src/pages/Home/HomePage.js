@@ -6,7 +6,6 @@ import { resizeImageTo128 } from "../../untils/imageResizer";
 import "./HomePage.css";
 import HeroSection from "./hero/hero";
 import CreateTripForm from "../../components/CreateTripForm";
-import HowItWorksPanel from "../../components/HowItWorks/HowItWorksPanel";
 import HomeIntro from "./HomeIntro";
 import {
   sendHeroTextRequestToWidget,
@@ -270,7 +269,6 @@ export default function HomePage({ savedIds, handleToggleSave }) {
 
   return (
     <div className="home-container">
-      <HowItWorksPanel />
       <HeroSection
         searchTerm={searchTerm}
         onSearchChange={handleSearchTermChange}
