@@ -14,10 +14,7 @@ import {
 } from "react-icons/fa";
 import { toast } from "react-toastify";
 import API from "../../untils/axios";
-import {
-  subscribeToChatWidget,
-  refreshChatWidgetHistory,
-} from "../../untils/chatWidgetEvents";
+import { subscribeToChatWidget } from "../../untils/chatWidgetEvents";
 import { resizeImageTo128 } from "../../untils/imageResizer";
 import "./ChatWidget.css";
 
@@ -94,13 +91,11 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
         entries.push({ role: "assistant", content: assistantMessage });
       }
 
-      if (!entries.length) return false;
+      if (!entries.length) return;
       try {
         await API.post("/chat/widget/log", { messages: entries });
-        return true;
       } catch (error) {
         console.warn("Unable to persist logged vision conversation", error);
-        return false;
       }
     },
     []
@@ -121,12 +116,6 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
     const unsubscribe = subscribeToChatWidget(
       ({ action = "toggle", payload }) => {
         if (action === "history-refresh") {
-          const dropId = payload?.dropClientRequestId;
-          if (dropId) {
-            setMessages((prev) =>
-              prev.filter((msg) => msg._requestId !== dropId)
-            );
-          }
           fetchHistory();
           return;
         }
@@ -144,7 +133,6 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
               name: item.name,
             })),
             _isExternal: true,
-            _requestId: payload.requestId,
           };
           setMessages((prev) => [...prev, userMessage]);
           return;
@@ -160,7 +148,6 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
                 role: "bot",
                 content: payload.response,
                 _isExternal: true,
-                _requestId: payload.requestId,
               },
             ]);
           }
@@ -181,7 +168,6 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
             content: payload.question || "Tìm kiếm bằng ảnh",
             attachments: normalized,
             _isExternal: true,
-            _requestId: payload.requestId,
           };
           setMessages((prev) => [...prev, userMessage]);
           return;
@@ -202,7 +188,6 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
               vision: responsePayload,
               content: formatted,
               _isExternal: true,
-              _requestId: payload.requestId,
             };
             setMessages((prev) => [...prev, botMessage]);
           }
@@ -260,7 +245,6 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
       role: "user",
       content: trimmed,
       created_at: new Date().toISOString(),
-      _requestId: `direct-${Date.now()}`,
     };
 
     setMessages((prev) => [...prev, optimistic]);
@@ -274,10 +258,10 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
         display_name: userDisplayName,
       });
       setMessages((prev) => {
-        const updated = prev
-          .filter((msg) => msg.id !== optimistic.id)
-          .concat(res.data || []);
-        return updated;
+        const updated = prev.map((msg) =>
+          msg.id === optimistic.id ? { ...msg, persisted: true } : msg
+        );
+        return [...updated, res.data];
       });
     } catch (error) {
       const fallback =
@@ -411,9 +395,8 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
       return;
     }
 
-    const optimisticId = `vision-${Date.now()}`;
     const optimistic = {
-      id: optimisticId,
+      id: `vision-${Date.now()}`,
       role: "user",
       content: question || "Tìm kiếm bằng ảnh",
       attachments: queuedImages.map((img) => ({
@@ -422,7 +405,6 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
         name: img.name,
       })),
       _isExternal: true,
-      _requestId: optimisticId,
     };
 
     setMessages((prev) => [...prev, optimistic]);
@@ -435,15 +417,17 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
     let assistantText = "";
 
     try {
-      const res = await API.post("/search/vision", {
-        images: queuedImages.map((img) => img.base64),
-        question,
-      });
-      const responsePayload = res.data || {};
-      const formatted =
-        formatVisionResponse(responsePayload) ||
-        "Mình đã nhận ảnh của bạn nhưng chưa thể diễn giải rõ hơn.";
-      assistantText = formatted;
+      const res = await API.post(
+        "/search/vision",
+        {
+          images: queuedImages.map((img) => img.base64),
+          question,
+        },
+        { responseType: "text" }
+      );
+      const responsePayload = { plain_text: res.data };
+      const formatted = formatVisionResponse(responsePayload);
+      assistantText = responsePayload.plain_text;
 
       setMessages((prev) => {
         const updated = prev.map((msg) =>
@@ -458,7 +442,6 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
             vision: responsePayload,
             content: formatted,
             _isExternal: true,
-            _requestId: optimisticId,
           },
         ];
       });
@@ -483,14 +466,7 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
     } finally {
       setSending(false);
       setVisionLoading(false);
-      const persisted = await persistVisionConversation(
-        userText,
-        queuedImages,
-        assistantText
-      );
-      if (persisted) {
-        refreshChatWidgetHistory({ dropClientRequestId: optimisticId });
-      }
+      persistVisionConversation(userText, queuedImages, assistantText);
     }
   };
 
@@ -563,35 +539,29 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
                   )}
                   {message.attachments && message.attachments.length > 0 && (
                     <div className="chat-widget-bubble-attachments">
-                      {message.attachments.map(
-                        (attachment) =>
-                          attachment &&
-                          (attachment.thumbnailUrl ||
-                            attachment.previewUrl) && (
-                            <button
-                              type="button"
-                              key={attachment.id}
-                              className="chat-widget-bubble-attachment"
-                              onClick={() =>
-                                setActivePreview({
-                                  src:
-                                    attachment.previewUrl ||
-                                    attachment.thumbnailUrl,
-                                  name: attachment.name,
-                                })
-                              }
-                              aria-label="Xem ảnh đính kèm"
-                            >
-                              <img
-                                src={
-                                  attachment.thumbnailUrl ||
-                                  attachment.previewUrl
-                                }
-                                alt={attachment.name || "reference"}
-                              />
-                            </button>
-                          )
-                      )}
+                      {message.attachments.map((attachment) => (
+                        <button
+                          type="button"
+                          key={attachment.id}
+                          className="chat-widget-bubble-attachment"
+                          onClick={() =>
+                            setActivePreview({
+                              src:
+                                attachment.previewUrl ||
+                                attachment.thumbnailUrl,
+                              name: attachment.name,
+                            })
+                          }
+                          aria-label="Xem ảnh đính kèm"
+                        >
+                          <img
+                            src={
+                              attachment.thumbnailUrl || attachment.previewUrl
+                            }
+                            alt={attachment.name || "reference"}
+                          />
+                        </button>
+                      ))}
                     </div>
                   )}
                   {message.error && (
@@ -643,7 +613,7 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
                 <FaMicrophone size={14} />
               </button>
               <textarea
-                placeholder="Type a travel question or describe your photo…"
+                placeholder="Nhập câu hỏi du lịch hoặc mô tả cho ảnh…"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}

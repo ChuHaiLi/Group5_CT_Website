@@ -145,7 +145,7 @@ export default function Hero({
               value={searchTerm ?? ""}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
-              placeholder="Ask anything about a destination or drop a reference photo..."
+              placeholder="Hỏi bất kỳ điều gì về điểm đến hoặc tải ảnh tham chiếu..."
             />
           </div>
           <div className="hero-command-actions">

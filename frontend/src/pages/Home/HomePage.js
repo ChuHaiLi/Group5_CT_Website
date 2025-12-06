@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import API from "../../untils/axios";
 import { usePageContext } from "../../context/PageContext";
@@ -7,14 +7,11 @@ import "./HomePage.css";
 import HeroSection from "./hero/hero";
 import HomeRecommendations from "./Recommendations/HomeRecommendations";
 import CreateTripForm from "../../components/CreateTripForm";
-import HowItWorksPanel from "../../components/HowItWorks/HowItWorksPanel";
-import HomeIntro from "./HomeIntro";
 import {
   sendHeroTextRequestToWidget,
   sendHeroTextResultToWidget,
   sendVisionRequestToWidget,
   sendVisionResultToWidget,
-  refreshChatWidgetHistory,
 } from "../../untils/chatWidgetEvents";
 
 const MAX_VISION_IMAGES = 4;
@@ -25,14 +22,12 @@ export default function HomePage({ savedIds, handleToggleSave }) {
   const [selectedDestination, setSelectedDestination] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [visionImages, setVisionImages] = useState([]);
+  const [visionResult, setVisionResult] = useState(null);
+  const [textResults, setTextResults] = useState(null);
   const [visionLoading, setVisionLoading] = useState(false);
   const [textLoading, setTextLoading] = useState(false);
   const [activePreview, setActivePreview] = useState(null);
   const { setPageContext } = usePageContext();
-
-  const handleSearchTermChange = useCallback((value) => {
-    setSearchTerm((prev) => (prev === value ? prev : value));
-  }, []);
 
   useEffect(() => {
     API.get("/destinations")
@@ -83,7 +78,7 @@ export default function HomePage({ savedIds, handleToggleSave }) {
     assistantContent,
     attachments = [],
   }) => {
-    if (!userContent && !assistantContent) return false;
+    if (!userContent && !assistantContent) return;
     const entries = [];
     if (userContent) {
       entries.push({
@@ -104,10 +99,8 @@ export default function HomePage({ savedIds, handleToggleSave }) {
 
     try {
       await API.post("/chat/widget/log", { messages: entries });
-      return true;
     } catch (error) {
       console.warn("Unable to persist hero conversation", error);
-      return false;
     }
   };
 
@@ -118,34 +111,31 @@ export default function HomePage({ savedIds, handleToggleSave }) {
       return;
     }
     setTextLoading(true);
+    setVisionResult(null);
     const requestId = `hero-text-${Date.now()}`;
     sendHeroTextRequestToWidget({ requestId, content: query });
     try {
       const res = await API.post("/search/text", { query });
+      setTextResults(res.data);
       const friendly =
         res.data?.message || res.data?.summary || res.data?.analysis;
       sendHeroTextResultToWidget({ requestId, response: friendly });
-      const persisted = await persistHeroConversation({
+      persistHeroConversation({
         userContent: query,
         assistantContent: friendly,
       });
-      if (persisted) {
-        refreshChatWidgetHistory({ dropClientRequestId: requestId });
-      }
     } catch (error) {
       console.error(error);
       const fallback =
         error.response?.data?.message ||
         "Không thể tìm kiếm gợi ý từ văn bản lúc này.";
       toast.error(fallback);
+      setTextResults(null);
       sendHeroTextResultToWidget({ requestId, response: fallback });
-      const persisted = await persistHeroConversation({
+      persistHeroConversation({
         userContent: query,
         assistantContent: fallback,
       });
-      if (persisted) {
-        refreshChatWidgetHistory({ dropClientRequestId: requestId });
-      }
     } finally {
       setTextLoading(false);
       setSearchTerm("");
@@ -216,6 +206,7 @@ export default function HomePage({ savedIds, handleToggleSave }) {
     });
 
     setVisionLoading(true);
+    setTextResults(null);
     setVisionImages([]);
     setSearchTerm("");
     try {
@@ -224,11 +215,12 @@ export default function HomePage({ savedIds, handleToggleSave }) {
         question: question || undefined,
       };
       const res = await API.post("/search/vision", payload);
+      setVisionResult(res.data);
       sendVisionResultToWidget({
         requestId,
         response: res.data?.message || res.data?.summary,
       });
-      const persisted = await persistHeroConversation({
+      persistHeroConversation({
         userContent: question || "Tìm kiếm bằng ảnh",
         assistantContent:
           res.data?.message ||
@@ -236,24 +228,19 @@ export default function HomePage({ savedIds, handleToggleSave }) {
           "AI đã trả lời ảnh của bạn.",
         attachments: queuedImages,
       });
-      if (persisted) {
-        refreshChatWidgetHistory({ dropClientRequestId: requestId });
-      }
     } catch (error) {
       console.error(error);
       const fallback =
         error.response?.data?.message ||
         "Không thể phân tích ảnh lúc này, vui lòng thử lại.";
       toast.error(fallback);
+      setVisionResult(null);
       sendVisionResultToWidget({ requestId, response: fallback });
-      const persisted = await persistHeroConversation({
+      persistHeroConversation({
         userContent: question || "Tìm kiếm bằng ảnh",
         assistantContent: fallback,
         attachments: queuedImages,
       });
-      if (persisted) {
-        refreshChatWidgetHistory({ dropClientRequestId: requestId });
-      }
     } finally {
       setVisionLoading(false);
     }
@@ -271,10 +258,9 @@ export default function HomePage({ savedIds, handleToggleSave }) {
 
   return (
     <div className="home-container">
-      <HowItWorksPanel />
       <HeroSection
         searchTerm={searchTerm}
-        onSearchChange={handleSearchTermChange}
+        onSearchChange={(value) => setSearchTerm(value)}
         visionImages={visionImages}
         onVisionImagesAdd={handleVisionImagesAdd}
         onVisionImageRemove={handleVisionImageRemove}
@@ -284,7 +270,21 @@ export default function HomePage({ savedIds, handleToggleSave }) {
         searching={visionLoading || textLoading}
       />
 
-      <HomeIntro />
+      {textResults && (
+        <SearchResultsPanel
+          type="text"
+          result={textResults}
+          onClear={() => setTextResults(null)}
+        />
+      )}
+
+      {visionResult && (
+        <SearchResultsPanel
+          type="vision"
+          result={visionResult}
+          onClear={() => setVisionResult(null)}
+        />
+      )}
 
       <h2 className="recommendations-title">Recommended Destinations</h2>
 
@@ -340,5 +340,110 @@ export default function HomePage({ savedIds, handleToggleSave }) {
         </div>
       )}
     </div>
+  );
+}
+
+const confidenceLabel = (value) => {
+  if (typeof value !== "number" || Number.isNaN(value)) return null;
+  return `${Math.round(value * 100)}% match`;
+};
+
+function SearchResultsPanel({ type, result, onClear }) {
+  if (!result) return null;
+  const isVision = type === "vision";
+  const title = isVision
+    ? "Photo-based suggestions"
+    : "Smart text search results";
+  const summary = isVision ? result.summary : result.analysis || result.summary;
+  const friendlyMessage = result.message;
+  const suggestions = result.suggestions || [];
+  const predictions = isVision ? result.predictions || [] : [];
+
+  return (
+    <section className="vision-results">
+      <div className="vision-results-header">
+        <div>
+          <p className="vision-results-title">{title}</p>
+          {isVision && predictions.length > 0 && (
+            <span className="vision-results-guess">Top predictions</span>
+          )}
+        </div>
+        <button
+          type="button"
+          className="vision-results-clear"
+          onClick={onClear}
+        >
+          Clear
+        </button>
+      </div>
+
+      {friendlyMessage && (
+        <p className="vision-results-message">{friendlyMessage}</p>
+      )}
+
+      {summary && summary !== friendlyMessage && (
+        <p className="vision-results-summary">{summary}</p>
+      )}
+
+      {predictions.length > 0 && (
+        <ul className="vision-results-list predictions">
+          {predictions.map((prediction, index) => (
+            <li key={`prediction-${index}`}>
+              {prediction.image_url && (
+                <img
+                  src={prediction.image_url}
+                  alt={prediction.place}
+                  className="vision-results-prediction-image"
+                />
+              )}
+              <div className="vision-results-prediction-text">
+                <strong>{prediction.place}</strong>
+                {confidenceLabel(prediction.confidence) && (
+                  <span>{confidenceLabel(prediction.confidence)}</span>
+                )}
+                {prediction.reason && <span>{prediction.reason}</span>}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {suggestions.length > 0 && (
+        <div className="vision-results-grid">
+          {suggestions.map((item, index) => (
+            <article
+              key={`suggestion-${index}`}
+              className="vision-results-card"
+            >
+              <div className="vision-results-card-header">
+                <div>
+                  <p className="vision-results-card-title">{item.name}</p>
+                  {item.category && (
+                    <span className="vision-results-card-tag">
+                      {item.category}
+                    </span>
+                  )}
+                </div>
+                {confidenceLabel(item.confidence) && (
+                  <span className="vision-results-card-conf">
+                    {confidenceLabel(item.confidence)}
+                  </span>
+                )}
+              </div>
+              {item.image_url && (
+                <img
+                  src={item.image_url}
+                  alt={item.name}
+                  className="vision-results-card-image"
+                />
+              )}
+              {item.reason && (
+                <p className="vision-results-card-reason">{item.reason}</p>
+              )}
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
   );
 }
