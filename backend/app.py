@@ -199,7 +199,76 @@ def me():
     user = db.session.get(User, user_id) 
     if not user:
         return jsonify({"message": "User not found"}), 404
-    return jsonify({"id": user.id, "username": user.username, "email": user.email})
+    return jsonify({
+        "id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "phone": user.phone,
+        "avatar": user.avatar_url,
+    })
+
+
+@app.route("/api/profile", methods=["PUT"])
+@jwt_required()
+def update_profile():
+    user_id = int(get_jwt_identity())
+    user = db.session.get(User, user_id)
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+
+    data = request.get_json() or {}
+
+    username = (data.get("username") or user.username or "").strip()
+    email = (data.get("email") or user.email or "").strip()
+    raw_phone = data.get("phone")
+    phone = raw_phone.strip() if isinstance(raw_phone, str) else (user.phone or "")
+    avatar_payload = data.get("avatarUrl")
+    if avatar_payload is None:
+        avatar_payload = data.get("avatar")
+    avatar_url = avatar_payload if avatar_payload is not None else user.avatar_url
+    new_password = data.get("password") or ""
+
+    errors = {}
+    if len(username) < 3:
+        errors["username"] = "Username must be at least 3 characters"
+    if not is_valid_email(email):
+        errors["email"] = "Invalid email"
+    if raw_phone is not None and phone and len(phone) < 6:
+        errors["phone"] = "Phone number looks too short"
+    if new_password and len(new_password) < 6:
+        errors["password"] = "Password must be at least 6 characters"
+
+    if username != user.username:
+        if User.query.filter(User.username == username, User.id != user.id).first():
+            errors["username"] = "Username already taken"
+    if email != user.email:
+        if User.query.filter(User.email == email, User.id != user.id).first():
+            errors["email"] = "Email already in use"
+
+    if errors:
+        return jsonify({"errors": errors}), 400
+
+    user.username = username
+    user.email = email
+    if raw_phone is not None:
+        user.phone = phone or None
+    if avatar_payload is not None:
+        user.avatar_url = avatar_url or None
+    if new_password:
+        user.password = generate_password_hash(new_password)
+
+    db.session.commit()
+
+    return jsonify({
+        "message": "Profile updated successfully",
+        "user": {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "phone": user.phone,
+            "avatar": user.avatar_url,
+        },
+    }), 200
 
 # -------- FORGOT PASSWORD --------
 @app.route("/api/auth/forgot-password", methods=["POST"])
