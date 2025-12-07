@@ -5,6 +5,7 @@
   display: flex;
   align-items: flex-start;
   z-index: 40;
+  pointer-events: none;
 }
 
 .howitworks-toggle {
@@ -20,6 +21,7 @@
   align-items: center;
   justify-content: center;
   transition: background 0.2s ease;
+  pointer-events: auto;
 }
 
 .howitworks-toggle:hover {
@@ -39,12 +41,18 @@
   visibility: hidden;
   transform: translateX(-20px);
   transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: auto;
 }
 
 .howitworks-shell.open .howitworks-panel {
   opacity: 1;
   visibility: visible;
   transform: translateX(0);
+  pointer-events: auto;
+}
+
+.howitworks-shell:not(.open) .howitworks-panel {
+  pointer-events: none;
 }
 
 .howitworks-title {
