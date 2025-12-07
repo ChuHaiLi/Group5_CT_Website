@@ -2,8 +2,18 @@ import os
 import time
 from typing import List, Dict
 
-from openai import OpenAI
-from openai import APIConnectionError, APIError, APIStatusError, APITimeoutError, RateLimitError
+try:
+    from openai import OpenAI
+    from openai import APIConnectionError, APIError, APIStatusError, APITimeoutError, RateLimitError
+except Exception:  # ImportError or other import-time issues
+    # If the package isn't installed, set placeholders and defer the error
+    OpenAI = None
+    # Bind generic exceptions so later except clauses still work
+    APIConnectionError = Exception
+    APIError = Exception
+    APIStatusError = Exception
+    APITimeoutError = Exception
+    RateLimitError = Exception
 
 from .openai_rate_limiter import get_shared_openai_limiter
 
@@ -24,6 +34,11 @@ class OpenAIChatClient:
             api_key = os.getenv("OPENAI_API_KEY")
             if not api_key:
                 return None
+            if OpenAI is None:
+                # Provide a helpful message instead of crashing at import time
+                raise RuntimeError(
+                    "Python package 'openai' is not installed. Run: python -m pip install -r requirements.txt"
+                )
             self._client = OpenAI(api_key=api_key, max_retries=0)
         return self._client
 
