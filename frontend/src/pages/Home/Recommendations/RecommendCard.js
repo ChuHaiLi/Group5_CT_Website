@@ -39,9 +39,9 @@ export default function RecommendCard({
     return stars;
   };
   
-  const descriptionText = Array.isArray(destination.description)
-    ? destination.description.join(' ')
-    : destination.description || '';
+  // const descriptionText = Array.isArray(destination.description)
+  //   ? destination.description.join(' ')
+  //   : destination.description || '';
 
   const cardImageUrl = Array.isArray(destination.image_url) 
     ? destination.image_url[0] 
@@ -96,7 +96,7 @@ export default function RecommendCard({
   // RENDER DẠNG THẺ LỚN (explore, select mode)
   return (
     <div
-      className="recommend-card"
+      className={`recommend-card ${mode === "select" ? "select" : ""}`}
       style={{ backgroundImage: `url(${cardImageUrl})` }}
       onClick={handleCardClick}
     >
@@ -114,13 +114,8 @@ export default function RecommendCard({
       {/* CONTENT */}
       <div className="card-content">
         <h3 className="light">{destination.name}</h3>
-        
-        <p className="card-description-text">{descriptionText}</p>
 
-        <div className="weather">
-          <strong>Weather:</strong> {destination.weather || "N/A"}
-        </div>
-
+        {/* {Description và Weather được xoá bỏ để trông đơn giản hơn} */}
         <div className="rating">
           <strong>Rating:</strong> {renderStars(destination.rating)}
         </div>

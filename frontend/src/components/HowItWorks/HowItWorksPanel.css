@@ -5,6 +5,7 @@
   display: flex;
   align-items: center;
   z-index: 1000;
+  pointer-events: none;
 }
 
 .howitworks-toggle {
@@ -20,6 +21,7 @@
   align-items: center;
   justify-content: center;
   transition: background 0.2s ease;
+  pointer-events: auto;
 }
 
 .howitworks-toggle:hover {
@@ -39,6 +41,7 @@
   visibility: hidden;
   transform: translateX(-20px);
   transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: auto;
 }
 
 .howitworks-shell.open .howitworks-panel {
@@ -146,8 +149,10 @@
 
 /* Khung preview ảnh */
 .howitworks-preview {
-  width: 920px;
-  height: 620px;
+  width: auto;
+  max-width: 920px;
+  height: auto;
+  max-height: 620px;
   margin-left: 20px;
   border-radius: 18px;
   overflow: hidden;
