@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   FaHome,
@@ -7,6 +7,7 @@ import {
   FaBookmark,
   FaUserCircle,
 } from "react-icons/fa";
+import API from "../../untils/axios";
 import "./Navbar.css";
 import logo from "./assets/logo.png";
 
@@ -18,14 +19,48 @@ export default function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   useEffect(() => {
-    const u = localStorage.getItem("user");
-    if (u) setUser(JSON.parse(u));
+    const stored = localStorage.getItem("user");
+    if (stored) setUser(JSON.parse(stored));
+  }, []);
+
+  useEffect(() => {
+    if (!token) return;
+    let isMounted = true;
+    API.get("/auth/me")
+      .then(({ data }) => {
+        if (!isMounted) return;
+        const normalized = {
+          id: data.id,
+          username: data.username,
+          email: data.email,
+          phone: data.phone,
+          avatar: data.avatar,
+        };
+        setUser(normalized);
+        localStorage.setItem("user", JSON.stringify(normalized));
+      })
+      .catch(() => {});
+    return () => {
+      isMounted = false;
+    };
+  }, [token]);
+
+  useEffect(() => {
+    const handleProfileUpdate = (event) => {
+      if (!event.detail) return;
+      setUser((prev) => ({ ...prev, ...event.detail }));
+    };
+    window.addEventListener("wonder-profile-updated", handleProfileUpdate);
+    return () => {
+      window.removeEventListener("wonder-profile-updated", handleProfileUpdate);
+    };
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
     localStorage.removeItem("user");
+    setUser(null);
     setDropdownOpen(false);
     navigate("/login");
   };
