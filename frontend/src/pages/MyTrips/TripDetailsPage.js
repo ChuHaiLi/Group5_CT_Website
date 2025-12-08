@@ -1,26 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaClock, FaCalendarAlt, FaRoute, FaUtensils, FaInfoCircle, FaArrowLeft, FaGlobe } from 'react-icons/fa';
+import { FaClock, FaCalendarAlt, FaRoute, FaUtensils, FaInfoCircle, FaArrowLeft, FaGlobe, FaEdit } from 'react-icons/fa';
 import './TripDetailsPage.css';
-// import RecommendCard from '../Home/Recommendations/RecommendCard'; // Bỏ comment nếu bạn cần dùng RecommendCard
 
-// Giả định hàm này tồn tại để lấy token JWT
-const getAuthToken = () => localStorage.getItem("access_token"); 
-
-// --- HÀM HỖ TRỢ HIỂN THỊ ---
-const getStatusTag = (status) => {
-    switch (status) {
-        case 'UPCOMING':
-            return { label: 'Sắp tới', className: 'status-upcoming' };
-        case 'ONGOING':
-            return { label: 'Đang diễn ra', className: 'status-ongoing' };
-        case 'COMPLETED':
-            return { label: 'Đã hoàn thành', className: 'status-completed' };
-        default:
-            return { label: 'Bản nháp', className: 'status-draft' };
-    }
-};
+const getAuthToken = () => localStorage.getItem("access_token");
 
 export default function TripDetailsPage() {
     const { tripId } = useParams(); 
@@ -52,15 +36,30 @@ export default function TripDetailsPage() {
         }
     }, [tripId]); 
     
-    // Hàm chuyển hướng đến trang chi tiết địa điểm (Destination Card)
+    // Hàm chuyển hướng đến trang chi tiết địa điểm
     const handleViewDestinationDetails = (destinationId) => {
-        // Chuyển hướng đến route chi tiết địa điểm
         navigate(`/destinations/${destinationId}`); 
     };
 
+    // Hàm chuyển đến trang chỉnh sửa
+    const handleEditTrip = () => {
+        navigate(`/trips/${tripId}/edit`);
+    };
+
+    // 🔥 HÀM MỚI: Quay về My Trips (không dùng navigate(-1))
+    const handleBackToMyTrips = () => {
+        navigate('/mytrips');
+    };
 
     if (isLoading) {
-        return <div className="details-container">Đang tải chi tiết chuyến đi...</div>;
+        return (
+            <div className="details-container">
+                <div className="loading-state">
+                    <div className="loading-spinner"></div>
+                    <p>Đang tải chi tiết chuyến đi...</p>
+                </div>
+            </div>
+        );
     }
 
     if (error) {
@@ -75,56 +74,65 @@ export default function TripDetailsPage() {
 
     return (
         <div className="details-container">
-            {/* SỬ DỤNG navigate(-1) để quay lại trạng thái trước đó */}
-            <button onClick={() => navigate(-1)} className="back-button"><FaArrowLeft /> Quay lại My Trips</button>
+            {/* 🔥 SỬA: Button quay về My Trips - navigate trực tiếp */}
+            <button onClick={handleBackToMyTrips} className="back-button">
+                <FaArrowLeft /> Quay lại My Trips
+            </button>
             
+            {/* Trip Header */}
             <div className="trip-header">
                 <h2>{trip.name}</h2>
-                <span className={`status-tag ${getStatusTag(trip.status).className}`}>
-                    {getStatusTag(trip.status).label}
-                </span>
             </div>
             
+            {/* Trip Summary */}
             <div className="trip-summary">
-                <p><FaGlobe /> **Địa điểm:** {trip.province_name}</p>
-                <p><FaCalendarAlt /> **Ngày đi:** {trip.start_date || 'Chưa xác định'}</p>
-                <p><FaClock /> **Thời lượng:** {trip.duration} ngày</p>
-                <p><FaInfoCircle /> **Ghi chú:** Người: {metadata.people || '—'} | Ngân sách: {metadata.budget || '—'}</p>
+                <p><FaGlobe /> <strong>Địa điểm:</strong> {trip.province_name}</p>
+                <p><FaCalendarAlt /> <strong>Ngày đi:</strong> {trip.start_date || 'Chưa xác định'}</p>
+                <p><FaClock /> <strong>Thời lượng:</strong> {trip.duration} ngày</p>
+                <p><FaInfoCircle /> <strong>Ghi chú:</strong> Người: {metadata.people || '—'} | Ngân sách: {metadata.budget || '—'}</p>
             </div>
             
             <hr />
 
-            <h3>📅 Lịch trình Chi tiết (Phân bổ theo giờ)</h3>
+            <h3>📅 Lịch trình Chi tiết</h3>
             
+            {/* Itinerary Schedule */}
             <div className="itinerary-schedule">
                 {trip.itinerary.map((dayPlan) => (
                     <div key={dayPlan.day} className="day-card">
                         <h4 className="day-header">Ngày {dayPlan.day}</h4>
                         <ul className="place-list">
-                            {/* Duyệt qua từng mục (Địa điểm, Lunch, Travel) */}
                             {dayPlan.places.map((item, index) => {
-                                // 🔑 KIỂM TRA MỤC ĐẶC BIỆT
+                                // LUNCH
                                 if (item.id === 'LUNCH') {
                                     return (
                                         <li key={index} className="item-lunch">
-                                            <span className="time-slot-display"><FaUtensils /> {item.time_slot}</span> 
+                                            <span className="time-slot-display">
+                                                <FaUtensils /> {item.time_slot}
+                                            </span> 
                                             <strong>{item.name}</strong>
                                         </li>
                                     );
                                 }
+                                
+                                // TRAVEL
                                 if (item.id === 'TRAVEL') {
                                     return (
                                         <li key={index} className="item-travel">
-                                            <span className="time-slot-display"><FaRoute /> {item.time_slot}</span> 
+                                            <span className="time-slot-display">
+                                                <FaRoute /> {item.time_slot}
+                                            </span> 
                                             <em>{item.name}</em>
                                         </li>
                                     );
                                 }
                                 
-                                // MỤC LÀ ĐỊA ĐIỂM (Destination)
+                                // DESTINATION
                                 return (
                                     <li key={index} className="item-destination">
-                                        <span className="time-slot-display"><FaClock /> {item.time_slot}</span>
+                                        <span className="time-slot-display">
+                                            <FaClock /> {item.time_slot}
+                                        </span>
                                         <button 
                                             onClick={() => handleViewDestinationDetails(item.id)}
                                             className="destination-link"
@@ -141,13 +149,15 @@ export default function TripDetailsPage() {
                 ))}
             </div>
             
+            {/* Action Footer */}
             <div className="action-footer">
                 <button 
-                    onClick={() => console.log("Mở giao diện chỉnh sửa chi tiết")} 
+                    onClick={handleEditTrip}
                     className="action-edit-full"
                 >
-                    Chỉnh sửa Lịch trình
+                Chỉnh sửa Lịch trình
                 </button>
+                {/* Future: Compare button can be added here */}
             </div>
         </div>
     );
