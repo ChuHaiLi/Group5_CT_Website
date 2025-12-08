@@ -310,6 +310,14 @@ def get_saved_list():
                 "tags": decode_db_json_string(destination.tags, default_type='text'),
                 # SỬA LỖI: Tạo Weather ngẫu nhiên
                 "weather": generate_random_weather(region_name),
+                
+                # 🔥 THÊM: Thông tin chi tiết cho Modal
+                "images": [img.image_url for img in destination.images],  # Danh sách ảnh
+                "type": destination.place_type,                           # Loại địa điểm
+                "place_type": destination.place_type,                     # Alias cho type
+                "opening_hours": destination.opening_hours,               # Giờ mở cửa
+                "entry_fee": destination.entry_fee,                       # Giá vé
+                "source": destination.source,   
             })
     return jsonify(result), 200
 
