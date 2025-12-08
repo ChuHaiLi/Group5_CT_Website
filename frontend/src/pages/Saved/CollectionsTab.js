@@ -1,173 +1,260 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import RecommendCard from "../Home/Recommendations/RecommendCard";
-import { FaSortAmountUp, FaSortAmountDown, FaLayerGroup } from "react-icons/fa";
+import { FaFolder, FaPlus, FaArrowLeft, FaTrash, FaMinusCircle, FaCheck } from "react-icons/fa";
+import CreateTripForm from "../../components/CreateTripForm";
 
 export default function CollectionsTab({ 
-  destinations, 
-  handleUnsave, 
-  handleCreateTrip,
-  handleOpenModal
+  allDestinations, 
+  folders, 
+  onCreateFolder, 
+  onDeleteFolder, 
+  onAddToFolder, 
+  onRemoveFromFolder
 }) {
+  // --- STATE ---
+  const [activeFolderId, setActiveFolderId] = useState(null);
   
-  // HOOKS DECLARATION
-  const [groupBy, setGroupBy] = useState("city"); 
-  const [sortOrder, setSortOrder] = useState("asc");
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showRemoveModal, setShowRemoveModal] = useState(false);
+  
+  const [selectedItems, setSelectedItems] = useState([]);
 
-  const filterOptions = [
-    { id: "region", label: "Region" },
-    { id: "city", label: "City" },
-    { id: "rating", label: "Rating" },
-    { id: "budget", label: "Budget" },
-    { id: "tags", label: "Tags" },
-  ];
+    const [showForm, setShowForm] = useState(false);
+    const [selectedDestination, setSelectedDestination] = useState(null);
 
-  // Logic: Grouping and Sorting
-  const groupedDestinations = useMemo(() => {
-    // Return empty if no data
-    if (!destinations || destinations.length === 0) return [];
+  // Tìm folder hiện tại
+  const activeFolder = folders.find(f => f.id === activeFolderId);
 
-    const groups = {};
+  // --- LOGIC ---
+  const openFolder = (folderId) => setActiveFolderId(folderId);
+  const backToFolders = () => setActiveFolderId(null);
 
-    destinations.forEach((dest) => {
-      let keys = [];
+  const toggleSelectItem = (id) => {
+    setSelectedItems(prev => 
+      prev.includes(id) ? prev.filter(itemId => itemId !== id) : [...prev, id]
+    );
+  };
 
-      switch (groupBy) {
-        case "region":
-          keys.push(dest.region_name || "Unknown Region");
-          break;
-        case "city":
-          keys.push(dest.province_name || "Unknown City");
-          break;
-        case "budget":
-          const fee = dest.entry_fee || 0;
-          if (fee === 0) keys.push("A. Free");
-          else if (fee < 200000) keys.push("B. Economy (< 200k)");
-          else if (fee < 500000) keys.push("C. Standard (200k - 500k)");
-          else if (fee < 2000000) keys.push("D. Premium (500k - 2M)");
-          else keys.push("E. Luxury (> 2M)");
-          break;
-        case "tags":
-          if (dest.tags) {
-            const tagList = Array.isArray(dest.tags) 
-              ? dest.tags 
-              : (typeof dest.tags === 'string' ? dest.tags.split(",").map(t => t.trim()) : []);
-            
-            if (tagList.length > 0) tagList.forEach(t => keys.push(t));
-            else keys.push("No Tags");
-          } else {
-            keys.push("No Tags");
-          }
-          break;
-        case "rating":
-          const star = Math.floor(dest.rating || 0);
-          keys.push(`${star} Star${star > 1 ? "s" : ""}`);
-          break;
-        default:
-          keys.push("All Items");
-      }
+  // --- API HANDLERS ---
+  const handleCreateTrip = (destinationObj) => {
+    setSelectedDestination(destinationObj);
+    setShowForm(true);
+  };
 
-      keys.forEach((k) => {
-        if (!groups[k]) groups[k] = [];
-        if (!groups[k].find(d => d.id === dest.id)) {
-          groups[k].push(dest);
-        }
-      });
-    });
+  const handleCloseForm = () => {
+    setSelectedDestination(null);
+    setShowForm(false);
+  };
 
-    // Sorting Keys (A-Z)
-    const sortedKeys = Object.keys(groups).sort((a, b) => {
-      if (a.includes("Unknown") || a.includes("No ")) return 1;
-      if (b.includes("Unknown") || b.includes("No ")) return -1;
+  // Logic Add
+  const handleApplyAdd = () => {
+    if (activeFolderId && selectedItems.length > 0) {
+      onAddToFolder(activeFolderId, selectedItems);
+      setShowAddModal(false);
+      setSelectedItems([]); // Reset danh sách chọn
+    }
+  };
+
+  // Logic Remove
+  const handleApplyRemove = () => {
+    if (activeFolderId && selectedItems.length > 0) {
+      selectedItems.forEach(id => onRemoveFromFolder(activeFolderId, id));
       
-      if (sortOrder === "asc") return a.localeCompare(b, 'vi');
-      return b.localeCompare(a, 'vi');
-    });
+      setShowRemoveModal(false);
+      setSelectedItems([]); // Reset danh sách chọn
+    }
+  };
 
-    return sortedKeys.map(key => ({
-      title: key,
-      items: groups[key]
-    }));
+  const handleCancelModal = () => {
+    setShowAddModal(false);
+    setShowRemoveModal(false);
+    setSelectedItems([]); // Reset danh sách chọn khi bấm Cancel
+  };
 
-  }, [destinations, groupBy, sortOrder]);
-
-  // CHECK EMPTY STATE
-  if (!destinations || destinations.length === 0) {
+  // --- VIEW 1: DANH SÁCH FOLDER (ROOT) ---
+  if (!activeFolderId || !activeFolder) {
     return (
-      <div className="saved-empty">
-        <img 
-            src="https://cdn-icons-png.flaticon.com/512/4076/4076432.png" 
-            alt="empty" 
-            style={{ width: "120px", opacity: 0.5, marginBottom: "1rem" }}
-            onError={(e) => e.target.style.display = 'none'} 
-        />
-        <h3>No saved destinations yet</h3>
-        <p>Explore amazing places and save them here to organize your next adventure!</p>
+      <div className="collections-root">
+        <div className="folders-grid">
+          <div className="folder-card create-new" onClick={onCreateFolder}>
+            <div className="folder-icon-circle"><FaPlus /></div>
+            <span>New Folder</span>
+          </div>
+          {folders.map(folder => (
+            <div key={folder.id} className="folder-card" onClick={() => openFolder(folder.id)}>
+              <FaFolder className="folder-icon" />
+              <div className="folder-info">
+                <h4>{folder.name}</h4>
+                <p>{folder.items.length} items</p>
+              </div>
+              <button 
+                className="delete-folder-btn" 
+                onClick={(e) => { e.stopPropagation(); onDeleteFolder(folder.id); }}
+                title="Delete Folder"
+              >
+                <FaTrash />
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
 
-  // RENDER UI
-  return (
-    <div className="collections-container">
-      {/* FILTER BAR */}
-      <div className="filter-container">
-        <div className="filter-left">
-          <span className="filter-title"><FaLayerGroup /> Group By:</span>
-          <div className="filter-options">
-            {filterOptions.map((opt) => (
-              <button
-                key={opt.id}
-                className={`filter-btn ${groupBy === opt.id ? "active" : ""}`}
-                onClick={() => setGroupBy(opt.id)}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </div>
+  // --- VIEW 2: CHI TIẾT FOLDER (INSIDE) ---
+  const folderDestinations = allDestinations.filter(dest => 
+    activeFolder.items.includes(dest.id)
+  );
 
-        <div className="filter-right">
-          <button
-            className={`sort-direction-btn ${sortOrder === 'asc' ? 'active' : ''}`}
-            onClick={() => setSortOrder('asc')}
-            title="A-Z"
-          >
-            <FaSortAmountUp /> A-Z
-          </button>
-          <button
-            className={`sort-direction-btn ${sortOrder === 'desc' ? 'active' : ''}`}
-            onClick={() => setSortOrder('desc')}
-            title="Z-A"
-          >
-            <FaSortAmountDown /> Z-A
-          </button>
+  const availableDestinations = allDestinations.filter(dest => 
+    !activeFolder.items.includes(dest.id)
+  );
+
+  return (
+    <div className="folder-detail-view">
+      <div className="folder-detail-header">
+        <button className="back-btn" onClick={backToFolders}>
+          <FaArrowLeft /> Back
+        </button>
+
+        <div className="folder-header-row"> 
+            {/*Folder bên trái*/}
+            <h2>{activeFolder.name}</h2>
+            
+            {/* Cụm nút bên phải */}
+            <div className="folder-actions">
+                <button 
+                    className="action-btn remove-btn" 
+                    onClick={() => setShowRemoveModal(true)}
+                    disabled={folderDestinations.length === 0}
+                    style={{opacity: folderDestinations.length === 0 ? 0.5 : 1}}
+                >
+                    <FaMinusCircle /> Remove Place
+                </button>
+                
+                <button className="action-btn add-btn" onClick={() => setShowAddModal(true)}>
+                    <FaPlus /> Add Place
+                </button>
+            </div>
+            
         </div>
       </div>
 
-      {/* GROUPED LIST */}
-      <div className="grouped-list">
-        {groupedDestinations.map((group) => (
-          <div key={group.title} className="group-section">
-            <div className="group-header">
-              <span className="header-text">{group.title}</span>
-              <span className="header-count">{group.items.length}</span>
-              <div className="header-line"></div>
+      <div className="saved-grid">
+        {folderDestinations.length === 0 ? (
+           <p style={{color: '#9ca3af', width: '100%', textAlign: 'center', marginTop: '2rem'}}>This folder is empty.</p>
+        ) : (
+            folderDestinations.map(dest => (
+            <RecommendCard 
+                key={dest.id} 
+                destination={dest} 
+                isSaved={true} 
+                // Bấm tim để xóa nhanh 1 item
+                onToggleSave={() => onRemoveFromFolder(activeFolder.id, dest.id)} 
+                onCreateTrip={() => handleCreateTrip(dest)} 
+            />
+            ))
+        )}
+      </div>
+
+      {/* --- MODAL 1: ADD ITEMS --- */}
+      {showAddModal && (
+        <div className="modal-overlay">
+          <div className="add-to-folder-modal">
+            <div className="modal-header">
+              <h3>Add to "{activeFolder.name}"</h3>
+              <p>Select places from your Saved list</p>
             </div>
-            <div className="saved-grid">
-              {group.items.map((dest) => (
-                <RecommendCard
-                  key={`${group.title}-${dest.id}`}
-                  destination={dest}
-                  isSaved={true}
-                  onToggleSave={() => handleUnsave(dest.id)}
-                  onCreateTrip={() => handleCreateTrip(dest)}
-                  onCardClick={() => handleOpenModal(dest)}
-                />
+            
+            <div className="modal-body-list">
+              {availableDestinations.length === 0 ? (
+                <p className="no-items-text">No other saved items available.</p>
+              ) : (
+                availableDestinations.map(dest => (
+                  <div 
+                    key={dest.id} 
+                    className={`select-item-row ${selectedItems.includes(dest.id) ? 'selected' : ''}`}
+                    onClick={() => toggleSelectItem(dest.id)}
+                  >
+                    <img src={Array.isArray(dest.image_url) ? dest.image_url[0] : dest.image_url} alt="" />
+                    <div className="select-item-info">
+                      <strong>{dest.name}</strong>
+                      <span>{dest.province_name}</span>
+                    </div>
+                    <div className="checkbox-circle">
+                      {selectedItems.includes(dest.id) && <div className="inner-check"><FaCheck size={10} color="white"/></div>}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="modal-footer">
+              <button className="btn-cancel" onClick={handleCancelModal}>Cancel</button>
+              <button 
+                className="btn-apply" 
+                onClick={handleApplyAdd}
+                disabled={selectedItems.length === 0}
+              >
+                Apply ({selectedItems.length})
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- MODAL 2: REMOVE ITEMS --- */}
+      {showRemoveModal && (
+        <div className="modal-overlay">
+          <div className="add-to-folder-modal">
+            <div className="modal-header">
+              <h3>Remove from "{activeFolder.name}"</h3>
+              <p>Select places to remove</p>
+            </div>
+            
+            <div className="modal-body-list">
+              {folderDestinations.map(dest => (
+                <div 
+                  key={dest.id} 
+                  className={`select-item-row ${selectedItems.includes(dest.id) ? 'selected-remove' : ''}`} // Class khác màu cho remove
+                  onClick={() => toggleSelectItem(dest.id)}
+                >
+                  <img 
+                    src={Array.isArray(dest.image_url) ? dest.image_url[0] : dest.image_url} 
+                    alt="" 
+                    onError={(e) => e.target.style.display = 'none'}
+                  />
+                  <div className="select-item-info">
+                    <strong>{dest.name}</strong>
+                    <span>{dest.province_name}</span>
+                  </div>
+                  <div className="checkbox-circle remove-style">
+                    {selectedItems.includes(dest.id) && <div className="inner-check"><FaCheck size={10} color="white"/></div>}
+                  </div>
+                </div>
               ))}
             </div>
+
+            <div className="modal-footer">
+              <button className="btn-cancel" onClick={handleCancelModal}>Cancel</button>
+              <button 
+                className="btn-apply btn-danger" 
+                onClick={handleApplyRemove}
+                disabled={selectedItems.length === 0}
+              >
+                Remove ({selectedItems.length})
+              </button>
+            </div>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
+
+      {showForm && selectedDestination && (
+        <CreateTripForm
+          initialDestination={selectedDestination}
+          onClose={handleCloseForm}
+        />
+      )}
     </div>
   );
 }
