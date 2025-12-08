@@ -1,11 +1,10 @@
 .howitworks-shell {
   position: fixed;
-  top: 120px;
+  top: 80px;
   left: 12px;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   z-index: 40;
-  pointer-events: none;
 }
 
 .howitworks-toggle {
@@ -21,15 +20,14 @@
   align-items: center;
   justify-content: center;
   transition: background 0.2s ease;
-  pointer-events: auto;
 }
 
 .howitworks-toggle:hover {
-  background: rgba(60, 120, 255, 0.95);
+  background: rgba(110, 110, 112, 0.95);
 }
 
 .howitworks-panel {
-  width: 840px;
+  width: 520px;
   margin-left: 12px;
   padding: 20px;
   border-radius: 20px;
@@ -41,105 +39,59 @@
   visibility: hidden;
   transform: translateX(-20px);
   transition: opacity 0.25s ease, transform 0.25s ease;
-  pointer-events: auto;
 }
 
 .howitworks-shell.open .howitworks-panel {
   opacity: 1;
   visibility: visible;
   transform: translateX(0);
-  pointer-events: auto;
-}
-
-.howitworks-shell:not(.open) .howitworks-panel {
-  pointer-events: none;
 }
 
 .howitworks-title {
-  font-weight: 600;
+  font-weight: 1000;
+  font-size: 22px;   
   margin-bottom: 16px;
 }
 
-.howitworks-grid {
-  display: flex;
-  gap: 20px;
-}
 
-.howitworks-list {
-  flex: 1.2;
+.howitworks-panel ul {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-}
-
-.howitworks-list li {
-  margin: 0;
-}
-
-.howitworks-step {
-  width: 100%;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 16px;
-  background: transparent;
-  display: flex;
-  align-items: flex-start;
   gap: 14px;
-  padding: 14px;
-  color: inherit;
-  text-align: left;
-  cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease;
 }
 
-.howitworks-step:hover,
-.howitworks-step:focus {
-  border-color: #79c2ff;
-}
-
-.howitworks-step.active {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: #79c2ff;
-}
-
-.howitworks-step-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
+.howitworks-panel li {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
-  flex-shrink: 0;
-  transform-origin: center;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.howitworks-step-icon-glyph {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  font-size: 1.5rem;
-  line-height: 1;
+.howitworks-step-item { cursor: pointer; }
+
+.howitworks-step-item:hover {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  transform: translateX(4px);
 }
 
-.howitworks-step:hover .howitworks-step-icon,
-.howitworks-step:focus-visible .howitworks-step-icon,
-.howitworks-step.active .howitworks-step-icon {
-  transform: scale(1.05);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4),
-    0 6px 14px rgba(0, 0, 0, 0.35);
+.howitworks-panel li:last-child {
+  border-bottom: none;
 }
 
 .howitworks-panel strong {
   display: block;
   margin-bottom: 4px;
 }
+
+.howitworks-step-content {
+  flex: 1 1 auto;
+}
+
+
 
 .howitworks-panel span {
   color: #bcd2ea;
@@ -149,97 +101,37 @@
   margin-bottom: 4px;
 }
 
-.howitworks-preview {
-  flex: 1.5;
-  background: rgba(2, 9, 18, 0.9);
-  border-radius: 16px;
-  padding: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  position: relative;
+
+/* Render the icon provided by JS (data-icon attribute) as a circular badge */
+.howitworks-panel li {
+  align-items: flex-start;
 }
 
-.howitworks-preview-header {
-  font-weight: 600;
-  font-size: 1.05rem;
-}
-
-.howitworks-preview-viewport {
-  flex: 1;
-  overflow-x: auto;
-  overflow-y: hidden;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.02);
-  padding: 8px;
-  display: flex;
-  flex-direction: row;
-  gap: 16px;
-  height: 420px;
-  scroll-snap-type: x mandatory;
-  scroll-behavior: smooth;
-  scrollbar-width: none;
-}
-
-.howitworks-preview-viewport::-webkit-scrollbar {
-  display: none;
-}
-
-.howitworks-preview-viewport img {
-  flex: 0 0 calc(100% - 16px);
-  width: calc(100% - 16px);
-  height: 100%;
-  border-radius: 10px;
-  object-fit: cover;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
-  scroll-snap-align: center;
-}
-
-.howitworks-preview-empty {
-  font-size: 0.85rem;
-  color: #9eb7d5;
-  line-height: 1.5;
+.howitworks-panel li::before {
+  content: attr(data-icon);
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  margin-right: 14px;
+  margin-top: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-size: 1.25rem;
+  line-height: 1;
 }
 
-.howitworks-preview-nav {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 42px;
-  height: 42px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(8, 16, 32, 0.75);
-  color: #f6fbff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-  cursor: pointer;
-  transition: background 0.2s ease, opacity 0.2s ease;
+/* If the icon is an svg/img node (unlikely when using emoji), scale it */
+.howitworks-panel li::before svg,
+.howitworks-panel li::before img {
+  max-width: 70%;
+  max-height: 70%;
 }
 
-.howitworks-preview-nav:hover {
-  background: rgba(40, 120, 255, 0.8);
-}
-
-.howitworks-preview-nav:disabled {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.howitworks-preview-nav--left {
-  left: 10px;
-}
-
-.howitworks-preview-nav--right {
-  right: 10px;
-}
-
+/* preview and edit controls removed */
 @media (max-width: 768px) {
   .howitworks-shell {
     top: auto;
@@ -248,19 +140,38 @@
   }
 
   .howitworks-panel {
-    width: 270px;
+    width: 260px;
   }
+}
 
-  .howitworks-grid {
-    flex-direction: column;
-  }
+/* Khung preview ảnh */
+.howitworks-preview {
+  width: 920px;
+  height: 620px;
+  margin-left: 20px;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity .25s ease, transform .25s ease;
+}
 
-  .howitworks-preview {
-    flex: 1;
-    width: 100%;
-  }
+.howitworks-shell.open .howitworks-preview {
+  opacity: 1;
+  transform: translateY(0);
+}
 
-  .howitworks-preview-viewport {
-    height: 300px;
-  }
+.howitworks-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Hover highlight */
+.howitworks-step-item:hover {
+  background: rgba(255,255,255,0.06);
+  cursor: pointer;
+  transform: translateX(4px);
+  transition: 0.2s ease;
 }
