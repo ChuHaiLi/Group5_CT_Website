@@ -378,6 +378,19 @@ def get_destinations():
             "category": dest.category,
             "tags": decode_db_json_string(dest.tags, default_type='text'),
             "weather": generate_random_weather(region_name),
+            
+            #TAO CẤM THẰNG NÀO XOÁ CỦA TAOOOOOO!!!!!!!!
+            "gps": {
+                "lat": dest.latitude,
+                "lng": dest.longitude
+            } if dest.latitude and dest.longitude else None,    
+            "images": [img.image_url for img in dest.images],
+            "type": dest.place_type,
+            "place_type": dest.place_type,
+            "opening_hours": dest.opening_hours,
+            "entry_fee": dest.entry_fee,
+            "source": dest.source
+            
         })
     return jsonify(result), 200
 
