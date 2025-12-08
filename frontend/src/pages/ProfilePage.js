@@ -6,7 +6,7 @@ import React, {
   useState,
 } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import API from "../untils/axios";
+import API from "../utils/axios";
 import "../styles/ProfilePage.css";
 
 const FALLBACK_AVATAR =

@@ -1,12 +1,13 @@
 import React, { useState } from "react";
-import API from "../untils/axios";
+import API from "../utils/axios";
 import { toast } from "react-toastify";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../styles/AuthForm.css";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -14,7 +15,15 @@ export default function ForgotPasswordPage() {
 
     try {
       const res = await API.post("/auth/forgot-password", { email });
-      toast.success(res.data.message);
+      toast.success(res.data.message || "Verification code sent to your email");
+      
+      // 🔥 CHUYỂN SANG TRANG RESET PASSWORD VỚI EMAIL
+      setTimeout(() => {
+        navigate("/reset-password", { 
+          state: { email } 
+        });
+      }, 1500);
+      
     } catch (err) {
       toast.error(err.response?.data?.message || "Request failed");
     } finally {
@@ -26,6 +35,9 @@ export default function ForgotPasswordPage() {
     <div className="auth-page">
       <div className="auth-box">
         <h2>Forgot Password</h2>
+        <p style={{ textAlign: "center", color: "#666", fontSize: "14px", marginBottom: "20px" }}>
+          Enter your email address and we'll send you a verification code
+        </p>
 
         <form onSubmit={handleSubmit}>
           <div className="input-group">
@@ -39,7 +51,7 @@ export default function ForgotPasswordPage() {
           </div>
 
           <button type="submit" disabled={loading}>
-            {loading ? "Sending..." : "Send Reset Link"}
+            {loading ? "Sending..." : "Send Verification Code"}
           </button>
         </form>
 

@@ -1,11 +1,18 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import API from "../untils/axios";
 import { toast } from "react-toastify";
-import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
+import { 
+  FaEnvelope, 
+  FaLock, 
+  FaUser, 
+  FaEye, 
+  FaEyeSlash 
+} from "react-icons/fa";
+import API from "../utils/axios";
+import GoogleLoginButton from "../components/GoogleLoginButton";
 import "../styles/AuthForm.css";
 
-export default function RegisterPage() {
+export default function RegisterPage({ setIsAuthenticated }) {
   const [form, setForm] = useState({
     username: "",
     email: "",
@@ -15,17 +22,34 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
+  
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
+
+    if (!form.username || !form.email || !form.password || !form.confirm) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    if (form.username.length < 3) {
+      toast.error("Username must be at least 3 characters");
+      return;
+    }
 
     if (form.password !== form.confirm) {
       toast.error("Passwords do not match");
       return;
     }
 
+    if (form.password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+
     setLoading(true);
+
     try {
       const res = await API.post("/auth/register", {
         username: form.username,
@@ -33,14 +57,26 @@ export default function RegisterPage() {
         password: form.password,
       });
 
-      toast.success(res.data.message || "Registration successful");
-      navigate("/login");
+      toast.success(res.data.message || "Registration successful! Please verify your email.");
+      
+      setTimeout(() => {
+        navigate("/verify-email", { 
+          state: { email: form.email } 
+        });
+      }, 1500);
+      
     } catch (err) {
-      const data = err.response?.data;
-      if (data?.errors) {
-        Object.values(data.errors).forEach((msg) => toast.error(msg));
+      console.error("Register error:", err);
+      
+      const errorData = err.response?.data;
+      
+      if (errorData?.errors) {
+        Object.values(errorData.errors).forEach((msg) => toast.error(msg));
       } else {
-        toast.error(data?.message || "Registration failed");
+        const errorMessage = errorData?.message || 
+                            errorData?.error || 
+                            "Registration failed";
+        toast.error(errorMessage);
       }
     } finally {
       setLoading(false);
@@ -50,16 +86,18 @@ export default function RegisterPage() {
   return (
     <div className="auth-page">
       <div className="auth-box">
-        <h2>Register</h2>
-
+        <h2>Create Account</h2>
+        
         <form onSubmit={handleRegister}>
           <div className="input-group">
             <FaUser className="icon" />
             <input
-              placeholder="Username"
+              type="text"
+              placeholder="Username (min 3 characters)"
               value={form.username}
               onChange={(e) => setForm({ ...form, username: e.target.value })}
               required
+              autoComplete="username"
             />
           </div>
 
@@ -71,6 +109,7 @@ export default function RegisterPage() {
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               required
+              autoComplete="email"
             />
           </div>
 
@@ -78,10 +117,11 @@ export default function RegisterPage() {
             <FaLock className="icon" />
             <input
               type={showPassword ? "text" : "password"}
-              placeholder="Password"
+              placeholder="Password (min 6 characters)"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               required
+              autoComplete="new-password"
             />
             <span
               className="show-hide"
@@ -99,6 +139,7 @@ export default function RegisterPage() {
               value={form.confirm}
               onChange={(e) => setForm({ ...form, confirm: e.target.value })}
               required
+              autoComplete="new-password"
             />
             <span
               className="show-hide"
@@ -109,9 +150,17 @@ export default function RegisterPage() {
           </div>
 
           <button type="submit" disabled={loading}>
-            {loading ? "Registering..." : "Register"}
+            {loading ? "Creating account..." : "Register"}
           </button>
         </form>
+
+        {/* 🔥 DIVIDER */}
+        <div className="auth-divider">
+          <span>OR</span>
+        </div>
+
+        {/* 🔥 GOOGLE LOGIN BUTTON */}
+        <GoogleLoginButton setIsAuthenticated={setIsAuthenticated} />
 
         <p>
           Already have an account? <Link to="/login">Login</Link>

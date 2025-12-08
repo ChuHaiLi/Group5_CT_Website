@@ -8,6 +8,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import "react-toastify/dist/ReactToastify.css";
 
 import Navbar from "./components/Navbar/Navbar";
@@ -21,13 +22,17 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import VerifyEmailPage from "./pages/VerifyEmailPage";
 import EditTripPage from './pages/MyTrips/EditTripPage';
-import API from "./untils/axios";
+import API from "./utils/axios";
 import ChatWidget from "./components/ChatWidget/ChatWidget";
 import Footer from "./components/Footer/Footer";
 import { PageContext } from "./context/PageContext";
 import HowItWorksPanel from "./components/HowItWorks/HowItWorksPanel";
 import "./App.css";
+
+// 🔥 GOOGLE CLIENT ID
+const GOOGLE_CLIENT_ID = "202417590292-ia2puaea18ige9bg43kng9a2oq5i6ktk.apps.googleusercontent.com";
 
 // ------------------- PrivateRoute -------------------
 function PrivateRoute({ isAuthenticated, children }) {
@@ -66,6 +71,7 @@ function AppContent() {
     "/register",
     "/reset-password",
     "/forgot-password",
+    "/verify-email",
   ].includes(location.pathname);
 
   const [checkingAuth, setCheckingAuth] = useState(true);
@@ -157,9 +163,13 @@ function AppContent() {
             path="/login"
             element={<LoginPage setIsAuthenticated={setIsAuthenticated} />}
           />
-          <Route path="/register" element={<RegisterPage />} />
+          <Route 
+            path="/register" 
+            element={<RegisterPage setIsAuthenticated={setIsAuthenticated} />} 
+          />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
 
           {/* "/" route */}
           <Route
@@ -217,7 +227,7 @@ function AppContent() {
             }
           />
 
-          {/* 🔥 ROUTE CHỈNH SỬA TRIP - ĐÃ SỬA */}
+          {/* 🔥 ROUTE CHỈNH SỬA TRIP */}
           <Route
             path="/trips/:tripId/edit"
             element={
@@ -253,8 +263,8 @@ function AppContent() {
       {!hideNavbar && <Footer />}
 
       {!hideNavbar && (
-  <ChatWidget isAuthenticated={isAuthenticated} pageContext={pageContext} />
-)}
+        <ChatWidget isAuthenticated={isAuthenticated} pageContext={pageContext} />
+      )}
       <ToastContainer position="top-right" autoClose={3000} theme="light" />
     </PageContext.Provider>
   );
@@ -263,8 +273,10 @@ function AppContent() {
 // ------------------- App -------------------
 export default function App() {
   return (
-    <Router>
-      <AppContent />
-    </Router>
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <Router>
+        <AppContent />
+      </Router>
+    </GoogleOAuthProvider>
   );
 }

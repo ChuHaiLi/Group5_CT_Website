@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
-import API from "../untils/axios";
+import API from "../utils/axios";
+import GoogleLoginButton from "../components/GoogleLoginButton";
 import "../styles/AuthForm.css";
 
 export default function LoginPage({ setIsAuthenticated }) {
@@ -14,24 +15,58 @@ export default function LoginPage({ setIsAuthenticated }) {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    
+    if (!email || !password) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
     setLoading(true);
 
     try {
       const res = await API.post("/auth/login", { email, password });
 
-      localStorage.setItem("access_token", res.data.access_token);
-      localStorage.setItem("refresh_token", res.data.refresh_token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+      if (res.data && res.data.access_token) {
+        localStorage.setItem("access_token", res.data.access_token);
+        localStorage.setItem("refresh_token", res.data.refresh_token);
+        localStorage.setItem("user", JSON.stringify(res.data.user));
 
-      // Nếu App có truyền setIsAuthenticated thì cập nhật, còn không thì thôi
-      if (typeof setIsAuthenticated === "function") {
-        setIsAuthenticated(true);
+        if (typeof setIsAuthenticated === "function") {
+          setIsAuthenticated(true);
+        }
+
+        toast.success(res.data.message || "Login successful");
+        navigate("/");
+      } else {
+        toast.error("Invalid response from server");
       }
-
-      toast.success(res.data.message || "Login successful");
-      navigate("/"); // hoặc "/home" tùy cấu hình router của bạn
     } catch (err) {
-      toast.error(err.response?.data?.message || "Login failed");
+      console.error("Login error:", err);
+      
+      if (err.response) {
+        const errorData = err.response.data;
+        
+        if (err.response.status === 403 && errorData?.error_type === "email_not_verified") {
+          toast.warning(errorData.message || "Please verify your email first");
+          
+          setTimeout(() => {
+            navigate("/verify-email", { 
+              state: { email: errorData.email || email } 
+            });
+          }, 1500);
+          
+          return;
+        }
+        
+        const errorMessage = errorData?.message || 
+                           errorData?.error ||
+                           "Invalid email or password";
+        toast.error(errorMessage);
+      } else if (err.request) {
+        toast.error("Cannot connect to server. Please try again.");
+      } else {
+        toast.error("An error occurred. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -51,6 +86,7 @@ export default function LoginPage({ setIsAuthenticated }) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              autoComplete="email"
             />
           </div>
 
@@ -62,6 +98,7 @@ export default function LoginPage({ setIsAuthenticated }) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              autoComplete="current-password"
             />
             <span
               className="show-hide"
@@ -75,6 +112,14 @@ export default function LoginPage({ setIsAuthenticated }) {
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
+
+        {/* 🔥 DIVIDER */}
+        <div className="auth-divider">
+          <span>OR</span>
+        </div>
+
+        {/* 🔥 GOOGLE LOGIN BUTTON */}
+        <GoogleLoginButton setIsAuthenticated={setIsAuthenticated} />
 
         <p>
           Don't have an account? <Link to="/register">Register</Link>

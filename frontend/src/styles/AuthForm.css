@@ -102,6 +102,35 @@
   background: linear-gradient(135deg, #a29bfe, #55efc4);
 }
 
+.auth-box button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 🔥 Divider for "OR" */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  margin: 25px 0 20px 0;
+  color: #636e72;
+  font-size: 14px;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #dfe6e9;
+}
+
+.auth-divider span {
+  margin: 0 15px;
+  font-weight: 600;
+  color: #636e72;
+}
+
 /* Links */
 .auth-box p {
   margin-top: 18px;
@@ -140,5 +169,9 @@
   .auth-box button {
     font-size: 16px;
     padding: 12px;
+  }
+  
+  .auth-divider {
+    margin: 20px 0 15px 0;
   }
 }

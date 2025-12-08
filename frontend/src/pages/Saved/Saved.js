@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import RecommendCard from "../Home/Recommendations/RecommendCard";
 import CreateTripForm from "../../components/CreateTripForm";
 import DestinationModal from "../../components/DestinationModal";
-import API from "../../untils/axios";
+import API from "../../utils/axios";
 import { FaSearch } from "react-icons/fa";
 import CollectionsTab from "./CollectionsTab";
 import "./Saved.css";

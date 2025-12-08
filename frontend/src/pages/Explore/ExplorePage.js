@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import API from "../../untils/axios";
+import API from "../../utils/axios";
 import { TAG_CATEGORIES } from "../../data/tags.js";
 import { toast } from "react-toastify";
 
