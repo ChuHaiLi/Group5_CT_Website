@@ -149,7 +149,7 @@ function AppContent() {
   return (
     <PageContext.Provider value={{ pageContext, setPageContext }}>
       {!hideNavbar && <Navbar />}
-      <HowItWorksPanel />
+      {!hideNavbar && <HowItWorksPanel />}
       <div className={`page-wrapper ${!hideNavbar ? "with-navbar" : ""}`}>
         <Routes>
           {/* Public routes */}
@@ -252,7 +252,9 @@ function AppContent() {
 
       {!hideNavbar && <Footer />}
 
-      <ChatWidget isAuthenticated={isAuthenticated} pageContext={pageContext} />
+      {!hideNavbar && (
+  <ChatWidget isAuthenticated={isAuthenticated} pageContext={pageContext} />
+)}
       <ToastContainer position="top-right" autoClose={3000} theme="light" />
     </PageContext.Provider>
   );
