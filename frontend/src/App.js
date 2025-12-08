@@ -21,12 +21,12 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
-
+import EditTripPage from './pages/MyTrips/EditTripPage';
 import API from "./untils/axios";
 import ChatWidget from "./components/ChatWidget/ChatWidget";
 import Footer from "./components/Footer/Footer";
-import HowItWorksPanel from "./components/HowItWorks/HowItWorksPanel";
 import { PageContext } from "./context/PageContext";
+import HowItWorksPanel from "./components/HowItWorks/HowItWorksPanel";
 import "./App.css";
 
 // ------------------- PrivateRoute -------------------
@@ -69,7 +69,7 @@ function AppContent() {
   ].includes(location.pathname);
 
   const [checkingAuth, setCheckingAuth] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(null); // null = chưa check
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [savedIds, setSavedIds] = useState(new Set());
   const [pageContext, setPageContext] = useState(
     getDefaultContext(location.pathname)
@@ -150,7 +150,6 @@ function AppContent() {
     <PageContext.Provider value={{ pageContext, setPageContext }}>
       {!hideNavbar && <Navbar />}
       <HowItWorksPanel />
-
       <div className={`page-wrapper ${!hideNavbar ? "with-navbar" : ""}`}>
         <Routes>
           {/* Public routes */}
@@ -162,7 +161,7 @@ function AppContent() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-          {/* "/" route: điều hướng theo trạng thái đăng nhập */}
+          {/* "/" route */}
           <Route
             path="/"
             element={
@@ -208,14 +207,25 @@ function AppContent() {
             }
           />
 
+          {/* 🔥 ROUTE XEM CHI TIẾT TRIP */}
           <Route
-            path="/trips/:tripId" // Lưu ý: Đường dẫn này phải khớp với hàm navigate trong MyTripsPage.jsx
-            element={
-              <PrivateRoute isAuthenticated={isAuthenticated}>
-                <TripDetailsPage /> 
-              </PrivateRoute>
-            }
-          />
+            path="/trips/:tripId"
+            element={
+              <PrivateRoute isAuthenticated={isAuthenticated}>
+                <TripDetailsPage />
+              </PrivateRoute>
+            }
+          />
+
+          {/* 🔥 ROUTE CHỈNH SỬA TRIP - ĐÃ SỬA */}
+          <Route
+            path="/trips/:tripId/edit"
+            element={
+              <PrivateRoute isAuthenticated={isAuthenticated}>
+                <EditTripPage />
+              </PrivateRoute>
+            }
+          />
 
           <Route
             path="/profile"

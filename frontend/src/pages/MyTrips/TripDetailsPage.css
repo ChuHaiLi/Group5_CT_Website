@@ -353,7 +353,7 @@ hr {
 .action-edit-full {
     padding: 14px 32px;
     background: linear-gradient(135deg, var(--warning-yellow), var(--warning-yellow-dark));
-    color: white;
+    color: rgb(0, 0, 0);
     border: none;
     border-radius: 8px;
     font-size: 1rem;
@@ -374,6 +374,33 @@ hr {
 
 .action-edit-full::before {
     content: '✏️';
+    font-size: 1.2rem;
+}
+
+.action-compare-btn {
+    padding: 14px 32px;
+    background: linear-gradient(135deg, var(--info-cyan), #0891b2);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.action-compare-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    background: linear-gradient(135deg, #0891b2, #0e7490);
+}
+
+.action-compare-btn::before {
+    content: '⚖️';
     font-size: 1.2rem;
 }
 
