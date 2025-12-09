@@ -13,65 +13,149 @@
 }
 
 /* ==========================================================================
-   2. HEADER & SEARCH (CẤU HÌNH LỆCH TRÁI - THỤT VÀO)
+   2. SEARCH BAR & LOCATION FILTER (GIAO DIỆN PREMIUM)
    ========================================================================== */
 
-/* LOGIC CĂN LỀ THÔNG MINH:
-   Chúng ta giả lập một container 1400px ở giữa màn hình.
-   Margin-left = (100% màn hình - 1400px) / 2.
-   Cộng thêm 40px để "thụt vào" như bạn muốn.
-   Hàm max() giúp đảm bảo trên màn hình nhỏ vẫn có lề 20px chứ không bị mất.
-*/
-
-.explore-header {
-  font-size: 3rem;
-  font-weight: 800;
-  color: #111827;
-  margin-bottom: 1rem;
-  text-align: left;
-  
-  /* --- FIX: Căn lề trái đồng bộ --- */
-  margin-left: max(20px, calc((100% - 1400px) / 2 + 40px));
-  
-  /* --- FIX QUAN TRỌNG: Không dùng width 100% để tránh bị đẩy ra ngoài --- */
-  width: auto; 
-  padding-right: 20px; /* Để khoảng thở bên phải */
-  margin-right: auto;
+.search-bar-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2.5rem; /* Tăng khoảng cách dưới một chút cho thoáng */
+  padding: 0 20px;
 }
 
 .search-bar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 2rem;
-  background: #f3f4f6;
-  padding: 12px 24px;
-  border-radius: 12px;
-  transition: all 0.2s ease;
-  
-  /* --- FIX QUAN TRỌNG: Tính toán lại width để không bị tràn --- */
-  /* Width = 100% trừ đi khoảng cách lề trái và phải (40px an toàn) */
-  width: calc(100% - 40px); 
-  max-width: 700px;
-  
-  /* Căn lề trái giống Header */
-  margin-left: max(20px, calc((100% - 1400px) / 2 + 40px));
-  margin-right: auto;
-  box-sizing: border-box; /* Đảm bảo padding không làm vỡ khung */
+  background: #ffffff;
+  padding: 6px; /* Padding nhỏ bao quanh */
+  width: 100%;
+  max-width: 850px;
+  border-radius: 50px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* Bóng đổ mềm mại hơn */
+  transition: all 0.3s ease;
+  height: 64px; /* Tăng chiều cao một chút cho sang */
 }
 
+/* Hiệu ứng nổi lên khi gõ tìm kiếm */
 .search-bar:focus-within {
-  background: #fff;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e5e7eb;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+  border-color: #818cf8;
+}
+
+/* --- PHẦN TÌM KIẾM TÊN (TRÁI) --- */
+.search-input-wrapper {
+  flex: 1.2;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-left: 24px;
+  height: 100%;
+}
+
+.search-icon { 
+  font-size: 1.25rem; 
+  color: #1e293b; /* Màu icon đậm hơn */
+  flex-shrink: 0;
 }
 
 .search-bar input {
-  flex: 1; border: none; background: transparent;
-  font-size: 1rem; color: #111827; font-weight: 500;
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 1.05rem; /* Chữ to hơn xíu */
+  color: #0f172a;
+  font-weight: 500;
+  outline: none;
+  height: 100%;
 }
-.search-bar input:focus { outline: none; }
-.search-icon { font-size: 1.2rem; color: #9ca3af; }
+
+.search-bar input::placeholder {
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+/* --- ĐƯỜNG KẺ DỌC NGĂN CÁCH --- */
+.search-divider {
+  width: 1px;
+  height: 36px; /* Cao hơn */
+  background-color: #cbd5e1;
+  margin: 0 4px;
+}
+
+/* --- PHẦN CHỌN TỈNH/THÀNH (PHẢI) - STYLE NÚT BẤM --- */
+.search-location-wrapper {
+  flex: 0.8; 
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 24px 0 16px;
+  height: 100%;
+  cursor: pointer;
+  border-radius: 50px; 
+  transition: background-color 0.2s ease;
+  position: relative;
+  /* Thêm màu nền nhẹ để tách biệt khu vực này */
+  margin: 4px;
+  height: calc(100% - 8px); 
+}
+
+/* Hiệu ứng hover xịn: Đổi màu nền rõ rệt */
+.search-location-wrapper:hover {
+  background-color: #f1f5f9; 
+}
+
+/* Hiệu ứng xoay icon khi hover */
+.search-location-wrapper:hover .globe-icon {
+  transform: rotate(15deg);
+}
+
+.select-container {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.location-select {
+  width: 100%;
+  padding: 14px 16px;
+  height: 100%; 
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  color: #1e293b;
+  font-weight: 600; /* Chữ đậm */
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 25px; /* Chừa chỗ cho mũi tên */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  z-index: 2;
+}
+
+/* Icon mũi tên */
+.select-arrow-icon {
+  position: absolute;
+  right: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+  z-index: 1;
+  pointer-events: none;
+  transition: transform 0.2s ease;
+}
+
+/* Xoay mũi tên khi hover */
+.search-location-wrapper:hover .select-arrow-icon {
+  color: #4f46e5; /* Mũi tên đổi màu xanh */
+  transform: rotate(180deg); /* Xoay ngược lên */
+}
 
 /* ==========================================================================
    3. CATEGORIES FILTER (CANH GIỮA MÀN HÌNH)

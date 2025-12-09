@@ -2,7 +2,6 @@ import React, { useEffect, useState, useMemo } from "react";
 import RecommendCard from "../Home/Recommendations/RecommendCard";
 import CreateTripForm from "../../components/CreateTripForm";
 import API from "../../untils/axios";
-import { FaSearch } from "react-icons/fa";
 import CollectionsTab from "./CollectionsTab";
 import "./Saved.css";
 
@@ -138,7 +137,6 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
 
         {activeTab === "saved" && (
           <div className="saved-search">
-            <FaSearch className="search-icon" />
             <input
               type="text"
               placeholder="Search saved destinations..."

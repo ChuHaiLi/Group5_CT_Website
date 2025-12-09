@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import CreateTripForm from '../../components/CreateTripForm';
-import { FaEdit, FaTrash, FaEye, FaPlus, FaSearch } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaEye, FaPlus} from 'react-icons/fa';
 import "./MyTripsPage.css";
 
 const getAuthToken = () => localStorage.getItem("access_token");
@@ -276,7 +276,6 @@ export default function MyTripsPage() {
             {/* Search Bar Only (No Filter) */}
             <div className="filter-bar">
                 <div className="search-box">
-                    <FaSearch className="search-icon" />
                     <input
                         type="text"
                         placeholder="Tìm kiếm theo tên chuyến đi..."
