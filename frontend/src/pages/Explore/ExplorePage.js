@@ -3,24 +3,22 @@ import API from "../../untils/axios";
 import { TAG_CATEGORIES } from "../../data/tags.js";
 import { toast } from "react-toastify";
 
-// Import các icon cần thiết
 import {
   FaUmbrellaBeach, FaMountain, FaLandmark, FaUtensils, FaHiking, FaTree, FaCity,
   FaWater, FaCamera, FaCampground, FaShoppingCart, FaSwimmer, FaBicycle, FaBinoculars,
   FaUsers, FaUser, FaClock, FaCalendarAlt, FaSun, FaCloudSun, FaLeaf, FaSnowflake,
   FaMoon, FaStar, FaMoneyBillWave, FaDollarSign, FaGem, FaGift, FaEye, FaImage,
-  FaMapMarkedAlt, FaFireAlt, FaPaw, FaSearch, FaChevronUp, FaChevronDown,
+  FaMapMarkedAlt, FaFireAlt, FaPaw, FaChevronUp, FaChevronDown,
   FaMusic, FaSpa, FaChild, FaCrown, FaTimes
 } from "react-icons/fa";
 
-// Import các component con
 import RecommendCard from "../Home/Recommendations/RecommendCard";
 import CreateTripForm from "../../components/CreateTripForm";
-import DestinationModal from "../../components/DestinationModal"; // Import Modal mới tạo
+import DestinationModal from "../../components/DestinationModal";
 
 import "./ExplorePage.css";
 
-/* --- CẤU HÌNH ICON VÀ DANH MỤC --- */
+/* ICON MAP & CATEGORY ICONS (Giữ nguyên) */
 const ICON_MAP = {
   Beach: <FaUmbrellaBeach />, Mountain: <FaMountain />, "Historical Site": <FaLandmark />,
   "Cultural Site": <FaMusic />, Gastronomy: <FaUtensils />, Adventure: <FaHiking />,
@@ -47,20 +45,16 @@ const CATEGORY_ICON_MAP = {
   Budget: <FaDollarSign />, "Special Features": <FaStar />
 };
 
-// Số lượng địa điểm hiển thị trên một trang
 const ITEMS_PER_PAGE = 30; 
 
 export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) {
-  // --- KHAI BÁO STATE ---
   const [destinations, setDestinations] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedTags, setSelectedTags] = useState([]);
   
-  // State cho Form tạo chuyến đi
+  // State cho Form & Modal
   const [showForm, setShowForm] = useState(false);
   const [selectedDestination, setSelectedDestination] = useState(null);
-  
-  // State cho Modal xem chi tiết địa điểm (MỚI)
   const [viewingDestination, setViewingDestination] = useState(null);
 
   // State cho Dropdown Categories
@@ -70,26 +64,51 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
   // State cho Phân trang
   const [currentPage, setCurrentPage] = useState(1);
 
+  // --- State cho danh sách Tỉnh/Thành ---
+  const [vietnamLocations, setVietnamLocations] = useState([]);
+  const [selectedProvinceId, setSelectedProvinceId] = useState("");
+
   // --- CALL API ---
   useEffect(() => {
+    // 1. Lấy danh sách địa điểm
     API.get("/destinations")
       .then((res) => setDestinations(res.data))
       .catch(() => toast.error("Failed to fetch destinations"));
+
+    // 2. Lấy danh sách Tỉnh/Thành (Logic chuẩn từ CreateTripForm)
+    API.get("/locations/vietnam")
+      .then((res) => {
+        console.log("Locations loaded:", res.data); // Debug dữ liệu
+        const provinces = [];
+        if (Array.isArray(res.data)) {
+          res.data.forEach((region, regionIdx) => {
+            if (Array.isArray(region.provinces)) {
+              region.provinces.forEach((p, idx) => {
+                // Đảm bảo lấy đúng ID và Name
+                const idStr = String(p.id ?? p.province_id ?? p.province_name ?? `prov-${regionIdx}-${idx}`);
+                provinces.push({
+                  id: idStr,
+                  name: p.province_name || p.name || "Unknown",
+                  regionName: region.region_name || "",
+                });
+              });
+            }
+          });
+        }
+        setVietnamLocations(provinces);
+      })
+      .catch((err) => console.error("Failed to fetch locations", err));
   }, []);
 
-  // --- CÁC HÀM XỬ LÝ LOGIC ---
-
-  // Đóng mở dropdown
+  // --- HANDLERS ---
   const toggleCategory = (title) => {
     setOpenCategory((prev) => (prev === title ? null : title));
   };
 
-  // Kiểm tra xem Category có đang chứa tag nào được chọn không (để highlight nút)
   const isCategoryActive = (categoryTags) => {
     return categoryTags.some(tag => selectedTags.includes(tag));
   };
 
-  // Xử lý click ra ngoài để đóng dropdown
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (openCategory && categoryRefs.current[openCategory] && !categoryRefs.current[openCategory].contains(event.target)) {
@@ -100,7 +119,6 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [openCategory]);
 
-  // Chọn/Bỏ chọn Tag
   const handleTagClick = (tag, e) => {
     if (e) e.stopPropagation(); 
     toggleTag(tag);
@@ -110,7 +128,7 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
     setSelectedTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
-    setCurrentPage(1); // Reset về trang 1 khi lọc
+    setCurrentPage(1); 
   };
 
   const removeTag = (tag) => {
@@ -118,30 +136,46 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
     setCurrentPage(1);
   };
 
-  // Xử lý tìm kiếm
   const handleSearchChange = (e) => {
     setSearch(e.target.value);
     setCurrentPage(1);
   };
 
-  // Xử lý xem chi tiết (Mở Modal)
-  const handleViewDetails = (dest) => {
-    setViewingDestination(dest);
+  // --- Xử lý chọn tỉnh ---
+  const handleProvinceChange = (e) => {
+    console.log("Selected Province ID:", e.target.value);
+    setSelectedProvinceId(e.target.value);
+    setCurrentPage(1);
   };
 
   // --- LOGIC LỌC DỮ LIỆU ---
   const filteredDestinations = destinations.filter((dest) => {
+    // 1. Lọc theo tên (Search)
     const destName = dest.name ? dest.name.toLowerCase() : "";
     const matchesSearch = destName.includes(search.toLowerCase());
 
-    // --- FIX LỖI NULL Ở ĐÂY ---
+    // 2. Lọc theo Tags
     const destTags = Array.isArray(dest.tags) ? dest.tags : [];
-
     const matchesTags =
       selectedTags.length === 0 || 
       selectedTags.every((tag) => destTags.includes(tag));
 
-    return matchesSearch && matchesTags;
+    // 3. Lọc theo Tỉnh/Thành
+    let matchesProvince = true;
+    if (selectedProvinceId) {
+        // So sánh ID (chuyển về string để an toàn)
+        if (dest.province_id) {
+            matchesProvince = String(dest.province_id) === String(selectedProvinceId);
+        } else if (dest.province_name) {
+             // Fallback: Tìm theo tên
+             const selectedProvObj = vietnamLocations.find(p => String(p.id) === String(selectedProvinceId));
+             if (selectedProvObj) {
+                 matchesProvince = dest.province_name.toLowerCase().includes(selectedProvObj.name.toLowerCase());
+             }
+        }
+    }
+
+    return matchesSearch && matchesTags && matchesProvince;
   });
 
   // --- LOGIC PHÂN TRANG ---
@@ -155,21 +189,45 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // --- RENDER GIAO DIỆN ---
   return (
     <div className="explore-container">
-      {/* Tiêu đề chính */}
-      <h1 className="explore-header">Explore Destinations</h1>
+      <h1 className="explore-header">Find Your Dream Trip ✈️</h1>
 
-      {/* Thanh tìm kiếm */}
-      <div className="search-bar">
-        <FaSearch className="search-icon" />
-        <input
-          type="text"
-          placeholder="Search destinations..."
-          value={search}
-          onChange={handleSearchChange}
-        />
+      {/* --- CẬP NHẬT: THANH TÌM KIẾM ĐÔI --- */}
+      <div className="search-bar-container">
+        <div className="search-bar">
+            {/* Input tìm kiếm */}
+            <div className="search-input-wrapper">
+                <input
+                  type="text"
+                  placeholder="Tìm theo tên địa điểm..."
+                  value={search}
+                  onChange={handleSearchChange}
+                />
+            </div>
+            
+            <div className="search-divider"></div>
+
+            {/* Select Tỉnh/Thành (Đã sửa icon) */}
+            <div className="search-location-wrapper">
+                <div className="select-container">
+                  <select 
+                      className="location-select"
+                      value={selectedProvinceId} 
+                      onChange={handleProvinceChange}
+                  >
+                      <option value="">Tất cả địa điểm</option>
+                      {vietnamLocations.map((p) => (
+                          <option key={p.id} value={p.id}>
+                              {p.name}
+                          </option>
+                      ))}
+                  </select>
+                  {/* Icon mũi tên thủ công để đảm bảo luôn hiện */}
+                  <FaChevronDown className="select-arrow-icon" />
+                </div>
+            </div>
+        </div>
       </div>
 
       {/* Bộ lọc Categories */}
@@ -191,7 +249,6 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
                 <span className="category-left">
                   {CATEGORY_ICON_MAP[cat.title] || <FaLandmark />}
                   {cat.title}
-                  {/* Hiển thị số lượng tag đã chọn (chỉ hiện số, không ngoặc) */}
                   {hasActiveTags && (
                      <span className="active-count">
                        {cat.tags.filter(t => selectedTags.includes(t)).length}
@@ -203,7 +260,6 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
                 </span>
               </button>
 
-              {/* Dropdown Menu */}
               <div className={`tag-list-vertical ${isOpen ? "open" : ""}`}>
                 {cat.tags.map((tag) => {
                   const isActive = selectedTags.includes(tag);
@@ -224,7 +280,7 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
         })}
       </div>
 
-      {/* Danh sách Tags đã chọn */}
+      {/* Tags đã chọn */}
       {selectedTags.length > 0 && (
         <div className="selected-tags-container">
           <span className="selected-label">Filters:</span>
@@ -245,11 +301,11 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
         </div>
       )}
 
-      {/* Tiêu đề Grid Kết quả */}
+      {/* Tiêu đề Grid */}
       <h2 className="recommend-header">
-        {search || selectedTags.length > 0 
+        {search || selectedTags.length > 0 || selectedProvinceId
           ? `Showing ${filteredDestinations.length} results` 
-          : "Recommended for you"}
+          : "Handpicked For You ✨"}
       </h2>
 
       {/* Lưới kết quả */}
@@ -262,11 +318,7 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
                   destination={dest}
                   isSaved={savedIds.has(dest.id)}
                   onToggleSave={() => handleToggleSave(dest.id)}
-                  
-                  // Truyền hàm xem chi tiết (Mở Modal)
-                  onViewDetails={() => handleViewDetails(dest)}
-                  
-                  // Mở form tạo chuyến đi
+                  onViewDetails={() => setViewingDestination(dest)}
                   onCreateTrip={() => {
                     setSelectedDestination(dest);
                     setShowForm(true);
@@ -276,7 +328,7 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
             ))}
           </div>
 
-          {/* Thanh Phân Trang */}
+          {/* Pagination */}
           {totalPages > 1 && (
             <div className="pagination-wrapper">
               <button 
@@ -310,7 +362,6 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
           )}
         </>
       ) : (
-        /* Trạng thái trống (Empty State) */
         <div className="empty-state-container">
           <img 
             src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" 
@@ -325,9 +376,10 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
           <button 
             className="empty-state-btn"
             onClick={() => {
-              setSelectedTags([]); // Xóa tags
-              setSearch("");       // Xóa tìm kiếm
-              setCurrentPage(1);   // Về trang đầu
+              setSelectedTags([]);
+              setSearch("");
+              setSelectedProvinceId(""); // Reset tỉnh
+              setCurrentPage(1);
             }}
           >
             Clear all filters
@@ -335,22 +387,19 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
         </div>
       )}
 
-      {/* --- CÁC MODAL & POPUP --- */}
-
-      {/* 1. Modal xem chi tiết địa điểm */}
+      {/* Modal & Form */}
       {viewingDestination && (
         <DestinationModal 
           destination={viewingDestination} 
           onClose={() => setViewingDestination(null)}
           onCreateTrip={(dest) => {
-             setViewingDestination(null); // Đóng modal xem chi tiết
-             setSelectedDestination(dest); // Mở form tạo chuyến đi
+             setViewingDestination(null);
+             setSelectedDestination(dest);
              setShowForm(true);
           }}
         />
       )}
 
-      {/* 2. Form tạo chuyến đi */}
       {showForm && selectedDestination && (
         <CreateTripForm
           initialDestination={selectedDestination}

@@ -70,16 +70,6 @@
   transition: all 0.2s ease;
 }
 
-
-.search-icon {
-    position: absolute;
-    left: 1.5rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #94a3b8;
-    font-size: 1.25rem;
-}
-
 .search-input {
     width: 100%;
     padding: 1.25rem 1.5rem 1.25rem 4rem;

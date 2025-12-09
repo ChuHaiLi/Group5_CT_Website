@@ -70,7 +70,6 @@
 }
 
 .saved-search input { flex: 1; padding: 0.5rem 1rem; border: none; font-size: 1rem; outline: none; font-family: 'Poppins', sans-serif; }
-.saved-search .search-icon { color: #6b7280; font-size: 1.2rem; }
 
 .saved-content { width: 100%; }
 
