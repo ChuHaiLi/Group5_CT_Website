@@ -10,7 +10,7 @@ import {
   FaTimes,
 } from "react-icons/fa";
 import RecommendCard from "../pages/Home/Recommendations/RecommendCard";
-import API from "../utils/axios";
+import API from "../untils/axios";
 import { toast } from "react-toastify";
 import "./CreateTripForm.css";
 

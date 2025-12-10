@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FaChevronRight, FaChevronLeft } from "react-icons/fa";
 import "./HowItWorksPanel.css";
-import { openChatWidget } from "../../utils/chatWidgetEvents";
+import { openChatWidget } from "../../untils/chatWidgetEvents";
 import { useNavigate } from "react-router-dom";
 
 import step1Img from "./step1.jpg";

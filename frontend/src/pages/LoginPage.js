@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
-import API from "../utils/axios";
+import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaPlane, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import API from "../untils/axios";
 import GoogleLoginButton from "../components/GoogleLoginButton";
 import "../styles/AuthForm.css";
 
@@ -13,11 +13,42 @@ export default function LoginPage({ setIsAuthenticated }) {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Validation states
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [passwordTouched, setPasswordTouched] = useState(false);
+  const [isEmailValid, setIsEmailValid] = useState(false);
+  const [isPasswordValid, setIsPasswordValid] = useState(false);
+
+  // Validate email format
+  useEffect(() => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    setIsEmailValid(emailRegex.test(email));
+  }, [email]);
+
+  // Validate password (min 6 characters)
+  useEffect(() => {
+    setIsPasswordValid(password.length >= 6);
+  }, [password]);
+
   const handleLogin = async (e) => {
     e.preventDefault();
     
+    // Mark all fields as touched on submit
+    setEmailTouched(true);
+    setPasswordTouched(true);
+
     if (!email || !password) {
       toast.error("Please fill in all fields");
+      return;
+    }
+
+    if (!isEmailValid) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
+    if (!isPasswordValid) {
+      toast.error("Password must be at least 6 characters");
       return;
     }
 
@@ -35,8 +66,10 @@ export default function LoginPage({ setIsAuthenticated }) {
           setIsAuthenticated(true);
         }
 
-        toast.success(res.data.message || "Login successful");
-        navigate("/");
+        window.dispatchEvent(new Event('authChange'));
+
+        toast.success(res.data.message || "Welcome back! 🎉");
+        navigate("/home");
       } else {
         toast.error("Invalid response from server");
       }
@@ -75,9 +108,28 @@ export default function LoginPage({ setIsAuthenticated }) {
   return (
     <div className="auth-page">
       <div className="auth-box">
-        <h2>Login</h2>
+        <div className="icon-wrapper" style={{ 
+          background: 'linear-gradient(135deg, #0074D9, #39CCCC)',
+          marginBottom: '20px'
+        }}>
+          <FaPlane style={{ 
+            fontSize: '40px', 
+            color: '#ffffff',
+            transform: 'rotate(-45deg)'
+          }} />
+        </div>
+
+        <h2>Welcome Back!</h2>
+        <p style={{ 
+          color: '#7f8c8d', 
+          marginBottom: '30px',
+          fontSize: '15px'
+        }}>
+          Continue your journey through Vietnam 🇻🇳
+        </p>
 
         <form onSubmit={handleLogin}>
+          {/* Email Input with Validation */}
           <div className="input-group">
             <FaEnvelope className="icon" />
             <input
@@ -85,20 +137,58 @@ export default function LoginPage({ setIsAuthenticated }) {
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              onBlur={() => setEmailTouched(true)}
               required
               autoComplete="email"
+              style={{
+                borderColor: emailTouched 
+                  ? (isEmailValid ? '#4CAF50' : email.length > 0 ? '#f44336' : 'rgba(0, 116, 217, 0.2)')
+                  : 'rgba(0, 116, 217, 0.2)',
+                paddingRight: emailTouched && email.length > 0 ? '50px' : '55px'
+              }}
             />
+            {emailTouched && email.length > 0 && (
+              <span style={{ 
+                position: 'absolute', 
+                right: '18px', 
+                top: '50%', 
+                transform: 'translateY(-50%)',
+                fontSize: '18px',
+                zIndex: 2
+              }}>
+                {isEmailValid ? (
+                  <FaCheckCircle style={{ color: '#4CAF50' }} />
+                ) : (
+                  <FaTimesCircle style={{ color: '#f44336' }} />
+                )}
+              </span>
+            )}
           </div>
 
+          {/* Email Error Message */}
+          {emailTouched && !isEmailValid && email.length > 0 && (
+            <div className="validation-message">
+              <FaTimesCircle />
+              Please enter a valid email address
+            </div>
+          )}
+
+          {/* Password Input with Validation */}
           <div className="input-group">
             <FaLock className="icon" />
             <input
               type={showPassword ? "text" : "password"}
-              placeholder="Password"
+              placeholder="Password (min 6 characters)"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              onBlur={() => setPasswordTouched(true)}
               required
               autoComplete="current-password"
+              style={{
+                borderColor: passwordTouched 
+                  ? (isPasswordValid ? '#4CAF50' : password.length > 0 ? '#f44336' : 'rgba(0, 116, 217, 0.2)')
+                  : 'rgba(0, 116, 217, 0.2)'
+              }}
             />
             <span
               className="show-hide"
@@ -108,24 +198,53 @@ export default function LoginPage({ setIsAuthenticated }) {
             </span>
           </div>
 
-          <button type="submit" disabled={loading}>
-            {loading ? "Logging in..." : "Login"}
+          {/* Password Error Message */}
+          {passwordTouched && !isPasswordValid && password.length > 0 && (
+            <div className="validation-message">
+              <FaTimesCircle />
+              Password must be at least 6 characters
+            </div>
+          )}
+
+          {/* Password Strength Indicator */}
+          {password.length > 0 && (
+            <div className="password-strength-box">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                {isPasswordValid ? (
+                  <FaCheckCircle style={{ color: '#4CAF50' }} />
+                ) : (
+                  <FaTimesCircle style={{ color: '#f44336' }} />
+                )}
+                <span style={{ color: isPasswordValid ? '#4CAF50' : '#666' }}>
+                  At least 6 characters
+                </span>
+              </div>
+            </div>
+          )}
+
+          <button 
+            type="submit" 
+            disabled={loading || !isEmailValid || !isPasswordValid}
+            style={{
+              opacity: (loading || !isEmailValid || !isPasswordValid) ? 0.6 : 1,
+              cursor: (loading || !isEmailValid || !isPasswordValid) ? 'not-allowed' : 'pointer'
+            }}
+          >
+            {loading ? "Logging in..." : "Start Exploring"}
           </button>
         </form>
 
-        {/* 🔥 DIVIDER */}
         <div className="auth-divider">
           <span>OR</span>
         </div>
 
-        {/* 🔥 GOOGLE LOGIN BUTTON */}
         <GoogleLoginButton setIsAuthenticated={setIsAuthenticated} />
 
         <p>
-          Don't have an account? <Link to="/register">Register</Link>
+          New to Vietnam Travel? <Link to="/register">Create Account</Link>
         </p>
         <p>
-          Forgot password? <Link to="/forgot-password">Reset here</Link>
+          <Link to="/forgot-password">Forgot Password?</Link>
         </p>
       </div>
     </div>

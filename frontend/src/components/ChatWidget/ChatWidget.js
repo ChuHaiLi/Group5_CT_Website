@@ -13,12 +13,12 @@ import {
   FaMicrophone,
 } from "react-icons/fa";
 import { toast } from "react-toastify";
-import API from "../../utils/axios";
+import API from "../../untils/axios";
 import {
   subscribeToChatWidget,
   refreshChatWidgetHistory,
-} from "../../utils/chatWidgetEvents";
-import { resizeImageTo128 } from "../../utils/imageResizer";
+} from "../../untils/chatWidgetEvents";
+import { resizeImageTo128 } from "../../untils/imageResizer";
 import "./ChatWidget.css";
 
 const BOT_NAME = "Travel Planner";

@@ -1,65 +1,50 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { toast } from "react-toastify";
-import { FaLock, FaEye, FaEyeSlash, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
-import API from "../utils/axios";
+import { FaLock, FaEye, FaEyeSlash, FaShieldAlt, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import API from "../untils/axios";
 import "../styles/AuthForm.css";
 
 export default function ResetPasswordPage() {
-  const [step, setStep] = useState(1); // 1: Verify OTP, 2: Reset Password
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [step, setStep] = useState(1); // 1 = Verify OTP, 2 = Set New Password
   const [loading, setLoading] = useState(false);
-  const [resending, setResending] = useState(false);
-  const [countdown, setCountdown] = useState(0);
-  const [resetToken, setResetToken] = useState(""); // Lưu reset_token từ API
+  const [resetToken, setResetToken] = useState("");
+  
   const inputRefs = useRef([]);
-
   const navigate = useNavigate();
   const location = useLocation();
   const email = location.state?.email || "";
 
-  // Password validation state
-  const [passwordStrength, setPasswordStrength] = useState({
-    length: false,
-    match: false,
-  });
+  // Validation states
+  const [passwordTouched, setPasswordTouched] = useState(false);
+  const [confirmTouched, setConfirmTouched] = useState(false);
+  const [isPasswordValid, setIsPasswordValid] = useState(false);
+  const [passwordsMatch, setPasswordsMatch] = useState(false);
 
-  // Countdown timer
+  // Validate password
   useEffect(() => {
-    if (countdown > 0) {
-      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [countdown]);
+    setIsPasswordValid(newPassword.length >= 6);
+    setPasswordsMatch(newPassword.length > 0 && newPassword === confirmPassword);
+  }, [newPassword, confirmPassword]);
 
-  // Redirect if no email
   useEffect(() => {
     if (!email) {
-      toast.error("Please start from forgot password page");
+      toast.error("Please request password reset first");
       navigate("/forgot-password");
     }
   }, [email, navigate]);
 
-  // Auto-focus first input when on step 1
   useEffect(() => {
-    if (step === 1 && inputRefs.current[0]) {
+    if (inputRefs.current[0] && step === 1) {
       inputRefs.current[0].focus();
     }
   }, [step]);
 
-  // Update password strength indicators
-  useEffect(() => {
-    setPasswordStrength({
-      length: password.length >= 6,
-      match: password.length > 0 && password === confirm,
-    });
-  }, [password, confirm]);
-
-  // OTP input handlers
   const handleOtpChange = (index, value) => {
     if (value && !/^\d$/.test(value)) return;
 
@@ -94,203 +79,110 @@ export default function ResetPasswordPage() {
     inputRefs.current[lastIndex]?.focus();
   };
 
-  const handleResend = async () => {
-    if (countdown > 0) return;
-
-    setResending(true);
-
-    try {
-      const res = await API.post("/auth/resend-otp", { email });
-      
-      toast.success(res.data.message || "New code sent to your email");
-      setCountdown(60);
-      setOtp(["", "", "", "", "", ""]);
-      inputRefs.current[0]?.focus();
-      
-    } catch (err) {
-      const errorData = err.response?.data;
-      
-      if (err.response?.status === 429) {
-        const waitSeconds = errorData?.wait_seconds || 60;
-        setCountdown(waitSeconds);
-        toast.warning(`Please wait ${waitSeconds} seconds`);
-      } else {
-        toast.error(errorData?.message || "Failed to resend code");
-      }
-    } finally {
-      setResending(false);
-    }
-  };
-
-  // STEP 1: Verify OTP - Gọi API để verify và nhận reset_token
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
 
     const otpCode = otp.join("");
-
+    
     if (otpCode.length !== 6) {
       toast.error("Please enter all 6 digits");
       return;
     }
 
     setLoading(true);
+
     try {
-      // Gọi API verify-otp
       const res = await API.post("/auth/verify-otp", {
         email,
-        otp_code: otpCode,
+        otp_code: otpCode
       });
 
-      // Nhận reset_token từ response
-      const token = res.data.reset_token;
-      
-      if (!token) {
-        throw new Error("Reset token not received from server");
-      }
-
-      toast.success(res.data.message || "Code verified! Please create your new password.");
-      setResetToken(token); // Lưu reset_token
-      setStep(2); // Chuyển sang bước 2
-      
+      setResetToken(res.data.reset_token);
+      toast.success("OTP verified! Now set your new password.");
+      setStep(2);
     } catch (err) {
-      console.error("Verify OTP error:", err);
       const errorData = err.response?.data;
       
       if (errorData?.error_type === "invalid_otp") {
-        toast.error("Invalid verification code");
+        toast.error("Invalid OTP code. Please try again.");
         setOtp(["", "", "", "", "", ""]);
         inputRefs.current[0]?.focus();
       } else if (errorData?.error_type === "otp_expired") {
-        toast.error("Code expired. Please request a new one.");
+        toast.error("OTP expired. Please request a new one.");
       } else {
-        toast.error(errorData?.message || "Verification failed. Please try again.");
+        toast.error(errorData?.message || "OTP verification failed");
       }
     } finally {
       setLoading(false);
     }
   };
 
-  // STEP 2: Reset Password - Gọi API với reset_token
   const handleResetPassword = async (e) => {
     e.preventDefault();
 
-    if (password !== confirm) {
+    setPasswordTouched(true);
+    setConfirmTouched(true);
+
+    if (!newPassword || !confirmPassword) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    if (!isPasswordValid) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+
+    if (!passwordsMatch) {
       toast.error("Passwords do not match");
       return;
     }
 
-    if (password.length < 6) {
-      toast.error("Password must be at least 6 characters long");
-      return;
-    }
-
     setLoading(true);
+
     try {
-      // Gọi API reset-password với reset_token
       const res = await API.post("/auth/reset-password", {
         reset_token: resetToken,
-        new_password: password,
+        new_password: newPassword
       });
 
-      toast.success(res.data.message || "Password reset successfully!");
+      toast.success(res.data.message || "Password reset successful! 🎉");
       
       setTimeout(() => {
         navigate("/login");
-      }, 2000);
-      
+      }, 1500);
     } catch (err) {
-      console.error("Reset password error:", err);
-      const errorData = err.response?.data;
-      
-      if (errorData?.message?.includes("token") || errorData?.message?.includes("expired")) {
-        toast.error("Your session has expired. Please verify code again.");
-        // Quay lại bước 1 nếu token không hợp lệ
-        setStep(1);
-        setOtp(["", "", "", "", "", ""]);
-        setResetToken("");
-        inputRefs.current[0]?.focus();
-      } else {
-        toast.error(errorData?.message || "Reset failed. Please try again.");
-      }
+      const errorMessage = err.response?.data?.message || "Failed to reset password";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  // Quay lại Step 1
-  const handleBackToStep1 = () => {
-    setStep(1);
-    setPassword("");
-    setConfirm("");
-    setShowPassword(false);
-    setShowConfirm(false);
-  };
-
   return (
     <div className="auth-page">
-      <div className="auth-box">
-        {/* Progress Indicator */}
-        <div style={{ 
-          display: "flex", 
-          justifyContent: "center", 
-          gap: "10px", 
-          marginBottom: "20px" 
+      <div className="auth-box verify-box">
+        <div className="icon-wrapper" style={{ 
+          background: step === 1 
+            ? 'linear-gradient(135deg, #FF6B6B, #DC143C)'
+            : 'linear-gradient(135deg, #4CAF50, #66BB6A)'
         }}>
-          <div style={{
-            width: "40px",
-            height: "40px",
-            borderRadius: "50%",
-            background: step >= 1 ? "#4CAF50" : "#ddd",
-            color: "#fff",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontWeight: "bold",
-            fontSize: "16px"
-          }}>
-            1
-          </div>
-          <div style={{
-            width: "60px",
-            height: "2px",
-            background: step >= 2 ? "#4CAF50" : "#ddd",
-            alignSelf: "center"
-          }}></div>
-          <div style={{
-            width: "40px",
-            height: "40px",
-            borderRadius: "50%",
-            background: step >= 2 ? "#4CAF50" : "#ddd",
-            color: "#fff",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontWeight: "bold",
-            fontSize: "16px"
-          }}>
-            2
-          </div>
+          <FaShieldAlt style={{ 
+            fontSize: '42px', 
+            color: '#ffffff'
+          }} />
         </div>
 
-        {/* STEP 1: Verify Code */}
-        {step === 1 && (
+        {step === 1 ? (
           <>
-            <h2>Verify Code</h2>
-            <p style={{ textAlign: "center", color: "#666", fontSize: "14px", marginBottom: "10px" }}>
-              Enter the 6-digit code sent to
+            <h2>Verify OTP</h2>
+            <p className="verify-subtitle">
+              We've sent a 6-digit code to
             </p>
-            <p style={{ textAlign: "center", color: "#2196F3", fontWeight: "bold", marginBottom: "20px" }}>
-              {email}
-            </p>
+            <p className="verify-email">{email}</p>
 
             <form onSubmit={handleVerifyOtp}>
-              {/* OTP Input */}
-              <div style={{ 
-                display: "flex", 
-                gap: "8px", 
-                justifyContent: "center", 
-                marginBottom: "20px" 
-              }}>
+              <div className="otp-container">
                 {otp.map((digit, index) => (
                   <input
                     key={index}
@@ -301,82 +193,47 @@ export default function ResetPasswordPage() {
                     onChange={(e) => handleOtpChange(index, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, e)}
                     onPaste={handlePaste}
-                    style={{
-                      width: "45px",
-                      height: "55px",
-                      textAlign: "center",
-                      fontSize: "20px",
-                      fontWeight: "bold",
-                      border: "2px solid #ddd",
-                      borderRadius: "8px",
-                      outline: "none",
-                      transition: "border-color 0.3s"
-                    }}
-                    onFocus={(e) => e.target.style.borderColor = "#2196F3"}
-                    onBlur={(e) => e.target.style.borderColor = "#ddd"}
+                    className="otp-input"
                   />
                 ))}
-              </div>
-
-              {/* Resend Code */}
-              <div style={{ textAlign: "center", marginBottom: "20px" }}>
-                {countdown > 0 ? (
-                  <p style={{ color: "#999", fontSize: "13px" }}>
-                    Resend code in {countdown}s
-                  </p>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={handleResend}
-                    disabled={resending}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      color: "#2196F3",
-                      textDecoration: "underline",
-                      cursor: "pointer",
-                      fontSize: "13px",
-                      padding: "0"
-                    }}
-                  >
-                    {resending ? "Sending..." : "Didn't receive code? Resend"}
-                  </button>
-                )}
               </div>
 
               <button 
                 type="submit" 
                 disabled={loading || otp.join("").length !== 6}
                 style={{
-                  opacity: (loading || otp.join("").length !== 6) ? 0.6 : 1,
-                  cursor: (loading || otp.join("").length !== 6) ? "not-allowed" : "pointer"
+                  background: 'linear-gradient(135deg, #FF6B6B, #DC143C)',
+                  opacity: (loading || otp.join("").length !== 6) ? 0.6 : 1
                 }}
               >
                 {loading ? "Verifying..." : "Verify Code"}
               </button>
             </form>
           </>
-        )}
-
-        {/* STEP 2: Reset Password */}
-        {step === 2 && (
+        ) : (
           <>
-            <h2>Create New Password</h2>
-            <p style={{ textAlign: "center", color: "#666", fontSize: "14px", marginBottom: "20px" }}>
-              Your code has been verified. Please create a new password.
+            <h2>New Password</h2>
+            <p className="verify-subtitle" style={{ marginBottom: '25px' }}>
+              Create a strong password for your account 🔒
             </p>
 
             <form onSubmit={handleResetPassword}>
-              {/* Password Fields */}
+              {/* New Password Input */}
               <div className="input-group">
                 <FaLock className="icon" />
                 <input
                   type={showPassword ? "text" : "password"}
-                  placeholder="New Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="New Password (min 6 characters)"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  onBlur={() => setPasswordTouched(true)}
                   required
                   autoComplete="new-password"
+                  style={{
+                    borderColor: passwordTouched 
+                      ? (isPasswordValid ? '#4CAF50' : newPassword.length > 0 ? '#f44336' : 'rgba(0, 116, 217, 0.2)')
+                      : 'rgba(0, 116, 217, 0.2)'
+                  }}
                 />
                 <span
                   className="show-hide"
@@ -386,15 +243,30 @@ export default function ResetPasswordPage() {
                 </span>
               </div>
 
+              {/* Password Error Message */}
+              {passwordTouched && !isPasswordValid && newPassword.length > 0 && (
+                <div className="validation-message">
+                  <FaTimesCircle />
+                  Password must be at least 6 characters
+                </div>
+              )}
+
+              {/* Confirm Password Input */}
               <div className="input-group">
                 <FaLock className="icon" />
                 <input
                   type={showConfirm ? "text" : "password"}
                   placeholder="Confirm New Password"
-                  value={confirm}
-                  onChange={(e) => setConfirm(e.target.value)}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onBlur={() => setConfirmTouched(true)}
                   required
                   autoComplete="new-password"
+                  style={{
+                    borderColor: confirmTouched 
+                      ? (passwordsMatch ? '#4CAF50' : confirmPassword.length > 0 ? '#f44336' : 'rgba(0, 116, 217, 0.2)')
+                      : 'rgba(0, 116, 217, 0.2)'
+                  }}
                 />
                 <span
                   className="show-hide"
@@ -404,28 +276,41 @@ export default function ResetPasswordPage() {
                 </span>
               </div>
 
-              {/* Password Strength Indicators */}
-              {password.length > 0 && (
-                <div style={{ marginBottom: "15px", fontSize: "13px" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
-                    {passwordStrength.length ? (
-                      <FaCheckCircle style={{ color: "#4CAF50" }} />
+              {/* Confirm Password Error Message */}
+              {confirmTouched && !passwordsMatch && confirmPassword.length > 0 && (
+                <div className="validation-message">
+                  <FaTimesCircle />
+                  Passwords do not match
+                </div>
+              )}
+
+              {/* Password Strength Summary */}
+              {newPassword.length > 0 && (
+                <div className="password-strength-box">
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '6px', 
+                    marginBottom: '4px' 
+                  }}>
+                    {isPasswordValid ? (
+                      <FaCheckCircle style={{ color: '#4CAF50' }} />
                     ) : (
-                      <FaTimesCircle style={{ color: "#f44336" }} />
+                      <FaTimesCircle style={{ color: '#f44336' }} />
                     )}
-                    <span style={{ color: passwordStrength.length ? "#4CAF50" : "#666" }}>
+                    <span style={{ color: isPasswordValid ? '#4CAF50' : '#666' }}>
                       At least 6 characters
                     </span>
                   </div>
                   
-                  {confirm.length > 0 && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                      {passwordStrength.match ? (
-                        <FaCheckCircle style={{ color: "#4CAF50" }} />
+                  {confirmPassword.length > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      {passwordsMatch ? (
+                        <FaCheckCircle style={{ color: '#4CAF50' }} />
                       ) : (
-                        <FaTimesCircle style={{ color: "#f44336" }} />
+                        <FaTimesCircle style={{ color: '#f44336' }} />
                       )}
-                      <span style={{ color: passwordStrength.match ? "#4CAF50" : "#666" }}>
+                      <span style={{ color: passwordsMatch ? '#4CAF50' : '#666' }}>
                         Passwords match
                       </span>
                     </div>
@@ -435,33 +320,27 @@ export default function ResetPasswordPage() {
 
               <button 
                 type="submit" 
-                disabled={loading || !passwordStrength.length || !passwordStrength.match}
+                disabled={loading || !isPasswordValid || !passwordsMatch}
+                className="verify-button"
                 style={{
-                  opacity: (loading || !passwordStrength.length || !passwordStrength.match) ? 0.6 : 1,
-                  cursor: (loading || !passwordStrength.length || !passwordStrength.match) ? "not-allowed" : "pointer"
+                  opacity: (loading || !isPasswordValid || !passwordsMatch) ? 0.6 : 1,
+                  cursor: (loading || !isPasswordValid || !passwordsMatch) ? 'not-allowed' : 'pointer'
                 }}
               >
                 {loading ? "Resetting..." : "Reset Password"}
-              </button>
-
-              <button
-                type="button"
-                onClick={handleBackToStep1}
-                style={{
-                  marginTop: "10px",
-                  background: "transparent",
-                  color: "#666",
-                  border: "1px solid #ddd"
-                }}
-              >
-                Back to Verification
               </button>
             </form>
           </>
         )}
 
-        <p style={{ textAlign: "center", marginTop: "20px", fontSize: "14px" }}>
-          Remember your password? <Link to="/login">Login</Link>
+        <p className="footer-links">
+          <Link to="/login">Back to Login</Link>
+          {step === 1 && (
+            <>
+              {" | "}
+              <Link to="/forgot-password">Request New Code</Link>
+            </>
+          )}
         </p>
       </div>
     </div>

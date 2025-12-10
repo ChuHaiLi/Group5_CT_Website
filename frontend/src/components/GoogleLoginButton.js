@@ -4,7 +4,7 @@ import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import API from "../utils/axios";
+import API from "../untils/axios";
 
 export default function GoogleLoginButton({ setIsAuthenticated }) {
   const navigate = useNavigate();
@@ -54,7 +54,7 @@ export default function GoogleLoginButton({ setIsAuthenticated }) {
         onSuccess={handleGoogleSuccess}
         onError={handleGoogleError}
         useOneTap={false}
-        text="continue_with"
+        text="Sign up or Login with"
         shape="rectangular"
         theme="filled_blue"
         size="large"

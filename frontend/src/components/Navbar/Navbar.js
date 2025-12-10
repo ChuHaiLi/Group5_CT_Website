@@ -7,7 +7,7 @@ import {
   FaBookmark,
   FaUserCircle,
 } from "react-icons/fa";
-import API from "../../utils/axios";
+import API from "../../untils/axios";
 import "./Navbar.css";
 import logo from "./assets/logo.png";
 

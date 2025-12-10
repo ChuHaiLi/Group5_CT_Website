@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
-import API from "../../utils/axios";
+import API from "../../untils/axios";
 import { usePageContext } from "../../context/PageContext";
-import { resizeImageTo128 } from "../../utils/imageResizer";
+import { resizeImageTo128 } from "../../untils/imageResizer";
 import "./HomePage.css";
 import HeroSection from "./hero/hero";
 import CreateTripForm from "../../components/CreateTripForm";
@@ -13,7 +13,7 @@ import {
   sendVisionRequestToWidget,
   sendVisionResultToWidget,
   refreshChatWidgetHistory,
-} from "../../utils/chatWidgetEvents";
+} from "../../untils/chatWidgetEvents";
 
 const MAX_VISION_IMAGES = 4;
 

@@ -2,21 +2,21 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { FaEnvelope } from "react-icons/fa";
-import API from "../utils/axios";
+import API from "../untils/axios";
 import "../styles/AuthForm.css";
 
-export default function VerifyEmailPage() {
+export default function VerifyEmailPage({ setIsAuthenticated }) {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
-  const [countdown, setCountdown] = useState(60); // ✅ Bắt đầu với 60s
+  const [countdown, setCountdown] = useState(60);
   const inputRefs = useRef([]);
   
   const navigate = useNavigate();
   const location = useLocation();
   const email = location.state?.email || "";
 
-  // Countdown timer cho resend
+  // Countdown timer
   useEffect(() => {
     if (countdown > 0) {
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
@@ -40,21 +40,18 @@ export default function VerifyEmailPage() {
   }, []);
 
   const handleChange = (index, value) => {
-    // Chỉ cho phép nhập số
     if (value && !/^\d$/.test(value)) return;
 
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
 
-    // Auto-focus sang ô tiếp theo
     if (value && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
   };
 
   const handleKeyDown = (index, e) => {
-    // Backspace: xóa và quay lại ô trước
     if (e.key === "Backspace" && !otp[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
@@ -72,7 +69,6 @@ export default function VerifyEmailPage() {
     const newOtp = pastedData.split("");
     setOtp([...newOtp, ...Array(6 - newOtp.length).fill("")]);
     
-    // Focus vào ô cuối cùng được điền
     const lastIndex = Math.min(pastedData.length, 5);
     inputRefs.current[lastIndex]?.focus();
   };
@@ -95,12 +91,36 @@ export default function VerifyEmailPage() {
         otp_code: otpCode
       });
 
-      toast.success(res.data.message || "Email verified successfully!");
-      
-      // ✅ Chuyển sang trang login giống như ForgotPassword -> Login
-      setTimeout(() => {
-        navigate("/login");
-      }, 1500);
+      // ✅ LƯU TOKEN VÀ THÔNG TIN USER
+      if (res.data.access_token) {
+        // 1️⃣ Lưu vào localStorage
+        localStorage.setItem("access_token", res.data.access_token);
+        localStorage.setItem("refresh_token", res.data.refresh_token);
+        localStorage.setItem("user", JSON.stringify(res.data.user));
+
+        // 2️⃣ Dispatch event để App.js biết có sự thay đổi
+        window.dispatchEvent(new Event('authChange'));
+
+        // 3️⃣ Cập nhật state authentication
+        if (typeof setIsAuthenticated === "function") {
+          setIsAuthenticated(true);
+        }
+
+        // 4️⃣ Hiển thị thông báo thành công
+        toast.success(res.data.message || "Email verified successfully!");
+        
+        // 5️⃣ Chuyển hướng đến Home (với replace để không back được)
+        setTimeout(() => {
+          navigate("/home", { replace: true });
+        }, 800);
+        
+      } else {
+        // Fallback: nếu không có token, chuyển về login
+        toast.success("Email verified! Please login.");
+        setTimeout(() => {
+          navigate("/login", { replace: true });
+        }, 1500);
+      }
       
     } catch (err) {
       console.error("Verification error:", err);
@@ -130,7 +150,7 @@ export default function VerifyEmailPage() {
       const res = await API.post("/auth/resend-verification", { email });
       
       toast.success(res.data.message || "New code sent to your email");
-      setCountdown(60); // 60 giây cooldown
+      setCountdown(60);
       setOtp(["", "", "", "", "", ""]);
       inputRefs.current[0]?.focus();
       
