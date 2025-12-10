@@ -296,9 +296,24 @@ def verify_email():
     user.reset_token_expiry = None
     db.session.commit()
     
+    access_token = create_access_token(identity=str(user.id))
+    refresh_token = create_refresh_token(identity=str(user.id))
+    
+    # Lấy avatar
+    avatar = user.avatar_url or user.picture or ""
+    
     return jsonify({
-        "message": "Email verified successfully! You can now login.",
-        "success": True
+        "message": "Email verified successfully! Logging you in...",
+        "success": True,
+        "access_token": access_token,      
+        "refresh_token": refresh_token,    
+        "user": {                       
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "phone": user.phone or "",
+            "avatar": avatar,
+        }
     }), 200
 
 @app.route("/api/auth/resend-verification", methods=["POST"])
@@ -416,7 +431,9 @@ def google_login():
                     'username': user.username,
                     'email': user.email,
                     'name': user.name,
+                    'phone': user.phone or "",
                     'picture': user.picture,
+                    'avatar': user.avatar_url or user.picture or "",  # 🔥 THÊM
                     'is_verified': True
                 }
             }), 200
@@ -497,11 +514,17 @@ def login():
     refresh_token = create_refresh_token(identity=str(user.id))
 
     return jsonify({
-        "message": "Login successful",
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-        "user": {"id": user.id, "username": user.username, "email": user.email}
-    }), 200
+    "message": "Login successful",
+    "access_token": access_token,
+    "refresh_token": refresh_token,
+    "user": {
+        "id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "phone": user.phone or "",
+        "avatar": user.avatar_url or user.picture or "", 
+    }
+}), 200
 
 # -------- REFRESH TOKEN --------
 @app.route("/api/auth/refresh", methods=["POST"])
@@ -519,7 +542,18 @@ def me():
     user = db.session.get(User, user_id) 
     if not user:
         return jsonify({"message": "User not found"}), 404
-    return jsonify({"id": user.id, "username": user.username, "email": user.email})
+    
+    # Ưu tiên avatar_url, fallback sang picture
+    avatar = user.avatar_url or user.picture or ""
+    
+    return jsonify({
+        "id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "phone": user.phone or "",
+        "name": user.name or "",
+        "avatar": avatar,
+    }), 200
 
 # -------- FORGOT PASSWORD --------
 @app.route("/api/auth/forgot-password", methods=["POST"])
@@ -640,6 +674,130 @@ def reset_password():
     db.session.commit()
 
     return jsonify({"message": "Password has been reset successfully. You can now log in."}), 200
+
+# -------- PROFILE MANAGEMENT --------
+@app.route("/api/profile", methods=["GET"])
+@jwt_required()
+def get_profile():
+    """Lấy thông tin profile của user hiện tại"""
+    user_id = int(get_jwt_identity())
+    user = db.session.get(User, user_id)
+    
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+    
+    # Ưu tiên avatar_url, fallback sang picture (Google)
+    avatar = user.avatar_url or user.picture or ""
+    
+    return jsonify({
+        "id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "phone": user.phone or "",
+        "name": user.name or "",
+        "avatar": avatar,  # Frontend expect "avatar"
+    }), 200
+
+@app.route("/api/profile", methods=["PUT"])
+@jwt_required()
+def update_profile():
+    """Cập nhật thông tin profile"""
+    user_id = int(get_jwt_identity())
+    user = db.session.get(User, user_id)
+    
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+    
+    data = request.get_json() or {}
+    
+    # Validation errors
+    errors = {}
+    profile_changed = False
+    
+    # 1. Cập nhật Username (kiểm tra trùng)
+    new_username = data.get("username", "").strip()
+    if new_username and new_username != user.username:
+        if len(new_username) < 3:
+            errors["username"] = "Username must be at least 3 characters"
+        elif User.query.filter(User.username == new_username, User.id != user_id).first():
+            errors["username"] = "Username already exists"
+        else:
+            user.username = new_username
+            profile_changed = True
+    
+    # 2. Cập nhật Email (kiểm tra trùng và format)
+    new_email = data.get("email", "").strip().lower()
+    if new_email and new_email != user.email.lower():
+        if not is_valid_email(new_email):
+            errors["email"] = "Invalid email format"
+        elif User.query.filter(db.func.lower(User.email) == new_email, User.id != user_id).first():
+            errors["email"] = "Email already exists"
+        else:
+            user.email = new_email
+            profile_changed = True
+    
+    # 3. Cập nhật Phone
+    new_phone = data.get("phone", "").strip()
+    if "phone" in data:  # Cho phép để trống
+        if new_phone != (user.phone or ""):
+            user.phone = new_phone if new_phone else None
+            profile_changed = True
+    
+    # 4. Cập nhật Password (nếu có)
+    new_password = data.get("password", "").strip()
+    if new_password:
+        if len(new_password) < 6:
+            errors["password"] = "Password must be at least 6 characters"
+        else:
+            user.password = generate_password_hash(new_password)
+            profile_changed = True
+    
+    # 5. Cập nhật Avatar URL (hỗ trợ cả avatarUrl và avatar từ frontend)
+    new_avatar = data.get("avatarUrl") or data.get("avatar")
+    if new_avatar:
+        current_avatar = user.avatar_url or user.picture or ""
+        if new_avatar != current_avatar:
+            # Lưu vào avatar_url (trường chính)
+            user.avatar_url = new_avatar
+            
+            # Nếu user login bằng Google, cũng update picture
+            if user.google_id:
+                user.picture = new_avatar
+            
+            profile_changed = True
+    
+    # Nếu có lỗi validation
+    if errors:
+        return jsonify({"errors": errors}), 400
+    
+    # Nếu không có gì thay đổi
+    if not profile_changed:
+        return jsonify({"message": "No changes detected"}), 200
+    
+    # Lưu thay đổi
+    try:
+        user.updated_at = datetime.utcnow()
+        db.session.commit()
+        
+        # Lấy avatar cuối cùng (ưu tiên avatar_url)
+        final_avatar = user.avatar_url or user.picture or ""
+        
+        return jsonify({
+            "message": "Profile updated successfully",
+            "user": {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "phone": user.phone or "",
+                "name": user.name or "",
+                "avatar": final_avatar,
+            }
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error updating profile: {e}")
+        return jsonify({"message": "Failed to update profile"}), 500
 
 # -------- SAVED DESTINATIONS --------
 @app.route("/api/saved/add", methods=["POST"])
