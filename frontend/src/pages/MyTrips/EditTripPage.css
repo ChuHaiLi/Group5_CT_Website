@@ -1,0 +1,377 @@
+/* EditTripPage.css - Modern 2-Column Layout */
+
+.edit-trip-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2rem;
+}
+
+/* ============ HEADER ============ */
+.edit-trip-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+    padding: 1.5rem 2rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.trip-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+    flex: 1;
+    text-align: center;
+}
+
+.back-btn, .save-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.back-btn {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.back-btn:hover {
+    background: #e2e8f0;
+    transform: translateX(-4px);
+}
+
+.save-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.save-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+.save-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ============ MAIN CONTENT: 2 COLUMNS ============ */
+.edit-trip-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+/* ============ COLUMN STYLING ============ */
+.original-column, .editable-column {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    height: fit-content;
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+}
+
+.original-column {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.column-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.column-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 0.5rem 0;
+}
+
+.column-header .subtitle {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin: 0;
+}
+
+/* ============ DAYS LIST (VERTICAL) ============ */
+.days-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.day-section {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.day-section.original {
+    background: #f8fafc;
+}
+
+.day-section.editable:hover {
+    border-color: #667eea;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15);
+}
+
+.day-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #667eea;
+    margin: 0 0 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.day-title::before {
+    content: '📅';
+    font-size: 1.5rem;
+}
+
+/* ============ PLACES LIST ============ */
+.places-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.place-item-readonly {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+}
+
+.time-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #ede9fe;
+    color: #6d28d9;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.place-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+}
+
+.place-icon {
+    font-size: 1.5rem;
+}
+
+.place-name {
+    font-weight: 600;
+    color: #1e293b;
+    flex: 1;
+}
+
+.place-category {
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+/* ============ DROPPABLE AREA (EDITABLE) ============ */
+.droppable-area {
+    min-height: 100px;
+    padding: 0.5rem;
+    border-radius: 8px;
+    border: 2px dashed #cbd5e1;
+    transition: all 0.3s ease;
+}
+
+.droppable-area.dragging-over {
+    background: #f0f9ff;
+    border-color: #667eea;
+    border-style: solid;
+}
+
+.empty-message {
+    text-align: center;
+    color: #94a3b8;
+    font-style: italic;
+    padding: 2rem;
+    margin: 0;
+}
+
+/* ============ ACTION BUTTONS ============ */
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.add-btn {
+    flex: 1;
+    min-width: 100px;
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.add-btn.destination {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.add-btn.destination:hover {
+    background: #bfdbfe;
+    transform: translateY(-2px);
+}
+
+.add-btn.lunch {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.add-btn.lunch:hover {
+    background: #fde68a;
+    transform: translateY(-2px);
+}
+
+.add-btn.travel {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.add-btn.travel:hover {
+    background: #a7f3d0;
+    transform: translateY(-2px);
+}
+
+/* ============ LOADING & ERROR STATES ============ */
+.edit-trip-loading, .edit-trip-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+.edit-trip-loading {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.edit-trip-error {
+    background: #fee2e2;
+    color: #991b1b;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+/* ============ SCROLLBAR STYLING ============ */
+.original-column::-webkit-scrollbar,
+.editable-column::-webkit-scrollbar {
+    width: 8px;
+}
+
+.original-column::-webkit-scrollbar-track,
+.editable-column::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+}
+
+.original-column::-webkit-scrollbar-thumb,
+.editable-column::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+.original-column::-webkit-scrollbar-thumb:hover,
+.editable-column::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 1200px) {
+    .edit-trip-content {
+        grid-template-columns: 1fr;
+    }
+
+    .original-column {
+        max-height: 400px;
+    }
+
+    .editable-column {
+        max-height: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .edit-trip-container {
+        padding: 1rem;
+    }
+
+    .edit-trip-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .trip-title {
+        font-size: 1.25rem;
+        text-align: center;
+    }
+
+    .back-btn, .save-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .add-btn {
+        width: 100%;
+    }
+}

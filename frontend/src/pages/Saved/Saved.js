@@ -3,7 +3,6 @@ import RecommendCard from "../Home/Recommendations/RecommendCard";
 import CreateTripForm from "../../components/CreateTripForm";
 import DestinationModal from "../../components/DestinationModal";
 import API from "../../untils/axios";
-import { FaSearch } from "react-icons/fa";
 import CollectionsTab from "./CollectionsTab";
 import "./Saved.css";
 
@@ -14,25 +13,64 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
   const token = localStorage.getItem("access_token");
 
   const [activeTab, setActiveTab] = useState("saved");
+  
+  // --- FOLDER STATE ---
+  // Khởi tạo từ Local Storage
+  const [folders, setFolders] = useState(() => {
+    const saved = localStorage.getItem("my_user_folders");
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [showCreateFolderModal, setShowCreateFolderModal] = useState(false);
+  const [newFolderName, setNewFolderName] = useState("");
+
   const [showForm, setShowForm] = useState(false);
   const [selectedDestination, setSelectedDestination] = useState(null);
 
-  // State cho Modal
-  const [showModal, setShowModal] = useState(false);
-  const [modalDestination, setModalDestination] = useState(null);
+  // Mỗi khi biến 'folders' thay đổi, nó sẽ tự lưu vào máy
+  useEffect(() => {
+    localStorage.setItem("my_user_folders", JSON.stringify(folders));
+  }, [folders]);
 
-  // Handler để mở Modal
-  const handleOpenModal = (destinationObj) => {
-    setModalDestination(destinationObj);
-    setShowModal(true);
+  // --- FOLDER HANDLERS ---
+  const handleCreateFolder = () => {
+    if (newFolderName.trim()) {
+      const newFolder = {
+        id: Date.now(),
+        name: newFolderName,
+        items: []
+      };
+      setFolders([...folders, newFolder]);
+      setNewFolderName("");
+      setShowCreateFolderModal(false);
+    }
   };
 
-  // Handler để đóng Modal
-  const handleCloseModal = () => {
-    setModalDestination(null);
-    setShowModal(false);
+  const handleDeleteFolder = (folderId) => {
+    if (window.confirm("Are you sure you want to delete this folder?")) {
+      setFolders(folders.filter(f => f.id !== folderId));
+    }
   };
 
+  const handleAddToFolder = (folderId, itemIds) => {
+    setFolders(folders.map(f => {
+      if (f.id === folderId) {
+        const uniqueItems = [...new Set([...f.items, ...itemIds])];
+        return { ...f, items: uniqueItems };
+      }
+      return f;
+    }));
+  };
+
+  const handleRemoveFromFolder = (folderId, itemId) => {
+    setFolders(folders.map(f => {
+      if (f.id === folderId) {
+        return { ...f, items: f.items.filter(id => id !== itemId) };
+      }
+      return f;
+    }));
+  };
+
+  // --- API HANDLERS ---
   const handleCreateTrip = (destinationObj) => {
     setSelectedDestination(destinationObj);
     setShowForm(true);
@@ -43,33 +81,24 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
     setShowForm(false);
   };
 
-  // Handler để tạo trip từ Modal
-  const handleCreateTripFromModal = (destinationObj) => {
-    handleCloseModal();
-    handleCreateTrip(destinationObj);
-  };
-
-  // --- GỌI API ---
   useEffect(() => {
     const fetchData = async () => {
-      if (!token) {
-        setDestinations([]);
-        setLoading(false);
-        return;
-      }
-
-      setLoading(true);
-      try {
-        const res = await API.get("/saved/list");
-        setDestinations(Array.isArray(res.data) ? res.data : []);
-      } catch (error) {
-        console.error("Failed to fetch saved list:", error);
-        setDestinations([]);
-      } finally {
-        setLoading(false);
-      }
+        if (!token) {
+            setDestinations([]);
+            setLoading(false);
+            return;
+        }
+        setLoading(true);
+        try {
+            const res = await API.get("/saved/list");
+            setDestinations(Array.isArray(res.data) ? res.data : []);
+        } catch (error) {
+            console.error("Failed to fetch saved list:", error);
+            setDestinations([]);
+        } finally {
+            setLoading(false);
+        }
     };
-
     fetchData();
   }, [token, savedIds]);
 
@@ -78,40 +107,37 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
     setDestinations((prev) => prev.filter((d) => d.id !== id));
   };
 
-  // Logic tìm kiếm (Cho tab Saved)
   const filteredDestinations = useMemo(() => {
-    return destinations.filter((dest) =>
+    return destinations.filter(dest =>
       dest.name.toLowerCase().includes(search.toLowerCase())
     );
   }, [destinations, search]);
 
   return (
     <div className="saved-wrapper">
-      {/* HEADER */}
       <div className="saved-header">
-        <h1>Collections</h1>
-        <p>All your saved destinations organized your way.</p>
+        <h1>Places You’re Keeping</h1>
+        <p>Keep all your dream destinations in one place — a personalized space where every spot you save becomes a trip waiting to happen. ✨</p>
 
         <div className="saved-tabs">
-          <button
+          <button 
             className={activeTab === "saved" ? "active" : ""}
             onClick={() => setActiveTab("saved")}
           >
             Saved ({destinations.length})
           </button>
 
-          <button
+          {/* FIX: Hiển thị số lượng folder */}
+          <button 
             className={activeTab === "collections" ? "active" : ""}
             onClick={() => setActiveTab("collections")}
           >
-            Collections (Group & Sort)
+            Collections ({folders.length})
           </button>
         </div>
 
-        {/* Thanh tìm kiếm (Chỉ hiện ở tab Saved) */}
         {activeTab === "saved" && (
           <div className="saved-search">
-            <FaSearch className="search-icon" />
             <input
               type="text"
               placeholder="Search saved destinations..."
@@ -122,73 +148,71 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
         )}
       </div>
 
-      {/* CONTENT */}
       <div className="saved-content">
-        {/* Trường hợp: Đang tải */}
         {loading ? (
-          <div className="saved-empty">
-            <p>Loading your collections...</p>
-          </div>
-        ) : destinations.length === 0 ? (
-          /* Trường hợp: Danh sách rỗng */
-          <div className="saved-empty">
-            <img
-              src="https://cdn-icons-png.flaticon.com/512/4076/4076432.png"
-              alt="empty"
-              style={{ width: "120px", opacity: 0.5, marginBottom: "1rem" }}
-              onError={(e) => (e.target.style.display = "none")}
-            />
-            <h3>No saved destinations yet</h3>
-            <p>Go to Explore page and save some amazing places!</p>
-          </div>
+            <div className="saved-empty"><p>Loading...</p></div>
         ) : (
-          /* Trường hợp: Có dữ liệu -> Hiển thị Tab */
-          <>
-            {activeTab === "saved" && (
-              <div className="saved-list">
-                {filteredDestinations.length === 0 ? (
-                  <div className="saved-empty">
-                    <p>No results found for "{search}"</p>
-                  </div>
-                ) : (
-                  <div className="saved-grid">
-                    {filteredDestinations.map((dest) => (
-                      <RecommendCard
-                        key={dest.id}
-                        destination={dest}
-                        isSaved={true}
-                        onToggleSave={() => handleUnsave(dest.id)}
-                        onCreateTrip={() => handleCreateTrip(dest)}
-                        onCardClick={() => handleOpenModal(dest)}
-                      />
-                    ))}
-                  </div>
+            <>
+                {/* TAB SAVED */}
+                {activeTab === "saved" && (
+                    <div className="saved-list">
+                        {filteredDestinations.length === 0 ? (
+                            <div className="saved-empty">
+                                <img src="/empty-state.svg" alt="" onError={(e)=>e.target.style.display='none'} style={{width: 150, opacity: 0.5, marginBottom: 20}}/>
+                                <h3>No saved destinations found</h3>
+                                <p>Browse destinations and save the ones you love.</p>
+                            </div>
+                        ) : (
+                            <div className="saved-grid">
+                                {filteredDestinations.map(dest => (
+                                <RecommendCard
+                                    key={dest.id}
+                                    destination={dest}
+                                    isSaved={true}
+                                    onToggleSave={() => handleUnsave(dest.id)}
+                                    onCreateTrip={() => handleCreateTrip(dest)}
+                                />
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 )}
-              </div>
-            )}
 
-            {activeTab === "collections" && (
-              <CollectionsTab
-                destinations={destinations}
-                handleUnsave={handleUnsave}
-                handleCreateTrip={handleCreateTrip}
-                handleOpenModal={handleOpenModal}
-              />
-            )}
-          </>
+                {/* TAB COLLECTIONS */}
+                {activeTab === "collections" && (
+                    <CollectionsTab 
+                        allDestinations={destinations}
+                        folders={folders}
+                        onCreateFolder={() => setShowCreateFolderModal(true)}
+                        onDeleteFolder={handleDeleteFolder}
+                        onAddToFolder={handleAddToFolder}
+                        onRemoveFromFolder={handleRemoveFromFolder}
+                    />
+                )}
+            </>
         )}
       </div>
 
-      {/* Modal hiển thị chi tiết địa điểm */}
-      {showModal && modalDestination && (
-        <DestinationModal
-          destination={modalDestination}
-          onClose={handleCloseModal}
-          onCreateTrip={handleCreateTripFromModal}
-        />
+      {/* MODAL TẠO FOLDER */}
+      {showCreateFolderModal && (
+        <div className="modal-overlay">
+          <div className="create-folder-modal">
+            <h3>New Folder</h3>
+            <input 
+              type="text" 
+              placeholder="Name your folder (e.g. Summer Trip)" 
+              value={newFolderName}
+              onChange={(e) => setNewFolderName(e.target.value)}
+              autoFocus
+            />
+            <div className="modal-footer">
+              <button className="btn-cancel" onClick={() => setShowCreateFolderModal(false)}>Cancel</button>
+              <button className="btn-create" onClick={handleCreateFolder}>Create</button>
+            </div>
+          </div>
+        </div>
       )}
 
-      {/* Form Tạo Chuyến Đi */}
       {showForm && selectedDestination && (
         <CreateTripForm
           initialDestination={selectedDestination}
