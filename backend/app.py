@@ -178,18 +178,18 @@ def evaluate_itinerary():
         return jsonify({"ok": False, "error": str(e)}), 500
 
 
-@app.route('/api/locations', methods=['GET'])
-def api_locations():
-    """Return deduplicated list of locations discovered in backend data files.
+# @app.route('/api/locations', methods=['GET'])
+# def api_locations():
+#     """Return deduplicated list of locations discovered in backend data files.
 
-    Useful for client-side classifier or autocomplete to prioritize database lookup
-    before falling back to AI.
-    """
-    try:
-        locs = load_locations()
-        return jsonify({"ok": True, "locations": locs})
-    except Exception as e:
-        return jsonify({"ok": False, "error": str(e)}), 500
+#     Useful for client-side classifier or autocomplete to prioritize database lookup
+#     before falling back to AI.
+#     """
+#     try:
+#         locs = load_locations()
+#         return jsonify({"ok": True, "locations": locs})
+#     except Exception as e:
+#         return jsonify({"ok": False, "error": str(e)}), 500
 
 
 # ----------------- AI Reorder Route -----------------
