@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import RecommendCard from "../Home/Recommendations/RecommendCard";
 import CreateTripForm from "../../components/CreateTripForm";
-import DestinationModal from "../../components/DestinationModal";
 import API from "../../untils/axios";
 import CollectionsTab from "./CollectionsTab";
 import "./Saved.css";
@@ -13,7 +12,7 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
   const token = localStorage.getItem("access_token");
 
   const [activeTab, setActiveTab] = useState("saved");
-  
+
   // --- FOLDER STATE ---
   // Khởi tạo từ Local Storage
   const [folders, setFolders] = useState(() => {
@@ -37,7 +36,7 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
       const newFolder = {
         id: Date.now(),
         name: newFolderName,
-        items: []
+        items: [],
       };
       setFolders([...folders, newFolder]);
       setNewFolderName("");
@@ -47,27 +46,31 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
 
   const handleDeleteFolder = (folderId) => {
     if (window.confirm("Are you sure you want to delete this folder?")) {
-      setFolders(folders.filter(f => f.id !== folderId));
+      setFolders(folders.filter((f) => f.id !== folderId));
     }
   };
 
   const handleAddToFolder = (folderId, itemIds) => {
-    setFolders(folders.map(f => {
-      if (f.id === folderId) {
-        const uniqueItems = [...new Set([...f.items, ...itemIds])];
-        return { ...f, items: uniqueItems };
-      }
-      return f;
-    }));
+    setFolders(
+      folders.map((f) => {
+        if (f.id === folderId) {
+          const uniqueItems = [...new Set([...f.items, ...itemIds])];
+          return { ...f, items: uniqueItems };
+        }
+        return f;
+      })
+    );
   };
 
   const handleRemoveFromFolder = (folderId, itemId) => {
-    setFolders(folders.map(f => {
-      if (f.id === folderId) {
-        return { ...f, items: f.items.filter(id => id !== itemId) };
-      }
-      return f;
-    }));
+    setFolders(
+      folders.map((f) => {
+        if (f.id === folderId) {
+          return { ...f, items: f.items.filter((id) => id !== itemId) };
+        }
+        return f;
+      })
+    );
   };
 
   // --- API HANDLERS ---
@@ -83,21 +86,21 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
 
   useEffect(() => {
     const fetchData = async () => {
-        if (!token) {
-            setDestinations([]);
-            setLoading(false);
-            return;
-        }
-        setLoading(true);
-        try {
-            const res = await API.get("/saved/list");
-            setDestinations(Array.isArray(res.data) ? res.data : []);
-        } catch (error) {
-            console.error("Failed to fetch saved list:", error);
-            setDestinations([]);
-        } finally {
-            setLoading(false);
-        }
+      if (!token) {
+        setDestinations([]);
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      try {
+        const res = await API.get("/saved/list");
+        setDestinations(Array.isArray(res.data) ? res.data : []);
+      } catch (error) {
+        console.error("Failed to fetch saved list:", error);
+        setDestinations([]);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchData();
   }, [token, savedIds]);
@@ -108,7 +111,7 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
   };
 
   const filteredDestinations = useMemo(() => {
-    return destinations.filter(dest =>
+    return destinations.filter((dest) =>
       dest.name.toLowerCase().includes(search.toLowerCase())
     );
   }, [destinations, search]);
@@ -117,10 +120,13 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
     <div className="saved-wrapper">
       <div className="saved-header">
         <h1>Places You’re Keeping</h1>
-        <p>Keep all your dream destinations in one place — a personalized space where every spot you save becomes a trip waiting to happen. ✨</p>
+        <p>
+          Keep all your dream destinations in one place — a personalized space
+          where every spot you save becomes a trip waiting to happen. ✨
+        </p>
 
         <div className="saved-tabs">
-          <button 
+          <button
             className={activeTab === "saved" ? "active" : ""}
             onClick={() => setActiveTab("saved")}
           >
@@ -128,7 +134,7 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
           </button>
 
           {/* FIX: Hiển thị số lượng folder */}
-          <button 
+          <button
             className={activeTab === "collections" ? "active" : ""}
             onClick={() => setActiveTab("collections")}
           >
@@ -150,46 +156,53 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
 
       <div className="saved-content">
         {loading ? (
-            <div className="saved-empty"><p>Loading...</p></div>
+          <div className="saved-empty">
+            <p>Loading...</p>
+          </div>
         ) : (
-            <>
-                {/* TAB SAVED */}
-                {activeTab === "saved" && (
-                    <div className="saved-list">
-                        {filteredDestinations.length === 0 ? (
-                            <div className="saved-empty">
-                                <img src="/empty-state.svg" alt="" onError={(e)=>e.target.style.display='none'} style={{width: 150, opacity: 0.5, marginBottom: 20}}/>
-                                <h3>No saved destinations found</h3>
-                                <p>Browse destinations and save the ones you love.</p>
-                            </div>
-                        ) : (
-                            <div className="saved-grid">
-                                {filteredDestinations.map(dest => (
-                                <RecommendCard
-                                    key={dest.id}
-                                    destination={dest}
-                                    isSaved={true}
-                                    onToggleSave={() => handleUnsave(dest.id)}
-                                    onCreateTrip={() => handleCreateTrip(dest)}
-                                />
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {/* TAB COLLECTIONS */}
-                {activeTab === "collections" && (
-                    <CollectionsTab 
-                        allDestinations={destinations}
-                        folders={folders}
-                        onCreateFolder={() => setShowCreateFolderModal(true)}
-                        onDeleteFolder={handleDeleteFolder}
-                        onAddToFolder={handleAddToFolder}
-                        onRemoveFromFolder={handleRemoveFromFolder}
+          <>
+            {/* TAB SAVED */}
+            {activeTab === "saved" && (
+              <div className="saved-list">
+                {filteredDestinations.length === 0 ? (
+                  <div className="saved-empty">
+                    <img
+                      src="/empty-state.svg"
+                      alt=""
+                      onError={(e) => (e.target.style.display = "none")}
+                      style={{ width: 150, opacity: 0.5, marginBottom: 20 }}
                     />
+                    <h3>No saved destinations found</h3>
+                    <p>Browse destinations and save the ones you love.</p>
+                  </div>
+                ) : (
+                  <div className="saved-grid">
+                    {filteredDestinations.map((dest) => (
+                      <RecommendCard
+                        key={dest.id}
+                        destination={dest}
+                        isSaved={true}
+                        onToggleSave={() => handleUnsave(dest.id)}
+                        onCreateTrip={() => handleCreateTrip(dest)}
+                      />
+                    ))}
+                  </div>
                 )}
-            </>
+              </div>
+            )}
+
+            {/* TAB COLLECTIONS */}
+            {activeTab === "collections" && (
+              <CollectionsTab
+                allDestinations={destinations}
+                folders={folders}
+                onCreateFolder={() => setShowCreateFolderModal(true)}
+                onDeleteFolder={handleDeleteFolder}
+                onAddToFolder={handleAddToFolder}
+                onRemoveFromFolder={handleRemoveFromFolder}
+              />
+            )}
+          </>
         )}
       </div>
 
@@ -198,16 +211,23 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
         <div className="modal-overlay">
           <div className="create-folder-modal">
             <h3>New Folder</h3>
-            <input 
-              type="text" 
-              placeholder="Name your folder (e.g. Summer Trip)" 
+            <input
+              type="text"
+              placeholder="Name your folder (e.g. Summer Trip)"
               value={newFolderName}
               onChange={(e) => setNewFolderName(e.target.value)}
               autoFocus
             />
             <div className="modal-footer">
-              <button className="btn-cancel" onClick={() => setShowCreateFolderModal(false)}>Cancel</button>
-              <button className="btn-create" onClick={handleCreateFolder}>Create</button>
+              <button
+                className="btn-cancel"
+                onClick={() => setShowCreateFolderModal(false)}
+              >
+                Cancel
+              </button>
+              <button className="btn-create" onClick={handleCreateFolder}>
+                Create
+              </button>
             </div>
           </div>
         </div>

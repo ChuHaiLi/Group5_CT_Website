@@ -58,9 +58,13 @@ export default function ProfilePage() {
   // Validate fields
   useEffect(() => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const emailValid = profileData.email.length === 0 || emailRegex.test(profileData.email);
-    const passwordValid = profileData.password.length === 0 || profileData.password.length >= 6;
-    const passwordsMatch = profileData.password.length === 0 || profileData.password === profileData.confirmPassword;
+    const emailValid =
+      profileData.email.length === 0 || emailRegex.test(profileData.email);
+    const passwordValid =
+      profileData.password.length === 0 || profileData.password.length >= 6;
+    const passwordsMatch =
+      profileData.password.length === 0 ||
+      profileData.password === profileData.confirmPassword;
 
     setValidation({
       emailValid,
@@ -162,19 +166,19 @@ export default function ProfilePage() {
     async (avatarDataUrl) => {
       if (!avatarDataUrl) return;
       setUploadingAvatar(true);
-      
+
       try {
-        const { data } = await API.put("/profile", { avatarUrl: avatarDataUrl });
-        
+        await API.put("/profile", { avatarUrl: avatarDataUrl });
+
         setProfileData((prev) => ({
           ...prev,
           avatarUrl: avatarDataUrl,
           password: "",
           confirmPassword: "",
         }));
-        
+
         setAvatarPreview(avatarDataUrl);
-        
+
         const updatedProfile = {
           ...profileData,
           avatarUrl: avatarDataUrl,
@@ -182,7 +186,7 @@ export default function ProfilePage() {
           confirmPassword: "",
         };
         localStorage.setItem("wonder-profile", JSON.stringify(updatedProfile));
-        
+
         broadcastProfile(
           {
             id: userId,
@@ -193,9 +197,8 @@ export default function ProfilePage() {
           },
           true
         );
-        
+
         alert("✅ Avatar has been updated!");
-        
       } catch (error) {
         console.error("Avatar upload failed", error);
         alert("⚠️ Unable to load avatar. Please try again.");
@@ -212,7 +215,7 @@ export default function ProfilePage() {
   };
 
   const handleBlur = (field) => {
-    setTouched(prev => ({ ...prev, [field]: true }));
+    setTouched((prev) => ({ ...prev, [field]: true }));
   };
 
   const handleAvatarChange = (event) => {
@@ -259,12 +262,20 @@ export default function ProfilePage() {
       return;
     }
 
-    if (profileData.password && profileData.password.trim() && !validation.passwordValid) {
+    if (
+      profileData.password &&
+      profileData.password.trim() &&
+      !validation.passwordValid
+    ) {
       alert("Password must be at least 6 characters.");
       return;
     }
 
-    if (profileData.password && profileData.password.trim() && !validation.passwordsMatch) {
+    if (
+      profileData.password &&
+      profileData.password.trim() &&
+      !validation.passwordsMatch
+    ) {
       alert("Mật khẩu và xác nhận mật khẩu không khớp.");
       return;
     }
@@ -295,9 +306,9 @@ export default function ProfilePage() {
 
       setProfileData(updatedProfile);
       setAvatarPreview(updatedProfile.avatarUrl);
-      
+
       localStorage.setItem("wonder-profile", JSON.stringify(updatedProfile));
-      
+
       broadcastProfile(
         {
           id: userId,
@@ -315,12 +326,11 @@ export default function ProfilePage() {
         password: false,
         confirmPassword: false,
       });
-      
+
       alert("✅ Profile updated successfully!");
-      
     } catch (error) {
       console.error("Update profile error:", error);
-      
+
       const apiErrors = error.response?.data?.errors;
       if (apiErrors) {
         const errorMessages = Object.entries(apiErrors)
@@ -415,51 +425,59 @@ export default function ProfilePage() {
 
           <label className="form-field">
             <span className="form-field__label">Email</span>
-            <div style={{ position: 'relative' }}>
+            <div style={{ position: "relative" }}>
               <input
                 id="email"
                 name="email"
                 type="email"
                 value={profileData.email}
                 onChange={handleInputChange}
-                onBlur={() => handleBlur('email')}
+                onBlur={() => handleBlur("email")}
                 placeholder="john.doe@example.com"
                 style={{
-                  borderColor: touched.email 
-                    ? (validation.emailValid ? '#4CAF50' : '#f44336')
-                    : '#ddd',
-                  paddingRight: touched.email ? '40px' : '12px'
+                  borderColor: touched.email
+                    ? validation.emailValid
+                      ? "#4CAF50"
+                      : "#f44336"
+                    : "#ddd",
+                  paddingRight: touched.email ? "40px" : "12px",
                 }}
               />
               {touched.email && profileData.email.length > 0 && (
-                <span style={{ 
-                  position: 'absolute', 
-                  right: '12px', 
-                  top: '50%', 
-                  transform: 'translateY(-50%)',
-                  fontSize: '18px'
-                }}>
+                <span
+                  style={{
+                    position: "absolute",
+                    right: "12px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    fontSize: "18px",
+                  }}
+                >
                   {validation.emailValid ? (
-                    <FaCheckCircle style={{ color: '#4CAF50' }} />
+                    <FaCheckCircle style={{ color: "#4CAF50" }} />
                   ) : (
-                    <FaTimesCircle style={{ color: '#f44336' }} />
+                    <FaTimesCircle style={{ color: "#f44336" }} />
                   )}
                 </span>
               )}
             </div>
-            {touched.email && !validation.emailValid && profileData.email.length > 0 && (
-              <p style={{ 
-                color: '#f44336', 
-                fontSize: '12px', 
-                marginTop: '5px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}>
-                <FaTimesCircle />
-                Please enter a valid email address
-              </p>
-            )}
+            {touched.email &&
+              !validation.emailValid &&
+              profileData.email.length > 0 && (
+                <p
+                  style={{
+                    color: "#f44336",
+                    fontSize: "12px",
+                    marginTop: "5px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                  }}
+                >
+                  <FaTimesCircle />
+                  Please enter a valid email address
+                </p>
+              )}
           </label>
 
           <label className="form-field">
@@ -474,104 +492,135 @@ export default function ProfilePage() {
           </label>
 
           <label className="form-field">
-            <span className="form-field__label">Password (leave blank to keep current)</span>
-            <div style={{ position: 'relative' }}>
+            <span className="form-field__label">
+              Password (leave blank to keep current)
+            </span>
+            <div style={{ position: "relative" }}>
               <input
                 id="password"
                 name="password"
                 type="password"
                 value={profileData.password}
                 onChange={handleInputChange}
-                onBlur={() => handleBlur('password')}
+                onBlur={() => handleBlur("password")}
                 placeholder="••••••••"
                 style={{
-                  borderColor: touched.password && profileData.password.length > 0
-                    ? (validation.passwordValid ? '#4CAF50' : '#f44336')
-                    : '#ddd'
+                  borderColor:
+                    touched.password && profileData.password.length > 0
+                      ? validation.passwordValid
+                        ? "#4CAF50"
+                        : "#f44336"
+                      : "#ddd",
                 }}
               />
             </div>
-            {touched.password && !validation.passwordValid && profileData.password.length > 0 && (
-              <p style={{ 
-                color: '#f44336', 
-                fontSize: '12px', 
-                marginTop: '5px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}>
-                <FaTimesCircle />
-                Password must be at least 6 characters
-              </p>
-            )}
+            {touched.password &&
+              !validation.passwordValid &&
+              profileData.password.length > 0 && (
+                <p
+                  style={{
+                    color: "#f44336",
+                    fontSize: "12px",
+                    marginTop: "5px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                  }}
+                >
+                  <FaTimesCircle />
+                  Password must be at least 6 characters
+                </p>
+              )}
           </label>
 
           <label className="form-field">
             <span className="form-field__label">Confirm Password</span>
-            <div style={{ position: 'relative' }}>
+            <div style={{ position: "relative" }}>
               <input
                 id="confirmPassword"
                 name="confirmPassword"
                 type="password"
                 value={profileData.confirmPassword}
                 onChange={handleInputChange}
-                onBlur={() => handleBlur('confirmPassword')}
+                onBlur={() => handleBlur("confirmPassword")}
                 placeholder="••••••••"
                 style={{
-                  borderColor: touched.confirmPassword && profileData.confirmPassword.length > 0
-                    ? (validation.passwordsMatch ? '#4CAF50' : '#f44336')
-                    : '#ddd'
+                  borderColor:
+                    touched.confirmPassword &&
+                    profileData.confirmPassword.length > 0
+                      ? validation.passwordsMatch
+                        ? "#4CAF50"
+                        : "#f44336"
+                      : "#ddd",
                 }}
               />
             </div>
-            {touched.confirmPassword && !validation.passwordsMatch && profileData.confirmPassword.length > 0 && (
-              <p style={{ 
-                color: '#f44336', 
-                fontSize: '12px', 
-                marginTop: '5px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}>
-                <FaTimesCircle />
-                Passwords do not match
-              </p>
-            )}
+            {touched.confirmPassword &&
+              !validation.passwordsMatch &&
+              profileData.confirmPassword.length > 0 && (
+                <p
+                  style={{
+                    color: "#f44336",
+                    fontSize: "12px",
+                    marginTop: "5px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                  }}
+                >
+                  <FaTimesCircle />
+                  Passwords do not match
+                </p>
+              )}
           </label>
 
           {/* Password Strength Indicator */}
           {profileData.password.length > 0 && (
-            <div style={{ 
-              marginBottom: '15px', 
-              fontSize: '12px',
-              padding: '10px',
-              background: '#f5f5f5',
-              borderRadius: '8px'
-            }}>
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '6px', 
-                marginBottom: '4px' 
-              }}>
+            <div
+              style={{
+                marginBottom: "15px",
+                fontSize: "12px",
+                padding: "10px",
+                background: "#f5f5f5",
+                borderRadius: "8px",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  marginBottom: "4px",
+                }}
+              >
                 {validation.passwordValid ? (
-                  <FaCheckCircle style={{ color: '#4CAF50' }} />
+                  <FaCheckCircle style={{ color: "#4CAF50" }} />
                 ) : (
-                  <FaTimesCircle style={{ color: '#f44336' }} />
+                  <FaTimesCircle style={{ color: "#f44336" }} />
                 )}
-                <span style={{ color: validation.passwordValid ? '#4CAF50' : '#666' }}>
+                <span
+                  style={{
+                    color: validation.passwordValid ? "#4CAF50" : "#666",
+                  }}
+                >
                   At least 6 characters
                 </span>
               </div>
-              
+
               {profileData.confirmPassword.length > 0 && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "6px" }}
+                >
                   {validation.passwordsMatch ? (
-                    <FaCheckCircle style={{ color: '#4CAF50' }} />
+                    <FaCheckCircle style={{ color: "#4CAF50" }} />
                   ) : (
-                    <FaTimesCircle style={{ color: '#f44336' }} />
+                    <FaTimesCircle style={{ color: "#f44336" }} />
                   )}
-                  <span style={{ color: validation.passwordsMatch ? '#4CAF50' : '#666' }}>
+                  <span
+                    style={{
+                      color: validation.passwordsMatch ? "#4CAF50" : "#666",
+                    }}
+                  >
                     Passwords match
                   </span>
                 </div>
@@ -582,7 +631,12 @@ export default function ProfilePage() {
           <button
             type="submit"
             className="primary-button"
-            disabled={savingProfile || !validation.emailValid || (profileData.password.length > 0 && (!validation.passwordValid || !validation.passwordsMatch))}
+            disabled={
+              savingProfile ||
+              !validation.emailValid ||
+              (profileData.password.length > 0 &&
+                (!validation.passwordValid || !validation.passwordsMatch))
+            }
           >
             {savingProfile ? "Saving..." : "Save Changes"}
           </button>

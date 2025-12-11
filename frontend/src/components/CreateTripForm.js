@@ -52,7 +52,11 @@ const normalizeProvince = (input, provinceList) => {
   return null;
 };
 
-export default function CreateTripForm({ initialDestination = null, onClose, onTripCreated }) {
+export default function CreateTripForm({
+  initialDestination = null,
+  onClose,
+  onTripCreated,
+}) {
   // --- Form state ---
   const [tripName, setTripName] = useState("");
   const [duration, setDuration] = useState("");
@@ -72,7 +76,6 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
 
   // --- Search logic (now only used for filtering preview) ---
   const [searchTerm, setSearchTerm] = useState("");
-  const searchTimer = useRef(null);
 
   // --- Preview destinations (right column) ---
   const [previewDestinations, setPreviewDestinations] = useState([]);
@@ -88,7 +91,12 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
   // Options
   const durationOptions = ["1-3 days", "4-7 days", "8-14 days", "15+ days"];
   const peopleOptions = ["1 person", "2-4 people", "5-10 people", "10+ people"];
-  const budgetOptions = ["< 5 triệu", "5-10 triệu", "10-20 triệu", "> 20 triệu"];
+  const budgetOptions = [
+    "< 5 triệu",
+    "5-10 triệu",
+    "10-20 triệu",
+    "> 20 triệu",
+  ];
 
   // =============================================
   // Disable body scroll + custom scroll routing
@@ -106,7 +114,6 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
       if (!container || !left || !right) return;
 
       const containerRect = container.getBoundingClientRect();
-      const leftRect = left.getBoundingClientRect();
       const rightRect = right.getBoundingClientRect();
 
       // Nếu chuột nằm trong modal -> chặn scroll trang
@@ -121,18 +128,16 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
         // Nếu chuột đang nằm trong vùng right preview
         if (
           e.clientX > rightRect.left &&
-          e.clientX < rightRect.right &&   // BỔ SUNG QUAN TRỌNG
+          e.clientX < rightRect.right && // BỔ SUNG QUAN TRỌNG
           e.clientY > rightRect.top &&
           e.clientY < rightRect.bottom
         ) {
           right.scrollTop += e.deltaY;
-        }
-        else {
+        } else {
           left.scrollTop += e.deltaY;
         }
       }
     };
-
 
     // Lắng nghe wheel
     window.addEventListener("wheel", handleWheel, { passive: false });
@@ -170,7 +175,12 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
           res.data.forEach((region, regionIdx) => {
             if (Array.isArray(region.provinces)) {
               region.provinces.forEach((p, idx) => {
-                const idStr = String(p.id ?? p.province_id ?? p.province_name ?? `prov-${regionIdx}-${idx}`);
+                const idStr = String(
+                  p.id ??
+                    p.province_id ??
+                    p.province_name ??
+                    `prov-${regionIdx}-${idx}`
+                );
                 provinces.push({
                   id: idStr,
                   name: p.province_name || p.name || "Unknown",
@@ -196,7 +206,12 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
     if (!initialDestination || vietnamLocations.length === 0) return;
     if (initialLoaded.current) return;
 
-    const { id: destId, name: destName, province_id, province_name } = initialDestination;
+    const {
+      id: destId,
+      name: destName,
+      province_id,
+      province_name,
+    } = initialDestination;
 
     // Try match by id
     if (province_id != null) {
@@ -204,7 +219,14 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
       const match = vietnamLocations.find((p) => String(p.id) === provIdStr);
       if (match) {
         setSelectedProvince({ id: match.id, name: match.name });
-        setMustIncludeDetails([{ id: destId, name: destName, province_id: province_id, province_name: match.name }]);
+        setMustIncludeDetails([
+          {
+            id: destId,
+            name: destName,
+            province_id: province_id,
+            province_name: match.name,
+          },
+        ]);
         if (!tripName) setTripName(`Khám phá ${destName}`);
         initialLoaded.current = true;
         return;
@@ -213,14 +235,22 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
 
     // Try match by numeric id
     const numericTry = Number(province_id);
-    if (Number.isFinite(numericTry)) {   // <-- fix: numericTry, not numericId
+    if (Number.isFinite(numericTry)) {
+      // <-- fix: numericTry, not numericId
       const matchNum = vietnamLocations.find((p) => {
         const pid = Number(p.id);
         return Number.isFinite(pid) && pid === numericTry;
       });
       if (matchNum) {
         setSelectedProvince({ id: matchNum.id, name: matchNum.name });
-        setMustIncludeDetails([{ id: destId, name: destName, province_id: numericTry, province_name: matchNum.name }]);
+        setMustIncludeDetails([
+          {
+            id: destId,
+            name: destName,
+            province_id: numericTry,
+            province_name: matchNum.name,
+          },
+        ]);
         if (!tripName) setTripName(`Khám phá ${destName}`);
         initialLoaded.current = true;
         return;
@@ -233,7 +263,14 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
       if (matchByName) {
         setSelectedProvince({ id: matchByName.id, name: matchByName.name });
         const pid = Number(matchByName.id);
-        setMustIncludeDetails([{ id: destId, name: destName, province_id: Number.isFinite(pid) ? pid : matchByName.id, province_name: matchByName.name }]);
+        setMustIncludeDetails([
+          {
+            id: destId,
+            name: destName,
+            province_id: Number.isFinite(pid) ? pid : matchByName.id,
+            province_name: matchByName.name,
+          },
+        ]);
         if (!tripName) setTripName(`Khám phá ${destName}`);
         initialLoaded.current = true;
         return;
@@ -257,7 +294,9 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
 
     // ⭐ Sử dụng thuật toán search của ExplorePage
     const provinceName = selectedProvince.name.trim();
-    const queryUrl = `/destinations?search=${encodeURIComponent(provinceName)}&top=20`;
+    const queryUrl = `/destinations?search=${encodeURIComponent(
+      provinceName
+    )}&top=20`;
 
     console.log(">>> Fetching destinations with:", queryUrl);
 
@@ -312,7 +351,9 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
       prev.filter((d) => {
         const dPid = d.province_id != null ? String(d.province_id) : "";
         const foundId = String(found.id);
-        const pnameMatch = d.province_name ? normalize(d.province_name) === normalize(found.name) : false;
+        const pnameMatch = d.province_name
+          ? normalize(d.province_name) === normalize(found.name)
+          : false;
         return dPid === foundId || pnameMatch;
       })
     );
@@ -328,7 +369,9 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
 
     const placePid = place.province_id != null ? String(place.province_id) : "";
     const selectedPid = String(selectedProvince.id);
-    const nameMatch = place.province_name ? normalize(place.province_name) === normalize(selectedProvince.name) : false;
+    const nameMatch = place.province_name
+      ? normalize(place.province_name) === normalize(selectedProvince.name)
+      : false;
     const placeBelongs = placePid === selectedPid || nameMatch;
 
     if (!placeBelongs) {
@@ -343,7 +386,12 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
 
     setMustIncludeDetails((prev) => [
       ...prev,
-      { id: place.id, name: place.name, province_id: place.province_id, province_name: place.province_name },
+      {
+        id: place.id,
+        name: place.name,
+        province_id: place.province_id,
+        province_name: place.province_name,
+      },
     ]);
     toast.success(`Đã thêm ${place.name}`);
     // setSearchTerm("");
@@ -351,7 +399,9 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
   };
 
   const removePlace = (placeId) => {
-    setMustIncludeDetails((prev) => prev.filter((d) => String(d.id) !== String(placeId)));
+    setMustIncludeDetails((prev) =>
+      prev.filter((d) => String(d.id) !== String(placeId))
+    );
   };
 
   const handleViewDetails = (place) => {
@@ -389,12 +439,18 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
       return;
     }
 
-    const loadingToast = toast.info("Đang tạo lộ trình...", { autoClose: false });
+    const loadingToast = toast.info("Đang tạo lộ trình...", {
+      autoClose: false,
+    });
 
     // FIXED: Always send province_id or province_name
     let provinceData = {};
     const provinceIdNum = Number(selectedProvince.id);
-    if (selectedProvince.id && Number.isFinite(provinceIdNum) && provinceIdNum > 0) {
+    if (
+      selectedProvince.id &&
+      Number.isFinite(provinceIdNum) &&
+      provinceIdNum > 0
+    ) {
       provinceData.province_id = provinceIdNum;
     } else if (selectedProvince.name) {
       provinceData.province_name = selectedProvince.name.trim();
@@ -419,9 +475,12 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
       .then((res) => {
         const created = res.data?.trip || res.data;
         toast.dismiss(loadingToast);
-        toast.success(`Chuyến đi "${created?.name ?? payload.name}" đã tạo thành công!`, {
-          autoClose: 3000,
-        });
+        toast.success(
+          `Chuyến đi "${created?.name ?? payload.name}" đã tạo thành công!`,
+          {
+            autoClose: 3000,
+          }
+        );
         if (onTripCreated) onTripCreated(created);
         if (onClose) onClose();
       })
@@ -458,7 +517,9 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
 
             {/* Province select */}
             <div className="province-select-group input-group">
-              <label><FaGlobe /> Select Main Province (Trip Focus)</label>
+              <label>
+                <FaGlobe /> Select Main Province (Trip Focus)
+              </label>
               {isProvinceLoading ? (
                 <p className="loading-text">Loading provinces...</p>
               ) : (
@@ -476,32 +537,47 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
                   ))}
                 </select>
               )}
-              <p className="hint-text">Chọn tỉnh/thành chính để hệ thống gợi ý lịch trình tự động.</p>
+              <p className="hint-text">
+                Chọn tỉnh/thành chính để hệ thống gợi ý lịch trình tự động.
+              </p>
             </div>
 
             {/* Summary */}
             <div className="destination-summary-group input-group">
-              <label><FaMapMarkerAlt /> Trip Summary</label>
+              <label>
+                <FaMapMarkerAlt /> Trip Summary
+              </label>
               <div className="summary-box">
                 <div className="main-province-info">
                   <strong>Main Destination:</strong>{" "}
                   {selectedProvince ? (
-                    <span className="main-province-tag">{selectedProvince.name}</span>
+                    <span className="main-province-tag">
+                      {selectedProvince.name}
+                    </span>
                   ) : (
                     <span className="warning-text">Province not yet set.</span>
                   )}
                 </div>
 
                 <div className="must-include-list">
-                  <span className="must-include-label">Must-Include Places ({mustIncludeDetails.length}):</span>
+                  <span className="must-include-label">
+                    Must-Include Places ({mustIncludeDetails.length}):
+                  </span>
                   <div className="destination-list">
                     {mustIncludeDetails.map((dest) => (
                       <span key={dest.id} className="destination-item">
                         {dest.name}
-                        <button type="button" onClick={() => removePlace(dest.id)}>×</button>
+                        <button
+                          type="button"
+                          onClick={() => removePlace(dest.id)}
+                        >
+                          ×
+                        </button>
                       </span>
                     ))}
-                    {mustIncludeDetails.length === 0 && <p className="hint-text">No priority places selected.</p>}
+                    {mustIncludeDetails.length === 0 && (
+                      <p className="hint-text">No priority places selected.</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -510,7 +586,9 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
             {/* Options */}
             <div className="options-group">
               <div className="option-card">
-                <label><FaClock /> Duration (Sets Trip Days)</label>
+                <label>
+                  <FaClock /> Duration (Sets Trip Days)
+                </label>
                 <div className="option-pills">
                   {durationOptions.map((opt) => (
                     <button
@@ -526,7 +604,9 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
               </div>
 
               <div className="option-card">
-                <label><FaUser /> People</label>
+                <label>
+                  <FaUser /> People
+                </label>
                 <div className="option-pills">
                   {peopleOptions.map((opt) => (
                     <button
@@ -542,7 +622,9 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
               </div>
 
               <div className="option-card">
-                <label><FaMoneyBillWave /> Budget</label>
+                <label>
+                  <FaMoneyBillWave /> Budget
+                </label>
                 <div className="option-pills">
                   {budgetOptions.map((opt) => (
                     <button
@@ -563,7 +645,11 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
               <button type="submit" disabled={!selectedProvince || !duration}>
                 Generate & Create Trip
               </button>
-              <button type="button" onClick={() => onClose && onClose()} className="cancel-btn">
+              <button
+                type="button"
+                onClick={() => onClose && onClose()}
+                className="cancel-btn"
+              >
                 Cancel
               </button>
             </div>
@@ -574,7 +660,9 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
         <div className="destinations-preview">
           <h3 className="dark">
             <FaMapMarkerAlt />
-            {selectedProvince ? `Destinations in ${selectedProvince.name}` : "Select a Province"}
+            {selectedProvince
+              ? `Destinations in ${selectedProvince.name}`
+              : "Select a Province"}
           </h3>
 
           {/* Search box in right column */}
@@ -608,38 +696,46 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
             </div>
           )}
 
-          {selectedProvince && !isLoadingPreview && previewDestinations.length === 0 && (
-            <div className="empty-preview">
-              <p>No destinations found in {selectedProvince.name}</p>
-            </div>
-          )}
-
-          {selectedProvince && !isLoadingPreview && previewDestinations.length > 0 && (() => {
-            // Filter destinations based on search term
-            const filteredDestinations = searchTerm.trim().length > 0
-              ? previewDestinations.filter((dest) =>
-                normalize(dest.name).includes(normalize(searchTerm.trim()))
-              )
-              : previewDestinations;
-
-            return filteredDestinations.length > 0 ? (
-              <div className="preview-grid">
-                {filteredDestinations.map((dest) => (
-                  <RecommendCard
-                    key={dest.id}
-                    destination={dest}
-                    mode="select"
-                    onSelectPlace={() => addPlaceToMustInclude(dest)}
-                    onViewDetails={() => handleViewDetails(dest)}
-                  />
-                ))}
-              </div>
-            ) : (
+          {selectedProvince &&
+            !isLoadingPreview &&
+            previewDestinations.length === 0 && (
               <div className="empty-preview">
-                <p>No destinations match "{searchTerm}"</p>
+                <p>No destinations found in {selectedProvince.name}</p>
               </div>
-            );
-          })()}
+            )}
+
+          {selectedProvince &&
+            !isLoadingPreview &&
+            previewDestinations.length > 0 &&
+            (() => {
+              // Filter destinations based on search term
+              const filteredDestinations =
+                searchTerm.trim().length > 0
+                  ? previewDestinations.filter((dest) =>
+                      normalize(dest.name).includes(
+                        normalize(searchTerm.trim())
+                      )
+                    )
+                  : previewDestinations;
+
+              return filteredDestinations.length > 0 ? (
+                <div className="preview-grid">
+                  {filteredDestinations.map((dest) => (
+                    <RecommendCard
+                      key={dest.id}
+                      destination={dest}
+                      mode="select"
+                      onSelectPlace={() => addPlaceToMustInclude(dest)}
+                      onViewDetails={() => handleViewDetails(dest)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="empty-preview">
+                  <p>No destinations match "{searchTerm}"</p>
+                </div>
+              );
+            })()}
         </div>
       </div>
 
@@ -651,9 +747,12 @@ export default function CreateTripForm({ initialDestination = null, onClose, onT
               destination={placeToView}
               mode="select"
               onSelectPlace={() => handleSelectFromDetails(placeToView)}
-              onViewDetails={() => { }}
+              onViewDetails={() => {}}
             />
-            <button className="close-details-btn" onClick={() => setIsDetailsModalOpen(false)}>
+            <button
+              className="close-details-btn"
+              onClick={() => setIsDetailsModalOpen(false)}
+            >
               <FaTimes /> Close
             </button>
           </div>
