@@ -1,51 +1,67 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-/* --- 1. GLOBAL LAYOUT --- */
+/* ==========================================================================
+   1. GLOBAL LAYOUT
+   ========================================================================== */
 .explore-container {
-  padding: 2rem 20px; /* Padding 2 bên an toàn */
+  padding: 2rem 20px;
   background: #fcfcfc;
   min-height: 100vh;
   font-family: "Inter", sans-serif;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  align-items: center; /* Căn giữa trục dọc */
+  align-items: center;
+}
+
+.explore-header {
+  font-size: 2.5rem;
+  font-weight: 800;
+  text-align: center;
+  color: #111827;
+  margin-bottom: 2rem;
+  letter-spacing: -0.02em;
+  width: 100%;
+}
+
+.section-block {
+  width: 100%;
+  max-width: 1400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 /* ==========================================================================
-   2. SEARCH BAR & LOCATION FILTER (GIAO DIỆN PREMIUM)
+   2. SEARCH BAR & LOCATION FILTER
    ========================================================================== */
-
 .search-bar-container {
   width: 100%;
   display: flex;
   justify-content: center;
-  margin-bottom: 2.5rem; /* Tăng khoảng cách dưới một chút cho thoáng */
-  padding: 0 20px;
+  margin-bottom: 1.5rem;
 }
 
 .search-bar {
   display: flex;
   align-items: center;
   background: #ffffff;
-  padding: 6px; /* Padding nhỏ bao quanh */
+  padding: 6px;
   width: 100%;
   max-width: 850px;
   border-radius: 50px;
   border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* Bóng đổ mềm mại hơn */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
-  height: 64px; /* Tăng chiều cao một chút cho sang */
+  height: 64px;
 }
 
-/* Hiệu ứng nổi lên khi gõ tìm kiếm */
 .search-bar:focus-within {
   transform: translateY(-2px);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
   border-color: #818cf8;
 }
 
-/* --- PHẦN TÌM KIẾM TÊN (TRÁI) --- */
 .search-input-wrapper {
   flex: 1.2;
   display: flex;
@@ -55,62 +71,46 @@
   height: 100%;
 }
 
-.search-icon { 
-  font-size: 1.25rem; 
-  color: #1e293b; /* Màu icon đậm hơn */
-  flex-shrink: 0;
-}
+.search-icon { font-size: 1.25rem; color: #1e293b; flex-shrink: 0; }
 
 .search-bar input {
   width: 100%;
   border: none;
   background: transparent;
-  font-size: 1.05rem; /* Chữ to hơn xíu */
+  font-size: 1.05rem;
   color: #0f172a;
   font-weight: 500;
   outline: none;
   height: 100%;
 }
 
-.search-bar input::placeholder {
-  color: #94a3b8;
-  font-weight: 400;
-}
+.search-bar input::placeholder { color: #94a3b8; font-weight: 400; }
 
-/* --- ĐƯỜNG KẺ DỌC NGĂN CÁCH --- */
 .search-divider {
   width: 1px;
-  height: 36px; /* Cao hơn */
+  height: 36px;
   background-color: #cbd5e1;
   margin: 0 4px;
 }
 
-/* --- PHẦN CHỌN TỈNH/THÀNH (PHẢI) - STYLE NÚT BẤM --- */
 .search-location-wrapper {
-  flex: 0.8; 
+  flex: 0.8;
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 0 24px 0 16px;
   height: 100%;
   cursor: pointer;
-  border-radius: 50px; 
-  transition: background-color 0.2s ease;
+  border-radius: 50px;
   position: relative;
-  /* Thêm màu nền nhẹ để tách biệt khu vực này */
   margin: 4px;
-  height: calc(100% - 8px); 
+  height: calc(100% - 8px);
 }
 
-/* Hiệu ứng hover xịn: Đổi màu nền rõ rệt */
-.search-location-wrapper:hover {
-  background-color: #f1f5f9; 
-}
+.search-location-wrapper:hover { background-color: #f1f5f9; }
 
-/* Hiệu ứng xoay icon khi hover */
-.search-location-wrapper:hover .globe-icon {
-  transform: rotate(15deg);
-}
+.globe-icon { color: #4f46e5; font-size: 1.2rem; }
+.search-location-wrapper:hover .globe-icon { transform: rotate(15deg); }
 
 .select-container {
   flex: 1;
@@ -122,25 +122,20 @@
 
 .location-select {
   width: 100%;
-  padding: 14px 16px;
-  height: 100%; 
+  height: 100%;
   border: none;
   background: transparent;
   font-size: 1rem;
   color: #1e293b;
-  font-weight: 600; /* Chữ đậm */
+  font-weight: 600;
   outline: none;
   cursor: pointer;
   appearance: none;
   -webkit-appearance: none;
-  padding-right: 25px; /* Chừa chỗ cho mũi tên */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  padding-right: 25px;
   z-index: 2;
 }
 
-/* Icon mũi tên */
 .select-arrow-icon {
   position: absolute;
   right: 0;
@@ -148,350 +143,403 @@
   font-size: 0.9rem;
   z-index: 1;
   pointer-events: none;
-  transition: transform 0.2s ease;
 }
 
-/* Xoay mũi tên khi hover */
-.search-location-wrapper:hover .select-arrow-icon {
-  color: #4f46e5; /* Mũi tên đổi màu xanh */
-  transform: rotate(180deg); /* Xoay ngược lên */
-}
+.search-location-wrapper:hover .select-arrow-icon { color: #4f46e5; transform: rotate(180deg); }
 
 /* ==========================================================================
-   3. CATEGORIES FILTER (CANH GIỮA MÀN HÌNH)
+   3. CATEGORIES FILTER (STICKY)
    ========================================================================== */
-
 .categories-row {
   display: flex;
   gap: 10px;
-  flex-wrap: wrap; 
-  overflow: visible !important;
-  
-  /* --- FIX: Căn trái nội dung thay vì căn giữa --- */
-  justify-content: flex-start; 
-  
-  /* --- FIX: Dùng Padding thay vì Margin để nền trắng vẫn phủ full màn hình --- */
-  /* Padding trái = Công thức căn lề của Header */
-  padding-left: max(20px, calc((100% - 1400px) / 2 + 40px));
-  padding-right: 20px;
-  padding-bottom: 1rem;
-  
-  margin-bottom: 0.5rem;
-  
-  /* --- FIX: Full width màn hình để nền dính (sticky) đẹp hơn --- */
+  flex-wrap: wrap;
+  justify-content: center;
   width: 100%;
-  max-width: 100%; /* Bỏ giới hạn 1400px ở container cha để background tràn viền */
-  
+  padding: 15px 20px;
   position: sticky;
   top: 0;
   z-index: 900;
   background: rgba(252, 252, 252, 0.95);
-  backdrop-filter: blur(8px);
-  padding-top: 15px;
-  padding-bottom: 15px;
+  backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  margin-bottom: 2rem;
-  
-  box-sizing: border-box; /* Quan trọng để không bị thừa scroll ngang */
+  margin-bottom: 1.5rem;
 }
 
-.categories-btn-highlight {
-  background: #e0e7ff; /* Màu xanh nhạt */
-  color: #4338ca;      /* Chữ xanh đậm */
-  border: 1px solid #c7d2fe; /* Viền nhẹ để nổi bật */
-  font-weight: 600;
-}
-
-.categories-row::-webkit-scrollbar { display: none; }
 .category-item { position: relative; z-index: 10; }
-.category-item.open { z-index: 1000; }
-
 .category-btn {
-  padding: 8px 15px;
+  padding: 8px 16px;
   border-radius: 30px;
-  border: 1px solid transparent;
-  background: #f3f4f6;
-  color: #374151;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #4b5563;
   cursor: pointer;
   font-weight: 600;
   font-size: 0.9rem;
-  display: flex; justify-content: space-between; align-items: center; gap: 8px;
-  transition: all 0.2s ease; white-space: nowrap;
+  display: flex; align-items: center; gap: 8px;
+  transition: all 0.2s ease;
 }
-.category-btn:hover { background: #e5e7eb; transform: translateY(-1px); }
-.category-btn.active { background: #e0e7ff; color: #4f46e5; }
+.category-btn:hover { background: #f8fafc; border-color: #cbd5e1; color: #1e293b; }
+.category-btn.active { background: #e0e7ff; color: #4f46e5; border-color: #c7d2fe; }
 .category-left { display: flex; align-items: center; gap: 6px; }
-.category-icon-bubble { display: none; } 
-.category-arrow { display: flex; align-items: center; font-size: 0.8rem; opacity: 0.5; }
+.active-count { font-size: 0.75rem; background: #4338ca; color: white; padding: 2px 6px; border-radius: 10px; margin-left: 4px; }
 
-/* Dropdown Menu */
+/* Dropdown */
 .tag-list-vertical {
   position: absolute !important;
-  top: calc(100% + 12px); /* Cách xa nút hơn một chút cho thoáng */
-  left: 50%; 
-  /* Trạng thái mặc định: Căn giữa theo chiều ngang */
-  transform: translateX(-50%); 
-  
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
   display: none;
   flex-direction: column;
   gap: 4px;
   background: #ffffff;
   border-radius: 16px;
-  padding: 10px;
-  
-  /* Bóng đổ mềm hơn */
-  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.2), 0 0 10px rgba(0,0,0,0.05);
-  
+  padding: 8px;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.15);
   z-index: 99999;
-  min-width: 240px;
+  min-width: 220px;
   max-height: 320px;
   overflow-y: auto;
-  border: 1px solid #f3f4f6;
-  
-  /* Giữ nguyên trạng thái transform sau khi animation kết thúc */
-  transform-origin: top center;
+  border: 1px solid #f1f5f9;
 }
-
-.tag-list-vertical.open {
-  display: flex !important;
-  /* Thêm forwards để giữ trạng thái cuối cùng của animation */
-  animation: dropdownFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
+.tag-list-vertical.open { display: flex !important; animation: dropdownFadeIn 0.2s ease forwards; }
 .tag-btn {
   padding: 10px 12px;
-  border-radius: 8px;
-  border: none;
-  background: transparent;
-  font-size: 0.9rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  transition: all 0.2s;
-  color: #4b5563;
-  width: 100%;
-  text-align: left;
+  border-radius: 8px; border: none; background: transparent;
+  font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 10px;
+  color: #4b5563; width: 100%; text-align: left;
 }
+.tag-btn:hover { background: #f9fafb; color: #111827; }
+.tag-btn.active { background: #eef2ff; color: #4f46e5; font-weight: 600; }
+.checkbox-circle { width: 16px; height: 16px; border-radius: 4px; border: 2px solid #d1d5db; }
+.tag-btn.active .checkbox-circle { background: #4f46e5; border-color: #4f46e5; }
 
-.tag-btn:hover {
-  background: #f9fafb;
-  color: #111827;
-}
-
-.tag-btn.active {
-  background: #eef2ff;
-  color: #4f46e5;
-  font-weight: 600;
-}
-
-.checkbox-circle {
-  width: 18px;
-  height: 18px;
-  border-radius: 6px;
-  border: 2px solid #d1d5db;
-  flex-shrink: 0;
-}
-
-.tag-btn.active .checkbox-circle {
-  background: #4f46e5;
-  border-color: #4f46e5;
-}
 /* ==========================================================================
-   4. SELECTED FILTERS (TAG ĐÃ CHỌN - CANH GIỮA)
+   4. QUICK QUESTIONS BAR (CẬP NHẬT: THANH CUỘN NGANG)
    ========================================================================== */
-.selected-tags-container {
-  display: flex; align-items: center; 
-  justify-content: center; /* Canh giữa */
-  gap: 1rem; margin-bottom: 2rem; padding: 0 20px;
-  width: 100%; max-width: 1400px;
+.quick-categories-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 3rem;
+  padding: 0 20px;
 }
-.selected-label { font-weight: 600; color: #6b7280; font-size: 0.9rem; }
-.selected-tags-list { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
-.selected-tag-chip {
-  display: flex; align-items: center; gap: 6px; padding: 6px 14px; 
-  background: #e0e7ff; color: #4338ca; border-radius: 20px;
-  font-size: 0.85rem; font-weight: 600;
-}
-.remove-tag-btn { background: transparent; border: none; color: #4338ca; cursor: pointer; font-size: 1rem; display: flex; opacity: 0.7; }
-.remove-tag-btn:hover { opacity: 1; }
 
-/* Nút Clear All trên thanh Filter - Style giống nút bên dưới */
-.clear-all-btn {
-  /* Màu sắc và nền */
-  background: #4f46e5; /* Màu xanh chủ đạo */
-  color: white;        /* Chữ trắng */
-  border: none;
+.quick-categories-scroll {
+  display: flex;
+  gap: 12px;
   
-  /* Hình dáng */
-  border-radius: 50px; /* Bo tròn hoàn toàn (viên thuốc) */
-  padding: 8px 20px;   /* Kích thước vừa phải */
+  /* --- THANH CUỘN --- */
+  width: 100%;
+  max-width: 1200px; /* Giới hạn chiều rộng để thanh cuộn đẹp */
+  overflow-x: auto;  /* Bật tính năng cuộn ngang */
   
-  /* Font chữ */
-  font-size: 0.9rem;
-  font-weight: 600;
-  text-decoration: none; /* Bỏ gạch chân cũ */
+  justify-content: flex-start; /* Nội dung bắt đầu từ trái sang */
+  padding: 5px 5px 15px 5px; /* Padding dưới để chứa thanh cuộn */
   
-  /* Căn chỉnh */
-  margin-left: 12px;
+  /* Tùy chỉnh thanh cuộn cho đẹp */
+  scrollbar-width: thin; /* Firefox: thanh cuộn mỏng */
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+/* Style thanh cuộn cho Chrome/Safari */
+.quick-categories-scroll::-webkit-scrollbar {
+  height: 6px; /* Chiều cao thanh ngang */
+}
+.quick-categories-scroll::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+.quick-categories-scroll::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 10px;
+}
+.quick-categories-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8;
+}
+
+.question-pill {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 50px;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  color: #475569;
   cursor: pointer;
-  
-  /* Hiệu ứng */
+  white-space: nowrap; /* Không xuống dòng */
+  font-weight: 500;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2); /* Đổ bóng nhẹ */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+  flex-shrink: 0; /* Không bị co nhỏ khi hết chỗ */
 }
 
-/* Hiệu ứng khi di chuột vào */
-.clear-all-btn:hover {
-  background: #4338ca; /* Đậm hơn chút */
-  color: white;
-  transform: translateY(-2px); /* Nổi lên nhẹ */
-  box-shadow: 0 6px 14px rgba(79, 70, 229, 0.3);
+.question-pill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  border-color: #cbd5e1; color: #1e293b;
 }
 
-/* Hiệu ứng khi bấm */
-.clear-all-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 5px rgba(79, 70, 229, 0.2);
+.question-pill.active {
+  background: #1e293b; color: #ffffff; border-color: #1e293b;
+  box-shadow: 0 4px 15px rgba(30, 41, 59, 0.3);
 }
 
 /* ==========================================================================
-   5. RESULTS GRID (CANH GIỮA MỌI THỨ)
+   5. RESULTS GRID (CẬP NHẬT: 3 CỘT/HÀNG)
    ========================================================================== */
 .recommend-header {
   font-size: 1.8rem; font-weight: 700;
   margin-top: 1rem; margin-bottom: 2rem;
-  color: #1f2937;
-  text-align: center; /* Canh giữa tiêu đề */
-  width: 100%; max-width: 1400px; padding: 0 20px;
+  color: #1f2937; text-align: center; width: 100%;
 }
 
 .explore-grid-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); 
-  gap: 30px; justify-content: center;
-  width: 100%; max-width: 1400px;
-  padding: 0 20px; margin-bottom: 3rem;
+  /* --- FIX CỐ ĐỊNH 3 CỘT --- */
+  grid-template-columns: repeat(3, 1fr); 
+  
+  gap: 32px;
+  justify-content: center;
+  width: 100%; 
+  max-width: 1200px; /* Chiều rộng tối đa vừa phải để 3 cột đẹp */
+  margin-bottom: 3rem;
 }
+
 .explore-grid-item { display: flex; justify-content: center; }
 
+/* Responsive Grid cho màn hình nhỏ */
+@media (max-width: 1024px) {
+  .explore-grid-container {
+    grid-template-columns: repeat(2, 1fr); /* Tablet: 2 cột */
+  }
+}
+
+@media (max-width: 768px) {
+  .explore-grid-container {
+    grid-template-columns: 1fr; /* Mobile: 1 cột */
+  }
+  
+  .search-bar { height: auto; flex-direction: column; border-radius: 20px; padding: 10px; }
+  .search-divider { display: none; }
+  .search-input-wrapper, .search-location-wrapper { width: 100%; padding: 10px; }
+}
+
 /* ==========================================================================
-   6. PAGINATION (CANH GIỮA)
+   6. PAGINATION & SELECTED TAGS
    ========================================================================== */
+.selected-tags-container {
+  display: flex; align-items: center; justify-content: center;
+  gap: 1rem; margin-bottom: 2rem; width: 100%;
+}
+.selected-tag-chip {
+  display: flex; align-items: center; gap: 6px; padding: 6px 14px; 
+  background: #e0e7ff; color: #4338ca; border-radius: 20px; font-size: 0.85rem; font-weight: 600;
+}
+.remove-tag-btn, .clear-all-btn { background: transparent; border: none; cursor: pointer; }
+.remove-tag-btn { color: #4338ca; } .clear-all-btn { color: #6b7280; text-decoration: underline; }
+
 .pagination-wrapper {
-  display: flex; justify-content: center; align-items: center;
-  gap: 12px; margin-top: 20px; margin-bottom: 60px;
-  width: 100%; max-width: 1400px;
+  display: flex; 
+  justify-content: center; 
+  align-items: center;
+  gap: 12px; 
+  margin-top: 30px; 
+  margin-bottom: 10px; 
+  width: 100%;
 }
+
 .pagination-scroll {
-  display: flex; gap: 8px; overflow-x: auto;
-  max-width: 400px; padding: 5px 2px; scrollbar-width: thin;
-}
-.pagination-btn, .pagination-number {
-  min-width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-  border-radius: 10px; border: 1px solid #e5e7eb; background: #fff; 
-  cursor: pointer; font-weight: 600; color: #374151; transition: all 0.2s;
-}
-.pagination-btn:hover:not(:disabled), .pagination-number:hover {
-  border-color: #6366f1; color: #6366f1; background: #f9fafb;
-}
-.pagination-number.active {
-  background: #111827; color: #fff; border-color: #111827; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-}
-.pagination-btn:disabled { opacity: 0.4; cursor: default; }
-
-@keyframes dropdownFadeIn {
-  from { 
-    opacity: 0; 
-    /* Bắt đầu: Vẫn căn giữa (-50%), nhưng dịch lên trên 10px (-10px) */
-    transform: translate(-50%, -10px) scale(0.95); 
-  }
-  to { 
-    opacity: 1; 
-    /* Kết thúc: Vẫn căn giữa (-50%), về vị trí gốc Y (0) */
-    transform: translate(-50%, 0) scale(1); 
-  }
+  display: flex; 
+  gap: 8px; 
+  
+  /* --- CẤU HÌNH THANH TRƯỢT (SCROLLBAR) --- */
+  overflow-x: auto;      /* Cho phép cuộn ngang */
+  max-width: 350px;      /* Giới hạn chiều rộng để thanh cuộn xuất hiện nếu nhiều trang */
+  padding: 5px 5px 12px 5px; /* Thêm padding dưới để chứa thanh cuộn */
+  
+  /* Style cho Firefox */
+  scrollbar-width: thin; 
+  scrollbar-color: #cbd5e1 transparent;
+  
+  /* Căn giữa các số */
+  align-items: center;
 }
 
-button, input, select, textarea {
-  font-family: "Inter", sans-serif !important;
+/* Style thanh cuộn cho Chrome/Safari/Edge */
+.pagination-scroll::-webkit-scrollbar {
+  height: 6px; /* Chiều cao thanh ngang */
 }
 
-.active-count {
-  font-size: 0.8rem;
-  margin-left: 4px;
-  background: #4338ca;
-  color: white;
-  padding: 1px 6px;
+.pagination-scroll::-webkit-scrollbar-track {
+  background: #f1f5f9;
   border-radius: 10px;
 }
 
-/* ==========================================================================
-   EMPTY STATE (TRẠNG THÁI TRỐNG)
-   ========================================================================== */
-
-.empty-state-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem 20px;
-  text-align: center;
-  width: 100%;
-  max-width: 600px; /* Giới hạn chiều rộng để chữ không bị dàn trải */
-  margin: 0 auto;
-  animation: fadeIn 0.5s ease;
-}
-
-/* Hình minh họa */
-.empty-state-img {
-  width: 180px; /* Kích thước vừa phải */
-  height: auto;
-  margin-bottom: 1.5rem;
-  opacity: 0.8; /* Làm mờ nhẹ để không quá chói */
-}
-
-/* Tiêu đề lớn */
-.empty-state-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #111827;
-  margin-bottom: 0.5rem;
-}
-
-/* Dòng mô tả */
-.empty-state-desc {
-  font-size: 1rem;
-  color: #6b7280;
-  margin-bottom: 2rem;
-  line-height: 1.6;
-}
-
-/* Nút Clear Filters (Hành động chính) */
-.empty-state-btn {
-  padding: 12px 24px;
-  background: #4f46e5; /* Màu xanh chủ đạo */
-  color: white;
-  border: none;
-  border-radius: 50px; /* Bo tròn hoàn toàn */
-  font-weight: 600;
-  font-size: 1rem;
+.pagination-scroll::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1; /* Màu thanh trượt */
+  border-radius: 10px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); /* Đổ bóng đẹp */
 }
 
-.empty-state-btn:hover {
-  background: #4338ca;
+.pagination-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8; /* Màu khi di chuột vào */
+}
+
+/* Style nút Prev/Next và Số trang */
+.pagination-btn, .pagination-number {
+  min-width: 40px; 
+  height: 40px; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  border-radius: 10px; 
+  border: 1px solid #e5e7eb; 
+  background: #fff; 
+  cursor: pointer;
+  font-weight: 600; 
+  color: #374151; 
+  transition: all 0.2s;
+  
+  /* Đảm bảo nút không bị co méo khi nằm trong flex */
+  flex-shrink: 0; 
+}
+
+.pagination-btn:hover:not(:disabled), .pagination-number:hover {
+  border-color: #6366f1; 
+  color: #6366f1; 
+  background: #f9fafb;
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
-.empty-state-btn:active {
-  transform: translateY(0);
+.pagination-number.active {
+  background: #111827; 
+  color: #fff; 
+  border-color: #111827;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+.pagination-btn:disabled { 
+  opacity: 0.4; 
+  cursor: default; 
+  background: #f3f4f6;
+  transform: none;
+}
+/* ==========================================================================
+   7. SECTIONS & EMPTY STATE
+   ========================================================================== */
+.section-divider-line {
+  width: 80%; height: 1px;
+  background: linear-gradient(to right, transparent, #e2e8f0, transparent);
+  margin: 2rem auto;
+}
+.section-header-center { text-align: center; margin-bottom: 2.5rem; }
+.section-header-center h2 { font-size: 2.2rem; color: #1e293b; margin-bottom: 0.5rem; font-weight: 800; }
+.section-header-center p { font-size: 1.1rem; color: #64748b; }
+
+.trending-scroll-container {
+  display: flex; gap: 24px; overflow-x: auto;
+  padding: 10px 5px 20px 5px; scroll-snap-type: x mandatory; justify-content: flex-start;
+}
+.trending-card-wrapper { min-width: 320px; scroll-snap-align: start; }
+
+.region-cards-grid {
+  display: grid;
+  /* Cố định 3 cột trên màn hình lớn */
+  grid-template-columns: repeat(3, 1fr); 
+  gap: 30px;
+  justify-content: center;
+  width: 100%;
+}
+
+.region-card {
+  height: 450px; /* Tăng chiều cao cho ấn tượng */
+  border-radius: 24px;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  background-size: cover;
+  background-position: center;
+}
+
+.region-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+.region-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.1), transparent);
+  transition: opacity 0.3s;
+}
+
+.region-content {
+  position: absolute;
+  bottom: 40px;
+  left: 30px;
+  color: white;
+  z-index: 2;
+  text-align: left;
+}
+
+.region-content h3 {
+  font-size: 2.2rem;
+  margin: 0 0 12px 0;
+  font-weight: 800;
+  text-shadow: 0 4px 10px rgba(0,0,0,0.4);
+}
+
+.region-content span {
+  font-size: 1.1rem;
+  font-weight: 600;
+  background: rgba(255,255,255,0.2);
+  padding: 8px 16px;
+  border-radius: 30px;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255,255,255,0.4);
+}
+
+/* Ảnh nền chất lượng cao (Unsplash) */
+.card-north {
+  background-image: url('https://images.unsplash.com/photo-1506665531195-3566af2b4dfa?q=80&w=2670&auto=format&fit=crop'); /* Hạ Long Bay - Rất nét */
+}
+.card-central {
+  background-image: url('https://image.vietgoing.com/destination/2024/1_20240105143218.jpg'); /* Hội An */
+}
+.card-south {
+  background-image: url('https://dulichhaugiang.com.vn/wp-content/uploads/2025/07/hinh-anh-mien-tay-1.jpg'); /* Miền Tây sông nước - Rất nét */
+}
+
+/* Responsive cho Tablet & Mobile */
+@media (max-width: 1024px) {
+  .region-cards-grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 cột trên Tablet */
+  }
+}
+
+@media (max-width: 768px) {
+  .region-cards-grid {
+    grid-template-columns: 1fr; /* 1 cột trên Mobile */
+  }
+  .region-card { height: 300px; }
+}
+
+.region-content span {
+  font-size: 1.1rem; font-weight: 500; background: rgba(255,255,255,0.2);
+  padding: 6px 12px; border-radius: 20px; backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.3);
+}
+
+.empty-state-container { display: flex; flex-direction: column; align-items: center; padding: 4rem 20px; text-align: center; }
+.empty-state-img { width: 180px; opacity: 0.8; margin-bottom: 1.5rem; }
+.empty-state-btn {
+  padding: 12px 24px; background: #4f46e5; color: white; border: none;
+  border-radius: 50px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+}
+@keyframes dropdownFadeIn {
+  from { opacity: 0; transform: translate(-50%, -10px) scale(0.95); }
+  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
 }
