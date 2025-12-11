@@ -24,6 +24,27 @@ export default function EditTripPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiResult, setAiResult] = useState(null);
+  const [showAIModal, setShowAIModal] = useState(false);
+
+  // Summarize raw AI response for user-friendly display (English)
+  const summarizeRaw = (raw) => {
+    if (!raw) return "No response from AI.";
+    try {
+      const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+      if (parsed && typeof parsed === "object") {
+        if (parsed.message) return String(parsed.message);
+        if (parsed.error) return String(parsed.error);
+        // If object has keys, return a short fixed message
+        return "AI returned an error. Please try again or check logs.";
+      }
+    } catch (e) {
+      // Not JSON — fall through
+    }
+    const text = String(raw);
+    return text.length > 300 ? text.slice(0, 300) + "..." : text;
+  };
 
   const flattenItinerary = (apiItinerary) => {
     let uniqueIdCounter = 0;
@@ -220,6 +241,92 @@ export default function EditTripPage() {
     }
   };
 
+  // --- AI evaluate handler ---
+  const handleAIEvaluate = async () => {
+    if (!tripData) return;
+    setAiLoading(true);
+    setAiResult(null);
+    setShowAIModal(false);
+    try {
+      const payload = {
+        original_itinerary: restoreItinerary(originalItinerary),
+        edited_itinerary: restoreItinerary(itinerary),
+        context: { tripId: tripId, tripName: tripData?.name || null },
+      };
+      const res = await axios.post("/api/ai/evaluate_itinerary", payload, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` },
+      });
+      if (res.data && res.data.ok) {
+        setAiResult(res.data.result);
+      } else if (res.data && res.data.result) {
+        setAiResult(res.data.result);
+      } else {
+        const raw =
+          res.data && res.data.error ? res.data.error : "No response from AI";
+        setAiResult({
+          raw: typeof raw === "string" ? raw : JSON.stringify(raw, null, 2),
+        });
+      }
+      setShowAIModal(true);
+    } catch (err) {
+      console.error("AI evaluate error", err);
+      const respData = err?.response?.data;
+      const rawErr = respData
+        ? typeof respData === "string"
+          ? respData
+          : JSON.stringify(respData, null, 2)
+        : err.message || String(err);
+      setAiResult({ raw: rawErr });
+      setShowAIModal(true);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  // --- AI reorder handler: ask backend to produce a suggested ordering and apply it to UI
+  const handleAIReorder = async () => {
+    if (!tripData) return;
+    setAiLoading(true);
+    try {
+      const payload = {
+        original_itinerary: restoreItinerary(originalItinerary),
+        edited_itinerary: restoreItinerary(itinerary),
+        context: { tripId: tripId, tripName: tripData?.name || null },
+      };
+
+      const res = await axios.post("/api/ai/reorder_itinerary", payload, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` },
+      });
+
+      if (res.data && res.data.ok && res.data.result) {
+        const suggested =
+          res.data.result.suggested_itinerary || res.data.result;
+        if (Array.isArray(suggested) && suggested.length > 0) {
+          const flattened = flattenItinerary(suggested);
+          setItinerary(flattened);
+          setShowAIModal(false);
+          alert("AI suggested reorder has been applied to the itinerary.");
+        } else if (res.data.result && res.data.result.raw) {
+          alert(summarizeRaw(res.data.result.raw));
+        } else {
+          alert("AI did not return a valid suggested itinerary.");
+        }
+      } else if (res.data && res.data.result && res.data.result.raw) {
+        alert(summarizeRaw(res.data.result.raw));
+      } else {
+        alert("Error: unable to get AI suggestion.");
+      }
+    } catch (err) {
+      console.error("AI reorder error", err);
+      const msg = err?.response?.data
+        ? JSON.stringify(err.response.data)
+        : err.message || String(err);
+      alert("AI reorder failed: " + (msg || "Unknown error"));
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   // --- RENDER ---
   if (isLoading && !tripData) {
     return (
@@ -244,9 +351,19 @@ export default function EditTripPage() {
         <h1 className="trip-title">
           ✏️ Chỉnh sửa: {tripData?.name || "Loading"}
         </h1>
-        <button onClick={handleSave} className="save-btn" disabled={isSaving}>
-          <FaSave /> {isSaving ? "Đang lưu..." : "Lưu Thay Đổi"}
-        </button>
+        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+          <button onClick={handleSave} className="save-btn" disabled={isSaving}>
+            <FaSave /> {isSaving ? "Đang lưu..." : "Lưu Thay Đổi"}
+          </button>
+          <button
+            type="button"
+            className="ai-evaluate-btn"
+            onClick={handleAIEvaluate}
+            disabled={aiLoading}
+          >
+            {aiLoading ? "Reviewing..." : "AI Review"}
+          </button>
+        </div>
       </div>
 
       {/* Main Content: 2 Columns */}
@@ -364,6 +481,242 @@ export default function EditTripPage() {
           </DragDropContext>
         </div>
       </div>
+      {/* AI Result Modal */}
+      {showAIModal && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0,0,0,0.45)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+            padding: 16,
+          }}
+          className="ai-modal-backdrop"
+        >
+          <div
+            style={{
+              background: "#fff",
+              borderRadius: 8,
+              maxWidth: 940,
+              width: "100%",
+              maxHeight: "85vh",
+              overflow: "auto",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+            }}
+            className="ai-modal"
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: "12px 16px",
+                borderBottom: "1px solid #eee",
+              }}
+            >
+              <h3 style={{ margin: 0 }}>AI Evaluation</h3>
+            </div>
+
+            <div style={{ padding: 16 }} className="ai-modal-body">
+              {aiResult ? (
+                aiResult.raw || typeof aiResult === "string" ? (
+                  <div
+                    style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
+                  >
+                    <strong>Message:</strong>
+                    <div style={{ marginTop: 8 }}>
+                      {summarizeRaw(aiResult.raw || aiResult)}
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ overflowX: "auto" }}>
+                    <table
+                      style={{ width: "100%", borderCollapse: "collapse" }}
+                    >
+                      <tbody>
+                        <tr>
+                          <th
+                            style={{
+                              textAlign: "left",
+                              padding: 8,
+                              borderBottom: "1px solid #eee",
+                              width: 180,
+                            }}
+                          >
+                            Score
+                          </th>
+                          <td
+                            style={{
+                              padding: 8,
+                              borderBottom: "1px solid #eee",
+                            }}
+                          >
+                            {aiResult.score ?? "-"}
+                          </td>
+                        </tr>
+                        <tr>
+                          <th
+                            style={{
+                              textAlign: "left",
+                              padding: 8,
+                              borderBottom: "1px solid #eee",
+                            }}
+                          >
+                            Decision
+                          </th>
+                          <td
+                            style={{
+                              padding: 8,
+                              borderBottom: "1px solid #eee",
+                            }}
+                          >
+                            {aiResult.decision ?? "-"}
+                          </td>
+                        </tr>
+                        <tr>
+                          <th
+                            style={{
+                              textAlign: "left",
+                              padding: 8,
+                              borderBottom: "1px solid #eee",
+                            }}
+                          >
+                            Summary
+                          </th>
+                          <td
+                            style={{
+                              padding: 8,
+                              borderBottom: "1px solid #eee",
+                            }}
+                          >
+                            {aiResult.summary ?? "-"}
+                          </td>
+                        </tr>
+                        <tr>
+                          <th
+                            style={{
+                              textAlign: "left",
+                              padding: 8,
+                              borderBottom: "1px solid #eee",
+                            }}
+                          >
+                            Suggestions
+                          </th>
+                          <td
+                            style={{
+                              padding: 8,
+                              borderBottom: "1px solid #eee",
+                            }}
+                          >
+                            {Array.isArray(aiResult.suggestions) ? (
+                              <ul style={{ margin: 0, paddingLeft: 18 }}>
+                                {aiResult.suggestions.map((s, i) => (
+                                  <li key={i} style={{ marginBottom: 6 }}>
+                                    {s}
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              aiResult.suggestions ?? "-"
+                            )}
+                          </td>
+                        </tr>
+                        {aiResult.details &&
+                          typeof aiResult.details === "object" && (
+                            <tr>
+                              <th
+                                style={{
+                                  textAlign: "left",
+                                  padding: 8,
+                                  verticalAlign: "top",
+                                }}
+                              >
+                                Details (per-day)
+                              </th>
+                              <td style={{ padding: 8 }}>
+                                {Object.keys(aiResult.details).length === 0 ? (
+                                  "-"
+                                ) : (
+                                  <div style={{ display: "grid", gap: 8 }}>
+                                    {Object.entries(aiResult.details).map(
+                                      ([dayKey, notes]) => (
+                                        <div
+                                          key={dayKey}
+                                          style={{
+                                            border: "1px solid #f0f0f0",
+                                            padding: 8,
+                                            borderRadius: 6,
+                                          }}
+                                        >
+                                          <strong>{dayKey}</strong>
+                                          <div style={{ marginTop: 6 }}>
+                                            {Array.isArray(notes) ? (
+                                              <ul
+                                                style={{
+                                                  margin: 0,
+                                                  paddingLeft: 18,
+                                                }}
+                                              >
+                                                {notes.map((n, idx) => (
+                                                  <li key={idx}>{n}</li>
+                                                ))}
+                                              </ul>
+                                            ) : (
+                                              <div>{String(notes)}</div>
+                                            )}
+                                          </div>
+                                        </div>
+                                      )
+                                    )}
+                                  </div>
+                                )}
+                              </td>
+                            </tr>
+                          )}
+                      </tbody>
+                    </table>
+                  </div>
+                )
+              ) : (
+                <p>No result.</p>
+              )}
+            </div>
+
+            <div
+              style={{
+                padding: 12,
+                borderTop: "1px solid #eee",
+                textAlign: "right",
+              }}
+              className="ai-modal-footer"
+            >
+              <button
+                onClick={handleAIReorder}
+                className="apply-btn"
+                disabled={aiLoading}
+                style={{
+                  padding: "8px 14px",
+                  cursor: "pointer",
+                  marginRight: 8,
+                }}
+              >
+                {aiLoading ? "Applying..." : "Apply AI Reorder"}
+              </button>
+
+              <button
+                onClick={() => setShowAIModal(false)}
+                className="close-btn"
+                style={{ padding: "8px 14px", cursor: "pointer" }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -22,6 +22,7 @@ import random
 from flask import request, jsonify
 from unidecode import unidecode
 from routes.auth import auth_bp
+from utils.openai_client import OpenAIChatClient
 
 from dotenv import load_dotenv
 import smtplib  
@@ -131,6 +132,118 @@ def get_card_image_url(destination):
     return None # Trả về None nếu không có ảnh nào hợp lệ tìm thấy
 
 # ----------------- Routes -----------------
+
+# ----------------- AI Evaluation Route -----------------
+@app.route("/api/ai/evaluate_itinerary", methods=["POST"])
+def evaluate_itinerary():
+    """
+    Accepts JSON: { original_itinerary: [...], edited_itinerary: [...], context?: {...} }
+    Returns AI evaluation as structured JSON or a text summary.
+    """
+    payload = request.get_json() or {}
+    original = payload.get("original_itinerary")
+    edited = payload.get("edited_itinerary")
+    context = payload.get("context") or {}
+
+    if original is None or edited is None:
+        return jsonify({"error": "original_itinerary and edited_itinerary are required"}), 400
+
+    # Prepare prompts (Vietnamese) asking for a concise JSON response
+    system_prompt = (
+        "Bạn là một trợ lý AI chuyên phân tích lịch trình du lịch. "
+        "So sánh hai lịch trình: 'original' (bản gốc) và 'edited' (bản đang chỉnh sửa). "
+        "Đánh giá những thay đổi theo các tiêu chí: an toàn, thời gian hợp lý, tính khả thi, tối ưu tuyến đi, và trải nghiệm tổng thể. "
+        "Trả về một JSON với cấu trúc:\n"
+        "{\n  \"score\": number (0-100),\n  \"summary\": string,\n  \"suggestions\": [string],\n  \"decision\": \"accept\" | \"revise\" | \"reject\",\n  \"details\": { ... optional per-day notes ... }\n}\n"
+        "Chỉ trả về JSON thuần túy, không thêm giải thích thừa. Nếu không thể trả về JSON, trả về trường 'raw' cùng văn bản."    
+    )
+
+    user_content = f"Original itinerary:\n{json.dumps(original, ensure_ascii=False, indent=2)}\n\nEdited itinerary:\n{json.dumps(edited, ensure_ascii=False, indent=2)}\n\nContext:\n{json.dumps(context, ensure_ascii=False)}"
+
+    ai = OpenAIChatClient()
+    try:
+        reply = ai.generate_reply([
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_content},
+        ])
+
+        # Try parse JSON
+        try:
+            parsed = json.loads(reply)
+            return jsonify({"ok": True, "result": parsed})
+        except Exception:
+            return jsonify({"ok": True, "result": {"raw": reply}})
+
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+@app.route('/api/locations', methods=['GET'])
+def api_locations():
+    """Return deduplicated list of locations discovered in backend data files.
+
+    Useful for client-side classifier or autocomplete to prioritize database lookup
+    before falling back to AI.
+    """
+    try:
+        locs = load_locations()
+        return jsonify({"ok": True, "locations": locs})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+# ----------------- AI Reorder Route -----------------
+@app.route("/api/ai/reorder_itinerary", methods=["POST"])
+def reorder_itinerary():
+    """
+    Accepts JSON: { original_itinerary: [...], edited_itinerary: [...], context?: {...} }
+    Returns suggested_itinerary as structured JSON where only ordering of places may be changed.
+    """
+    payload = request.get_json() or {}
+    original = payload.get("original_itinerary")
+    edited = payload.get("edited_itinerary")
+    context = payload.get("context") or {}
+
+    if original is None or edited is None:
+        return jsonify({"error": "original_itinerary and edited_itinerary are required"}), 400
+
+    system_prompt = (
+        "You are an AI assistant that reorders itinerary items for better flow. "
+        "Given an 'original' itinerary and an 'edited' itinerary, produce a JSON object with a single key 'suggested_itinerary'. "
+        "The value should be an array of day objects {\n  \"day\": number_or_string,\n  \"places\": [ { name, id?(optional), category?(optional), time_slot?(optional) } ]\n}. "
+        "Do NOT add or remove places; only reorder them to optimize travel time and experience. "
+        "Preserve place names and include any ids when possible. Return only valid JSON — no extra explanation. "
+    )
+
+    user_content = (
+        f"Original itinerary:\n{json.dumps(original, ensure_ascii=False, indent=2)}\n\n"
+        f"Edited itinerary:\n{json.dumps(edited, ensure_ascii=False, indent=2)}\n\n"
+        f"Context:\n{json.dumps(context, ensure_ascii=False)}"
+    )
+
+    ai = OpenAIChatClient()
+    try:
+        reply = ai.generate_reply([
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_content},
+        ])
+
+        try:
+            parsed = json.loads(reply)
+            # Expecting parsed like { "suggested_itinerary": [...] }
+            if isinstance(parsed, dict) and "suggested_itinerary" in parsed:
+                return jsonify({"ok": True, "result": parsed})
+            else:
+                # Wrap into suggested_itinerary if top-level array returned
+                if isinstance(parsed, list):
+                    return jsonify({"ok": True, "result": {"suggested_itinerary": parsed}})
+                return jsonify({"ok": True, "result": {"raw": reply}})
+        except Exception:
+            return jsonify({"ok": True, "result": {"raw": reply}})
+
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
 
 # -------- EMAIL FUNCTION --------
 def send_email(to_email, subject, html_content):
