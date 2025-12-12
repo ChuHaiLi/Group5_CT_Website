@@ -173,7 +173,7 @@ def seed_database():
         return
 
     with app.app_context():
-        
+        db.create_all()
         for region_data in data:
             region_name = region_data.get("region_name")
             if not region_name:
