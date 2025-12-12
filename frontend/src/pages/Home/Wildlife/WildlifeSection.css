@@ -1,4 +1,4 @@
-.relaxation-section {
+.wildlife-section {
   width: 100%;
   max-width: 1400px;
   margin: 0rem auto 3rem;
@@ -7,17 +7,17 @@
   transform-origin: center top;
 }
 
-.relaxation-header {
+.wildlife-header {
   text-align: center;
   margin-bottom: 2.5rem;
-    transform: scale(1.2);
+  transform: scale(1.2);
   transform-origin: center top;
 }
 
-.relaxation-title {
+.wildlife-title {
   font-size: 2.5rem;
   font-weight: 900;
-  background: linear-gradient(135deg, #06b6d4 0%, #20ebd0 50%, #15bcea 100%);
+  background: linear-gradient(135deg, #16a34a 0%, #22c55e 50%, #84cc16 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -30,35 +30,35 @@
   padding-bottom: 8px;
 }
 
-.relaxation-title::after {
+.wildlife-title::after {
   content: '';
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
   height: 4px;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    #26d3f2e4 20%, 
-    #0891b2 50%, 
-    #3dbadd 80%, 
+  background: linear-gradient(90deg,
+    transparent 0%,
+    #22c55ee4 20%,
+    #16a34a 50%,
+    #84cc16 80%,
     transparent 100%
   );
   border-radius: 2px;
 }
 
-.relaxation-subtitle {
+.wildlife-subtitle {
   font-size: 1.1rem;
   color: #6b7280;
   font-weight: 400;
 }
 
-.relaxation-slider-wrapper {
+.wildlife-slider-wrapper {
   position: relative;
   width: 100%;
 }
 
-.relaxation-slider {
+.wildlife-slider {
   display: flex;
   gap: 30px;
   overflow-x: auto;
@@ -68,17 +68,17 @@
   -ms-overflow-style: none;
 }
 
-.relaxation-slider::-webkit-scrollbar {
+.wildlife-slider::-webkit-scrollbar {
   display: none;
 }
 
-.relaxation-card-wrapper {
+.wildlife-card-wrapper {
   flex: 0 0 auto;
   width: 340px;
 }
 
 /* Navigation Buttons */
-.slider-nav-btn {
+.wildlife-section .slider-nav-btn {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
@@ -98,81 +98,81 @@
   font-size: 1.2rem;
 }
 
-.slider-nav-btn:hover {
+.wildlife-section .slider-nav-btn:hover {
   background: #fff;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-  color: #4f46e5;
+  color: #16a34a;
   transform: translateY(-50%) scale(1.05);
 }
 
-.slider-nav-btn:active {
+.wildlife-section .slider-nav-btn:active {
   transform: translateY(-50%) scale(0.95);
 }
 
-.slider-nav-left {
+.wildlife-section .slider-nav-left {
   left: -20px;
 }
 
-.slider-nav-right {
+.wildlife-section .slider-nav-right {
   right: -20px;
 }
 
 /* View More Button */
-.relaxation-view-more {
+.wildlife-view-more {
   display: flex;
   justify-content: center;
   margin-top: 2rem;
 }
 
-.view-more-btn {
+.wildlife-section .view-more-btn {
   padding: 14px 96px;
   background: transparent;
-  color: #4f46e5;
-  border: 2px solid #4f46e5;
+  color: #16a34a;
+  border: 2px solid #16a34a;
   border-radius: 50px;
   font-weight: 800;
   font-size: 1.15rem;
-  letter-spacing: 1px; /* Dãn chữ */
+  letter-spacing: 1px;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: none;
   font-family: "Inter", sans-serif;
 }
 
-.view-more-btn:hover {
-  background: linear-gradient(135deg, #667eea 0%, #14fbff 20%, #764ba2 100%);
+.wildlife-section .view-more-btn:hover {
+  background: linear-gradient(135deg, #28d868 0%, #30c477 20%, #2de737 90%, #0caa0f 100%);
   color: white;
   border: 2px solid transparent;
   transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 8px 20px rgba(34, 197, 94, 0.4);
   letter-spacing: 1.5px;
 }
 
-.view-more-btn:active {
+.wildlife-section .view-more-btn:active {
   transform: translateY(0);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
 }
 
 /* Ẩn icon save (tim) */
-.relaxation-card-wrapper .save-icon {
+.wildlife-card-wrapper .save-icon {
   display: none !important;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .relaxation-title {
+  .wildlife-title {
     font-size: 1.6rem;
   }
 
-  .relaxation-subtitle {
+  .wildlife-subtitle {
     font-size: 1rem;
   }
 
-  .slider-nav-btn {
+  .wildlife-section .slider-nav-btn {
     display: none;
   }
 
-  .relaxation-card-wrapper {
+  .wildlife-card-wrapper {
     width: 300px;
   }
 }
