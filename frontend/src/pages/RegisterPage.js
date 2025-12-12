@@ -36,6 +36,7 @@ export default function RegisterPage({ setIsAuthenticated }) {
 });
 
   const [validation, setValidation] = useState({
+    usernameValid: false,
     emailValid: false,
     passwordValid: false,
     passwordsMatch: false,
@@ -46,6 +47,7 @@ export default function RegisterPage({ setIsAuthenticated }) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     
     setValidation({
+      usernameValid: form.username.length >= 3,
       emailValid: emailRegex.test(form.email),
       passwordValid: form.password.length >= 6,
       passwordsMatch: form.password.length > 0 && form.password === form.confirm,
@@ -61,6 +63,7 @@ export default function RegisterPage({ setIsAuthenticated }) {
 
   // Mark all fields as touched - BỎ username
   setTouched({
+    username: true,
     email: true,
     password: true,
     confirm: true,
@@ -68,6 +71,11 @@ export default function RegisterPage({ setIsAuthenticated }) {
 
   if (!form.username || !form.email || !form.password || !form.confirm) {
     toast.error("Please fill in all fields");
+    return;
+  }
+
+  if (!validation.usernameValid) {
+    toast.error("Username must be at least 3 characters");
     return;
   }
 
@@ -158,10 +166,48 @@ export default function RegisterPage({ setIsAuthenticated }) {
               placeholder="Username"
               value={form.username}
               onChange={(e) => setForm({ ...form, username: e.target.value })}
+              onBlur={() => handleBlur('username')} 
               required
               autoComplete="username"
+              style={{
+                borderColor: touched.username 
+                  ? (validation.usernameValid ? '#4CAF50' : '#f44336')
+                  : '#ddd'
+              }}
             />
+            {touched.username && form.username.length > 0 && (  // ← THÊM
+              <span style={{ 
+                position: 'absolute', 
+                right: '15px', 
+                top: '50%', 
+                transform: 'translateY(-50%)',
+                fontSize: '18px'
+              }}>
+                {validation.usernameValid ? (
+                  <FaCheckCircle style={{ color: '#4CAF50' }} />
+                ) : (
+                  <FaTimesCircle style={{ color: '#f44336' }} />
+                )}
+              </span>
+            )}
           </div>
+
+          {/* Error message cho username */}
+            {touched.username && !validation.usernameValid && form.username.length > 0 && (
+              <p style={{ 
+                color: '#f44336', 
+                fontSize: '12px', 
+                marginTop: '-10px', 
+                marginBottom: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}>
+                <FaTimesCircle />
+                Username must be at least 3 characters
+              </p>
+            )}
+
 
           {/* Email */}
           <div className="input-group">
@@ -332,16 +378,16 @@ export default function RegisterPage({ setIsAuthenticated }) {
             </div>
           )}
 
-          <button 
-              type="submit" 
-              disabled={loading || !validation.emailValid || !validation.passwordValid || !validation.passwordsMatch}
-              style={{
-                opacity: (loading || !validation.emailValid || !validation.passwordValid || !validation.passwordsMatch) ? 0.6 : 1,
-                cursor: (loading || !validation.emailValid || !validation.passwordValid || !validation.passwordsMatch) ? 'not-allowed' : 'pointer'
-              }}
-            >
-              {loading ? "Creating account..." : "Begin Adventure"}
-            </button>
+            <button 
+            type="submit" 
+            disabled={loading || !validation.usernameValid || !validation.emailValid || !validation.passwordValid || !validation.passwordsMatch}
+            style={{
+              opacity: (loading || !validation.usernameValid || !validation.emailValid || !validation.passwordValid || !validation.passwordsMatch) ? 0.6 : 1,
+              cursor: (loading || !validation.usernameValid || !validation.emailValid || !validation.passwordValid || !validation.passwordsMatch) ? 'not-allowed' : 'pointer'
+            }}
+          >
+            {loading ? "Creating account..." : "Begin Adventure"}
+          </button>
         </form>
 
         <div className="auth-divider">
