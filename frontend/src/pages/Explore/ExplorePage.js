@@ -16,6 +16,8 @@ import RecommendCard from "../Home/Recommendations/RecommendCard";
 import CreateTripForm from "../../components/CreateTripForm";
 import DestinationModal from "../../components/DestinationModal";
 
+import { useLocation } from "react-router-dom";
+
 import "./ExplorePage.css";
 
 // --- QUICK QUESTIONS ---
@@ -114,7 +116,28 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
   const [vietnamLocations, setVietnamLocations] = useState([]);
   const [selectedProvinceId, setSelectedProvinceId] = useState("");
 
-  // --- API ---
+  const location = useLocation();
+
+  // Thêm useEffect để xử lý preSelectedTags từ navigation
+  useEffect(() => {
+    if (location.state?.preSelectedTags) {
+      const tagsToSelect = location.state.preSelectedTags;
+      setSelectedTags((prev) => {
+        const newTags = [...prev];
+        tagsToSelect.forEach((tag) => {
+          if (!newTags.includes(tag)) {
+            newTags.push(tag);
+          }
+        });
+        return newTags;
+      });
+      
+      // Clear state sau khi đã xử lý để tránh re-trigger
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
+
+  // --- CALL API ---
   useEffect(() => {
     API.get("/destinations")
       .then((res) => {
