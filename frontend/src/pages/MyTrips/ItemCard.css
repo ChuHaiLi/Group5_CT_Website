@@ -1,0 +1,194 @@
+/* ItemCard.css - Modern Card Design */
+
+.item-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 12px;
+    border: 2px solid #e2e8f0;
+    margin-bottom: 0.75rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.item-card:hover {
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    transform: translateY(-2px);
+}
+
+.item-card.dragging {
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+    transform: rotate(3deg) scale(1.05);
+    opacity: 0.9;
+}
+
+/* ============ DRAG HANDLE ============ */
+.drag-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    cursor: grab;
+    font-size: 1.25rem;
+    padding: 0.5rem;
+    transition: color 0.2s ease;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.drag-handle:hover {
+    color: #667eea;
+}
+
+/* ============ ITEM ICON ============ */
+.item-icon {
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border-radius: 12px;
+    flex-shrink: 0;
+}
+
+/* ============ CONTENT SECTION ============ */
+.item-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.time-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.time-icon {
+    color: #667eea;
+    font-size: 0.875rem;
+}
+
+.time-input {
+    width: 130px;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #475569;
+    transition: all 0.2s ease;
+}
+
+.time-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.name-input {
+    width: 90%;
+    padding: 0.75rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e293b;
+    transition: all 0.2s ease;
+}
+
+.name-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.category-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 6px;
+    width: fit-content;
+}
+
+/* ============ DELETE BUTTON ============ */
+.delete-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: #fee2e2;
+    color: #dc2626;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.delete-btn:hover {
+    background: #fecaca;
+    transform: scale(1.1);
+}
+
+.delete-btn:active {
+    transform: scale(0.95);
+}
+
+/* ============ THEME VARIATIONS ============ */
+.item-card.theme-lunch {
+    border-left: 4px solid #fbbf24;
+}
+
+.item-card.theme-lunch .item-icon {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+}
+
+.item-card.theme-travel {
+    border-left: 4px solid #34d399;
+}
+
+.item-card.theme-travel .item-icon {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+}
+
+.item-card.theme-default {
+    border-left: 4px solid #667eea;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 768px) {
+    .item-card {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .drag-handle {
+        align-self: center;
+    }
+
+    .item-icon {
+        align-self: center;
+    }
+
+    .time-input {
+        width: 100%;
+    }
+
+    .delete-btn {
+        width: 100%;
+    }
+}

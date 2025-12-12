@@ -8,6 +8,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import "react-toastify/dist/ReactToastify.css";
 
 import Navbar from "./components/Navbar/Navbar";
@@ -21,12 +22,17 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
-
+import VerifyEmailPage from "./pages/VerifyEmailPage";
+import VerifyEmailChangePage from "./pages/VerifyEmailChangePage";
+import EditTripPage from './pages/MyTrips/EditTripPage';
 import API from "./untils/axios";
 import ChatWidget from "./components/ChatWidget/ChatWidget";
 import Footer from "./components/Footer/Footer";
 import { PageContext } from "./context/PageContext";
+import HowItWorksPanel from "./components/HowItWorks/HowItWorksPanel";
 import "./App.css";
+
+const GOOGLE_CLIENT_ID = "202417590292-ia2puaea18ige9bg43kng9a2oq5i6ktk.apps.googleusercontent.com";
 
 // ------------------- PrivateRoute -------------------
 function PrivateRoute({ isAuthenticated, children }) {
@@ -59,16 +65,16 @@ function getDefaultContext(pathname) {
 function AppContent() {
   const location = useLocation();
 
-  // Ẩn navbar ở các trang auth
   const hideNavbar = [
     "/login",
     "/register",
     "/reset-password",
     "/forgot-password",
+    "/verify-email",
   ].includes(location.pathname);
 
   const [checkingAuth, setCheckingAuth] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(null); // null = chưa check
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [savedIds, setSavedIds] = useState(new Set());
   const [pageContext, setPageContext] = useState(
     getDefaultContext(location.pathname)
@@ -78,7 +84,7 @@ function AppContent() {
     setPageContext(getDefaultContext(location.pathname));
   }, [location.pathname]);
 
-  // Check authentication on app load
+  // ✅ Check authentication on app load
   useEffect(() => {
     const accessToken = localStorage.getItem("access_token");
     if (!accessToken) {
@@ -92,10 +98,32 @@ function AppContent() {
       .catch(() => {
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
+        localStorage.removeItem("user");
         setIsAuthenticated(false);
       })
       .finally(() => setCheckingAuth(false));
   }, []);
+
+  // ✅ Listen for authentication changes (for verify email flow)
+  useEffect(() => {
+    const handleAuthChange = () => {
+      const token = localStorage.getItem("access_token");
+      if (token && !isAuthenticated) {
+        // Token có mà chưa authenticated -> verify lại
+        API.get("/auth/me")
+          .then(() => setIsAuthenticated(true))
+          .catch(() => {
+            localStorage.removeItem("access_token");
+            localStorage.removeItem("refresh_token");
+            localStorage.removeItem("user");
+            setIsAuthenticated(false);
+          });
+      }
+    };
+
+    window.addEventListener('authChange', handleAuthChange);
+    return () => window.removeEventListener('authChange', handleAuthChange);
+  }, [isAuthenticated]);
 
   // Fetch saved destinations khi đã xác thực
   useEffect(() => {
@@ -148,7 +176,7 @@ function AppContent() {
   return (
     <PageContext.Provider value={{ pageContext, setPageContext }}>
       {!hideNavbar && <Navbar />}
-
+      {!hideNavbar && <HowItWorksPanel />}
       <div className={`page-wrapper ${!hideNavbar ? "with-navbar" : ""}`}>
         <Routes>
           {/* Public routes */}
@@ -156,11 +184,20 @@ function AppContent() {
             path="/login"
             element={<LoginPage setIsAuthenticated={setIsAuthenticated} />}
           />
-          <Route path="/register" element={<RegisterPage />} />
+          <Route 
+            path="/register" 
+            element={<RegisterPage setIsAuthenticated={setIsAuthenticated} />} 
+          />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
-
-          {/* "/" route: điều hướng theo trạng thái đăng nhập */}
+          
+          {/* ✅ FIX: Truyền setIsAuthenticated vào VerifyEmailPage */}
+          <Route 
+            path="/verify-email" 
+            element={<VerifyEmailPage setIsAuthenticated={setIsAuthenticated} />} 
+          />
+          
+          {/* "/" route */}
           <Route
             path="/"
             element={
@@ -185,6 +222,8 @@ function AppContent() {
             }
           />
 
+          <Route path="/verify-email-change" element={<VerifyEmailChangePage />} />
+          <Route path="/profile" element={<ProfilePage />} />
           <Route
             path="/explore"
             element={
@@ -207,13 +246,22 @@ function AppContent() {
           />
 
           <Route
-            path="/trips/:tripId" // Lưu ý: Đường dẫn này phải khớp với hàm navigate trong MyTripsPage.jsx
-            element={
-              <PrivateRoute isAuthenticated={isAuthenticated}>
-                <TripDetailsPage /> 
-              </PrivateRoute>
-            }
-          />
+            path="/trips/:tripId"
+            element={
+              <PrivateRoute isAuthenticated={isAuthenticated}>
+                <TripDetailsPage />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/trips/:tripId/edit"
+            element={
+              <PrivateRoute isAuthenticated={isAuthenticated}>
+                <EditTripPage />
+              </PrivateRoute>
+            }
+          />
 
           <Route
             path="/profile"
@@ -240,8 +288,19 @@ function AppContent() {
 
       {!hideNavbar && <Footer />}
 
-      <ChatWidget isAuthenticated={isAuthenticated} pageContext={pageContext} />
-      <ToastContainer position="top-right" autoClose={3000} theme="light" />
+      {!hideNavbar && (
+        <ChatWidget isAuthenticated={isAuthenticated} pageContext={pageContext} />
+      )}
+      <ToastContainer 
+        position="top-right" 
+        autoClose={3000} 
+        theme="light"
+        closeButton={true}
+        hideProgressBar={false}
+        closeOnClick={true}
+        pauseOnHover={true}
+        draggable={true}
+      />
     </PageContext.Provider>
   );
 }
@@ -249,8 +308,10 @@ function AppContent() {
 // ------------------- App -------------------
 export default function App() {
   return (
-    <Router>
-      <AppContent />
-    </Router>
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <Router>
+        <AppContent />
+      </Router>
+    </GoogleOAuthProvider>
   );
 }

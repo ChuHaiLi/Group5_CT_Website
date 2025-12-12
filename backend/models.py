@@ -38,19 +38,54 @@ class Province(db.Model):
 # -------------------------------------------------------------
 
 class User(db.Model):
-    __tablename__ = 'users' # <-- GIỮ LẠI: Đồng bộ với khóa ngoại
+    __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
+    tagline = db.Column(db.String(50), default="#VN", nullable=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False, index=True)  
+    phone = db.Column(db.String(30), nullable=True)
     password = db.Column(db.String(200), nullable=False)
-    is_email_verified = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    reset_token = db.Column(db.String(200), nullable=True)
+    avatar_url = db.Column(db.String(255), nullable=True)
     
+    # Google OAuth fields
+    google_id = db.Column(db.String(100), unique=True, nullable=True, index=True)
+    name = db.Column(db.String(100), nullable=True)  # Full name from Google
+    picture = db.Column(db.String(255), nullable=True)  # Google profile picture
+
+    # Email verification
+    is_email_verified = db.Column(db.Boolean, default=False)
+    verification_token = db.Column(db.String(200), nullable=True)  
+    pending_email = db.Column(db.String(120), nullable=True)
+
+    # Password reset
+    reset_token = db.Column(db.String(200), nullable=True)
+    reset_token_expiry = db.Column(db.DateTime, nullable=True)  
+    
+    # Timestamps
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow) 
+    
+    # Relationships (giữ nguyên)
     saved_destinations = db.relationship("SavedDestination", backref="user", lazy=True)
     itineraries = db.relationship("Itinerary", back_populates="user", lazy=True)
     reviews = db.relationship("Review", backref="user", lazy=True)
     chat_sessions = db.relationship("ChatSession", backref="user", lazy=True)
+    
+    def __repr__(self):
+        return f'<User {self.username}>'
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'username': self.username,
+            'email': self.email,
+            'phone': self.phone,
+            'name': self.name,
+            'avatar_url': self.avatar_url,
+            'picture': self.picture,
+            'is_email_verified': self.is_email_verified,
+            'created_at': self.created_at.isoformat() if self.created_at else None
+        }
 
 class Destination(db.Model):
     __tablename__ = 'destinations' # <-- THÊM: Đồng bộ với khóa ngoại

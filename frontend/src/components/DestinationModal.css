@@ -180,8 +180,8 @@
 }
 
 .description-list {
-  list-style: none;
-  padding-left: 0;
+  list-style: disc;
+  padding-left: 20px;
 }
 
 .description-list li {
