@@ -84,6 +84,7 @@ export default function CreateTripForm({
   // --- Modal details ---
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [placeToView, setPlaceToView] = useState(null);
+  const [startDate, setStartDate] = useState("");
 
   // --- Init guard ---
   const initialLoaded = useRef(false);
@@ -433,6 +434,11 @@ export default function CreateTripForm({
       return;
     }
 
+    if (!startDate) {
+    toast.error("Vui lòng chọn ngày xuất phát.");
+    return;
+    }
+
     const durationDays = extractDurationDays(duration);
     if (durationDays === 0) {
       toast.error("Thời lượng không hợp lệ.");
@@ -464,6 +470,7 @@ export default function CreateTripForm({
       name: tripName.trim(),
       ...provinceData,
       duration: durationDays,
+      start_date: startDate,
       must_include_place_ids: mustIncludeDetails.map((d) => d.id),
       metadata: {
         people: peopleCount || null,
@@ -514,6 +521,20 @@ export default function CreateTripForm({
                 required
               />
             </div>
+
+            <div className="input-group date-select-group">
+            <label>
+              <FaClock /> Start Date
+            </label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="start-date-input"
+              required
+            />
+            <p className="hint-text">Chọn ngày bạn dự định bắt đầu chuyến đi.</p>
+          </div>
 
             {/* Province select */}
             <div className="province-select-group input-group">
