@@ -597,3 +597,25 @@
         font-size: 1.25rem;
     }
 }
+/* Trong TripDetailsPage.css */
+
+.status-badge {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.75em;
+    font-weight: 700;
+    color: white;
+    margin-left: 15px;
+    display: inline-block;
+    vertical-align: middle;
+    text-transform: uppercase;
+}
+.status-UPCOMING { background-color: #007bff; }
+.status-ONGOING { background-color: #ffc107; color: #333; }
+.status-COMPLETED { background-color: #28a745; }
+
+/* Thẻ này nhắm mục tiêu vào <strong> trong thẻ ngày tháng */
+.date-info .info-bar-value strong {
+    font-weight: 700;
+    color: #333; 
+}
