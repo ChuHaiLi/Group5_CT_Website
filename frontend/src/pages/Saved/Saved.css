@@ -124,6 +124,7 @@
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   padding: 1.2rem;
+}
 /* ================================================= */
 /* FOLDER & MODAL STYLES */
 /* ================================================= */
@@ -299,6 +300,7 @@
 
 .folder-header-row h2 {
   margin: 0;
+}
 .folder-header-row {
   display: flex;
   justify-content: space-between;
@@ -324,6 +326,8 @@
   background: transparent; border: none; font-weight: 600;
   cursor: pointer; color: #6b7280; font-size: 1rem;
   padding: 0.5rem 0; font-family: 'Poppins', sans-serif;
+}
+
 .folder-detail-header {
   display: flex;
   flex-direction: column;
@@ -428,6 +432,7 @@
 .checkbox-circle {
   width: 20px; height: 20px; border-radius: 50%;
   border: 2px solid #d1d5db; display: flex; align-items: center; justify-content: center;
+}
 .remove-btn { background: white; border: 1px solid #fee2e2; color: #ef4444; }
 .remove-btn:hover { background: #fef2f2; border-color: #ef4444; }
 
@@ -505,6 +510,7 @@
 .modal-footer {
   display: flex; justify-content: flex-end; gap: 1rem;
   padding: 1rem; border-top: 1px solid #f3f4f6;
+}
 .select-item-row.selected .checkbox-circle { border-color: #3b82f6; background: #3b82f6; }
 
 /* Checkbox đỏ cho modal remove */
@@ -535,4 +541,6 @@
 .btn-apply.btn-danger { background: #ef4444; }
 .btn-apply.btn-danger:hover { background: #dc2626; }
 
-.no-items-text { text-align: center; color: #9ca3af; padding: 2rem; }
+.no-items-text { 
+  text-align: center;
+   color: #9ca3af; padding: 2rem; }
