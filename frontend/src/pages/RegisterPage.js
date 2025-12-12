@@ -71,7 +71,6 @@ export default function RegisterPage({ setIsAuthenticated }) {
     return;
   }
 
-  // BỎ check usernameValid
   if (!validation.emailValid) {
     toast.error("Please enter a valid email address");
     return;

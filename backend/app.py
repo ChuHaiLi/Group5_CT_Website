@@ -306,8 +306,6 @@ def register():
 
     if User.query.filter(db.func.lower(User.email) == email.lower()).first():
         errors["email"] = "Email already exists"
-    if User.query.filter_by(username=username).first():
-        errors["username"] = "Username already exists"
 
     if errors:
         return jsonify({"errors": errors}), 400
@@ -566,12 +564,6 @@ def google_login():
             # Tạo username từ email hoặc name
             base_username = email.split('@')[0]
             username = base_username
-            
-            # Đảm bảo username unique
-            counter = 1
-            while User.query.filter_by(username=username).first():
-                username = f"{base_username}{counter}"
-                counter += 1
             
             # Tạo user mới
             new_user = User(
@@ -850,9 +842,8 @@ def update_profile():
         if new_username != user.username:
             if len(new_username) < 3:
                 errors["username"] = "Username must be at least 3 characters"
-            elif User.query.filter(User.username == new_username, User.id != user_id).first():
-                errors["username"] = "Username already exists"
             else:
+                # CHO PHÉP USERNAME TRÙNG - chỉ cần đủ dài
                 user.username = new_username
                 profile_changed = True
     
