@@ -32,7 +32,7 @@ import { PageContext } from "./context/PageContext";
 import HowItWorksPanel from "./components/HowItWorks/HowItWorksPanel";
 import "./App.css";
 
-const GOOGLE_CLIENT_ID = "202417590292-ia2puaea18ige9bg43kng9a2oq5i6ktk.apps.googleusercontent.com";
+const GOOGLE_CLIENT_ID = "953512846166-p1oc06mcu0b9qkko76sridsappr131tn.apps.googleusercontent.com";
 
 // ------------------- PrivateRoute -------------------
 function PrivateRoute({ isAuthenticated, children }) {
