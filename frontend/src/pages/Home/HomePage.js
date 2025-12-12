@@ -10,7 +10,8 @@ import CreateTripForm from "../../components/CreateTripForm";
 import HomeIntro from "./HomeIntro";
 import RelaxationSection from "./Relaxation/RelaxationSection";
 import TrendingSection from "./Trending/TrendingSection";
-import ContactSection from "./ContactSection/ContactSection";
+import VacationCarousel from "./VacationCarousel/VacationCarousel";
+import WildlifeSection from "./Wildlife/WildlifeSection";
 
 import {
   sendHeroTextRequestToWidget,
@@ -302,6 +303,8 @@ export default function HomePage({ savedIds, handleToggleSave }) {
 
       <HomeIntro />
 
+      <VacationCarousel />
+
       <TrendingSection />
 
       <RelaxationSection
@@ -310,7 +313,11 @@ export default function HomePage({ savedIds, handleToggleSave }) {
         onCreateTrip={handleRelaxationCreateTrip} // Truyền handler xuống
       />
 
-      <ContactSection />
+      <WildlifeSection 
+        savedIds={savedIds} 
+        handleToggleSave={handleToggleSave}
+        onCreateTrip={handleCreateTrip}
+      />
 
       {showForm && selectedDestination && (
         <CreateTripForm
