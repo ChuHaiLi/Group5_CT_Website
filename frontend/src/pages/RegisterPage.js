@@ -71,7 +71,6 @@ export default function RegisterPage({ setIsAuthenticated }) {
     return;
   }
 
-  // BỎ check usernameValid
   if (!validation.emailValid) {
     toast.error("Please enter a valid email address");
     return;
@@ -163,21 +162,6 @@ export default function RegisterPage({ setIsAuthenticated }) {
               autoComplete="username"
             />
           </div>
-
-          {touched.username && !validation.usernameValid && form.username.length > 0 && (
-            <p style={{ 
-              color: '#f44336', 
-              fontSize: '12px', 
-              marginTop: '-10px', 
-              marginBottom: '10px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '5px'
-            }}>
-              <FaTimesCircle />
-              Username must be at least 3 characters
-            </p>
-          )}
 
           {/* Email */}
           <div className="input-group">
