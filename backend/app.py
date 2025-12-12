@@ -303,7 +303,9 @@ def register():
         errors["email"] = "Invalid email"
     if len(password) < 6:
         errors["password"] = "Password must be at least 6 characters"
-
+    
+    if User.query.filter_by(username=username).first():
+        errors["username"] = "Username already exists"
     if User.query.filter(db.func.lower(User.email) == email.lower()).first():
         errors["email"] = "Email already exists"
 
@@ -526,11 +528,10 @@ def google_login():
                 user.google_id = google_id
                 user.name = name
                 user.picture = picture
-                user.avatar_url = picture  # 🔥 SỬA: Đồng bộ avatar_url với picture
+                user.avatar_url = picture
                 user.is_email_verified = True
                 db.session.commit()
             elif picture and picture != user.picture:
-                # 🔥 THÊM: Cập nhật cả 2 field nếu ảnh Google thay đổi
                 user.picture = picture
                 user.avatar_url = picture
                 db.session.commit()
@@ -553,8 +554,9 @@ def google_login():
                     'name': user.name,
                     'phone': user.phone or "",
                     'picture': user.picture,
-                    'avatar': avatar,  # 🔥 SỬA: Trả về avatar đúng
-                    'is_verified': True
+                    'avatar': avatar,
+                    'is_verified': True,
+                    'google_id': user.google_id  # 🔥 Trả về để frontend biết
                 }
             }), 200
         
@@ -565,15 +567,15 @@ def google_login():
             base_username = email.split('@')[0]
             username = base_username
             
-            # Tạo user mới
+            # 🔥 QUAN TRỌNG: Google user KHÔNG CÓ PASSWORD ban đầu
             new_user = User(
                 username=username,
                 email=email.lower(),
                 name=name,
                 google_id=google_id,
                 picture=picture,
-                avatar_url=picture,  # 🔥 SỬA: Lưu cả avatar_url
-                password=generate_password_hash(secrets.token_urlsafe(32)),
+                avatar_url=picture,
+                password=None,  # ✅ KHÔNG TẠO PASSWORD CHO GOOGLE USER
                 is_email_verified=True,
             )
             
@@ -595,8 +597,9 @@ def google_login():
                     'name': new_user.name,
                     'phone': new_user.phone or "",
                     'picture': new_user.picture,
-                    'avatar': picture,  
-                    'is_verified': True
+                    'avatar': picture,
+                    'is_verified': True,
+                    'google_id': new_user.google_id  # 🔥 Trả về
                 }
             }), 201
     
@@ -611,13 +614,37 @@ def google_login():
 @app.route("/api/auth/login", methods=["POST"])
 def login():
     data = request.get_json() or {}
-    email = (data.get("email") or "").strip().lower()
+    email_or_username = (data.get("email") or "").strip().lower()  # Có thể là email hoặc username
     password = data.get("password") or ""
 
-    user = User.query.filter(db.func.lower(User.email) == email.lower()).first()
+    # Tìm user bằng EMAIL hoặc USERNAME
+    user = User.query.filter(
+        db.or_(
+            db.func.lower(User.email) == email_or_username,
+            db.func.lower(User.username) == email_or_username
+        )
+    ).first()
     
-    if not user or not check_password_hash(user.password, password):
-        return jsonify({"message": "Invalid email or password"}), 401
+    if not user:
+        return jsonify({"message": "Invalid email/username or password"}), 401
+
+    # 🔒 KIỂM TRA: Nếu user có google_id và KHÔNG có password
+    if user.google_id and not user.password:
+        return jsonify({
+            "message": "This account was created with Google. Please use 'Continue with Google' to sign in, or set a password in your profile settings first.",
+            "error_type": "google_account_no_password"
+        }), 401
+    
+    # 🔒 KIỂM TRA: Nếu user CÓ password thì mới verify
+    if not user.password:
+        return jsonify({
+            "message": "Invalid email/username or password",
+            "error_type": "no_password_set"
+        }), 401
+    
+    # Verify password
+    if not check_password_hash(user.password, password):
+        return jsonify({"message": "Invalid email/username or password"}), 401
 
     # QUAN TRỌNG: Kiểm tra email đã verify chưa
     if not user.is_email_verified:
@@ -631,17 +658,18 @@ def login():
     refresh_token = create_refresh_token(identity=str(user.id))
 
     return jsonify({
-    "message": "Login successful",
-    "access_token": access_token,
-    "refresh_token": refresh_token,
-    "user": {
-        "id": user.id,
-        "username": user.username,
-        "email": user.email,
-        "phone": user.phone or "",
-        "avatar": user.avatar_url or user.picture or "", 
-    }
-}), 200
+        "message": "Login successful",
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "user": {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "phone": user.phone or "",
+            "avatar": user.avatar_url or user.picture or "",
+            "google_id": user.google_id,
+        }
+    }), 200
 
 # -------- REFRESH TOKEN --------
 @app.route("/api/auth/refresh", methods=["POST"])
@@ -671,6 +699,7 @@ def me():
         "name": user.name or "",
         "tagline": user.tagline or "#VN",
         "avatar": avatar,
+        "google_id": user.google_id, 
     }), 200
 
 # -------- FORGOT PASSWORD --------
@@ -833,21 +862,29 @@ def update_profile():
     errors = {}
     profile_changed = False
     
-    # 🔥 QUAN TRỌNG: Chỉ validate field NÀO được gửi lên
+    # 📥 QUAN TRỌNG: Chỉ validate field NÀO được gửi lên
     fields_to_update = set(data.keys())
     
-    # 1. Cập nhật Username (chỉ validate nếu có trong request)
+    # 1. Cập nhật Username (🔥 THÊM KIỂM TRA TRÙNG LẶP)
     if "username" in fields_to_update:
         new_username = data.get("username", "").strip()
         if new_username != user.username:
             if len(new_username) < 3:
                 errors["username"] = "Username must be at least 3 characters"
             else:
-                # CHO PHÉP USERNAME TRÙNG - chỉ cần đủ dài
-                user.username = new_username
-                profile_changed = True
+                # 🔥 KIỂM TRA USERNAME ĐÃ TỒN TẠI CHƯA
+                existing_user = User.query.filter(
+                    User.username == new_username,
+                    User.id != user_id
+                ).first()
+                
+                if existing_user:
+                    errors["username"] = "Username already exists"
+                else:
+                    user.username = new_username
+                    profile_changed = True
     
-    # 2. Cập nhật Tagline (chỉ validate nếu có trong request)
+    # 2. Cập nhật Tagline (giữ nguyên logic cũ)
     if "tagline" in fields_to_update:
         new_tagline = data.get("tagline", "").strip()
         
@@ -864,7 +901,7 @@ def update_profile():
             user.tagline = new_tagline
             profile_changed = True
 
-    # 3. Cập nhật Email (CHỈ validate nếu có trong request)
+    # 3. Cập nhật Email (giữ nguyên)
     if "email" in fields_to_update:
         new_email = data.get("email", "").strip().lower()
         if new_email != user.email.lower():
@@ -876,32 +913,51 @@ def update_profile():
                 user.email = new_email
                 profile_changed = True
     
-    # 4. Cập nhật Phone (chỉ nếu có trong request)
+    # 4. Cập nhật Phone (giữ nguyên)
     if "phone" in fields_to_update:
         new_phone = data.get("phone", "").strip()
         if new_phone != (user.phone or ""):
             user.phone = new_phone if new_phone else None
             profile_changed = True
     
-    # 5. CẬP NHẬT PASSWORD (chỉ nếu có currentPassword và newPassword)
-    if "currentPassword" in fields_to_update and "newPassword" in fields_to_update:
-        current_password = data.get("currentPassword", "").strip()
+    # 5. 🔥 CẬP NHẬT PASSWORD (XỬ LÝ NGƯỜI DÙNG GOOGLE) - FIXED
+    if "newPassword" in fields_to_update:
         new_password = data.get("newPassword", "").strip()
         
         if new_password:
-            if not current_password:
-                errors["currentPassword"] = "Current password is required to change password"
-            else:
-                if not check_password_hash(user.password, current_password):
-                    errors["currentPassword"] = "Current password is incorrect"
+            # 🔥 KIỂM TRA XEM USER CÓ ĐĂNG NHẬP BẰNG GOOGLE KHÔNG
+            is_google_user = bool(user.google_id)
+            
+            if is_google_user:
+                # ✅ NGƯỜI DÙNG GOOGLE - CHO PHÉP ĐẶT MẬT KHẨU MỚI
+                # Không cần kiểm tra current password
+                if len(new_password) < 6:
+                    errors["newPassword"] = "New password must be at least 6 characters"
                 else:
-                    if len(new_password) < 6:
-                        errors["newPassword"] = "New password must be at least 6 characters"
+                    # ✅ ĐẶT MẬT KHẨU MỚI CHO GOOGLE USER
+                    user.password = generate_password_hash(new_password)
+                    profile_changed = True
+                    print(f"✅ Google user {user.email} set new password")
+            else:
+                # ✅ NGƯỜI DÙNG THÔNG THƯỜNG - YÊU CẦU current password
+                current_password = data.get("currentPassword", "").strip()
+                
+                if not current_password:
+                    errors["currentPassword"] = "Current password is required to change password"
+                else:
+                    # Kiểm tra current password có đúng không
+                    if not check_password_hash(user.password, current_password):
+                        errors["currentPassword"] = "Current password is incorrect"
                     else:
-                        user.password = generate_password_hash(new_password)
-                        profile_changed = True
+                        if len(new_password) < 6:
+                            errors["newPassword"] = "New password must be at least 6 characters"
+                        else:
+                            # ✅ CẬP NHẬT MẬT KHẨU MỚI CHO USER THÔNG THƯỜNG
+                            user.password = generate_password_hash(new_password)
+                            profile_changed = True
+                            print(f"✅ Normal user {user.email} changed password")
     
-    # 6. Cập nhật Avatar URL (chỉ nếu có trong request)
+    # 6. Cập nhật Avatar URL (giữ nguyên)
     if "avatarUrl" in fields_to_update or "avatar" in fields_to_update:
         new_avatar = data.get("avatarUrl") or data.get("avatar")
         if new_avatar:
@@ -939,6 +995,7 @@ def update_profile():
                 "name": user.name or "",
                 "tagline": user.tagline or "#VN",   
                 "avatar": final_avatar,
+                "google_id": user.google_id,  
             }
         }), 200
         
