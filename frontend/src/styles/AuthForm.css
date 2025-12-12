@@ -746,13 +746,122 @@
   }
 }
 
+/* Toast Notification Styling - Override react-toastify */
+.Toastify__toast {
+  border-radius: 12px !important;
+  padding: 16px 20px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+  font-family: 'Poppins', 'Segoe UI', sans-serif !important;
+  min-height: 64px !important;
+}
+
+.Toastify__toast--success {
+  background: #ffffff !important;
+  border-left: 4px solid #4CAF50 !important;
+  color: #2c3e50 !important;
+}
+
+.Toastify__toast--error {
+  background: #ffffff !important;
+  border-left: 4px solid #f44336 !important;
+  color: #2c3e50 !important;
+}
+
+.Toastify__toast--warning {
+  background: #ffffff !important;
+  border-left: 4px solid #FF9800 !important;
+  color: #2c3e50 !important;
+}
+
+.Toastify__toast--info {
+  background: #ffffff !important;
+  border-left: 4px solid #2196F3 !important;
+  color: #2c3e50 !important;
+}
+
+/* Close Button Styling */
+.Toastify__close-button {
+  opacity: 0.5 !important;
+  color: #95a5a6 !important;
+  align-self: center !important;
+  width: 24px !important;
+  height: 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  transition: all 0.3s ease !important;
+  padding: 0 !important;
+}
+
+.Toastify__close-button:hover {
+  opacity: 1 !important;
+  background: rgba(0, 0, 0, 0.05) !important;
+  color: #2c3e50 !important;
+}
+
+.Toastify__close-button > svg {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+/* Progress Bar */
+.Toastify__progress-bar {
+  height: 3px !important;
+}
+
+.Toastify__progress-bar--success {
+  background: #4CAF50 !important;
+}
+
+.Toastify__progress-bar--error {
+  background: #f44336 !important;
+}
+
+.Toastify__progress-bar--warning {
+  background: #FF9800 !important;
+}
+
+.Toastify__progress-bar--info {
+  background: #2196F3 !important;
+}
+
+/* Toast Container */
+.Toastify__toast-container {
+  padding: 0 !important;
+}
+
+.Toastify__toast-container--top-right {
+  top: 20px !important;
+  right: 20px !important;
+}
+
+.Toastify__toast-container--top-center {
+  top: 20px !important;
+}
+
+/* Validation Message Styling */
+.validation-message {
+  color: #f44336;
+  font-size: 12px;
+  margin-top: -10px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  animation: slideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  position: relative;
+  z-index: 1;
+}
+
 /* Loading State Animation */
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
 
-button:disabled::after {
+
+.auth-page button:disabled::after {
   content: '';
   position: absolute;
   width: 18px;

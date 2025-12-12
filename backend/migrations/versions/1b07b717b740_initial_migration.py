@@ -1,8 +1,9 @@
 """Initial migration
 
-Revision ID: ead4888835b1
+
+Revision ID: 1b07b717b740
 Revises: 
-Create Date: 2025-12-09 17:09:29.011805
+Create Date: 2025-12-12 09:04:49.875104
 
 """
 from alembic import op
@@ -10,7 +11,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'ead4888835b1'
+revision = '1b07b717b740'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -26,6 +27,7 @@ def upgrade():
     )
     op.create_table('users',
     sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('tagline', sa.String(length=50), nullable=True),
     sa.Column('username', sa.String(length=50), nullable=False),
     sa.Column('email', sa.String(length=120), nullable=False),
     sa.Column('phone', sa.String(length=30), nullable=True),
@@ -36,6 +38,7 @@ def upgrade():
     sa.Column('picture', sa.String(length=255), nullable=True),
     sa.Column('is_email_verified', sa.Boolean(), nullable=True),
     sa.Column('verification_token', sa.String(length=200), nullable=True),
+    sa.Column('pending_email', sa.String(length=120), nullable=True),
     sa.Column('reset_token', sa.String(length=200), nullable=True),
     sa.Column('reset_token_expiry', sa.DateTime(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),

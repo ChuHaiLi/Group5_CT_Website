@@ -528,8 +528,17 @@ def google_login():
                 user.google_id = google_id
                 user.name = name
                 user.picture = picture
-                user.is_email_verified = True  # Google user tự động verified
+                user.avatar_url = picture  # 🔥 SỬA: Đồng bộ avatar_url với picture
+                user.is_email_verified = True
                 db.session.commit()
+            elif picture and picture != user.picture:
+                # 🔥 THÊM: Cập nhật cả 2 field nếu ảnh Google thay đổi
+                user.picture = picture
+                user.avatar_url = picture
+                db.session.commit()
+            
+            # Lấy avatar (ưu tiên avatar_url, fallback sang picture)
+            avatar = user.avatar_url or user.picture or ""
             
             # Tạo token
             access_token = create_access_token(identity=str(user.id))
@@ -546,7 +555,7 @@ def google_login():
                     'name': user.name,
                     'phone': user.phone or "",
                     'picture': user.picture,
-                    'avatar': user.avatar_url or user.picture or "",  # 🔥 THÊM
+                    'avatar': avatar,  # 🔥 SỬA: Trả về avatar đúng
                     'is_verified': True
                 }
             }), 200
@@ -571,8 +580,9 @@ def google_login():
                 name=name,
                 google_id=google_id,
                 picture=picture,
-                password=generate_password_hash(secrets.token_urlsafe(32)),  # Random password
-                is_email_verified=True,  # Google user tự động verified
+                avatar_url=picture,  # 🔥 SỬA: Lưu cả avatar_url
+                password=generate_password_hash(secrets.token_urlsafe(32)),
+                is_email_verified=True,
             )
             
             db.session.add(new_user)
@@ -591,7 +601,9 @@ def google_login():
                     'username': new_user.username,
                     'email': new_user.email,
                     'name': new_user.name,
+                    'phone': new_user.phone or "",
                     'picture': new_user.picture,
+                    'avatar': picture,  
                     'is_verified': True
                 }
             }), 201
@@ -665,6 +677,7 @@ def me():
         "email": user.email,
         "phone": user.phone or "",
         "name": user.name or "",
+        "tagline": user.tagline or "#VN",
         "avatar": avatar,
     }), 200
 
@@ -808,13 +821,14 @@ def get_profile():
         "email": user.email,
         "phone": user.phone or "",
         "name": user.name or "",
-        "avatar": avatar,  # Frontend expect "avatar"
+        "tagline": user.tagline or "#VN", 
+        "avatar": avatar,  
     }), 200
 
 @app.route("/api/profile", methods=["PUT"])
 @jwt_required()
 def update_profile():
-    """Cập nhật thông tin profile"""
+    """Cập nhật thông tin profile - CHỈ VALIDATE FIELDS ĐƯỢC GỬI LÊN"""
     user_id = int(get_jwt_identity())
     user = db.session.get(User, user_id)
     
@@ -827,57 +841,87 @@ def update_profile():
     errors = {}
     profile_changed = False
     
-    # 1. Cập nhật Username (kiểm tra trùng)
-    new_username = data.get("username", "").strip()
-    if new_username and new_username != user.username:
-        if len(new_username) < 3:
-            errors["username"] = "Username must be at least 3 characters"
-        elif User.query.filter(User.username == new_username, User.id != user_id).first():
-            errors["username"] = "Username already exists"
-        else:
-            user.username = new_username
-            profile_changed = True
+    # 🔥 QUAN TRỌNG: Chỉ validate field NÀO được gửi lên
+    fields_to_update = set(data.keys())
     
-    # 2. Cập nhật Email (kiểm tra trùng và format)
-    new_email = data.get("email", "").strip().lower()
-    if new_email and new_email != user.email.lower():
-        if not is_valid_email(new_email):
-            errors["email"] = "Invalid email format"
-        elif User.query.filter(db.func.lower(User.email) == new_email, User.id != user_id).first():
-            errors["email"] = "Email already exists"
-        else:
-            user.email = new_email
-            profile_changed = True
+    # 1. Cập nhật Username (chỉ validate nếu có trong request)
+    if "username" in fields_to_update:
+        new_username = data.get("username", "").strip()
+        if new_username != user.username:
+            if len(new_username) < 3:
+                errors["username"] = "Username must be at least 3 characters"
+            elif User.query.filter(User.username == new_username, User.id != user_id).first():
+                errors["username"] = "Username already exists"
+            else:
+                user.username = new_username
+                profile_changed = True
     
-    # 3. Cập nhật Phone
-    new_phone = data.get("phone", "").strip()
-    if "phone" in data:  # Cho phép để trống
+    # 2. Cập nhật Tagline (chỉ validate nếu có trong request)
+    if "tagline" in fields_to_update:
+        new_tagline = data.get("tagline", "").strip()
+        
+        if new_tagline and not new_tagline.startswith("#VN"):
+            new_tagline = f"#VN{new_tagline}"
+        
+        suffix = new_tagline.replace("#VN", "")
+        
+        if suffix and (len(suffix) < 3 or len(suffix) > 5):
+            errors["tagline"] = "Tagline must be between 3 and 5 characters (excluding #VN)"
+        elif not suffix:
+            new_tagline = user.tagline or "#VN"
+        elif new_tagline != user.tagline:
+            user.tagline = new_tagline
+            profile_changed = True
+
+    # 3. Cập nhật Email (CHỈ validate nếu có trong request)
+    if "email" in fields_to_update:
+        new_email = data.get("email", "").strip().lower()
+        if new_email != user.email.lower():
+            if not is_valid_email(new_email):
+                errors["email"] = "Invalid email format"
+            elif User.query.filter(db.func.lower(User.email) == new_email, User.id != user_id).first():
+                errors["email"] = "Email already exists"
+            else:
+                user.email = new_email
+                profile_changed = True
+    
+    # 4. Cập nhật Phone (chỉ nếu có trong request)
+    if "phone" in fields_to_update:
+        new_phone = data.get("phone", "").strip()
         if new_phone != (user.phone or ""):
             user.phone = new_phone if new_phone else None
             profile_changed = True
     
-    # 4. Cập nhật Password (nếu có)
-    new_password = data.get("password", "").strip()
-    if new_password:
-        if len(new_password) < 6:
-            errors["password"] = "Password must be at least 6 characters"
-        else:
-            user.password = generate_password_hash(new_password)
-            profile_changed = True
+    # 5. CẬP NHẬT PASSWORD (chỉ nếu có currentPassword và newPassword)
+    if "currentPassword" in fields_to_update and "newPassword" in fields_to_update:
+        current_password = data.get("currentPassword", "").strip()
+        new_password = data.get("newPassword", "").strip()
+        
+        if new_password:
+            if not current_password:
+                errors["currentPassword"] = "Current password is required to change password"
+            else:
+                if not check_password_hash(user.password, current_password):
+                    errors["currentPassword"] = "Current password is incorrect"
+                else:
+                    if len(new_password) < 6:
+                        errors["newPassword"] = "New password must be at least 6 characters"
+                    else:
+                        user.password = generate_password_hash(new_password)
+                        profile_changed = True
     
-    # 5. Cập nhật Avatar URL (hỗ trợ cả avatarUrl và avatar từ frontend)
-    new_avatar = data.get("avatarUrl") or data.get("avatar")
-    if new_avatar:
-        current_avatar = user.avatar_url or user.picture or ""
-        if new_avatar != current_avatar:
-            # Lưu vào avatar_url (trường chính)
-            user.avatar_url = new_avatar
-            
-            # Nếu user login bằng Google, cũng update picture
-            if user.google_id:
-                user.picture = new_avatar
-            
-            profile_changed = True
+    # 6. Cập nhật Avatar URL (chỉ nếu có trong request)
+    if "avatarUrl" in fields_to_update or "avatar" in fields_to_update:
+        new_avatar = data.get("avatarUrl") or data.get("avatar")
+        if new_avatar:
+            current_avatar = user.avatar_url or user.picture or ""
+            if new_avatar != current_avatar:
+                user.avatar_url = new_avatar
+                
+                if user.google_id:
+                    user.picture = new_avatar
+                
+                profile_changed = True
     
     # Nếu có lỗi validation
     if errors:
@@ -892,7 +936,6 @@ def update_profile():
         user.updated_at = datetime.utcnow()
         db.session.commit()
         
-        # Lấy avatar cuối cùng (ưu tiên avatar_url)
         final_avatar = user.avatar_url or user.picture or ""
         
         return jsonify({
@@ -903,6 +946,7 @@ def update_profile():
                 "email": user.email,
                 "phone": user.phone or "",
                 "name": user.name or "",
+                "tagline": user.tagline or "#VN",   
                 "avatar": final_avatar,
             }
         }), 200
@@ -911,6 +955,141 @@ def update_profile():
         db.session.rollback()
         print(f"Error updating profile: {e}")
         return jsonify({"message": "Failed to update profile"}), 500
+
+# -------- Email change verify --------
+@app.route("/api/auth/request-email-change", methods=["POST"])
+@jwt_required()
+def request_email_change():
+    """
+    Gửi OTP đến email mới khi user muốn thay đổi email trong profile
+    """
+    data = request.get_json() or {}
+    user_id = int(get_jwt_identity())
+    new_email = (data.get("new_email") or "").strip().lower()
+    
+    user = db.session.get(User, user_id)
+    
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+    
+    # Validate email format
+    if not is_valid_email(new_email):
+        return jsonify({"message": "Invalid email format"}), 400
+    
+    # Kiểm tra email đã tồn tại chưa
+    if User.query.filter(db.func.lower(User.email) == new_email, User.id != user_id).first():
+        return jsonify({"message": "Email already exists"}), 400
+    
+    # Kiểm tra cooldown (60 giây)
+    if user.reset_token_expiry:
+        time_since_last = datetime.utcnow() - (user.reset_token_expiry - timedelta(minutes=10))
+        if time_since_last.total_seconds() < 60:
+            return jsonify({
+                "message": "Please wait before requesting a new code.",
+                "wait_seconds": 60 - int(time_since_last.total_seconds())
+            }), 429
+    
+    # Tạo OTP
+    otp_code = generate_otp(6)
+    
+    # Lưu OTP và email mới tạm thời (dùng field pending_email)
+    user.verification_token = otp_code
+    user.reset_token_expiry = datetime.utcnow() + timedelta(minutes=10)
+    
+    # Lưu email mới vào field tạm (cần thêm column này vào DB)
+    # Hoặc dùng metadata_json để lưu
+    user.pending_email = new_email  # 🔥 CẦN THÊM COLUMN NÀY VÀO MODEL User
+    
+    db.session.commit()
+    
+    # Gửi email OTP
+    email_html = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <h2 style="color: #2196F3; text-align: center;">Verify Your New Email</h2>
+                
+                <p>Hi <strong>{user.username}</strong>,</p>
+                
+                <p>You've requested to change your email address to <strong>{new_email}</strong>. Please verify this email using the code below:</p>
+                
+                <div style="background-color: #e3f2fd; border: 2px dashed #2196F3; border-radius: 8px; padding: 20px; text-align: center; margin: 30px 0;">
+                    <p style="margin: 0; color: #666; font-size: 14px;">Your verification code:</p>
+                    <h1 style="margin: 10px 0; color: #2196F3; font-size: 48px; letter-spacing: 8px; font-family: 'Courier New', monospace;">
+                        {otp_code}
+                    </h1>
+                </div>
+                
+                <p style="color: #f44336; font-weight: bold;">⏰ This code will expire in 10 minutes.</p>
+                
+                <p style="color: #666; font-size: 14px;">If you didn't request this change, please ignore this email or contact support immediately.</p>
+                
+                <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;">
+                
+                <p style="color: #999; font-size: 12px; text-align: center;">
+                    This is an automated message, please do not reply.
+                </p>
+            </div>
+        </body>
+    </html>
+    """
+    
+    send_email(new_email, "Verify Your New Email Address", email_html)
+    
+    return jsonify({
+        "message": "A verification code has been sent to your new email address.",
+        "new_email": new_email,
+        "requires_verification": True
+    }), 200
+
+
+@app.route("/api/auth/verify-email-change", methods=["POST"])
+@jwt_required()
+def verify_email_change():
+    """
+    Xác nhận OTP và thay đổi email chính thức
+    """
+    data = request.get_json() or {}
+    user_id = int(get_jwt_identity())
+    otp_code = data.get("otp_code", "").strip()
+    
+    user = db.session.get(User, user_id)
+    
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+    
+    if not user.pending_email:
+        return jsonify({"message": "No pending email change request"}), 400
+    
+    # Kiểm tra OTP
+    if user.verification_token != otp_code:
+        return jsonify({
+            "message": "Invalid verification code",
+            "error_type": "invalid_otp"
+        }), 400
+    
+    # Kiểm tra hết hạn
+    if not user.reset_token_expiry or user.reset_token_expiry < datetime.utcnow():
+        return jsonify({
+            "message": "Verification code has expired",
+            "error_type": "otp_expired"
+        }), 400
+    
+    # Xác minh thành công - Cập nhật email
+    old_email = user.email
+    user.email = user.pending_email
+    user.pending_email = None
+    user.verification_token = None
+    user.reset_token_expiry = None
+    user.updated_at = datetime.utcnow()
+    
+    db.session.commit()
+    
+    return jsonify({
+        "message": "Email changed successfully!",
+        "new_email": user.email,
+        "old_email": old_email
+    }), 200
 
 # -------- SAVED DESTINATIONS --------
 @app.route("/api/saved/add", methods=["POST"])
