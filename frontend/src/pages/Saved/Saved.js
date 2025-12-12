@@ -2,6 +2,13 @@ import React, { useEffect, useState, useMemo } from "react";
 import RecommendCard from "../Home/Recommendations/RecommendCard";
 import CreateTripForm from "../../components/CreateTripForm";
 import API from "../../untils/axios";
+import {
+  FaSearch,
+  FaFilter,
+  FaSortAmountDown,
+  FaSortAmountUp,
+  FaLayerGroup,
+} from "react-icons/fa";
 import CollectionsTab from "./CollectionsTab";
 import "./Saved.css";
 
@@ -14,7 +21,6 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
   const [activeTab, setActiveTab] = useState("saved");
   
   // --- FOLDER STATE ---
-  // Khởi tạo từ Local Storage
   const [folders, setFolders] = useState(() => {
     const saved = localStorage.getItem("my_user_folders");
     return saved ? JSON.parse(saved) : [];
@@ -25,7 +31,20 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
   const [showForm, setShowForm] = useState(false);
   const [selectedDestination, setSelectedDestination] = useState(null);
 
-  // Mỗi khi biến 'folders' thay đổi, nó sẽ tự lưu vào máy
+  // --- STATE CHO FILTER & SORT (TAB SAVED) ---
+  const [groupBy, setGroupBy] = useState("all");
+  const [sortOrder, setSortOrder] = useState("asc");
+
+  const filterOptions = [
+    { id: "all", label: "All Places" },
+    { id: "region", label: "Region" },
+    { id: "city", label: "City" },
+    { id: "rating", label: "Rating" },
+    { id: "budget", label: "Budget" },
+    { id: "tags", label: "Tags" },
+  ];
+
+  // --- EFFECT: LƯU FOLDER ---
   useEffect(() => {
     localStorage.setItem("my_user_folders", JSON.stringify(folders));
   }, [folders]);
@@ -61,12 +80,15 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
   };
 
   const handleRemoveFromFolder = (folderId, itemId) => {
-    setFolders(folders.map(f => {
-      if (f.id === folderId) {
-        return { ...f, items: f.items.filter(id => id !== itemId) };
-      }
-      return f;
-    }));
+    const idsToRemove = Array.isArray(itemId) ? itemId : [itemId];
+    setFolders(
+      folders.map((f) => {
+        if (f.id === folderId) {
+          return { ...f, items: f.items.filter((id) => !idsToRemove.includes(id)) };
+        }
+        return f;
+      })
+    );
   };
 
   // --- API HANDLERS ---
@@ -106,11 +128,93 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
     setDestinations((prev) => prev.filter((d) => d.id !== id));
   };
 
+  // --- SEARCH FILTER ---
   const filteredDestinations = useMemo(() => {
     return destinations.filter(dest =>
       dest.name.toLowerCase().includes(search.toLowerCase())
     );
   }, [destinations, search]);
+
+  // --- GROUPING + SORT ---
+  const savedContentData = useMemo(() => {
+    const filtered = filteredDestinations;
+
+    if (filtered.length === 0) return [];
+
+    if (groupBy === "all") {
+      const sorted = [...filtered].sort((a, b) => {
+        const nameA = a.name.toLowerCase();
+        const nameB = b.name.toLowerCase();
+        return sortOrder === "asc"
+          ? nameA.localeCompare(nameB)
+          : nameB.localeCompare(nameA);
+      });
+      return [{ type: "flat", items: sorted }];
+    }
+
+    const groups = {};
+
+    filtered.forEach((dest) => {
+      let keys = [];
+
+      switch (groupBy) {
+        case "region":
+          keys.push(dest.region_name || "Unknown Region");
+          break;
+        case "city":
+          keys.push(dest.province_name || "Unknown City");
+          break;
+        case "budget":
+          const fee = dest.entry_fee || 0;
+          if (fee === 0) keys.push("A. Free");
+          else if (fee < 200000) keys.push("B. Economy (< 200k)");
+          else if (fee < 500000) keys.push("C. Standard (200k - 500k)");
+          else if (fee < 2000000) keys.push("D. Premium (500k - 2M)");
+          else keys.push("E. Luxury (> 2M)");
+          break;
+        case "rating":
+          const star = Math.floor(dest.rating || 0);
+          keys.push(`${star} Star${star !== 1 ? "s" : ""}`);
+          break;
+        case "tags":
+          if (dest.tags) {
+            const tagList = Array.isArray(dest.tags)
+              ? dest.tags
+              : typeof dest.tags === "string"
+              ? dest.tags.split(",").map((t) => t.trim())
+              : [];
+
+            if (tagList.length > 0) {
+              tagList.forEach((t) => keys.push(t.replace(/^<=/, "≤")));
+            } else {
+              keys.push("No Tags");
+            }
+          } else {
+            keys.push("No Tags");
+          }
+          break;
+        default:
+          keys.push("All");
+      }
+
+      keys.forEach((k) => {
+        if (!groups[k]) groups[k] = [];
+        if (!groups[k].find((d) => d.id === dest.id)) {
+          groups[k].push(dest);
+        }
+      });
+    });
+
+    const sortedKeys = Object.keys(groups).sort((a, b) =>
+      sortOrder === "asc" ? a.localeCompare(b) : b.localeCompare(a)
+    );
+
+    return sortedKeys.map((key) => ({
+      type: "group",
+      title: key,
+      items: groups[key],
+    }));
+  }, [filteredDestinations, groupBy, sortOrder]);
 
   return (
     <div className="saved-wrapper">
@@ -126,8 +230,7 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
             Saved ({destinations.length})
           </button>
 
-          {/* FIX: Hiển thị số lượng folder */}
-          <button 
+          <button
             className={activeTab === "collections" ? "active" : ""}
             onClick={() => setActiveTab("collections")}
           >
@@ -137,14 +240,57 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
         </div>
 
         {activeTab === "saved" && (
-          <div className="saved-search">
-            <input
-              type="text"
-              placeholder="Search saved destinations..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
+          <>
+            <div className="saved-search">
+              <FaSearch className="search-icon" />
+              <input
+                type="text"
+                placeholder="Search saved destinations..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+
+            <div className="saved-controls">
+              <div className="group-filters">
+                <span className="control-label">
+                  <FaLayerGroup /> Group by:
+                </span>
+                <div className="group-options">
+                  {filterOptions.map((opt) => (
+                    <button
+                      key={opt.id}
+                      className={`filter-chip ${
+                        groupBy === opt.id ? "active" : ""
+                      }`}
+                      onClick={() => setGroupBy(opt.id)}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="sort-controls">
+                <button
+                  className="sort-btn"
+                  onClick={() =>
+                    setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))
+                  }
+                >
+                  {sortOrder === "asc" ? (
+                    <>
+                      A - Z <FaSortAmountDown />
+                    </>
+                  ) : (
+                    <>
+                      Z - A <FaSortAmountUp />
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </>
         )}
       </div>
 
@@ -152,48 +298,81 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
         {loading ? (
             <div className="saved-empty"><p>Loading...</p></div>
         ) : (
-            <>
-                {/* TAB SAVED */}
-                {activeTab === "saved" && (
-                    <div className="saved-list">
-                        {filteredDestinations.length === 0 ? (
-                            <div className="saved-empty">
-                                <img src="/empty-state.svg" alt="" onError={(e)=>e.target.style.display='none'} style={{width: 150, opacity: 0.5, marginBottom: 20}}/>
-                                <h3>No saved destinations found</h3>
-                                <p>Browse destinations and save the ones you love.</p>
-                            </div>
-                        ) : (
-                            <div className="saved-grid">
-                                {filteredDestinations.map(dest => (
-                                <RecommendCard
-                                    key={dest.id}
-                                    destination={dest}
-                                    isSaved={true}
-                                    onToggleSave={() => handleUnsave(dest.id)}
-                                    onCreateTrip={() => handleCreateTrip(dest)}
-                                />
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {/* TAB COLLECTIONS */}
-                {activeTab === "collections" && (
-                    <CollectionsTab 
-                        allDestinations={destinations}
-                        folders={folders}
-                        onCreateFolder={() => setShowCreateFolderModal(true)}
-                        onDeleteFolder={handleDeleteFolder}
-                        onAddToFolder={handleAddToFolder}
-                        onRemoveFromFolder={handleRemoveFromFolder}
+          <>
+            {activeTab === "saved" && (
+              <div className="saved-list">
+                {savedContentData.length === 0 ? (
+                  <div className="saved-empty">
+                    <img
+                      src="/empty-state.svg"
+                      alt=""
+                      onError={(e) => (e.target.style.display = "none")}
+                      style={{
+                        width: 150,
+                        opacity: 0.5,
+                        marginBottom: 20,
+                      }}
                     />
+                    <h3>No saved destinations found</h3>
+                    <p>Try adjusting your search or filters.</p>
+                  </div>
+                ) : (
+                  <div className="grouped-container">
+                    {savedContentData.map((dataItem) =>
+                      dataItem.type === "flat" ? (
+                        <div key="flat" className="saved-grid">
+                          {dataItem.items.map((dest) => (
+                            <RecommendCard
+                              key={dest.id}
+                              destination={dest}
+                              isSaved={true}
+                              onToggleSave={() => handleUnsave(dest.id)}
+                              onCreateTrip={() => handleCreateTrip(dest)}
+                            />
+                          ))}
+                        </div>
+                      ) : (
+                        <div key={dataItem.title} className="group-section">
+                          <div className="group-header">
+                            <span className="header-text">{dataItem.title}</span>
+                            <span className="header-count">
+                              {dataItem.items.length}
+                            </span>
+                            <div className="header-line" />
+                          </div>
+                          <div className="saved-grid">
+                            {dataItem.items.map((dest) => (
+                              <RecommendCard
+                                key={`${dataItem.title}-${dest.id}`}
+                                destination={dest}
+                                isSaved={true}
+                                onToggleSave={() => handleUnsave(dest.id)}
+                                onCreateTrip={() => handleCreateTrip(dest)}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </div>
                 )}
-            </>
+              </div>
+            )}
+
+            {activeTab === "collections" && (
+              <CollectionsTab
+                allDestinations={destinations}
+                folders={folders}
+                onCreateFolder={() => setShowCreateFolderModal(true)}
+                onDeleteFolder={handleDeleteFolder}
+                onAddToFolder={handleAddToFolder}
+                onRemoveFromFolder={handleRemoveFromFolder}
+              />
+            )}
+          </>
         )}
       </div>
 
-      {/* MODAL TẠO FOLDER */}
       {showCreateFolderModal && (
         <div className="modal-overlay">
           <div className="create-folder-modal">

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import RecommendCard from "../Home/Recommendations/RecommendCard";
 import { FaFolder, FaPlus, FaArrowLeft, FaTrash, FaMinusCircle, FaCheck } from "react-icons/fa";
-import CreateTripForm from "../../components/CreateTripForm";
 
 export default function CollectionsTab({ 
   allDestinations, 
@@ -9,18 +8,15 @@ export default function CollectionsTab({
   onCreateFolder, 
   onDeleteFolder, 
   onAddToFolder, 
-  onRemoveFromFolder
+  onRemoveFromFolder 
 }) {
   // --- STATE ---
   const [activeFolderId, setActiveFolderId] = useState(null);
   
   const [showAddModal, setShowAddModal] = useState(false);
-  const [showRemoveModal, setShowRemoveModal] = useState(false);
+  const [showRemoveModal, setShowRemoveModal] = useState(false); // Modal Xóa
   
   const [selectedItems, setSelectedItems] = useState([]);
-
-    const [showForm, setShowForm] = useState(false);
-    const [selectedDestination, setSelectedDestination] = useState(null);
 
   // Tìm folder hiện tại
   const activeFolder = folders.find(f => f.id === activeFolderId);
@@ -35,40 +31,26 @@ export default function CollectionsTab({
     );
   };
 
-  // --- API HANDLERS ---
-  const handleCreateTrip = (destinationObj) => {
-    setSelectedDestination(destinationObj);
-    setShowForm(true);
-  };
-
-  const handleCloseForm = () => {
-    setSelectedDestination(null);
-    setShowForm(false);
-  };
-
   // Logic Add
   const handleApplyAdd = () => {
     if (activeFolderId && selectedItems.length > 0) {
       onAddToFolder(activeFolderId, selectedItems);
-      setShowAddModal(false);
-      setSelectedItems([]); // Reset danh sách chọn
+      handleCancelModal();
     }
   };
 
-  // Logic Remove
+  // Logic Remove (Mới)
   const handleApplyRemove = () => {
     if (activeFolderId && selectedItems.length > 0) {
-      selectedItems.forEach(id => onRemoveFromFolder(activeFolderId, id));
-      
-      setShowRemoveModal(false);
-      setSelectedItems([]); // Reset danh sách chọn
+      onRemoveFromFolder(activeFolderId, selectedItems);
+      handleCancelModal();
     }
   };
 
   const handleCancelModal = () => {
     setShowAddModal(false);
     setShowRemoveModal(false);
-    setSelectedItems([]); // Reset danh sách chọn khi bấm Cancel
+    setSelectedItems([]); // Reset danh sách chọn
   };
 
   // --- VIEW 1: DANH SÁCH FOLDER (ROOT) ---
@@ -102,56 +84,59 @@ export default function CollectionsTab({
   }
 
   // --- VIEW 2: CHI TIẾT FOLDER (INSIDE) ---
+  
+  // Lọc items đang có trong folder
   const folderDestinations = allDestinations.filter(dest => 
     activeFolder.items.includes(dest.id)
   );
 
+  // Lọc items chưa có (để hiện trong modal thêm)
   const availableDestinations = allDestinations.filter(dest => 
     !activeFolder.items.includes(dest.id)
   );
 
   return (
     <div className="folder-detail-view">
-      <div className="folder-detail-header">
-        <button className="back-btn" onClick={backToFolders}>
-          <FaArrowLeft /> Back
-        </button>
-
-        <div className="folder-header-row"> 
-            {/*Folder bên trái*/}
+      <div className="folder-header-bar">
+        <div className="header-left">
+            <button className="back-btn" onClick={backToFolders}>
+            <FaArrowLeft /> Back
+            </button>
             <h2>{activeFolder.name}</h2>
+        </div>
+        
+        <div className="folder-actions">
+            {/* Nút Remove Place -> Mở Modal Xóa */}
+            <button 
+                className="action-btn remove-btn" 
+                onClick={() => setShowRemoveModal(true)}
+                disabled={folderDestinations.length === 0}
+                style={{ opacity: folderDestinations.length === 0 ? 0.5 : 1 }}
+            >
+                <FaMinusCircle /> Remove Place
+            </button>
             
-            {/* Cụm nút bên phải */}
-            <div className="folder-actions">
-                <button 
-                    className="action-btn remove-btn" 
-                    onClick={() => setShowRemoveModal(true)}
-                    disabled={folderDestinations.length === 0}
-                    style={{opacity: folderDestinations.length === 0 ? 0.5 : 1}}
-                >
-                    <FaMinusCircle /> Remove Place
-                </button>
-                
-                <button className="action-btn add-btn" onClick={() => setShowAddModal(true)}>
-                    <FaPlus /> Add Place
-                </button>
-            </div>
-            
+            {/* Nút Add Place -> Mở Modal Thêm */}
+            <button className="action-btn add-btn" onClick={() => setShowAddModal(true)}>
+                <FaPlus /> Add Place
+            </button>
         </div>
       </div>
 
       <div className="saved-grid">
         {folderDestinations.length === 0 ? (
-           <p style={{color: '#9ca3af', width: '100%', textAlign: 'center', marginTop: '2rem'}}>This folder is empty.</p>
+           <div className="folder-empty-state">
+               <p>This folder is empty.</p>
+           </div>
         ) : (
             folderDestinations.map(dest => (
             <RecommendCard 
                 key={dest.id} 
                 destination={dest} 
                 isSaved={true} 
-                // Bấm tim để xóa nhanh 1 item
+                // Trong folder, bấm tim = xóa khỏi folder (Remove)
                 onToggleSave={() => onRemoveFromFolder(activeFolder.id, dest.id)} 
-                onCreateTrip={() => handleCreateTrip(dest)} 
+                onCreateTrip={null} 
             />
             ))
         )}
@@ -176,7 +161,11 @@ export default function CollectionsTab({
                     className={`select-item-row ${selectedItems.includes(dest.id) ? 'selected' : ''}`}
                     onClick={() => toggleSelectItem(dest.id)}
                   >
-                    <img src={Array.isArray(dest.image_url) ? dest.image_url[0] : dest.image_url} alt="" />
+                    <img 
+                      src={Array.isArray(dest.image_url) ? dest.image_url[0] : dest.image_url} 
+                      alt="" 
+                      onError={(e) => e.target.style.display = 'none'}
+                    />
                     <div className="select-item-info">
                       <strong>{dest.name}</strong>
                       <span>{dest.province_name}</span>
@@ -196,14 +185,14 @@ export default function CollectionsTab({
                 onClick={handleApplyAdd}
                 disabled={selectedItems.length === 0}
               >
-                Apply ({selectedItems.length})
+                Add ({selectedItems.length})
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* --- MODAL 2: REMOVE ITEMS --- */}
+      {/* --- MODAL 2: REMOVE ITEMS (MỚI) --- */}
       {showRemoveModal && (
         <div className="modal-overlay">
           <div className="add-to-folder-modal">
@@ -216,7 +205,7 @@ export default function CollectionsTab({
               {folderDestinations.map(dest => (
                 <div 
                   key={dest.id} 
-                  className={`select-item-row ${selectedItems.includes(dest.id) ? 'selected-remove' : ''}`} // Class khác màu cho remove
+                  className={`select-item-row ${selectedItems.includes(dest.id) ? 'selected-remove' : ''}`}
                   onClick={() => toggleSelectItem(dest.id)}
                 >
                   <img 
@@ -249,12 +238,6 @@ export default function CollectionsTab({
         </div>
       )}
 
-      {showForm && selectedDestination && (
-        <CreateTripForm
-          initialDestination={selectedDestination}
-          onClose={handleCloseForm}
-        />
-      )}
     </div>
   );
 }

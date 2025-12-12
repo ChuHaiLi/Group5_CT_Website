@@ -6,7 +6,12 @@ import { resizeImageTo128 } from "../../untils/imageResizer";
 import "./HomePage.css";
 import HeroSection from "./hero/hero";
 import CreateTripForm from "../../components/CreateTripForm";
+
 import HomeIntro from "./HomeIntro";
+import RelaxationSection from "./Relaxation/RelaxationSection";
+import TrendingSection from "./Trending/TrendingSection";
+import ContactSection from "./ContactSection/ContactSection";
+
 import {
   sendHeroTextRequestToWidget,
   sendHeroTextResultToWidget,
@@ -27,6 +32,20 @@ export default function HomePage({ savedIds, handleToggleSave }) {
   const [textLoading, setTextLoading] = useState(false);
   const [activePreview, setActivePreview] = useState(null);
   const { setPageContext } = usePageContext();
+
+  // Thêm state cho Relaxation Section
+  const [relaxationShowForm, setRelaxationShowForm] = useState(false);
+  const [relaxationSelectedDest, setRelaxationSelectedDest] = useState(null);
+
+  const handleRelaxationCreateTrip = (dest) => {
+    setRelaxationSelectedDest(dest);
+    setRelaxationShowForm(true);
+  };
+
+  const handleRelaxationCloseForm = () => {
+    setRelaxationSelectedDest(null);
+    setRelaxationShowForm(false);
+  };
 
   const handleSearchTermChange = useCallback((value) => {
     setSearchTerm((prev) => (prev === value ? prev : value));
@@ -283,10 +302,28 @@ export default function HomePage({ savedIds, handleToggleSave }) {
 
       <HomeIntro />
 
+      <TrendingSection />
+
+      <RelaxationSection
+        savedIds={savedIds}
+        handleToggleSave={handleToggleSave}
+        onCreateTrip={handleRelaxationCreateTrip} // Truyền handler xuống
+      />
+
+      <ContactSection />
+
       {showForm && selectedDestination && (
         <CreateTripForm
           initialDestination={selectedDestination}
           onClose={handleCloseForm}
+        />
+      )}
+
+      {/* Modal riêng cho Relaxation Section */}
+      {relaxationShowForm && relaxationSelectedDest && (
+        <CreateTripForm
+          initialDestination={relaxationSelectedDest}
+          onClose={handleRelaxationCloseForm}
         />
       )}
 
