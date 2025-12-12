@@ -1358,9 +1358,9 @@
                 ]
             },
             {
-                "province_name": "Lâm Đồng",
-                "overview": "Lâm Đồng là tỉnh nằm ở phía Tây Nam của khu vực Tây Nguyên, Việt Nam. Nơi đây được thiên nhiên ưu đãi với khí hậu mát mẻ, cảnh quan đa dạng từ núi non, thác nước đến hồ lớn, và là một trung tâm du lịch, nông nghiệp công nghệ cao quan trọng của cả nước.",
-                "image_url": "https://du-lich-da-lat.com/wp-content/uploads/2022/04/Lam-Dong.jpg",
+                "province_name": "Đà Lạt",
+                "overview": "Đà Lạt là thành phố nghỉ dưỡng nổi tiếng trên Cao nguyên Lang Biang, thuộc tỉnh Lâm Đồng. Nơi đây có khí hậu ôn hòa mát mẻ quanh năm, được mệnh danh là 'Thành phố Ngàn hoa' và 'Tiểu Paris'. Đà Lạt thu hút du khách bởi kiến trúc Pháp cổ kính, rừng thông, hồ nước lãng mạn (Xuân Hương, Tuyền Lâm) và các sản phẩm nông nghiệp ôn đới chất lượng cao (hoa, dâu tây, rau củ)",
+                "image_url": "https://file.hstatic.net/1000379600/file/dia-diem-du-lich-da-lat-1_86dc1307188e41f284a1227679f089b4_grande.png",
                 "places": [
                     {
                         "name": "Làng Cù Lần",
@@ -2575,51 +2575,6 @@
                             "Winter"
                         ],
                         "source": "https://www.klook.com/vi/activity/28137-clay-sculpture-tunnel-ticket-da-lat/"
-                    },
-                    {
-                        "name": "Trải nghiệm PGA Golf NovaWorld ở Phan Thiết",
-                        "type": "Thể thao",
-                        "description": [
-                            "Trải nghiệm các dịch vụ và tiện nghi đẳng cấp thế giới tại PGA Golf NovaWorld như clubhouse hiện đại và nhiều hơn thế nữa!.",
-                            "Cùng những người thân yêu trải nghiệm niềm vui bất tận, nơi họ có thể khám phá một môn thể thao mới.",
-                            "Tận hưởng dịch vụ đưa đón tiện lợi giữa khách sạn của bạn ở Mũi Né, Phan Thiết và PGA Golf NovaWorld.",
-                            "Đắm mình trong khung cảnh đại dương tuyệt đẹp cùng những trải nghiệm phong phú và đa dạng cho bất kỳ người chơi golf nào.",
-                            "PGA Golf NovaWorld Phan Thiết là điểm đến không thể bỏ qua cho những người đam mê golf ở Việt Nam và trên toàn thế giới.",
-                            "Thời lượng: 4 giờ 30 phút."
-                        ],
-                        "images": [
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_863/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/hq3fwgc6bcqggl3l5tqf/Tr%E1%BA%A3inghi%E1%BB%87mPGAGolfNovaWorld%E1%BB%9FPhanThi%E1%BA%BFt.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_729/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/xb9lvkwadddquoae2oh4/Tr%E1%BA%A3inghi%E1%BB%87mPGAGolfNovaWorld%E1%BB%9FPhanThi%E1%BA%BFt.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_863/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/q6w60euwaaueymadrc1d/Tr%E1%BA%A3inghi%E1%BB%87mPGAGolfNovaWorld%E1%BB%9FPhanThi%E1%BA%BFt.webp",
-                            "https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_727/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/ld5e4ndovcax0pgxfbjn/Tr%E1%BA%A3inghi%E1%BB%87mPGAGolfNovaWorld%E1%BB%9FPhanThi%E1%BA%BFt.webp"
-                        ],
-                        "gps": {
-                            "lat": 10.831127341771227,
-                            "lng": 108.02718408222722
-                        },
-                        "opening_hours": "Thứ Hai-Chủ Nhật: 06:00-18:00",
-                        "entry_fee": 2457500,
-                        "tags": [
-                            "Sightseeing",
-                            "Adventure Sports",
-                            "Adventure Seekers",
-                            "Solo Traveler",
-                            "Couples",
-                            "Friends",
-                            "Kids Friendly",
-                            "Family",
-                            "Elderly Friendly",
-                            "Morning",
-                            "Afternoon",
-                            "Half Day",
-                            "4 hours 30 minutes",
-                            "<=5000000 VND",
-                            "Spring",
-                            "Summer",
-                            "Autumn",
-                            "Winter"
-                        ],
-                        "source": "https://www.klook.com/vi/activity/108785-pga-novaworld-golf-experience-phan-thiet/"
                     },
                     {
                         "name": "Tham Quan Vùng Nông Thôn Đà Lạt",

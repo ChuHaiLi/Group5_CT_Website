@@ -40,8 +40,9 @@ class Province(db.Model):
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
+    tagline = db.Column(db.String(50), default="#VN", nullable=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False, index=True)  # Thêm index
+    email = db.Column(db.String(120), unique=True, nullable=False, index=True)  
     phone = db.Column(db.String(30), nullable=True)
     password = db.Column(db.String(200), nullable=False)
     avatar_url = db.Column(db.String(255), nullable=True)
@@ -53,15 +54,16 @@ class User(db.Model):
 
     # Email verification
     is_email_verified = db.Column(db.Boolean, default=False)
-    verification_token = db.Column(db.String(200), nullable=True)  # THÊM MỚI
-    
+    verification_token = db.Column(db.String(200), nullable=True)  
+    pending_email = db.Column(db.String(120), nullable=True)
+
     # Password reset
     reset_token = db.Column(db.String(200), nullable=True)
-    reset_token_expiry = db.Column(db.DateTime, nullable=True)  # THÊM MỚI
+    reset_token_expiry = db.Column(db.DateTime, nullable=True)  
     
     # Timestamps
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)  # THÊM MỚI
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow) 
     
     # Relationships (giữ nguyên)
     saved_destinations = db.relationship("SavedDestination", backref="user", lazy=True)

@@ -81,7 +81,7 @@ export default function Footer() {
           <ul className="footer-contact">
             <li>
               <FaEnvelope />
-              <a href="mailto:hello@wonderai.travel">hello@wonderai.travel</a>
+              <a href="mailto:hellowonderai@gmail.com">hellowonderai@gmail.com</a>
             </li>
             <li>
               <FaPhoneAlt />

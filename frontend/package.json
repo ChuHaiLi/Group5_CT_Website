@@ -18,6 +18,7 @@
     "react-router-dom": "^7.9.5",
     "react-scripts": "5.0.1",
     "react-toastify": "^11.0.5",
+    "recharts": "^3.5.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
@@ -43,5 +44,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "typescript": "^5.9.3"
   }
 }
