@@ -1,8 +1,12 @@
 /* --- GLOBAL STYLES --- */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
+/* --- GLOBAL STYLES --- */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
 .saved-wrapper {
   padding: 2rem 4rem;
+  font-family: 'Poppins', sans-serif;
   font-family: 'Poppins', sans-serif;
   background: #f9fafb;
   min-height: 100vh;
@@ -19,6 +23,7 @@
 }
 
 /* HEADER */
+/* HEADER */
 .saved-header {
   width: 100%;
   display: flex;
@@ -33,6 +38,7 @@
   margin-bottom: 0.5rem;
   color: #111827;
   font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
 
 .saved-header p {
@@ -41,6 +47,7 @@
   font-size: 1rem;
 }
 
+/* TABS */
 /* TABS */
 .saved-tabs {
   display: flex;
@@ -58,6 +65,9 @@
   color: #6b7280;
   transition: all 0.2s ease;
   font-family: 'Poppins', sans-serif;
+  color: #6b7280;
+  transition: all 0.2s ease;
+  font-family: 'Poppins', sans-serif;
 }
 
 .saved-tabs button.active {
@@ -67,12 +77,19 @@
 }
 
 /* FIX HOVER TAB: Chữ đen nền xám */
+.saved-tabs button:not(.active):hover { 
+  background: #f3f4f6;
+  color: #111827;
+  border-color: #d1d5db;
+}
+/* FIX HOVER TAB: Chữ đen nền xám */
 .saved-tabs button:not(.active):hover {
   background: #f3f4f6;
   color: #111827;
   border-color: #d1d5db;
 }
 
+/* SEARCH BAR */
 /* SEARCH BAR */
 .saved-search {
   display: flex;
@@ -242,6 +259,7 @@
 }
 
 /* GRID LAYOUT */
+/* GRID LAYOUT */
 .saved-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -279,7 +297,28 @@
   font-family: 'Poppins', sans-serif;
 }
 
-/* --- CÁC STYLE KHÁC CỦA MODAL/FOLDER (GIỮ NGUYÊN) --- */
+/* ================================================= */
+/* FOLDER & MODAL STYLES */
+/* ================================================= */
+
+/* Grid Folder */
+.folders-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.folder-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.2rem;
+}
+/* ================================================= */
+/* FOLDER & MODAL STYLES */
+/* ================================================= */
+
+/* Grid Folder */
 .folders-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -293,7 +332,128 @@
   padding: 1.2rem;
   display: flex;
   flex-direction: column;
+  flex-direction: column;
   justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.2s;
+  height: 120px;
+  position: relative;
+}
+.folder-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transform: translateY(-2px);
+  border-color: #d1d5db;
+}
+
+.folder-icon {
+  font-size: 2rem;
+  color: #3b82f6;
+  margin-bottom: 0.5rem;
+}
+
+.folder-info h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.folder-info p { margin: 2px 0 0 0; font-size: 0.8rem; color: #9ca3af; }
+
+.delete-folder-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  color: #ef4444;
+  opacity: 0;
+  transition: opacity 0.2s;
+  cursor: pointer;
+}
+
+.folder-card:hover .delete-folder-btn { opacity: 1; }
+
+.folder-card.create-new {
+  border: 2px dashed #d1d5db;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+}
+
+.folder-card.create-new:hover { border-color: #3b82f6; color: #3b82f6; }
+
+.folder-icon-circle {
+  width: 40px; height: 40px; background: #f3f4f6; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; margin-bottom: 0.5rem;
+}
+
+/* Giao diện bên trong Folder */
+.folder-header-bar {
+  display: flex;
+  cursor: pointer;
+  transition: all 0.2s;
+  height: 120px;
+  position: relative;
+}
+.folder-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transform: translateY(-2px);
+  border-color: #d1d5db;
+}
+
+.folder-icon {
+  font-size: 2rem;
+  color: #3b82f6;
+  margin-bottom: 0.5rem;
+}
+
+.folder-info h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.folder-info p { margin: 2px 0 0 0; font-size: 0.8rem; color: #9ca3af; }
+
+.delete-folder-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  color: #ef4444;
+  opacity: 0;
+  transition: opacity 0.2s;
+  cursor: pointer;
+}
+
+.folder-card:hover .delete-folder-btn { opacity: 1; }
+
+.folder-card.create-new {
+  border: 2px dashed #d1d5db;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+}
+
+.folder-card.create-new:hover { border-color: #3b82f6; color: #3b82f6; }
+
+.folder-icon-circle {
+  width: 40px; height: 40px; background: #f3f4f6; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; margin-bottom: 0.5rem;
+}
+
+/* Giao diện bên trong Folder */
+.folder-header-bar {
+  display: flex;
   cursor: pointer;
   transition: all 0.2s;
   height: 120px;
@@ -371,7 +531,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  justify-content: space-between;
   margin-bottom: 2rem;
+  padding-bottom: 1rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid #e5e7eb;
 }
@@ -389,7 +551,22 @@
   color: #111827;
 }
 
-.back-btn {
+.folder-header-bar h2 {
+  margin: 0;
+  font-size: 1.6rem;
+  font-family: 'Poppins', sans-serif;
+  color: #111827;
+}
+
+.folder-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.folder-header-row {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -409,9 +586,29 @@
 
 .folder-actions {
   display: flex;
-  gap: 12px;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  width: 100%;
 }
 
+.back-btn {
+  display: flex; align-items: center; gap: 0.5rem;
+  background: transparent; border: none; font-weight: 600;
+  cursor: pointer; color: #6b7280; font-size: 1rem;
+  padding: 0.5rem 0; font-family: 'Poppins', sans-serif;
+}
+.back-btn:hover { color: #111827; }
+
+.folder-actions { display: flex; gap: 12px; }
+
+.action-btn {
+  display: flex; align-items: center; gap: 0.6rem;
+  border: none; padding: 0.6rem 1.4rem; border-radius: 99px;
+  font-weight: 600; font-size: 0.95rem; cursor: pointer;
+  transition: all 0.2s; font-family: 'Poppins', sans-serif;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
 .action-btn {
   display: flex;
   align-items: center;
@@ -427,27 +624,77 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
-.add-btn {
-  background: #2563eb;
-  color: white;
+.add-btn { background: #2563eb; color: white; }
+.add-btn:hover { background: #1d4ed8; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(37, 99, 235, 0.2); }
+
+.remove-btn { background: white; border: 1px solid #fee2e2; color: #ef4444; }
+.remove-btn:hover { background: #fef2f2; border-color: #ef4444; }
+
+.folder-empty-state { text-align: center; padding: 3rem; color: #9ca3af; }
+
+/* MODAL STYLES */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+
+  background: rgba(0,0,0,0.5);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 2000;
 }
 
-.add-btn:hover {
-  background: #1d4ed8;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(37, 99, 235, 0.2);
+.create-folder-modal {
+  background: white; padding: 2rem; border-radius: 12px; width: 400px;
+  text-align: center;
 }
 
-.remove-btn {
-  background: white;
-  border: 1px solid #fee2e2;
-  color: #ef4444;
+.create-folder-modal input {
+  width: 100%; padding: 0.8rem; margin: 1rem 0;
+  border: 1px solid #d1d5db; border-radius: 8px;
+  box-sizing: border-box; font-family: 'Poppins', sans-serif;
 }
 
-.remove-btn:hover {
-  background: #fef2f2;
-  border-color: #ef4444;
+.add-to-folder-modal {
+  background: white; border-radius: 12px; width: 500px; max-width: 90%;
+  display: flex; flex-direction: column; max-height: 80vh;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
 }
+
+.modal-header { padding: 1.5rem; border-bottom: 1px solid #f3f4f6; }
+.modal-header h3 { margin: 0; font-size: 1.2rem; font-family: 'Poppins', sans-serif; }
+.modal-header p { margin: 5px 0 0 0; color: #6b7280; font-size: 0.9rem; }
+
+.modal-body-list { padding: 1rem; overflow-y: auto; flex: 1; }
+
+.select-item-row {
+  display: flex; align-items: center; padding: 0.8rem;
+  border-radius: 8px; cursor: pointer; transition: background 0.2s;
+  border: 1px solid transparent; margin-bottom: 0.5rem;
+}
+
+.select-item-row:hover { background: #f9fafb; }
+.select-item-row.selected { background: #eff6ff; border-color: #bfdbfe; }
+
+/* Style riêng cho nút Remove (Màu đỏ nhạt khi chọn) */
+.select-item-row.selected-remove { background: #fef2f2; border-color: #fecaca; }
+
+.select-item-row img {
+  width: 50px; height: 50px; border-radius: 6px; object-fit: cover; margin-right: 1rem;
+}
+
+.select-item-info { flex: 1; display: flex; flex-direction: column; }
+.select-item-info strong { font-size: 0.95rem; color: #374151; }
+.select-item-info span { font-size: 0.8rem; color: #9ca3af; }
+
+.checkbox-circle {
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 2px solid #d1d5db; display: flex; align-items: center; justify-content: center;
+}
+
+.remove-btn { background: white; border: 1px solid #fee2e2; color: #ef4444; }
+.remove-btn:hover { background: #fef2f2; border-color: #ef4444; }
 
 .folder-empty-state {
   grid-column: 1 / -1 !important;
@@ -590,10 +837,7 @@
   justify-content: center;
 }
 
-.select-item-row.selected .checkbox-circle {
-  border-color: #3b82f6;
-  background: #3b82f6;
-}
+.select-item-row.selected .checkbox-circle { border-color: #3b82f6; background: #3b82f6; }
 
 .checkbox-circle.remove-style {
   border-color: #ef4444;
@@ -618,32 +862,9 @@
   border-top: 1px solid #f3f4f6;
 }
 
-.btn-cancel {
-  background: #f3f4f6;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 600;
-}
-
-.btn-create,
-.btn-apply {
-  background: #10b981;
-  color: white;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 600;
-}
-
-.btn-apply:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+.btn-cancel { background: #f3f4f6; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-family: 'Poppins', sans-serif; font-weight: 600; }
+.btn-create, .btn-apply { background: #10b981; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-family: 'Poppins', sans-serif; font-weight: 600; }
+.btn-apply:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .btn-apply.btn-danger {
   background: #ef4444;

@@ -1,23 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import { FaEnvelope, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
-
-// Mock API for demo
-const API = {
-  post: async (url, data) => {
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    if (url === "/auth/verify-email-change") {
-      if (data.otp_code === "123456") {
-        return { data: { message: "Email changed successfully!" } };
-      }
-      throw { response: { data: { error_type: "invalid_otp" } } };
-    }
-    if (url === "/auth/request-email-change") {
-      return { data: { message: "New code sent to your email" } };
-    }
-  }
-};
+import API from "../untils/axios"; 
 
 export default function VerifyEmailChangePage() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -28,8 +13,8 @@ export default function VerifyEmailChangePage() {
   
   const navigate = useNavigate();
   const location = useLocation();
-  const newEmail = location.state?.newEmail || "newemail@example.com";
-  const oldEmail = location.state?.oldEmail || "oldemail@example.com";
+  const newEmail = location.state?.newEmail || "";
+  const oldEmail = location.state?.oldEmail || "";
 
   // Countdown timer
   useEffect(() => {
@@ -45,6 +30,14 @@ export default function VerifyEmailChangePage() {
       inputRefs.current[0].focus();
     }
   }, []);
+
+  // Redirect nếu không có email
+  useEffect(() => {
+    if (!newEmail) {
+      toast.error("Invalid request. Please try again from profile settings.");
+      navigate("/profile?tab=settings");
+    }
+  }, [newEmail, navigate]);
 
   const handleChange = (index, value) => {
     if (value && !/^\d$/.test(value)) return;
@@ -99,8 +92,15 @@ export default function VerifyEmailChangePage() {
 
       toast.success(res.data.message || "Email changed successfully!");
       
+      // 🔥 CẬP NHẬT PROFILE TRONG LOCALSTORAGE
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      storedUser.email = res.data.new_email || newEmail;
+      localStorage.setItem("user", JSON.stringify(storedUser));
+      
       // Dispatch event để cập nhật header
-      window.dispatchEvent(new Event('authChange'));
+      window.dispatchEvent(new CustomEvent('wonder-profile-updated', { 
+        detail: storedUser 
+      }));
       
       // Chuyển hướng về profile sau 1.5s
       setTimeout(() => {
@@ -118,8 +118,10 @@ export default function VerifyEmailChangePage() {
         inputRefs.current[0]?.focus();
       } else if (errorData?.error_type === "otp_expired") {
         toast.error("Verification code expired. Please request a new one.");
+      } else if (errorData?.message) {
+        toast.error(errorData.message);
       } else {
-        toast.error(errorData?.message || "Verification failed");
+        toast.error("Verification failed. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -167,7 +169,7 @@ export default function VerifyEmailChangePage() {
       position: 'relative',
       fontFamily: "'Poppins', 'Segoe UI', sans-serif",
       overflow: 'hidden',
-      ckground: '#0a0a0a'
+      background: '#ffffff'
     }}>
       {/* Subtle gradient overlay */}
       <div style={{
