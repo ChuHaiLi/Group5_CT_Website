@@ -1338,15 +1338,17 @@ def get_place_duration(destination_obj):
 # LOGIC LỘ TRÌNH TỰ ĐỘNG (TỐI ƯU HÓA DỰA TRÊN THỜI LƯỢNG MỚI)
 # -------------------------------------------------------------
 
-def generate_itinerary_optimized(province_id, duration_days, must_include_place_ids=None):
+def generate_itinerary_optimized(province_id, duration_days, must_include_place_ids=None, excluded_ids=None):
     if must_include_place_ids is None:
         must_include_place_ids = []
+    if excluded_ids is None:
+        excluded_ids = []
         
-    excluded_ids = set(must_include_place_ids)
+    all_excluded_ids = set(must_include_place_ids) | set(excluded_ids)
     
-    MAX_HOURS_PER_DAY = 9.0        
-    TRAVEL_BUFFER_HOURS = 0.5    
-    MAX_PLACES_LIMIT = 4    
+    MAX_HOURS_PER_DAY = 11.0 
+    TRAVEL_BUFFER_HOURS = 0.5 
+    MAX_PLACES_LIMIT = 4 
     MAX_TOTAL_PLACES_SELECTION = duration_days * MAX_PLACES_LIMIT
     
     # -----------------------------------------------------------------
@@ -1357,13 +1359,15 @@ def generate_itinerary_optimized(province_id, duration_days, must_include_place_
     must_include_places = []
     for place_id in must_include_place_ids:
         place = db.session.get(Destination, place_id)
-        if place:
+        # Chỉ bao gồm điểm bắt buộc nếu nó chưa nằm trong danh sách ĐÃ ĐI
+        if place and place.id not in excluded_ids: 
             must_include_places.append(place)
             
     # Lấy các điểm còn lại (Priority 2)
+    # TRUY VẤN: Loại trừ TẤT CẢ các địa điểm (must-include + đã dùng)
     places_in_province = Destination.query.filter(
         Destination.province_id == province_id,
-        Destination.id.notin_(excluded_ids)
+        Destination.id.notin_(all_excluded_ids) 
     ).all()
         
     remaining_places_sorted = sorted(
@@ -1376,36 +1380,37 @@ def generate_itinerary_optimized(province_id, duration_days, must_include_place_
     num_to_select = MAX_TOTAL_PLACES_SELECTION - len(must_include_places)
     selected_remaining_places = remaining_places_sorted[:max(0, num_to_select)]
 
-    # CHUYỂN ĐỔI sang định dạng DICT (giữ nguyên logic ban đầu)
-    
+    # CHUYỂN ĐỔI sang định dạng DICT 
     places_to_assign = []
     must_include_dicts = []
     
-    for p in must_include_places + selected_remaining_places: 
+    # 1. Xử lý các điểm BẮT BUỘC
+    for p in must_include_places:
         raw_lat = getattr(p, 'latitude', None)
         raw_lon = getattr(p, 'longitude', None)
-        
         lat = float(raw_lat) if raw_lat is not None else 0.0
         lon = float(raw_lon) if raw_lon is not None else 0.0
-        
         place_dict = {
-            "id": p.id, 
-            "name": p.name, 
-            "category": p.category, 
-            "lat": lat,
-            "lon": lon, 
-            "assigned": False,
-            "duration_hours": get_place_duration(p) 
+            "id": p.id, "name": p.name, "category": p.category, "lat": lat, "lon": lon, 
+            "assigned": False, "duration_hours": get_place_duration(p) 
         }
+        must_include_dicts.append(place_dict)
         
-        if p.id in excluded_ids:
-            must_include_dicts.append(place_dict)
-        else:
-            places_to_assign.append(place_dict)
-            
+    # 2. Xử lý các điểm TỰ CHỌN
+    for p in selected_remaining_places:
+        raw_lat = getattr(p, 'latitude', None)
+        raw_lon = getattr(p, 'longitude', None)
+        lat = float(raw_lat) if raw_lat is not None else 0.0
+        lon = float(raw_lon) if raw_lon is not None else 0.0
+        place_dict = {
+            "id": p.id, "name": p.name, "category": p.category, "lat": lat, "lon": lon, 
+            "assigned": False, "duration_hours": get_place_duration(p) 
+        }
+        places_to_assign.append(place_dict)
+        
     # Xáo trộn các điểm tự chọn để tăng tính đa dạng (giữ nguyên)
     random.shuffle(places_to_assign) 
-    
+
     # -----------------------------------------------------------------
     # BƯỚC 2: PHÂN BỔ ĐIỂM VÀ TỐI ƯU HÓA VỊ TRÍ 
     # -----------------------------------------------------------------
@@ -1414,48 +1419,39 @@ def generate_itinerary_optimized(province_id, duration_days, must_include_place_
     # Danh sách kết hợp: BẮT BUỘC (ưu tiên) + TỰ CHỌN (sau)
     unassigned_places = must_include_dicts + places_to_assign
     
-    # Sắp xếp các điểm bắt buộc theo một thứ tự cố định (ví dụ: ID) để đảm bảo tính nhất quán
-    # Không cần sắp xếp lại nếu muốn giữ thứ tự ban đầu của must_include_place_ids, 
-    # nhưng việc ưu tiên gán là quan trọng hơn.
-    
     # Lặp qua các ngày
     for day_index in range(duration_days):
         
         current_daily_hours = 0.0
         current_time_slot_hour = 8.0 
         
-        # Tạo bản sao của danh sách để tránh sửa đổi trong khi lặp (không cần thiết với logic mới)
-        
         while current_daily_hours < MAX_HOURS_PER_DAY and unassigned_places:
             
             is_first_place = not itinerary_draft[day_index]["places"]
             
-            # --- TÌM ĐIỂM TIẾP THEO (Ưu tiên Điểm BẮT BUỘC) ---
+            # --- TÌM ĐIỂM TIẾP THEO (Ưu tiên Điểm BẮT BUỘNG) ---
             
             next_place_to_add = None
             candidates = []
             
-            must_include_still_unassigned = [p for p in unassigned_places if p['id'] in excluded_ids]
+            # must_include_place_ids là danh sách ban đầu, ta kiểm tra các điểm bắt buộc chưa được gán
+            must_include_still_unassigned = [p for p in unassigned_places if p['id'] in must_include_place_ids]
             
             if must_include_still_unassigned:
-                # Ưu tiên chọn địa điểm bắt buộc đầu tiên trong danh sách 
+                # Logic chọn điểm bắt buộc (giữ nguyên)
                 next_place_to_add = must_include_still_unassigned[0] 
-                # Cần tìm 'anchor' để tính thời gian di chuyển nếu không phải điểm đầu tiên
                 if not is_first_place:
                     last_place_info = itinerary_draft[day_index]["places"][-1]
                     last_place_db = db.session.get(Destination, last_place_info['id'])
-                    
                     anchor_lat = float(getattr(last_place_db, 'latitude', 0) or 0.0) 
                     anchor_lon = float(getattr(last_place_db, 'longitude', 0) or 0.0)
                 else:
-                    # Nếu là điểm đầu tiên, không cần tối ưu hóa vị trí
                     anchor_lat = next_place_to_add['lat']
                     anchor_lon = next_place_to_add['lon']
                     
             elif unassigned_places:
-                # Nếu không còn điểm bắt buộc, áp dụng TỐI ƯU HÓA VỊ TRÍ cho các điểm còn lại
+                # Logic chọn điểm tự chọn (giữ nguyên)
                 if is_first_place:
-                    # Chọn điểm tự chọn đầu tiên trong danh sách (đã được xáo trộn)
                     next_place_to_add = unassigned_places[0]
                     anchor_lat = next_place_to_add['lat']
                     anchor_lon = next_place_to_add['lon']
@@ -1468,7 +1464,6 @@ def generate_itinerary_optimized(province_id, duration_days, must_include_place_
                     anchor_lat = float(getattr(last_place_db, 'latitude', 0) or 0.0) 
                     anchor_lon = float(getattr(last_place_db, 'longitude', 0) or 0.0)
 
-                    # Sắp xếp các điểm chưa gán theo khoảng cách từ điểm neo
                     candidates = sorted(
                         [p for p in unassigned_places], 
                         key=lambda p: simple_distance(anchor_lat, anchor_lon, p['lat'], p['lon'])
@@ -1481,13 +1476,11 @@ def generate_itinerary_optimized(province_id, duration_days, must_include_place_
             
             time_spent = duration
             if not is_first_place:
-                # Bằng 0 nếu là điểm đầu tiên trong ngày, ngược lại là 0.5
                 time_spent += TRAVEL_BUFFER_HOURS 
             
             # 2.3. Kiểm tra Giới hạn Giờ
             if current_daily_hours + time_spent <= MAX_HOURS_PER_DAY:
                 
-                # Cần tìm và loại bỏ điểm đã được gán khỏi unassigned_places
                 unassigned_places.remove(next_place_to_add)
 
                 start_time_hour = int(current_time_slot_hour)
@@ -1513,11 +1506,9 @@ def generate_itinerary_optimized(province_id, duration_days, must_include_place_
                     current_time_slot_hour += TRAVEL_BUFFER_HOURS
                 
             else:
-                # Nếu không đủ thời gian, chuyển sang ngày tiếp theo (cho dù điểm đó là bắt buộc)
                 break
         
-        # Nếu còn điểm chưa gán, chúng sẽ được xử lý trong ngày tiếp theo.
-        # Danh sách unassigned_places đã được cập nhật trực tiếp.
+        # ... (Logic chèn Ăn trưa nếu có)
 
     # -----------------------------------------------------------------
     # BƯỚC CUỐI: 
@@ -1537,20 +1528,8 @@ def generate_itinerary_optimized(province_id, duration_days, must_include_place_
                 "places": clean_places
             })
 
-    # 🚨 BƯỚC MỚI: Kiểm tra các điểm bắt buộc CÓ được gán hết hay không
-    # (Nếu không đủ ngày/giờ, một số điểm bắt buộc có thể bị bỏ sót)
-    must_include_assigned_ids = set()
-    for day_plan in final_itinerary:
-        for place in day_plan['places']:
-            if place['id'] in excluded_ids:
-                must_include_assigned_ids.add(place['id'])
-
-    if len(must_include_assigned_ids) < len(must_include_place_ids):
-        # Nếu ít hơn số điểm bắt buộc, hàm gọi cần phải xử lý lỗi này
-        # hoặc ít nhất là gửi cảnh báo. Ở đây, ta vẫn trả về hành trình tốt nhất có thể.
-        print(f"Warning: Only {len(must_include_assigned_ids)}/{len(must_include_place_ids)} required places were assigned due to time constraints.")
-
-
+    # LƯU Ý: Đã xóa phần kiểm tra must_include_assigned_ids ở cuối vì logic này đã phức tạp và không cần thiết
+    
     return final_itinerary
 
 # -------------------------------------------------------------
@@ -1636,6 +1615,7 @@ def create_trip():
                 "province_name": province_name,
                 "duration": new_trip.duration,
                 "start_date": new_trip.start_date.strftime("%Y-%m-%d") if new_trip.start_date else None,
+                "end_date": new_trip.end_date.strftime("%Y-%m-%d") if new_trip.end_date else None,
                 "status": new_trip.status,
                 "metadata": metadata, 
                 "itinerary": itinerary_draft
@@ -1698,7 +1678,8 @@ def get_trip_details(trip_id):
         "end_date": trip.end_date.strftime("%Y-%m-%d") if trip.end_date else None,       
         "status": trip.status,                                                          
         "metadata": metadata,                                                           
-        "itinerary": itinerary_data, 
+        "itinerary": itinerary_data,
+        "province_id": trip.province_id,
         "last_updated": trip.updated_at.strftime("%Y-%m-%d %H:%M:%S") if hasattr(trip, 'updated_at') and trip.updated_at else None
     }), 200
 
@@ -1933,6 +1914,131 @@ def update_itinerary(trip_id):
         db.session.rollback()
         print(f"Error updating itinerary: {e}")
         return jsonify({"message": "An error occurred while updating the itinerary."}), 500
+    
+@app.route("/api/trips/<int:trip_id>/regenerate", methods=["POST"])
+@jwt_required()
+def regenerate_trip_itinerary(trip_id):
+    data = request.get_json() or {}
+    user_id = int(get_jwt_identity())
+    
+    trip = db.session.get(Itinerary, trip_id)
+
+    if not trip or trip.user_id != user_id:
+        return jsonify({"message": "Trip not found or unauthorized access."}), 404
+    
+    # Lấy thông tin cần thiết (cấu hình hiện tại)
+    province_id = data.get("province_id", trip.province_id)
+    duration_days = data.get("duration", trip.duration)
+    # Giả định must_include_place_ids là thuộc tính của trip hoặc được gửi lên
+    must_include_place_ids = data.get("must_include_place_ids", []) 
+
+    if not all([province_id, duration_days]):
+        return jsonify({"message": "Province ID and duration are required for regeneration."}), 400
+
+    try:
+        # 1. Tái tạo lịch trình
+        itinerary_draft = generate_itinerary_optimized(province_id, duration_days, must_include_place_ids)
+        
+        if not itinerary_draft and not must_include_place_ids:
+            return jsonify({"message": "No suitable destinations found to create an itinerary."}), 400
+            
+        # 2. Lưu lịch trình mới
+        trip.itinerary_json = json.dumps(itinerary_draft, ensure_ascii=False)
+        trip.updated_at = datetime.now()
+        db.session.commit()
+        
+        province_name = trip.province.name if trip.province else "Unknown Province"
+        
+        # Trả về lịch trình mới
+        return jsonify({
+            "message": "Itinerary successfully regenerated.",
+            "trip": {
+                "id": trip.id,
+                "name": trip.name,
+                "province_name": province_name,
+                "itinerary": itinerary_draft,
+                "duration": trip.duration
+            }
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error regenerating trip itinerary: {e}")
+        return jsonify({"message": "An error occurred during itinerary regeneration."}), 500
+
+# API: MỞ RỘNG CHUYẾN ĐI (THÊM 1 NGÀY VÀO LỊCH TRÌNH)
+@app.route("/api/trips/<int:trip_id>/extend", methods=["POST"])
+@jwt_required()
+def extend_trip_itinerary(trip_id):
+    data = request.get_json() or {}
+    user_id = int(get_jwt_identity())
+    
+    trip = db.session.get(Itinerary, trip_id)
+
+    if not trip or trip.user_id != user_id:
+        return jsonify({"message": "Trip not found or unauthorized access."}), 404
+        
+    duration_new = data.get("duration") 
+    new_day_number = data.get("new_day")
+    province_id = data.get("province_id", trip.province_id)
+    # ⭐ NHẬN THAM SỐ MỚI
+    used_place_ids = data.get("used_place_ids", []) 
+
+    if duration_new is None or new_day_number is None or new_day_number != duration_new:
+        return jsonify({"message": "Invalid extension data (new duration and new day must match)."}), 400
+    
+    # Cập nhật Duration và Status/Dates trước
+    trip.duration = duration_new 
+    if trip.start_date:
+        trip.end_date = trip.start_date + timedelta(days=duration_new - 1)
+        current_date = datetime.now().date()
+        if trip.start_date > current_date:
+            trip.status = 'UPCOMING'
+        elif trip.end_date >= current_date:
+            trip.status = 'ONGOING'
+        else:
+            trip.status = 'COMPLETED'
+
+    try:
+        # 1. Tái tạo lịch trình chỉ cho 1 ngày mới, loại trừ các địa điểm đã dùng
+        itinerary_draft_for_new_day = generate_itinerary_optimized(
+            province_id, 
+            1, 
+            must_include_place_ids=[], 
+            excluded_ids=used_place_ids # ⭐ TRUYỀN DANH SÁCH ĐÃ DÙNG VÀO HÀM LOGIC
+        ) 
+        
+        # 2. Kiểm tra nếu không có địa điểm mới nào được tạo
+        if not itinerary_draft_for_new_day or not itinerary_draft_for_new_day[0]['places']:
+            db.session.commit() # Commit cập nhật duration/status
+            # ⭐ TRẢ VỀ THÔNG BÁO CHO FRONTEND
+            return jsonify({
+                "message": "No suitable destinations found to create an itinerary for the new day.",
+                "new_day_itinerary": json.loads(trip.itinerary_json) if trip.itinerary_json else []
+            }), 200
+            
+        current_itinerary = json.loads(trip.itinerary_json) if trip.itinerary_json else []
+        
+        # 3. Nối lịch trình mới vào lịch trình cũ
+        day_content = itinerary_draft_for_new_day[0]
+        day_content['day'] = new_day_number
+        current_itinerary.append(day_content)
+        current_itinerary.sort(key=lambda x: x['day'])
+            
+        # 4. Lưu lịch trình mới
+        trip.itinerary_json = json.dumps(current_itinerary, ensure_ascii=False)
+        trip.updated_at = datetime.now()
+        db.session.commit()
+        
+        return jsonify({
+            "message": f"Trip successfully extended to Day {new_day_number}.",
+            "new_day_itinerary": current_itinerary 
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error extending trip itinerary: {e}")
+        return jsonify({"message": "An error occurred during trip extension."}), 500
     
 @app.route("/api/destinations/<int:destination_id>", methods=["GET"])
 @jwt_required()

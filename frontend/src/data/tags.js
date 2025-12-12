@@ -71,10 +71,11 @@ export const TAG_CATEGORIES = [
     title: "Budget",
     tags: [
       "Free",
-      "< 5 Triệu",
-      "5 - 10 Triệu",
-      "10 - 20 Triệu",
-      "> 20 Triệu",
+      "<=100000 VND",
+      "<=200000 VND",
+      "<=500000 VND",
+      "<=1000000 VND",
+      "<=2000000 VND"
     ]
   },
   {
