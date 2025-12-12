@@ -1,3 +1,4 @@
+import { toast } from "react-toastify";
 import React, {
   useCallback,
   useEffect,
@@ -6,18 +7,31 @@ import React, {
   useState,
 } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import API from "../untils/axios";
 import "../styles/ProfilePage.css";
+
+import { 
+  FaTag,
+  FaCheckCircle, 
+  FaTimesCircle,
+  FaUser,       
+  FaEnvelope,    
+  FaPhone,       
+  FaLock,
+  FaEye,        
+  FaEyeSlash 
+} from "react-icons/fa";
 
 const FALLBACK_AVATAR =
   "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80";
 
 const defaultProfile = {
   username: "",
+  taglineSuffix: "",
   email: "",
   phone: "",
-  password: "",
+  currentPassword: "",  
+  newPassword: "",        
   confirmPassword: "",
   avatarUrl: FALLBACK_AVATAR,
 };
@@ -30,6 +44,12 @@ export default function ProfilePage() {
   const initialTab =
     tabParam === "dashboard" || tabParam === "settings" ? tabParam : "settings";
   const [activeSection, setActiveSection] = useState(initialTab);
+
+  // ← NEW: Scroll sections
+  const [activeScrollSection, setActiveScrollSection] = useState("account");
+  const accountSectionRef = useRef(null);
+  const personalInfoSectionRef = useRef(null);
+  const passwordSectionRef = useRef(null);
 
   const [userId, setUserId] = useState(null);
   const [profileData, setProfileData] = useState(defaultProfile);
@@ -45,29 +65,76 @@ export default function ProfilePage() {
   // Validation states
   const [touched, setTouched] = useState({
     email: false,
-    password: false,
+    currentPassword: false,  
+    newPassword: false,       
     confirmPassword: false,
+  });
+
+   const [showPassword, setShowPassword] = useState({
+    current: false,
+    new: false,
+    confirm: false,
+  });
+
+  const [modified, setModified] = useState({
+    accountId: false,
+    personalInfo: false,
+    password: false,
   });
 
   const [validation, setValidation] = useState({
     emailValid: true,
-    passwordValid: true,
+    newPasswordValid: true,   
     passwordsMatch: true,
   });
+
+  // Store original values for cancel functionality
+  const [originalData, setOriginalData] = useState(defaultProfile);
 
   // Validate fields
   useEffect(() => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const emailValid = profileData.email.length === 0 || emailRegex.test(profileData.email);
-    const passwordValid = profileData.password.length === 0 || profileData.password.length >= 6;
-    const passwordsMatch = profileData.password.length === 0 || profileData.password === profileData.confirmPassword;
+    const newPasswordValid = profileData.newPassword.length === 0 || profileData.newPassword.length >= 6;
+    const passwordsMatch = profileData.newPassword.length === 0 || profileData.newPassword === profileData.confirmPassword;
 
     setValidation({
       emailValid,
-      passwordValid,
+      newPasswordValid,
       passwordsMatch,
     });
-  }, [profileData.email, profileData.password, profileData.confirmPassword]);
+  }, [profileData.email, profileData.newPassword, profileData.confirmPassword]);
+
+  // ← NEW: Scroll spy effect
+ useEffect(() => {
+  if (activeSection !== "settings") return;
+
+  const handleScroll = () => {
+    const scrollY = window.scrollY + 150;
+
+    const sections = [
+      { ref: accountSectionRef, name: 'account' },
+      { ref: personalInfoSectionRef, name: 'personal' },
+      { ref: passwordSectionRef, name: 'password' }
+    ];
+
+    // Tìm section hiện tại dựa trên scroll position
+    for (let i = sections.length - 1; i >= 0; i--) {
+      const section = sections[i];
+      if (section.ref.current) {
+        const sectionTop = section.ref.current.offsetTop;
+        if (scrollY >= sectionTop - 50) {
+          setActiveScrollSection(section.name);
+          break;
+        }
+      }
+    }
+  };
+
+  window.addEventListener("scroll", handleScroll);
+  handleScroll();
+  return () => window.removeEventListener("scroll", handleScroll);
+}, [activeSection]);
 
   const broadcastProfile = useCallback((payload = {}, persist = false) => {
     const normalized = {
@@ -88,16 +155,23 @@ export default function ProfilePage() {
   const fetchProfile = useCallback(async () => {
     try {
       const { data } = await API.get("/auth/me");
+      let taglineSuffix = "";
+      if (data.tagline) {
+      taglineSuffix = data.tagline.replace(/^#VN/, "");
+    }
       const nextProfile = {
         username: data.username || data.name || "",
+        taglineSuffix: taglineSuffix,
         email: data.email || "",
         phone: data.phone || "",
-        password: "",
+        currentPassword: "",
+        newPassword: "",
         confirmPassword: "",
         avatarUrl: data.avatar || FALLBACK_AVATAR,
       };
       setUserId(data.id ?? null);
       setProfileData((prev) => ({ ...prev, ...nextProfile }));
+      setOriginalData(nextProfile); 
       setAvatarPreview(nextProfile.avatarUrl);
       localStorage.setItem("wonder-profile", JSON.stringify(nextProfile));
       broadcastProfile(
@@ -164,12 +238,13 @@ export default function ProfilePage() {
       setUploadingAvatar(true);
       
       try {
-        const { data } = await API.put("/profile", { avatarUrl: avatarDataUrl });
+        await API.put("/profile", { avatarUrl: avatarDataUrl });
         
         setProfileData((prev) => ({
           ...prev,
           avatarUrl: avatarDataUrl,
-          password: "",
+          currentPassword: "",
+          newPassword: "",
           confirmPassword: "",
         }));
         
@@ -178,7 +253,8 @@ export default function ProfilePage() {
         const updatedProfile = {
           ...profileData,
           avatarUrl: avatarDataUrl,
-          password: "",
+          currentPassword: "",
+          newPassword: "",
           confirmPassword: "",
         };
         localStorage.setItem("wonder-profile", JSON.stringify(updatedProfile));
@@ -198,7 +274,7 @@ export default function ProfilePage() {
         
       } catch (error) {
         console.error("Avatar upload failed", error);
-        alert("⚠️ Unable to load avatar. Please try again.");
+        alert("⚠️ Unable to upload avatar. Please try again.");
       } finally {
         setUploadingAvatar(false);
       }
@@ -206,13 +282,65 @@ export default function ProfilePage() {
     [broadcastProfile, userId, profileData]
   );
 
-  const handleInputChange = (event) => {
+   const handleInputChange = (event) => {
     const { name, value } = event.target;
+    
+    if (name === 'taglineSuffix') {
+    const limitedValue = value.slice(0, 5);
+    setProfileData((prev) => ({ ...prev, taglineSuffix: limitedValue }));
+    setModified(prev => ({ ...prev, accountId: true }));
+    return;
+  }
+
     setProfileData((prev) => ({ ...prev, [name]: value }));
+    
+    // Track modifications
+    if (name === 'username') {
+      setModified(prev => ({ ...prev, accountId: true }));
+    } else if (name === 'email' || name === 'phone') {
+      setModified(prev => ({ ...prev, personalInfo: true }));
+    } else if (name === 'currentPassword' || name === 'newPassword' || name === 'confirmPassword') {
+      setModified(prev => ({ ...prev, password: true }));
+    }
   };
 
   const handleBlur = (field) => {
     setTouched(prev => ({ ...prev, [field]: true }));
+  };
+
+  const handleCancelAccountId = () => {
+    setProfileData(prev => ({ 
+    ...prev, 
+    username: originalData.username,
+    taglineSuffix: originalData.taglineSuffix
+  }));
+    setModified(prev => ({ ...prev, accountId: false }));
+  };
+
+  const handleCancelPersonalInfo = () => {
+    setProfileData(prev => ({ 
+      ...prev, 
+      email: originalData.email,
+      phone: originalData.phone 
+    }));
+    setTouched(prev => ({ ...prev, email: false }));
+    setModified(prev => ({ ...prev, personalInfo: false }));
+  };
+
+  const handleCancelPassword = () => {
+    setProfileData(prev => ({ 
+      ...prev, 
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    }));
+    setTouched(prev => ({ 
+      ...prev, 
+      currentPassword: false,
+      newPassword: false,
+      confirmPassword: false 
+    }));
+    setModified(prev => ({ ...prev, password: false }));
   };
 
   const handleAvatarChange = (event) => {
@@ -243,92 +371,223 @@ export default function ProfilePage() {
     reader.readAsDataURL(file);
   };
 
-  const handleSaveProfile = async (event) => {
+  const handleSaveProfile = async (event, section = 'all') => {
     event.preventDefault();
 
-    // Mark all as touched
-    setTouched({
-      email: true,
-      password: true,
-      confirmPassword: true,
-    });
+    // Validate based on section
+    if (section === 'accountId') {  
+      if (!profileData.username || !profileData.username.trim()) {
+        alert("❌ Username is required.");
+        return;
+      }
+      if (profileData.taglineSuffix.length < 3 || profileData.taglineSuffix.length > 5) {
+        alert("❌ Tagline must be between 3 and 5 characters.");
+        return;
+      }
+    } else if (section === 'personalInfo') {
+      setTouched(prev => ({ ...prev, email: true }));
+      
+      if (!validation.emailValid) {
+        alert("❌ Please enter a valid email address.");
+        return;
+      }
 
-    // Validation
-    if (!validation.emailValid) {
-      alert("Please enter a valid email address.");
-      return;
+      const emailChanged = profileData.email.toLowerCase() !== originalData.email.toLowerCase();
+  
+  if (emailChanged) {
+    // Gửi yêu cầu OTP thay vì cập nhật trực tiếp
+    setSavingProfile(true);
+    
+    try {
+      const res = await API.post("/auth/request-email-change", {
+        new_email: profileData.email
+      });
+      
+      toast.success(res.data.message || "Verification code sent to your new email!");
+      
+      // Redirect đến trang verify
+      navigate("/verify-email-change", {
+        state: {
+          newEmail: profileData.email,
+          oldEmail: originalData.email
+        }
+      });
+      
+      return; // 🔥 QUAN TRỌNG: Dừng tại đây, không chạy phần save bên dưới
+      
+    } catch (error) {
+      console.error("Request email change error:", error);
+      const errorResponse = error.response?.data;
+      
+      if (errorResponse?.message) {
+        toast.error(errorResponse.message);
+      } else {
+        toast.error("Unable to send verification code. Please try again.");
+      }
+    } finally {
+      setSavingProfile(false);
     }
+    
+    return; // Dừng tại đây
+  }
+    } else if (section === 'password') {
+      setTouched({
+        email: touched.email,
+        currentPassword: true,
+        newPassword: true,
+        confirmPassword: true,
+      });
 
-    if (profileData.password && profileData.password.trim() && !validation.passwordValid) {
-      alert("Password must be at least 6 characters.");
-      return;
-    }
-
-    if (profileData.password && profileData.password.trim() && !validation.passwordsMatch) {
-      alert("Mật khẩu và xác nhận mật khẩu không khớp.");
-      return;
+      const wantsPasswordChange = profileData.newPassword && profileData.newPassword.trim();
+      
+      if (wantsPasswordChange) {
+        if (!profileData.currentPassword || !profileData.currentPassword.trim()) {
+          alert("❌ Please enter your current password to change password.");
+          return;
+        }
+        
+        if (!validation.newPasswordValid) {
+          alert("❌ New password must be at least 6 characters.");
+          return;
+        }
+        
+        if (!validation.passwordsMatch) {
+          alert("❌ New passwords do not match.");
+          return;
+        }
+      } else {
+        alert("❌ Please enter a new password to change your password.");
+        return;
+      }
     }
 
     setSavingProfile(true);
     try {
-      const payload = {
-        username: profileData.username,
-        email: profileData.email,
-        phone: profileData.phone,
-        avatarUrl: profileData.avatarUrl,
-      };
-
-      if (profileData.password && profileData.password.trim()) {
-        payload.password = profileData.password.trim();
+      // 🔥 QUAN TRỌNG: CHỈ GỬI FIELDS CẦN THIẾT
+      let payload = {};
+      
+      if (section === 'accountId') {
+        // Chỉ gửi username và tagline
+        const fullTagline = `#VN${profileData.taglineSuffix}`;
+        payload = {
+          username: profileData.username,
+          tagline: fullTagline,
+        };
+      } else if (section === 'personalInfo') {
+        // Chỉ gửi email và phone
+        payload = {
+          email: profileData.email,
+          phone: profileData.phone,
+        };
+      } else if (section === 'password') {
+        // Chỉ gửi password fields
+        payload = {
+          currentPassword: profileData.currentPassword.trim(),
+          newPassword: profileData.newPassword.trim(),
+        };
       }
 
       const { data } = await API.put("/profile", payload);
 
-      const updatedProfile = {
-        username: data.user.username || "",
-        email: data.user.email || "",
-        phone: data.user.phone || "",
-        password: "",
-        confirmPassword: "",
-        avatarUrl: data.user.avatar || FALLBACK_AVATAR,
-      };
-
-      setProfileData(updatedProfile);
-      setAvatarPreview(updatedProfile.avatarUrl);
-      
-      localStorage.setItem("wonder-profile", JSON.stringify(updatedProfile));
-      
-      broadcastProfile(
-        {
-          id: userId,
-          username: updatedProfile.username,
-          email: updatedProfile.email,
-          phone: updatedProfile.phone,
-          avatar: updatedProfile.avatarUrl,
-        },
-        true
-      );
-
-      // Reset touched state
-      setTouched({
-        email: false,
-        password: false,
-        confirmPassword: false,
+      // 🔥 QUAN TRỌNG: CHỈ CẬP NHẬT FIELDS ĐÃ SAVE, GIỮ NGUYÊN CÁC FIELDS KHÁC
+      setProfileData(prev => {
+        const updated = { ...prev };
+        
+        if (section === 'accountId') {
+          // Chỉ cập nhật username và tagline
+          updated.username = data.user?.username || data.username || prev.username;
+          
+          if (data.user?.tagline || data.tagline) {
+            const fullTag = data.user?.tagline || data.tagline;
+            updated.taglineSuffix = fullTag.replace(/^#VN/, "");
+          }
+        } else if (section === 'personalInfo') {
+          // Chỉ cập nhật email và phone
+          updated.email = data.user?.email || data.email || prev.email;
+          updated.phone = data.user?.phone || data.phone || prev.phone;
+        } else if (section === 'password') {
+          // Reset password fields sau khi đổi thành công
+          updated.currentPassword = "";
+          updated.newPassword = "";
+          updated.confirmPassword = "";
+        }
+        
+        return updated;
       });
       
-      alert("✅ Profile updated successfully!");
+      // Cập nhật originalData chỉ cho fields đã save
+      setOriginalData(prev => {
+        const updated = { ...prev };
+        
+        if (section === 'accountId') {
+          updated.username = data.user?.username || data.username || prev.username;
+          if (data.user?.tagline || data.tagline) {
+            const fullTag = data.user?.tagline || data.tagline;
+            updated.taglineSuffix = fullTag.replace(/^#VN/, "");
+          }
+        } else if (section === 'personalInfo') {
+          updated.email = data.user?.email || data.email || prev.email;
+          updated.phone = data.user?.phone || data.phone || prev.phone;
+        }
+        
+        return updated;
+      });
+      
+      localStorage.setItem("wonder-profile", JSON.stringify(profileData));
+      
+      // Broadcast chỉ khi có thay đổi avatar hoặc username
+      if (section === 'accountId' || section === 'personalInfo') {
+        broadcastProfile(
+          {
+            id: userId,
+            username: profileData.username,
+            email: profileData.email,
+            phone: profileData.phone,
+            avatar: profileData.avatarUrl,
+          },
+          true
+        );
+      }
+
+      // Reset states based on section
+      if (section === 'accountId') {
+        setModified(prev => ({ ...prev, accountId: false }));
+        alert("✅ Account ID updated successfully!");
+      } else if (section === 'personalInfo') {
+        setTouched(prev => ({ ...prev, email: false }));
+        setModified(prev => ({ ...prev, personalInfo: false }));
+        alert("✅ Personal information updated successfully!");
+      } else if (section === 'password') {
+        setTouched({
+          email: false,
+          currentPassword: false,
+          newPassword: false,
+          confirmPassword: false,
+        });
+        setModified(prev => ({ ...prev, password: false }));
+        alert("✅ Password updated successfully!");
+      }
       
     } catch (error) {
       console.error("Update profile error:", error);
       
-      const apiErrors = error.response?.data?.errors;
-      if (apiErrors) {
-        const errorMessages = Object.entries(apiErrors)
+      const errorResponse = error.response?.data;
+      
+      if (errorResponse?.errors) {
+        const errorMessages = Object.entries(errorResponse.errors)
           .map(([field, msg]) => `${field}: ${msg}`)
           .join("\n");
-        alert(errorMessages);
+        alert(`❌ Update failed:\n${errorMessages}`);
+      } else if (errorResponse?.message) {
+        if (errorResponse.message.includes("current password")) {
+          alert("❌ Current password is incorrect. Please try again.");
+        } else if (errorResponse.message.includes("password")) {
+          alert(`❌ Password update failed: ${errorResponse.message}`);
+        } else {
+          alert(`❌ ${errorResponse.message}`);
+        }
       } else {
-        alert(error.response?.data?.message || "Unable to update profile.");
+        alert("❌ Unable to update profile. Please check your connection and try again.");
       }
     } finally {
       setSavingProfile(false);
@@ -367,7 +626,27 @@ export default function ProfilePage() {
     return highest > 0 ? highest : 1;
   }, [chartData]);
 
-  const renderUserSettings = () => {
+  // ← NEW: Scroll to section
+  const scrollToSection = (section) => {
+    setActiveScrollSection(section);
+    let ref;
+    
+    if (section === "account") {
+      ref = accountSectionRef;
+    } else if (section === "personal") {
+      ref = personalInfoSectionRef;
+    } else if (section === "password") {
+      ref = passwordSectionRef;
+    }
+    
+    if (ref?.current) {
+      const yOffset = -100;
+      const y = ref.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+  };
+
+   const renderUserSettings = () => {
     const isActive = activeSection === "settings";
     return (
       <div
@@ -377,216 +656,373 @@ export default function ProfilePage() {
         aria-labelledby="control-tab-settings"
         aria-hidden={!isActive}
       >
-        <div className="settings-avatar">
-          <img
-            src={avatarPreview}
-            alt="User avatar"
-            className="avatar-preview"
-          />
-          <button
-            type="button"
-            className="avatar-upload-btn"
-            title="Upload a new avatar"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploadingAvatar}
-          >
-            {uploadingAvatar ? "Uploading..." : "Upload new avatar"}
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleAvatarChange}
-            className="avatar-upload-input"
-          />
-        </div>
-
-        <form className="settings-form" onSubmit={handleSaveProfile}>
-          <label className="form-field">
-            <span className="form-field__label">Username</span>
-            <input
-              id="username"
-              name="username"
-              value={profileData.username}
-              onChange={handleInputChange}
-              placeholder="john_doe"
-            />
-          </label>
-
-          <label className="form-field">
-            <span className="form-field__label">Email</span>
-            <div style={{ position: 'relative' }}>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                value={profileData.email}
-                onChange={handleInputChange}
-                onBlur={() => handleBlur('email')}
-                placeholder="john.doe@example.com"
-                style={{
-                  borderColor: touched.email 
-                    ? (validation.emailValid ? '#4CAF50' : '#f44336')
-                    : '#ddd',
-                  paddingRight: touched.email ? '40px' : '12px'
-                }}
-              />
-              {touched.email && profileData.email.length > 0 && (
-                <span style={{ 
-                  position: 'absolute', 
-                  right: '12px', 
-                  top: '50%', 
-                  transform: 'translateY(-50%)',
-                  fontSize: '18px'
-                }}>
-                  {validation.emailValid ? (
-                    <FaCheckCircle style={{ color: '#4CAF50' }} />
-                  ) : (
-                    <FaTimesCircle style={{ color: '#f44336' }} />
-                  )}
-                </span>
-              )}
-            </div>
-            {touched.email && !validation.emailValid && profileData.email.length > 0 && (
-              <p style={{ 
-                color: '#f44336', 
-                fontSize: '12px', 
-                marginTop: '5px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}>
-                <FaTimesCircle />
-                Please enter a valid email address
-              </p>
-            )}
-          </label>
-
-          <label className="form-field">
-            <span className="form-field__label">Phone</span>
-            <input
-              id="phone"
-              name="phone"
-              value={profileData.phone}
-              onChange={handleInputChange}
-              placeholder="+1 234 567 3900"
-            />
-          </label>
-
-          <label className="form-field">
-            <span className="form-field__label">Password (leave blank to keep current)</span>
-            <div style={{ position: 'relative' }}>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                value={profileData.password}
-                onChange={handleInputChange}
-                onBlur={() => handleBlur('password')}
-                placeholder="••••••••"
-                style={{
-                  borderColor: touched.password && profileData.password.length > 0
-                    ? (validation.passwordValid ? '#4CAF50' : '#f44336')
-                    : '#ddd'
-                }}
-              />
-            </div>
-            {touched.password && !validation.passwordValid && profileData.password.length > 0 && (
-              <p style={{ 
-                color: '#f44336', 
-                fontSize: '12px', 
-                marginTop: '5px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}>
-                <FaTimesCircle />
-                Password must be at least 6 characters
-              </p>
-            )}
-          </label>
-
-          <label className="form-field">
-            <span className="form-field__label">Confirm Password</span>
-            <div style={{ position: 'relative' }}>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                value={profileData.confirmPassword}
-                onChange={handleInputChange}
-                onBlur={() => handleBlur('confirmPassword')}
-                placeholder="••••••••"
-                style={{
-                  borderColor: touched.confirmPassword && profileData.confirmPassword.length > 0
-                    ? (validation.passwordsMatch ? '#4CAF50' : '#f44336')
-                    : '#ddd'
-                }}
-              />
-            </div>
-            {touched.confirmPassword && !validation.passwordsMatch && profileData.confirmPassword.length > 0 && (
-              <p style={{ 
-                color: '#f44336', 
-                fontSize: '12px', 
-                marginTop: '5px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}>
-                <FaTimesCircle />
-                Passwords do not match
-              </p>
-            )}
-          </label>
-
-          {/* Password Strength Indicator */}
-          {profileData.password.length > 0 && (
-            <div style={{ 
-              marginBottom: '15px', 
-              fontSize: '12px',
-              padding: '10px',
-              background: '#f5f5f5',
-              borderRadius: '8px'
-            }}>
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '6px', 
-                marginBottom: '4px' 
-              }}>
-                {validation.passwordValid ? (
-                  <FaCheckCircle style={{ color: '#4CAF50' }} />
-                ) : (
-                  <FaTimesCircle style={{ color: '#f44336' }} />
-                )}
-                <span style={{ color: validation.passwordValid ? '#4CAF50' : '#666' }}>
-                  At least 6 characters
-                </span>
+        <div className="settings-form-wrapper">
+          {/* ACCOUNT ID SECTION */}
+          <form className="settings-form" onSubmit={(e) => handleSaveProfile(e, 'accountId')}>
+            <div ref={accountSectionRef} className="form-section" id="section-account-id">
+              <div className="section-header">
+                <h2 className="form-section__title">
+                  <span className="section-icon">👤</span>
+                  Account ID
+                </h2>
+                <p className="form-section__description">
+                  Your unique identifier and display name
+                </p>
               </div>
               
-              {profileData.confirmPassword.length > 0 && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  {validation.passwordsMatch ? (
-                    <FaCheckCircle style={{ color: '#4CAF50' }} />
-                  ) : (
-                    <FaTimesCircle style={{ color: '#f44336' }} />
-                  )}
-                  <span style={{ color: validation.passwordsMatch ? '#4CAF50' : '#666' }}>
-                    Passwords match
+              {/* Username */}
+              <label className="form-field">
+                <span className="form-field__label">
+                  <FaUser className="field-icon" /> 
+                  <span>Username</span>
+                  <span className="field-badge">Required</span>
+                </span>
+                <div className="input-wrapper">
+                  <input
+                    id="username"
+                    name="username"
+                    value={profileData.username}
+                    onChange={handleInputChange}
+                    placeholder="Enter your username"
+                    className="form-input"
+                  />
+                </div>
+              </label>
+
+              {/* Tagline */}
+              <label className="form-field">
+                <span className="form-field__label">
+                    <FaTag className="field-icon" />
+                    <span>Tagline</span>
+                  <span className="field-badge">Required</span>
+                </span>
+                <div className="input-wrapper" style={{ position: 'relative' }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    position: 'relative'
+                  }}>
+                    <span style={{
+                      color: '#1a1a1a',
+                      fontWeight: '600',
+                      fontSize: '15px',
+                      paddingLeft: '18px',
+                      paddingRight: '2px',
+                      position: 'absolute',
+                      zIndex: 1,
+                      pointerEvents: 'none',
+                      lineHeight: '54px'
+                    }}>
+                      #VN
+                    </span>
+                    <input
+                      id="taglineSuffix"
+                      name="taglineSuffix"
+                      value={profileData.taglineSuffix}
+                      onChange={handleInputChange}
+                      placeholder=""
+                      className="form-input"
+                      type="text"
+                      maxLength={5}
+                      minLength={3}
+                      style={{
+                        paddingLeft: '52px',
+                        width: '100%'
+                      }}
+                    />
+                  </div>
+                  <span className="input-hint">
+                    🎯 Your unique travel identifier (3-5 characters: letters, numbers, special chars)
                   </span>
                 </div>
-              )}
+              </label>
+              {/* Action buttons for RIOT ID */}
+              <div className="button-group">
+                {modified.accountId && (
+                  <button
+                    type="button"
+                    onClick={handleCancelAccountId}
+                    className="secondary-button"
+                  >
+                    Cancel
+                  </button>
+                )}
+                <button
+                  type="submit"
+                  className="primary-button"
+                  disabled={savingProfile || !modified.accountId}
+                >
+                  {savingProfile ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
             </div>
-          )}
+          </form>
 
-          <button
-            type="submit"
-            className="primary-button"
-            disabled={savingProfile || !validation.emailValid || (profileData.password.length > 0 && (!validation.passwordValid || !validation.passwordsMatch))}
-          >
-            {savingProfile ? "Saving..." : "Save Changes"}
-          </button>
-        </form>
+          {/* PERSONAL INFORMATION SECTION */}
+          <form className="settings-form" onSubmit={(e) => handleSaveProfile(e, 'personalInfo')}>
+            <div ref={personalInfoSectionRef} className="form-section" id="section-personal-info">
+              <div className="section-header">
+                <h2 className="form-section__title">
+                  <span className="section-icon">📧</span>
+                  PERSONAL INFORMATION
+                </h2>
+                <p className="form-section__description">
+                  Contact details and account recovery options
+                </p>
+              </div>
+
+              {/* Email */}
+              <label className="form-field">
+                <span className="form-field__label">
+                  <FaEnvelope className="field-icon" /> 
+                  <span>Email Address</span>
+                  <span className="field-badge">Required</span>
+                </span>
+                <div className="input-wrapper">
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={profileData.email}
+                    onChange={handleInputChange}
+                    onBlur={() => handleBlur('email')}
+                    placeholder="hellowonderai@gmail.com"
+                    className="form-input"
+                  />
+                </div>
+                {!validation.emailValid && profileData.email.length > 0 && (
+                  <div className="validation-message error">
+                    <FaTimesCircle />
+                    <span>Please enter a valid email address</span>
+                  </div>
+                )}
+              </label>
+
+              {/* Phone */}
+              <label className="form-field">
+                <span className="form-field__label">
+                  <FaPhone className="field-icon" /> 
+                  <span>Phone Number</span>
+                  <span className="field-badge optional">Optional</span>
+                </span>
+                <div className="input-wrapper">
+                  <input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    value={profileData.phone}
+                    onChange={handleInputChange}
+                    placeholder="+1 555 987 6543"
+                    className="form-input"
+                  />
+                  <span className="input-hint">
+                    📱 Used for account recovery and notifications
+                  </span>
+                </div>
+              </label>
+
+              {/* Action buttons for Personal Info */}
+              <div className="button-group">
+                {modified.personalInfo && (
+                  <button
+                    type="button"
+                    onClick={handleCancelPersonalInfo}
+                    className="secondary-button"
+                  >
+                    Cancel
+                  </button>
+                )}
+                <button
+                  type="submit"
+                  className="primary-button"
+                  disabled={savingProfile || !validation.emailValid || !modified.personalInfo}
+                >
+                  {savingProfile 
+                    ? "Processing..." 
+                    : (profileData.email.toLowerCase() !== originalData.email.toLowerCase()
+                        ? "Send Verification Code" 
+                        : "Save Changes"
+                      )
+                  }
+                </button>
+              </div>
+            </div>
+          </form>
+
+          {/* ACCOUNT SIGN-IN (PASSWORD) SECTION */}
+          <form className="settings-form" onSubmit={(e) => handleSaveProfile(e, 'password')}>
+            <div ref={passwordSectionRef} className="form-section" id="section-password">
+              <div className="section-header">
+                <h2 className="form-section__title">
+                  <span className="section-icon">🔐</span>
+                    ACCOUNT SIGN-IN
+                </h2>
+                <p className="form-section__subtitle">
+                      Leave blank if you don't want to change your password
+                </p>
+              </div>
+
+              {/* Current Password */}
+              <label className="form-field">
+                <span className="form-field__label">
+                  <FaLock className="field-icon" /> 
+                  <span>Current Password</span>
+                </span>
+                <div className="input-wrapper">
+                  <input
+                    id="currentPassword"
+                    name="currentPassword"
+                    type={showPassword.current ? "text" : "password"}
+                    value={profileData.currentPassword}
+                    onChange={handleInputChange}
+                    onBlur={() => handleBlur('currentPassword')}
+                    placeholder="Enter current password"
+                    className="form-input"
+                  />
+                  <button
+                    type="button"
+                    className="show-hide"
+                    onClick={() => setShowPassword(prev => ({ ...prev, current: !prev.current }))}
+                    aria-label={showPassword.current ? "Hide password" : "Show password"}
+                  >
+                    {showPassword.current ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+              </label>
+
+              {/* New Password */}
+              <label className="form-field">
+                <span className="form-field__label">
+                  <FaLock className="field-icon" /> 
+                  <span>New Password</span>
+                </span>
+                <div className="input-wrapper">
+                  <input
+                    id="newPassword"
+                    name="newPassword"
+                    type={showPassword.new ? "text" : "password"}
+                    value={profileData.newPassword}
+                    onChange={handleInputChange}
+                    onBlur={() => handleBlur('newPassword')}
+                    placeholder="Enter new password (min 6 characters)"
+                    className="form-input"
+                    style={{
+                      borderColor: touched.newPassword && profileData.newPassword.length > 0
+                        ? (validation.newPasswordValid ? '#4CAF50' : '#f44336')
+                        : '#d0d0d0'
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="show-hide"
+                    onClick={() => setShowPassword(prev => ({ ...prev, new: !prev.new }))}
+                    aria-label={showPassword.new ? "Hide password" : "Show password"}
+                  >
+                    {showPassword.new ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+                {touched.newPassword && !validation.newPasswordValid && profileData.newPassword.length > 0 && (
+                  <div className="validation-message error">
+                    <FaTimesCircle />
+                    <span>Password must be at least 6 characters</span>
+                  </div>
+                )}
+              </label>
+
+              {/* Confirm New Password */}
+              <label className="form-field">
+                <span className="form-field__label">
+                  <FaLock className="field-icon" /> 
+                  <span>Confirm New Password</span>
+                </span>
+                <div className="input-wrapper">
+                  <input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type={showPassword.confirm ? "text" : "password"}
+                    value={profileData.confirmPassword}
+                    onChange={handleInputChange}
+                    onBlur={() => handleBlur('confirmPassword')}
+                    placeholder="Confirm new password"
+                    className="form-input"
+                    style={{
+                      borderColor: touched.confirmPassword && profileData.confirmPassword.length > 0
+                        ? (validation.passwordsMatch ? '#4CAF50' : '#f44336')
+                        : '#d0d0d0'
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="show-hide"
+                    onClick={() => setShowPassword(prev => ({ ...prev, confirm: !prev.confirm }))}
+                    aria-label={showPassword.confirm ? "Hide password" : "Show password"}
+                  >
+                    {showPassword.confirm ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+                {touched.confirmPassword && !validation.passwordsMatch && profileData.confirmPassword.length > 0 && (
+                  <div className="validation-message error">
+                    <FaTimesCircle />
+                    <span>Passwords do not match</span>
+                  </div>
+                )}
+              </label>
+
+              {/* Password Strength */}
+              {profileData.newPassword.length > 0 && (
+                <div className="password-strength-box">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                    {validation.newPasswordValid ? (
+                      <FaCheckCircle style={{ color: '#4CAF50' }} />
+                    ) : (
+                      <FaTimesCircle style={{ color: '#f44336' }} />
+                    )}
+                    <span style={{ color: validation.newPasswordValid ? '#4CAF50' : '#666' }}>
+                      At least 6 characters
+                    </span>
+                  </div>
+                  
+                  {profileData.confirmPassword.length > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      {validation.passwordsMatch ? (
+                        <FaCheckCircle style={{ color: '#4CAF50' }} />
+                      ) : (
+                        <FaTimesCircle style={{ color: '#f44336' }} />
+                      )}
+                      <span style={{ color: validation.passwordsMatch ? '#4CAF50' : '#666' }}>
+                        Passwords match
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Action buttons for Password */}
+              <div className="button-group">
+                {modified.password && (
+                  <button
+                    type="button"
+                    onClick={handleCancelPassword}
+                    className="secondary-button"
+                  >
+                    Cancel
+                  </button>
+                )}
+                <button
+                  type="submit"
+                  className="primary-button"
+                  disabled={
+                    savingProfile || 
+                    !modified.password ||
+                    (profileData.newPassword.length > 0 && (!validation.newPasswordValid || !validation.passwordsMatch))
+                  }
+                >
+                  {savingProfile ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
     );
   };
@@ -730,34 +1166,111 @@ export default function ProfilePage() {
 
   return (
     <div className="profile-page">
+      {/* Header */}
+      <div className="profile-header">
+        <div className="profile-header__content">
+          <span className="profile-header__icon">✈️</span>
+          <div>
+            <h1 className="profile-header__title">
+              Vietnam Travel Account
+            </h1>
+            <p className="profile-header__subtitle">
+              Manage your travel profile and journey statistics
+            </p>
+          </div>
+        </div>
+      </div>
+
       <div className="profile-layout">
+        {/* Sidebar */}
+        <aside className="profile-sidebar">
+          <div className="sidebar-avatar">
+            <div className="sidebar-avatar__wrapper">
+              <img
+                src={avatarPreview}
+                alt="User avatar"
+                className="sidebar-avatar__image"
+              />
+              <button
+                className="sidebar-avatar__upload"
+                title="Upload a new avatar"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingAvatar}
+              >
+                📷
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                className="avatar-upload-input"
+              />
+            </div>
+            <h3 className="sidebar-avatar__username">
+              {profileData.username || 'Traveler'}
+            </h3>
+            <p className="sidebar-avatar__tag">
+              #VN{profileData.taglineSuffix || ''}
+            </p>
+          </div>
+
+          <nav className="profile-sidebar__tabs">
+            <button
+              className={`control-tab ${activeSection === 'settings' ? 'active' : ''}`}
+              onClick={() => handleSectionChange('settings')}
+            >
+              <span className="control-tab__icon">👤</span>
+              <span className="control-tab__label">Account Info</span>
+            </button>
+            <button
+              className={`control-tab ${activeSection === 'dashboard' ? 'active' : ''}`}
+              onClick={() => handleSectionChange('dashboard')}
+            >
+              <span className="control-tab__icon">📊</span>
+              <span className="control-tab__label">Dashboard</span>
+            </button>
+          </nav>
+
+          {/* ← NEW: Sticky section nav (only show in settings) */}
+           {activeSection === "settings" && (
+            <div className="section-nav">
+              <p className="section-nav__title">SECTIONS</p>
+              <button
+                className={`section-nav__item ${activeScrollSection === 'account' ? 'active' : ''}`}
+                onClick={() => scrollToSection('account')}
+              >
+                Account ID
+              </button>
+              <button
+                className={`section-nav__item ${activeScrollSection === 'personal' ? 'active' : ''}`}
+                onClick={() => scrollToSection('personal')}
+              >
+                Personal Info
+              </button>
+              <button
+                className={`section-nav__item ${activeScrollSection === 'password' ? 'active' : ''}`}
+                onClick={() => scrollToSection('password')}
+              >
+                Account Sign-in
+              </button>
+            </div>
+          )}
+        </aside>
+
+        {/* Main Content */}
         <main className="profile-main">
           <div className="profile-main__header">
             <div>
               <p className="eyebrow">Profile</p>
               <h1>
-                {activeSection === "settings" ? "User Settings" : "Dashboard"}
+                {activeSection === "settings" ? "Account Information" : "Travel Dashboard"}
               </h1>
               <span>
                 {activeSection === "settings"
-                  ? "Manage your personal info and security preferences."
-                  : "Track how your travel plans evolve in real time."}
+                  ? "Update your personal details and travel preferences"
+                  : "Your journey statistics and travel highlights"}
               </span>
-            </div>
-            <div className="profile-main__toggle">
-              <button
-                type="button"
-                className="profile-toggle-button"
-                onClick={() =>
-                  handleSectionChange(
-                    activeSection === "settings" ? "dashboard" : "settings"
-                  )
-                }
-              >
-                {activeSection === "settings"
-                  ? "Go to Dashboard"
-                  : "Back to User Settings"}
-              </button>
             </div>
           </div>
 

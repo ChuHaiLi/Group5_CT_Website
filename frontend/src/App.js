@@ -23,6 +23,7 @@ import RegisterPage from "./pages/RegisterPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
+import VerifyEmailChangePage from "./pages/VerifyEmailChangePage";
 import EditTripPage from './pages/MyTrips/EditTripPage';
 import API from "./untils/axios";
 import ChatWidget from "./components/ChatWidget/ChatWidget";
@@ -195,7 +196,7 @@ function AppContent() {
             path="/verify-email" 
             element={<VerifyEmailPage setIsAuthenticated={setIsAuthenticated} />} 
           />
-
+          
           {/* "/" route */}
           <Route
             path="/"
@@ -221,6 +222,8 @@ function AppContent() {
             }
           />
 
+          <Route path="/verify-email-change" element={<VerifyEmailChangePage />} />
+          <Route path="/profile" element={<ProfilePage />} />
           <Route
             path="/explore"
             element={
@@ -288,7 +291,16 @@ function AppContent() {
       {!hideNavbar && (
         <ChatWidget isAuthenticated={isAuthenticated} pageContext={pageContext} />
       )}
-      <ToastContainer position="top-right" autoClose={3000} theme="light" />
+      <ToastContainer 
+        position="top-right" 
+        autoClose={3000} 
+        theme="light"
+        closeButton={true}
+        hideProgressBar={false}
+        closeOnClick={true}
+        pauseOnHover={true}
+        draggable={true}
+      />
     </PageContext.Provider>
   );
 }
