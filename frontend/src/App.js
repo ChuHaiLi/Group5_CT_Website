@@ -10,6 +10,7 @@ import {
 import { ToastContainer, toast } from "react-toastify";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import "react-toastify/dist/ReactToastify.css";
+import "../src/firebase/config"
 
 import Navbar from "./components/Navbar/Navbar";
 import HomePage from "./pages/Home/HomePage";
@@ -32,7 +33,7 @@ import { PageContext } from "./context/PageContext";
 import HowItWorksPanel from "./components/HowItWorks/HowItWorksPanel";
 import "./App.css";
 
-const GOOGLE_CLIENT_ID = "953512846166-p1oc06mcu0b9qkko76sridsappr131tn.apps.googleusercontent.com";
+const GOOGLE_CLIENT_ID = "587186101518-cv410npc301f93m0r6f8558bsl27h3pd.apps.googleusercontent.com";
 
 // ------------------- PrivateRoute -------------------
 function PrivateRoute({ isAuthenticated, children }) {

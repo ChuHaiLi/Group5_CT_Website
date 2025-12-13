@@ -63,10 +63,12 @@ export default function ProfilePage() {
   const fileInputRef = useRef(null);
   
   const [isGoogleUser, setIsGoogleUser] = useState(false);
-
+  const [isGitHubUser, setIsGitHubUser] = useState(false); 
+  
   // Validation states
   const [touched, setTouched] = useState({
     email: false,
+    username: false,
     currentPassword: false,  
     newPassword: false,       
     confirmPassword: false,
@@ -86,6 +88,7 @@ export default function ProfilePage() {
 
   const [validation, setValidation] = useState({
     emailValid: true,
+    usernameValid: true, 
     newPasswordValid: true,   
     passwordsMatch: true,
   });
@@ -96,47 +99,51 @@ export default function ProfilePage() {
   // Validate fields
   useEffect(() => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const usernameRegex = /^[a-zA-Z0-9._-]{3,}$/;
+
+    const usernameValid = profileData.username.length === 0 || (usernameRegex.test(profileData.username) && profileData.username.length >= 3);
     const emailValid = profileData.email.length === 0 || emailRegex.test(profileData.email);
     const newPasswordValid = profileData.newPassword.length === 0 || profileData.newPassword.length >= 6;
     const passwordsMatch = profileData.newPassword.length === 0 || profileData.newPassword === profileData.confirmPassword;
 
     setValidation({
-      emailValid,
-      newPasswordValid,
-      passwordsMatch,
-    });
-  }, [profileData.email, profileData.newPassword, profileData.confirmPassword]);
+    usernameValid,   
+    emailValid,
+    newPasswordValid,
+    passwordsMatch,
+  });
+}, [profileData.email, profileData.username, profileData.newPassword, profileData.confirmPassword]); 
 
-  // ← NEW: Scroll spy effect
- useEffect(() => {
-  if (activeSection !== "settings") return;
+  // Scroll spy effect
+  useEffect(() => {
+    if (activeSection !== "settings") return;
 
-  const handleScroll = () => {
-    const scrollY = window.scrollY + 150;
+    const handleScroll = () => {
+      const scrollY = window.scrollY + 150;
 
-    const sections = [
-      { ref: accountSectionRef, name: 'account' },
-      { ref: personalInfoSectionRef, name: 'personal' },
-      { ref: passwordSectionRef, name: 'password' }
-    ];
+      const sections = [];
+      
+      // Always include these sections
+      sections.push({ ref: accountSectionRef, name: 'account' });
+      sections.push({ ref: personalInfoSectionRef, name: 'personal' });
+      sections.push({ ref: passwordSectionRef, name: 'password' });
 
-    // Tìm section hiện tại dựa trên scroll position
-    for (let i = sections.length - 1; i >= 0; i--) {
-      const section = sections[i];
-      if (section.ref.current) {
-        const sectionTop = section.ref.current.offsetTop;
-        if (scrollY >= sectionTop - 50) {
-          setActiveScrollSection(section.name);
-          break;
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const section = sections[i];
+        if (section.ref.current) {
+          const sectionTop = section.ref.current.offsetTop;
+          if (scrollY >= sectionTop - 50) {
+            setActiveScrollSection(section.name);
+            break;
+          }
         }
       }
-    }
-  };
+    };
 
-  window.addEventListener("scroll", handleScroll);
-  handleScroll();
-  return () => window.removeEventListener("scroll", handleScroll);
-}, [activeSection]);
+    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [activeSection]);
 
   const broadcastProfile = useCallback((payload = {}, persist = false) => {
     const normalized = {
@@ -159,7 +166,10 @@ export default function ProfilePage() {
       const { data } = await API.get("/auth/me");
       
       const isGoogle = Boolean(data.google_id);
+      const isGitHub = Boolean(data.github_id);
+
       setIsGoogleUser(isGoogle);
+      setIsGitHubUser(isGitHub);
 
       let taglineSuffix = "";
       if (data.tagline) {
@@ -387,6 +397,12 @@ export default function ProfilePage() {
         toast.error("Username is required.");
         return;
       }
+
+      if (!validation.usernameValid) {
+        toast.error("Username can only contain letters, numbers, dots (.), underscores (_), and hyphens (-), minimum 3 characters.");
+        return;
+      }
+
       if (profileData.taglineSuffix.length < 3 || profileData.taglineSuffix.length > 5) {
         toast.error("Tagline must be between 3 and 5 characters.");
         return;
@@ -448,7 +464,7 @@ export default function ProfilePage() {
       const wantsPasswordChange = profileData.newPassword && profileData.newPassword.trim();
       
       if (wantsPasswordChange) {
-        if (!isGoogleUser) {
+        if (!isGoogleUser && !isGitHubUser) {
           if (!profileData.currentPassword || !profileData.currentPassword.trim()) {
             toast.error("Please enter your current password to change pase if (section === 'password') {sword.");
             return;
@@ -494,7 +510,7 @@ export default function ProfilePage() {
           newPassword: profileData.newPassword.trim(),  
         };
 
-        if (!isGoogleUser) {
+        if (!isGoogleUser && !isGitHubUser) {
           payload.currentPassword = profileData.currentPassword.trim();
         }
       }
@@ -578,11 +594,11 @@ export default function ProfilePage() {
         });
         setModified(prev => ({ ...prev, password: false }));
 
-        if (isGoogleUser) {
-          toast.success("Password set successfully! You can now use it to sign in.");
-        } else {
-          toast.success("Password updated successfully!");
-        }
+        if (isGoogleUser || isGitHubUser) { // 🔥 UPDATED
+        toast.success("Password set successfully! You can now use it to sign in.");
+      } else {
+        toast.success("Password updated successfully!");
+      }
       }
       
     } catch (error) {
@@ -702,10 +718,35 @@ export default function ProfilePage() {
                     name="username"
                     value={profileData.username}
                     onChange={handleInputChange}
+                    onBlur={() => setTouched(prev => ({ ...prev, username: true }))} // 🔥 THÊM
                     placeholder="Enter your username"
                     className="form-input"
+                    style={{
+                      borderColor: touched.username && !validation.usernameValid && profileData.username.length > 0
+                        ? '#f44336'  
+                        : '#d0d0d0'  
+                    }}
                   />
                 </div>
+                
+                {/*  THÊM: Error message */}
+                {touched.username && !validation.usernameValid && profileData.username.length > 0 && (
+                  <div className="validation-message error" style={{ 
+                    marginTop: '8px',
+                    fontSize: '13px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    color: '#f44336'
+                  }}>
+                    <FaTimesCircle />
+                    <span>Username must be 3+ characters (letters, numbers, . _ - only)</span>
+                  </div>
+                )}
+                
+                <span className="input-hint">
+                  💡 Choose a unique username (3+ characters, letters, numbers, . _ - only)
+                </span>
               </label>
 
               {/* Tagline */}
@@ -882,7 +923,7 @@ export default function ProfilePage() {
               </div>
 
               {/* Current Password */}
-              {!isGoogleUser && (
+              {!isGoogleUser && !isGitHubUser && (
                 <label className="form-field">
                   <span className="form-field__label">
                     <FaLock className="field-icon" /> 

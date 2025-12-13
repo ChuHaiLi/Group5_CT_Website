@@ -13,6 +13,7 @@ import {
 } from "react-icons/fa";
 import API from "../untils/axios";
 import GoogleLoginButton from "../components/GoogleLoginButton";
+import GitHubLoginButton from "../components/GitHubLoginButton";
 import "../styles/AuthForm.css";
 
 export default function RegisterPage({ setIsAuthenticated }) {
@@ -45,9 +46,10 @@ export default function RegisterPage({ setIsAuthenticated }) {
   // Validate fields
     useEffect(() => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const usernameRegex = /^[a-zA-Z0-9._-]{3,}$/;
     
     setValidation({
-      usernameValid: form.username.length >= 3,
+      usernameValid: usernameRegex.test(form.username) && form.username.length >= 3,
       emailValid: emailRegex.test(form.email),
       passwordValid: form.password.length >= 6,
       passwordsMatch: form.password.length > 0 && form.password === form.confirm,
@@ -75,8 +77,8 @@ export default function RegisterPage({ setIsAuthenticated }) {
   }
 
   if (!validation.usernameValid) {
-    toast.error("Username must be at least 3 characters");
-    return;
+      toast.error("Username must be at least 3 characters (letters, numbers, . _ - only)");
+      return;
   }
 
   if (!validation.emailValid) {
@@ -163,7 +165,7 @@ export default function RegisterPage({ setIsAuthenticated }) {
             <FaUser className="icon" />
             <input
               type="text"
-              placeholder="Username"
+              placeholder="Username (letters, numbers, . _ - only)"
               value={form.username}
               onChange={(e) => setForm({ ...form, username: e.target.value })}
               onBlur={() => handleBlur('username')} 
@@ -193,19 +195,11 @@ export default function RegisterPage({ setIsAuthenticated }) {
           </div>
 
           {/* Error message cho username */}
-            {touched.username && !validation.usernameValid && form.username.length > 0 && (
-              <p style={{ 
-                color: '#f44336', 
-                fontSize: '12px', 
-                marginTop: '-10px', 
-                marginBottom: '10px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}>
+            {!validation.usernameValid && form.username.length > 0 && (
+              <div className="validation-message">
                 <FaTimesCircle />
-                Username must be at least 3 characters
-              </p>
+                Please enter a valid username (min 3 characters, letters, numbers, . _ - only)
+              </div>
             )}
 
 
@@ -243,19 +237,11 @@ export default function RegisterPage({ setIsAuthenticated }) {
             )}
           </div>
 
-          {touched.email && !validation.emailValid && form.email.length > 0 && (
-            <p style={{ 
-              color: '#f44336', 
-              fontSize: '12px', 
-              marginTop: '-10px', 
-              marginBottom: '10px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '5px'
-            }}>
+          {!validation.emailValid && form.email.length > 0 && (
+            <div className="validation-message">
               <FaTimesCircle />
               Please enter a valid email address
-            </p>
+            </div>
           )}
 
           {/* Password */}
@@ -283,21 +269,6 @@ export default function RegisterPage({ setIsAuthenticated }) {
             </span>
           </div>
 
-          {touched.password && !validation.passwordValid && form.password.length > 0 && (
-            <p style={{ 
-              color: '#f44336', 
-              fontSize: '12px', 
-              marginTop: '-10px', 
-              marginBottom: '10px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '5px'
-            }}>
-              <FaTimesCircle />
-              Password must be at least 6 characters
-            </p>
-          )}
-
           {/* Confirm Password */}
           <div className="input-group">
             <FaLock className="icon" />
@@ -323,36 +294,10 @@ export default function RegisterPage({ setIsAuthenticated }) {
             </span>
           </div>
 
-          {touched.confirm && !validation.passwordsMatch && form.confirm.length > 0 && (
-            <p style={{ 
-              color: '#f44336', 
-              fontSize: '12px', 
-              marginTop: '-10px', 
-              marginBottom: '10px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '5px'
-            }}>
-              <FaTimesCircle />
-              Passwords do not match
-            </p>
-          )}
-
           {/* Password Strength Summary */}
-          {form.password.length > 0 && (
-            <div style={{ 
-              marginBottom: '15px', 
-              fontSize: '12px',
-              padding: '10px',
-              background: '#f5f5f5',
-              borderRadius: '8px'
-            }}>
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '6px', 
-                marginBottom: '4px' 
-              }}>
+          {(form.password.length > 0 || form.confirm.length > 0) && (
+            <div className="password-strength-box">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 {validation.passwordValid ? (
                   <FaCheckCircle style={{ color: '#4CAF50' }} />
                 ) : (
@@ -395,7 +340,7 @@ export default function RegisterPage({ setIsAuthenticated }) {
         </div>
 
         <GoogleLoginButton setIsAuthenticated={setIsAuthenticated} />
-
+        <GitHubLoginButton setIsAuthenticated={setIsAuthenticated} />
         <p>
           Already exploring? <Link to="/login">Login Here</Link>
         </p>

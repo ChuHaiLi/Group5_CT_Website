@@ -49,6 +49,7 @@ class User(db.Model):
     
     # Google OAuth fields
     google_id = db.Column(db.String(255), unique=True, nullable=True)
+    github_id = db.Column(db.String(255), unique=True, nullable=True)
     name = db.Column(db.String(100), nullable=True)  # Full name from Google
     picture = db.Column(db.String(255), nullable=True)  # Google profile picture
 
