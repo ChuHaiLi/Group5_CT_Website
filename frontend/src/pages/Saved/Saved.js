@@ -235,7 +235,6 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
             onClick={() => setActiveTab("collections")}
           >
             Collections ({folders.length})
-            Collections ({folders.length})
           </button>
         </div>
 
