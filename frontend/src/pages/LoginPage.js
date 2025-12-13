@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaPlane, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import API from "../untils/axios";
 import GoogleLoginButton from "../components/GoogleLoginButton";
+import GitHubLoginButton from "../components/GitHubLoginButton";
 import "../styles/AuthForm.css";
 
 export default function LoginPage({ setIsAuthenticated }) {
@@ -22,7 +23,7 @@ export default function LoginPage({ setIsAuthenticated }) {
   // Validate email OR username format
   useEffect(() => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const usernameRegex = /^[a-zA-Z0-9_]{3,}$/; // Username: at least 3 chars, alphanumeric + underscore
+    const usernameRegex = /^[a-zA-Z0-9._-]{3,}$/;
     
     setIsInputValid(
       emailRegex.test(emailOrUsername) || usernameRegex.test(emailOrUsername)
@@ -173,10 +174,10 @@ export default function LoginPage({ setIsAuthenticated }) {
           </div>
 
           {/* Input Error Message */}
-          {inputTouched && !isInputValid && emailOrUsername.length > 0 && (
+          {!isInputValid && emailOrUsername.length > 0 && (
             <div className="validation-message">
               <FaTimesCircle />
-              Please enter a valid email or username (min 3 characters)
+              Please enter a valid email or username (min 3 characters, letters, numbers, . _ - only)
             </div>
           )}
 
@@ -204,14 +205,6 @@ export default function LoginPage({ setIsAuthenticated }) {
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </span>
           </div>
-
-          {/* Password Error Message */}
-          {passwordTouched && !isPasswordValid && password.length > 0 && (
-            <div className="validation-message">
-              <FaTimesCircle />
-              Password must be at least 6 characters
-            </div>
-          )}
 
           {/* Password Strength Indicator */}
           {password.length > 0 && (
@@ -246,6 +239,7 @@ export default function LoginPage({ setIsAuthenticated }) {
         </div>
 
         <GoogleLoginButton setIsAuthenticated={setIsAuthenticated} />
+        <GitHubLoginButton setIsAuthenticated={setIsAuthenticated} />
 
         <p>
           New to Vietnam Travel? <Link to="/register">Create Account</Link>

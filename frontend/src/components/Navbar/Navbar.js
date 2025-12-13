@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react"; 
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   FaHome,
@@ -8,6 +8,7 @@ import {
   FaUserCircle,
 } from "react-icons/fa";
 import API from "../../untils/axios";
+import { useClickOutside } from "../../hooks/useClickOutside"; 
 import "./Navbar.css";
 import logo from "./assets/logo.png";
 
@@ -17,6 +18,13 @@ export default function Navbar() {
 
   const [user, setUser] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useClickOutside(
+    dropdownRef,
+    () => setDropdownOpen(false),
+    dropdownOpen
+  );
 
   useEffect(() => {
     const stored = localStorage.getItem("user");
@@ -111,7 +119,7 @@ export default function Navbar() {
       {/* Right user avatar / login */}
       <div className="navbar-right">
         {token ? (
-          <div className="profile-dropdown-wrapper">
+          <div className="profile-dropdown-wrapper" ref={dropdownRef}> 
             {/* Avatar trigger */}
             <div
               className="profile-trigger"
@@ -127,7 +135,14 @@ export default function Navbar() {
             {/* Dropdown menu */}
             {dropdownOpen && (
               <div className="dropdown-menu">
-                <button onClick={() => navigate("/profile")}>👤 Profile</button>
+                <button 
+                  onClick={() => {
+                    setDropdownOpen(false); 
+                    navigate("/profile");
+                  }}
+                >
+                  👤 Profile
+                </button>
                 <button onClick={handleLogout}>🚪 Logout</button>
               </div>
             )}

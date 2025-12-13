@@ -243,14 +243,6 @@ export default function ResetPasswordPage() {
                 </span>
               </div>
 
-              {/* Password Error Message */}
-              {passwordTouched && !isPasswordValid && newPassword.length > 0 && (
-                <div className="validation-message">
-                  <FaTimesCircle />
-                  Password must be at least 6 characters
-                </div>
-              )}
-
               {/* Confirm Password Input */}
               <div className="input-group">
                 <FaLock className="icon" />
@@ -276,16 +268,8 @@ export default function ResetPasswordPage() {
                 </span>
               </div>
 
-              {/* Confirm Password Error Message */}
-              {confirmTouched && !passwordsMatch && confirmPassword.length > 0 && (
-                <div className="validation-message">
-                  <FaTimesCircle />
-                  Passwords do not match
-                </div>
-              )}
-
               {/* Password Strength Summary */}
-              {newPassword.length > 0 && (
+              {(newPassword.length > 0 || confirmPassword.length > 0) && (
                 <div className="password-strength-box">
                   <div style={{ 
                     display: 'flex', 

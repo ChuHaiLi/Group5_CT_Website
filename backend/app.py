@@ -19,6 +19,7 @@ import json
 from sqlalchemy.orm import joinedload
 from flask_migrate import Migrate
 import random
+import re
 from flask import request, jsonify
 from unidecode import unidecode
 from routes.auth import auth_bp
@@ -296,9 +297,11 @@ def register():
     email = (data.get("email") or "").strip().lower()
     password = data.get("password") or ""
 
+    username_regex = re.compile(r'^[a-zA-Z0-9._-]{3,}$')
+
     errors = {}
-    if len(username) < 3:
-        errors["username"] = "Username must be at least 3 characters"
+    if not username_regex.match(username):
+        errors["username"] = "Username can only contain letters, numbers, dots, underscores, and hyphens"
     if not is_valid_email(email):
         errors["email"] = "Invalid email"
     if len(password) < 6:
@@ -648,10 +651,51 @@ def login():
 
     # QUAN TRỌNG: Kiểm tra email đã verify chưa
     if not user.is_email_verified:
+        # 🔥 TẠO OTP MỚI VÀ GỬI EMAIL NGAY
+        otp_code = generate_otp(6)
+        user.verification_token = otp_code
+        user.reset_token_expiry = datetime.utcnow() + timedelta(minutes=10)
+        db.session.commit()
+        
+        # Gửi email OTP
+        email_html = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5;">
+                <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    <h2 style="color: #4CAF50; text-align: center;">Email Verification Required</h2>
+                    
+                    <p>Hi <strong>{user.username}</strong>,</p>
+                    
+                    <p>You need to verify your email before logging in. Here is your verification code:</p>
+                    
+                    <div style="background-color: #f0f8ff; border: 2px dashed #4CAF50; border-radius: 8px; padding: 20px; text-align: center; margin: 30px 0;">
+                        <p style="margin: 0; color: #666; font-size: 14px;">Your verification code:</p>
+                        <h1 style="margin: 10px 0; color: #4CAF50; font-size: 48px; letter-spacing: 8px; font-family: 'Courier New', monospace;">
+                            {otp_code}
+                        </h1>
+                    </div>
+                    
+                    <p style="color: #f44336; font-weight: bold;">⏰ This code will expire in 10 minutes.</p>
+                    
+                    <p style="color: #666; font-size: 14px;">If you didn't try to log in, please ignore this email.</p>
+                    
+                    <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;">
+                    
+                    <p style="color: #999; font-size: 12px; text-align: center;">
+                        This is an automated message, please do not reply.
+                    </p>
+                </div>
+            </body>
+        </html>
+        """
+        
+        send_email(user.email, "Email Verification Code", email_html)
+        
         return jsonify({
-            "message": "Please verify your email before logging in.",
+            "message": "Please verify your email before logging in. A verification code has been sent to your email.",
             "error_type": "email_not_verified",
-            "email": user.email
+            "email": user.email,
+            "otp_sent": True  
         }), 403
 
     access_token = create_access_token(identity=str(user.id))
@@ -671,6 +715,131 @@ def login():
         }
     }), 200
 
+@app.route("/api/auth/github-login", methods=["POST"])
+def github_login():
+    """
+    Xử lý đăng nhập/đăng ký qua GitHub (Firebase)
+    Frontend sẽ gửi thông tin user từ Firebase
+    """
+    try:
+        data = request.get_json()
+        
+        github_id = data.get('github_id')
+        email = data.get('email')
+        name = data.get('name')
+        username = data.get('username')
+        picture = data.get('picture')
+        
+        # Validate dữ liệu
+        if not github_id:
+            return jsonify({
+                'error': 'Missing required fields',
+                'message': 'GitHub ID is required'
+            }), 400
+        
+        # Kiểm tra xem user đã tồn tại chưa (theo github_id hoặc email)
+        user = User.query.filter(
+            db.or_(
+                User.github_id == github_id,
+                User.email == email.lower() if email else None
+            )
+        ).first()
+        
+        if user:
+            # ✅ User đã tồn tại - Cập nhật thông tin GitHub nếu chưa có
+            if not user.github_id:
+                user.github_id = github_id
+                user.name = name
+                user.picture = picture
+                user.avatar_url = picture
+                user.is_email_verified = True
+                db.session.commit()
+            elif picture and picture != user.picture:
+                user.picture = picture
+                user.avatar_url = picture
+                db.session.commit()
+            
+            # Lấy avatar (ưu tiên avatar_url, fallback sang picture)
+            avatar = user.avatar_url or user.picture or ""
+            
+            # Tạo token
+            access_token = create_access_token(identity=str(user.id))
+            refresh_token = create_refresh_token(identity=str(user.id))
+            
+            return jsonify({
+                'message': 'Login successful',
+                'access_token': access_token,
+                'refresh_token': refresh_token,
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email,
+                    'name': user.name,
+                    'phone': user.phone or "",
+                    'picture': user.picture,
+                    'avatar': avatar,
+                    'is_verified': True,
+                    'github_id': user.github_id
+                }
+            }), 200
+        
+        else:
+            # ✅ User chưa tồn tại - Tạo tài khoản mới
+            
+            # Tạo username unique
+            base_username = username or f"github_{github_id[:8]}"
+            final_username = base_username
+            counter = 1
+            
+            # Đảm bảo username không trùng
+            while User.query.filter_by(username=final_username).first():
+                final_username = f"{base_username}{counter}"
+                counter += 1
+            
+            # Tạo user mới (KHÔNG CÓ PASSWORD cho GitHub user)
+            new_user = User(
+                username=final_username,
+                email=email.lower() if email else f"{github_id}@github.temp",
+                name=name,
+                github_id=github_id,
+                picture=picture,
+                avatar_url=picture,
+                password=None,  # ✅ KHÔNG TẠO PASSWORD CHO GITHUB USER
+                is_email_verified=True,
+            )
+            
+            db.session.add(new_user)
+            db.session.commit()
+            
+            # Tạo token
+            access_token = create_access_token(identity=str(new_user.id))
+            refresh_token = create_refresh_token(identity=str(new_user.id))
+            
+            return jsonify({
+                'message': 'Account created successfully',
+                'access_token': access_token,
+                'refresh_token': refresh_token,
+                'user': {
+                    'id': new_user.id,
+                    'username': new_user.username,
+                    'email': new_user.email,
+                    'name': new_user.name,
+                    'phone': new_user.phone or "",
+                    'picture': new_user.picture,
+                    'avatar': picture,
+                    'is_verified': True,
+                    'github_id': new_user.github_id
+                }
+            }), 201
+    
+    except Exception as e:
+        print(f"GitHub login error: {str(e)}")
+        db.session.rollback()
+        return jsonify({
+            'error': 'Internal server error',
+            'message': str(e)
+        }), 500
+    
 # -------- REFRESH TOKEN --------
 @app.route("/api/auth/refresh", methods=["POST"])
 @jwt_required(refresh=True)
@@ -700,6 +869,7 @@ def me():
         "tagline": user.tagline or "#VN",
         "avatar": avatar,
         "google_id": user.google_id, 
+        "github_id": user.github_id, 
     }), 200
 
 # -------- FORGOT PASSWORD --------
@@ -927,8 +1097,9 @@ def update_profile():
         if new_password:
             # 🔥 KIỂM TRA XEM USER CÓ ĐĂNG NHẬP BẰNG GOOGLE KHÔNG
             is_google_user = bool(user.google_id)
+            is_github_user = bool(user.github_id)
             
-            if is_google_user:
+            if is_google_user or is_github_user:
                 # ✅ NGƯỜI DÙNG GOOGLE - CHO PHÉP ĐẶT MẬT KHẨU MỚI
                 # Không cần kiểm tra current password
                 if len(new_password) < 6:
@@ -995,7 +1166,8 @@ def update_profile():
                 "name": user.name or "",
                 "tagline": user.tagline or "#VN",   
                 "avatar": final_avatar,
-                "google_id": user.google_id,  
+                "google_id": user.google_id,
+                "github_id": user.github_id,  
             }
         }), 200
         
