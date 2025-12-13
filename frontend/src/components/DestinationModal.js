@@ -6,12 +6,15 @@ export default function DestinationModal({ destination, onClose, onCreateTrip })
   const [showImageViewer, setShowImageViewer] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
+  // ✅ FIX: ESC key chỉ đóng image viewer, KHÔNG đóng modal chính
   useEffect(() => {
     const handleEsc = (e) => {
       if (e.key === "Escape") {
         if (showImageViewer) {
+          // ✅ Chỉ đóng image viewer
           setShowImageViewer(false);
         } else {
+          // ✅ Đóng modal chính
           onClose();
         }
       }
@@ -127,6 +130,7 @@ export default function DestinationModal({ destination, onClose, onCreateTrip })
     setShowImageViewer(true);
   };
 
+  // ✅ FIX: Đóng image viewer KHÔNG đóng modal chính
   const closeImageViewer = () => {
     setShowImageViewer(false);
   };
@@ -140,146 +144,153 @@ export default function DestinationModal({ destination, onClose, onCreateTrip })
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <button className="modal-close-btn" onClick={onClose}>
-          <FaTimes />
-        </button>
+    <>
+      {/* MAIN MODAL */}
+      <div className="modal-overlay" onClick={onClose}>
+        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <button className="modal-close-btn" onClick={onClose}>
+            <FaTimes />
+          </button>
 
-        {/* HEADER */}
-        <div 
-          className="modal-hero-image" 
-          style={{ 
-            backgroundImage: coverImage ? `url(${coverImage})` : 'none',
-            backgroundColor: coverImage ? 'transparent' : '#2d3748',
-            height: coverImage ? '250px' : '120px'
-          }}
-        >
-          <div className="modal-hero-overlay"></div>
-          <div className="modal-title-container">
-            <span className="modal-type-badge">{destination.type || "Địa điểm"}</span>
-            <h2 className="modal-title">{destination.name}</h2>
-          </div>
-        </div>
-
-        <div className="modal-body">
-          {/* THÔNG TIN NHANH */}
-          <div className="modal-info-grid">
-            <div className="info-item">
-              <FaClock className="info-icon" />
-              <div>
-                <strong>Giờ mở cửa</strong>
-                <div className="info-text">{renderOpeningHours(rawHours)}</div>
-              </div>
-            </div>
-
-            <div className="info-item">
-              <FaMoneyBillWave className="info-icon" />
-              <div>
-                <strong>Giá vé / Chi phí</strong>
-                <div className="info-text">{formatPrice(rawPrice)}</div>
-              </div>
-            </div>
-
-            {rawAddress && (
-              <div className="info-item">
-                <FaMapPin className="info-icon" />
-                <div>
-                  <strong>Tỉnh Thành</strong>
-                  <div className="info-text">{rawAddress}</div>
-                </div>
-              </div>
-            )}
-
-            {destination.gps && (
-              <div className="info-item">
-                <FaMapMarkerAlt className="info-icon" />
-                <div>
-                  <strong>Bản đồ</strong>
-                  <div className="info-text">
-                    <a 
-                      href={`https://www.google.com/maps?q=${destination.gps.lat || destination.gps.latitude},${destination.gps.lng || destination.gps.longitude}`} 
-                      target="_blank" 
-                      rel="noreferrer"
-                      className="map-link"
-                    >
-                      Xem trên Google Maps
-                    </a>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* MÔ TẢ */}
-          <div className="modal-section">
-            <h3>Giới thiệu</h3>
-            <div className="modal-description-text">
-              {descriptionList && descriptionList.length > 0 ? (
-                <ul className="description-list">
-                  {descriptionList.map((item, index) => (
-                    <li key={index}>{item}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-gray-500 italic">Chưa có mô tả chi tiết.</p>
-              )}
-            </div>
-          </div>
-
-          {/* GALLERY HÌNH ẢNH */}
-          {allImages.length > 0 && (
-            <div className="modal-section">
-              <h3><FaImages style={{marginRight: '8px'}} />Hình ảnh ({allImages.length})</h3>
-              <div className="modal-gallery">
-                {allImages.map((img, idx) => (
-                  <div key={idx} className="gallery-item" onClick={() => openImageViewer(idx)}>
-                    <img src={img} alt={`${destination.name} - ${idx + 1}`} />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* TAGS */}
-          {processedTags && processedTags.length > 0 && (
-            <div className="modal-section">
-              <h3>Tags</h3>
-              <div className="modal-tags-list">
-                {processedTags.map((tag, idx) => (
-                  <span key={idx} className="modal-tag">
-                    <FaTag className="tag-icon-small" /> {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-          
-          {destination.source && (
-            <div className="modal-source">
-              <a href={destination.source} target="_blank" rel="noreferrer">
-                <FaExternalLinkAlt /> Nguồn tham khảo
-              </a>
-            </div>
-          )}
-        </div>
-
-        <div className="modal-footer">
-          <button className="modal-btn secondary" onClick={onClose}>Đóng</button>
-          <button 
-            className="modal-btn primary"
-            onClick={() => {
-              if(onCreateTrip) onCreateTrip(destination);
+          {/* HEADER */}
+          <div 
+            className="modal-hero-image" 
+            style={{ 
+              backgroundImage: coverImage ? `url(${coverImage})` : 'none',
+              backgroundColor: coverImage ? 'transparent' : '#2d3748',
+              height: coverImage ? '250px' : '120px'
             }}
           >
-            Tạo chuyến đi
-          </button>
+            <div className="modal-hero-overlay"></div>
+            <div className="modal-title-container">
+              <span className="modal-type-badge">{destination.type || "Địa điểm"}</span>
+              <h2 className="modal-title">{destination.name}</h2>
+            </div>
+          </div>
+
+          <div className="modal-body">
+            {/* THÔNG TIN NHANH */}
+            <div className="modal-info-grid">
+              <div className="info-item">
+                <FaClock className="info-icon" />
+                <div>
+                  <strong>Giờ mở cửa</strong>
+                  <div className="info-text">{renderOpeningHours(rawHours)}</div>
+                </div>
+              </div>
+
+              <div className="info-item">
+                <FaMoneyBillWave className="info-icon" />
+                <div>
+                  <strong>Giá vé / Chi phí</strong>
+                  <div className="info-text">{formatPrice(rawPrice)}</div>
+                </div>
+              </div>
+
+              {rawAddress && (
+                <div className="info-item">
+                  <FaMapPin className="info-icon" />
+                  <div>
+                    <strong>Tỉnh Thành</strong>
+                    <div className="info-text">{rawAddress}</div>
+                  </div>
+                </div>
+              )}
+
+              {destination.gps && (
+                <div className="info-item">
+                  <FaMapMarkerAlt className="info-icon" />
+                  <div>
+                    <strong>Bản đồ</strong>
+                    <div className="info-text">
+                      <a 
+                        href={`https://www.google.com/maps?q=${destination.gps.lat || destination.gps.latitude},${destination.gps.lng || destination.gps.longitude}`} 
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="map-link"
+                      >
+                        Xem trên Google Maps
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* MÔ TẢ */}
+            <div className="modal-section">
+              <h3>Giới thiệu</h3>
+              <div className="modal-description-text">
+                {descriptionList && descriptionList.length > 0 ? (
+                  <ul className="description-list">
+                    {descriptionList.map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-gray-500 italic">Chưa có mô tả chi tiết.</p>
+                )}
+              </div>
+            </div>
+
+            {/* GALLERY HÌNH ẢNH */}
+            {allImages.length > 0 && (
+              <div className="modal-section">
+                <h3><FaImages style={{marginRight: '8px'}} />Hình ảnh ({allImages.length})</h3>
+                <div className="modal-gallery">
+                  {allImages.map((img, idx) => (
+                    <div key={idx} className="gallery-item" onClick={() => openImageViewer(idx)}>
+                      <img src={img} alt={`${destination.name} - ${idx + 1}`} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* TAGS */}
+            {processedTags && processedTags.length > 0 && (
+              <div className="modal-section">
+                <h3>Tags</h3>
+                <div className="modal-tags-list">
+                  {processedTags.map((tag, idx) => (
+                    <span key={idx} className="modal-tag">
+                      <FaTag className="tag-icon-small" /> {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {destination.source && (
+              <div className="modal-source">
+                <a href={destination.source} target="_blank" rel="noreferrer">
+                  <FaExternalLinkAlt /> Nguồn tham khảo
+                </a>
+              </div>
+            )}
+          </div>
+
+          <div className="modal-footer">
+            <button className="modal-btn secondary" onClick={onClose}>Đóng</button>
+            <button 
+              className="modal-btn primary"
+              onClick={() => {
+                if(onCreateTrip) onCreateTrip(destination);
+              }}
+            >
+              Tạo chuyến đi
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* IMAGE VIEWER OVERLAY */}
+      {/* ✅ IMAGE VIEWER OVERLAY - RIÊNG BIỆT, KHÔNG ĐÓNG MODAL CHÍNH */}
       {showImageViewer && allImages.length > 0 && (
-        <div className="image-viewer-overlay" onClick={closeImageViewer}>
+        <div 
+          className="image-viewer-overlay" 
+          onClick={closeImageViewer} // ✅ CHỈ ĐÓI IMAGE VIEWER
+        >
+          {/* ✅ NÚT X ĐỂ ĐÓNG IMAGE VIEWER */}
           <button className="image-viewer-close" onClick={closeImageViewer}>
             <FaTimes />
           </button>
@@ -305,6 +316,6 @@ export default function DestinationModal({ destination, onClose, onCreateTrip })
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
