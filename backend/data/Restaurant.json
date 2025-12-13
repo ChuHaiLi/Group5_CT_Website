@@ -1,0 +1,2975 @@
+{
+    "provinces": [
+        {
+            "province_name": "Hà Nội",
+            "places": [
+                {
+                    "name": "Phở Bát Đàn",
+                    "description": [
+                        "Phở bò truyền thống, nổi tiếng với nước dùng đậm đà, vị thanh ngọt. Phong cách xếp hàng tự phục vụ."
+                    ],
+                    "images": [
+                        "https://mia.vn/media/uploads/blog-du-lich/Pho-bat-dan-pho-gia-truyen-100-nam-tuoi-tai-ha-noi-01-1639325605.jpg"
+                    ],
+                    "gps": {
+                        "lat": 21.0339386873256,
+                        "lng": 105.846991904887
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bún Chả Hương Liên (Bun Cha Huong Lien)",
+                    "description": [
+                        "Nổi tiếng toàn cầu sau khi phục vụ cựu Tổng thống Obama. Chả nướng thơm lừng, suất ăn đầy đặn."
+                    ],
+                    "images": [
+                        "https://flavorsofhanoi.com/wp-content/uploads/2021/05/Bun-cha-huong-lien.jpg"
+                    ],
+                    "gps": {
+                        "lat": 21.02319357928,
+                        "lng": 105.853381769233
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Chả Cá Lã Vọng",
+                    "description": [
+                        "Đặc sản chả cá, dùng với bún, lạc rang, rau thơm và mắm tôm. Món ăn lịch sử của Hà Nội."
+                    ],
+                    "images": [
+                        "https://i-giadinh.vnecdn.net/2023/02/23/Buoc-9-Thanh-pham-9-3656-1677138711.jpg"
+                    ],
+                    "gps": {
+                        "lat": 21.0226690529218,
+                        "lng": 105.857109172862
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bún riêu cua Hàng Bún",
+                    "description": [
+                        "Tô bún riêu đầy màu sắc với gạch cua, đậu phụ, và giò tai. Vị riêu cua đậm đà."
+                    ],
+                    "images": [
+                        "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:format(webp):quality(75)/cach_nau_bun_rieu_cua_ha_noi_ed8278d38b.jpg"
+                    ],
+                    "gps": {
+                        "lat": 21.0187074751367,
+                        "lng": 105.856888176165
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Kem Tràng Tiền",
+                    "description": [
+                        "Thương hiệu kem que lâu đời, hương vị truyền thống (cốm, đậu xanh, sữa dừa)."
+                    ],
+                    "images": [
+                        "https://kenhhomestay.com/wp-content/uploads/2023/01/kem-trang-tien-1.jpg"
+                    ],
+                    "gps": {
+                        "lat": 21.0259957313254,
+                        "lng": 105.854999885732
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Cà phê Giảng",
+                    "description": [
+                        "Nơi khai sinh món Cà phê Trứng nổi tiếng. Không gian cũ kỹ, nằm sâu trong ngõ."
+                    ],
+                    "images": [
+                        "https://flavorsofhanoi.com/wp-content/uploads/2020/12/Cafe-Giang.jpg"
+                    ],
+                    "gps": {
+                        "lat": 21.0419424230972,
+                        "lng": 105.848975297611
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bánh mì Phố Cổ",
+                    "description": [
+                        "Bánh mì nướng than, nhân pate, thịt xá xíu hoặc thập cẩm. Vỏ bánh giòn rụm."
+                    ],
+                    "images": [
+                        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2b/4d/62/28/caption.jpg?w=900&h=500&s=1"
+                    ],
+                    "gps": {
+                        "lat": 21.0329294604377,
+                        "lng": 105.851807706573
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bún Thang Bà Đức",
+                    "description": [
+                        "Món bún thang tinh tế, nước dùng thanh tao, các nguyên liệu được thái chỉ công phu."
+                    ],
+                    "images": [
+                        "https://cdn.tgdd.vn/Files/2023/08/08/1541580/ghe-an-bun-thang-trong-khu-pho-co-ha-noi-chi-ban-chieu-toi-500-bat-moi-ngay-202308081004040486.jpg"
+                    ],
+                    "gps": {
+                        "lat": 21.0346065571638,
+                        "lng": 105.852922443422
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Quán Ăn Ngon ( Phan Bội Châu)",
+                    "description": [
+                        "Tổng hợp ẩm thực 3 miền, phục vụ trong không gian sang trọng kiểu truyền thống."
+                    ],
+                    "images": [
+                        "https://media-cdn.tripadvisor.com/media/photo-s/0e/ab/5a/4a/quan-an-ngon-18-phan.jpg"
+                    ],
+                    "gps": {
+                        "lat": 21.0278226564462,
+                        "lng": 105.843547679608
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Xôi Chè Bà Thìn",
+                    "description": [
+                        "Quán chè/xôi chè truyền thống, đa dạng các loại chè và xôi, phù hợp để tráng miệng."
+                    ],
+                    "images": [
+                        "https://mia.vn/media/uploads/blog-du-lich/xoi-che-ba-thin-dia-chi-quen-thuoc-cua-cac-tin-do-me-do-ngot-tai-ha-noi-06-1639324433.jpg"
+                    ],
+                    "gps": {
+                        "lat": 21.0362060081358,
+                        "lng": 105.847653256859
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                }
+            ]
+        },
+        {
+            "province_name": "Hồ Chí Minh",
+            "places": [
+                {
+                    "name": "Phở Hoà Pasteur",
+                    "description": [
+                        "Phở bò gia truyền nổi tiếng, nước dùng ngọt tự nhiên, thịt chất lượng. Địa điểm nổi tiếng với khách du lịch."
+                    ],
+                    "images": [
+                        "https://danviet.ex-cdn.com/files/f1/296231569849192448/2022/3/5/pho-hoa-1-16464892071662137023768-164648926621073411074.jpeg"
+                    ],
+                    "gps": {
+                        "lat": 10.787785904235,
+                        "lng": 106.688747422122
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bánh Mì Huỳnh Hoa",
+                    "description": [
+                        "\"Vua bánh mì Sài Gòn\" với ổ bánh đầy ắp nhân thịt nguội, pate, chà bông. Luôn có hàng dài người xếp hàng."
+                    ],
+                    "images": [
+                        "https://banhmihuynhhoa.vn/wp-content/uploads/2024/05/cua-hang.png"
+                    ],
+                    "gps": {
+                        "lat": 10.7732926041614,
+                        "lng": 106.692224844872
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bún Mắm Miền Tây (104 Mạc Thị Bưởi)",
+                    "description": [
+                        "Bún mắm hương vị miền Tây đậm đà, nước lèo nấu từ mắm cá linh, ăn kèm hải sản."
+                    ],
+                    "images": [
+                        "https://media-cdn-v2.laodong.vn/storage/newsportal/2024/1/8/1290144/Bun-Mam-4.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.7786557500343,
+                        "lng": 106.686898639519
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Quán ốc Đào",
+                    "description": [
+                        "Quán ốc bình dân nổi tiếng, đa dạng các món ốc xào me, bơ tỏi, nướng. Địa điểm đông khách."
+                    ],
+                    "images": [
+                        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/0f/d7/f6/0e/in-front-of-the-oc-dao.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.7691905173715,
+                        "lng": 106.68449512338
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bún thịt nướng Kiều Bảo",
+                    "description": [
+                        "Bún thịt nướng chất lượng với thịt nướng tẩm ướp đậm đà, chả giò giòn tan."
+                    ],
+                    "images": [
+                        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/15/1f/b0/24/cheap-eats-but-worth.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.8018828721534,
+                        "lng": 106.660462273329
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Cơm Tấm Ba Ghiền",
+                    "description": [
+                        "Cơm tấm sườn bì chả nổi tiếng. Miếng sườn to, ướp vừa miệng."
+                    ],
+                    "images": [
+                        "https://mia.vn/media/uploads/blog-du-lich/com-tam-ba-ghien-13-1729128577.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.7966019011665,
+                        "lng": 106.66937683967
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Lẩu Dê Chú Mười",
+                    "description": [
+                        "Quán lẩu dê bình dân, thịt dê tươi, không hôi, nước lẩu thuốc bắc đậm đà."
+                    ],
+                    "images": [
+                        "https://topsaigon.vn/upload/data/images/DeChuMuoi-1.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.8009732501688,
+                        "lng": 106.677669414202
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bánh Xèo 46A Đinh Công Tráng",
+                    "description": [
+                        "Bánh xèo miền Nam vỏ giòn tan, nhân tôm thịt, ăn kèm rau sống và nước mắm chua ngọt."
+                    ],
+                    "images": [
+                        "https://mia.vn/media/uploads/blog-du-lich/banh-xeo-dinh-cong-trang-1744036749.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.7913372968926,
+                        "lng": 106.690827522124
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bánh Khọt Cô Ba Vũng Tàu",
+                    "description": [
+                        "Chuyên món bánh khọt (bánh căn) giòn, nhân tôm, chấm nước mắm pha đặc biệt."
+                    ],
+                    "images": [
+                        "https://static.vinwonders.com/production/banh-khot-sai-gon-8.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.7850435429179,
+                        "lng": 106.696301851811
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Hẻm Ăn Uống 200 Xóm Chiếu",
+                    "description": [
+                        "Khu ẩm thực đường phố sầm uất, nổi tiếng với các món ăn vặt và hải sản."
+                    ],
+                    "images": [
+                        "https://images2.thanhnien.vn/528068263637045248/2025/3/7/z6383320765187e1d18ea85b633013ad96d2554ff54b7e-17413340577151820564561.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.7571998855728,
+                        "lng": 106.708894159692
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                }
+            ]
+        },
+        {
+            "province_name": "Hải Phòng",
+            "places": [
+                {
+                    "name": "Bánh đa cua Bà Cụ",
+                    "description": [
+                        "Quán bánh đa cua lâu đời và nổi tiếng nhất Hải Phòng. Nước dùng đậm đà vị riêu cua đồng."
+                    ],
+                    "images": [
+                        "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:format(webp):quality(75)/banh_da_cua_ba_cu_1_413b6c0395.jpg"
+                    ],
+                    "gps": {
+                        "lat": 20.8496008472351,
+                        "lng": 106.690270002434
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bánh mì cay Bà Già",
+                    "description": [
+                        "Đặc sản bánh mì cay (hay còn gọi là bánh mì que) nổi tiếng. Nhỏ, dài, nhân pate gan, chấm chí chương."
+                    ],
+                    "images": [
+                        "https://mia.vn/media/uploads/blog-du-lich/ngat-ngay-voi-banh-mi-cay-ba-gia-hai-phong-chi-tu-2000-dong-mot-o-10-1648438570.jpg"
+                    ],
+                    "gps": {
+                        "lat": 20.8596132257235,
+                        "lng": 106.692513230474
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bún cá cay 66 Lê Lợi",
+                    "description": [
+                        "Bún cá cay đặc trưng Hải Phòng với nước dùng xương cá, cá chiên giòn, chả cá và dọc mùng."
+                    ],
+                    "images": [
+                        "https://hotel84.com/hotel84-images/news/img1/bun-ca-cay-66-le-loi.jpg"
+                    ],
+                    "gps": {
+                        "lat": 20.8604344676967,
+                        "lng": 106.693280498674
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Lẩu dê Nhật Quang",
+                    "description": [
+                        "Quán lẩu dê bình dân, được biết đến với thịt dê tươi ngon, tẩm ướp kỹ."
+                    ],
+                    "images": [
+                        "https://img.tripi.vn/cdn-cgi/image/width=700,height=700/https://gcs.tripi.vn/public-tripi/tripi-feed/img/474739ZKE/lau-de-nhat-ly-1312875.jpg"
+                    ],
+                    "gps": {
+                        "lat": 20.8619822158667,
+                        "lng": 106.684499735202
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Chè Thái Lan 110 Lương Khánh Thiện",
+                    "description": [
+                        "Quán chè nổi tiếng với món chè Thái dừa non mát lạnh, nhiều topping."
+                    ],
+                    "images": [
+                        "https://cdn.tgdd.vn/2021/11/CookRecipe/Avatar/che-mit-thai-lan-thumbnail.jpeg"
+                    ],
+                    "gps": {
+                        "lat": 20.8568032185029,
+                        "lng": 106.687524266033
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Cà phê Trung Nguyên E-Coffee (nhiều chi nhánh)",
+                    "description": [
+                        "Mặc dù là thương hiệu chuỗi, các cửa hàng lớn thường nằm ở vị trí đẹp, phục vụ cà phê pha phin truyền thống."
+                    ],
+                    "images": [
+                        "https://trungnguyenlegend.com/wp-content/uploads/2020/06/trungnguyenecoffeect.jpg"
+                    ],
+                    "gps": {
+                        "lat": 20.8435478622979,
+                        "lng": 106.683056394287
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Ốc Thuỷ Dương",
+                    "description": [
+                        "Quán ốc nổi tiếng với nhiều món ốc chế biến đa dạng: xào dừa, hấp, nướng."
+                    ],
+                    "images": [
+                        "https://mia.vn/media/uploads/blog-du-lich/hem-nho-cung-khong-ngan-duoc-suc-hut-cua-quan-oc-thuy-duong-5-1647969639.jpg"
+                    ],
+                    "gps": {
+                        "lat": 20.8329007627488,
+                        "lng": 106.699477675897
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Nem cua bể Phương Mai",
+                    "description": [
+                        "Nem cua bể hình vuông, vỏ giòn, nhân tôm, thịt, cua bể tươi ngon."
+                    ],
+                    "images": [
+                        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/0c/67/c8/c0/bun-cha-phuong-mai.jpg?w=900&h=500&s=1"
+                    ],
+                    "gps": {
+                        "lat": 20.853941084889,
+                        "lng": 106.676501041831
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bánh cuốn tôm",
+                    "description": [
+                        "Bánh cuốn tráng mỏng, nhân tôm tươi xào, ăn kèm nước mắm đặc trưng Hải Phòng."
+                    ],
+                    "images": [
+                        "https://cdn.tgdd.vn/Files/2021/08/28/1378586/cach-lam-banh-cuon-tom-dimsum-hongkong-don-gian-chuan-vi-ngon-tai-nha-202201131232309198.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.7991618632982,
+                        "lng": 106.635081189652
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Cháo Trai Đinh Tiên Hoàng",
+                    "description": [
+                        "Quán cháo trai nổi tiếng với cháo nóng, trai tươi, rắc hành phi và gia vị."
+                    ],
+                    "images": [
+                        "https://cdn.tgdd.vn/2021/12/CookRecipe/GalleryStep/4-3.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.7905068757024,
+                        "lng": 106.697646652821
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                }
+            ]
+        },
+        {
+            "province_name": "Đà Nẵng",
+            "places": [
+                {
+                    "name": "Bánh tráng cuốn thịt heo Trần",
+                    "description": [
+                        "Thương hiệu nổi tiếng với món bánh tráng cuốn thịt heo luộc, ăn kèm rau sống và mắm nêm đặc trưng."
+                    ],
+                    "images": [
+                        "https://bazantravel.com/cdn/medias/uploads/54/54279-quan-tran-700x465.jpg"
+                    ],
+                    "gps": {
+                        "lat": 16.0276861466929,
+                        "lng": 108.196552949997
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Mì Quảng Bà Mua",
+                    "description": [
+                        "Mì Quảng truyền thống với sợi mì dai, nước dùng đậm đà, nhân đa dạng (gà, tôm, thịt)."
+                    ],
+                    "images": [
+                        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/11/75/92/85/img-20171207-131918-01.jpg"
+                    ],
+                    "gps": {
+                        "lat": 16.0619693649136,
+                        "lng": 108.208912315582
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bánh Xèo Bà Dưỡng",
+                    "description": [
+                        "Bánh xèo miền Trung giòn rụm, được nướng bằng khuôn nhỏ, chấm nước lèo/mắm nêm."
+                    ],
+                    "images": [
+                        "https://mia.vn/media/uploads/blog-du-lich/thoa-man-voi-banh-xeo-ba-duong-ngon-nhat-da-nang-06-1636651298.jpg"
+                    ],
+                    "gps": {
+                        "lat": 16.0606083179831,
+                        "lng": 108.216337369199
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Hải sản Bé Mặn",
+                    "description": [
+                        "Quán hải sản tươi sống nổi tiếng, đa dạng các loại ốc, tôm, cua, cá. Giá cả phải chăng."
+                    ],
+                    "images": [
+                        "https://vietair.com.vn/Media/Images/hai-san-be-man(1).jpg"
+                    ],
+                    "gps": {
+                        "lat": 16.0838828857813,
+                        "lng": 108.247300377177
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Phở Lý Quốc Sư (chi nhánh Đà Nẵng)",
+                    "description": [
+                        "Thương hiệu phở Bắc nổi tiếng, được yêu thích tại Đà Nẵng."
+                    ],
+                    "images": [
+                        "https://cdn.vntrip.vn/cam-nang/wp-content/uploads/2017/08/pho-ly-quoc-su.jpg"
+                    ],
+                    "gps": {
+                        "lat": 16.0718862885787,
+                        "lng": 108.192701515629
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bún chả cá Ông Tạ",
+                    "description": [
+                        "Bún chả cá truyền thống, nước dùng thanh ngọt nấu từ xương cá, chả cá dai ngon."
+                    ],
+                    "images": [
+                        "https://hoangviettravel.vn/wp-content/uploads/2020/03/bun-cha-ca-ong-ta-da-nang-1024x683.jpg"
+                    ],
+                    "gps": {
+                        "lat": 16.0533195852184,
+                        "lng": 108.210456124774
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Cơm gà bà Nga",
+                    "description": [
+                        "Cơm gà xối mỡ hoặc gà luộc da vàng óng, cơm nấu bằng nước luộc gà."
+                    ],
+                    "images": [
+                        "https://www.wikidanang.com/tin-tuc/images/wiki-noi-khac/hoi-an/quan-an/com-ga-nga/com-ga-nga-hoi-an-pct-1.jpg"
+                    ],
+                    "gps": {
+                        "lat": 16.0611803797249,
+                        "lng": 108.208933645672
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Café Cộng Cà Phê (nhiều chi nhánh)",
+                    "description": [
+                        "Chuỗi cà phê phong cách bao cấp, không gian độc đáo, nổi tiếng với món Cà phê Cốt Dừa."
+                    ],
+                    "images": [
+                        "https://mia.vn/media/uploads/blog-du-lich/cong-ca-phe-01-1693876084.jpg"
+                    ],
+                    "gps": {
+                        "lat": 16.0826669966474,
+                        "lng": 108.220581508567
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bánh Canh Ruộng",
+                    "description": [
+                        "Bánh canh truyền thống, nước dùng sệt, có thể thêm chả cua, chả cá."
+                    ],
+                    "images": [
+                        "https://cdn.vntrip.vn/cam-nang/wp-content/uploads/2016/01/banh-canh.jpg"
+                    ],
+                    "gps": {
+                        "lat": 16.0651508121936,
+                        "lng": 108.230537615014
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Kem Bơ Bán Đá",
+                    "description": [
+                        "Kem bơ đặc trưng, kem bơ mịn, béo ngậy, ăn kèm dừa sấy hoặc sầu riêng."
+                    ],
+                    "images": [
+                        "https://mia.vn/media/uploads/blog-du-lich/tong-hop-6-quan-kem-bo-da-nang-giup-giai-nhiet-nhung-ngay-nong-1-1636737670.jpg"
+                    ],
+                    "gps": {
+                        "lat": 16.0631398594076,
+                        "lng": 108.209594675467
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                }
+            ]
+        },
+        {
+            "province_name": "Huế",
+            "places": [
+                {
+                    "name": "Bún Bò Huế Mụ Rớt",
+                    "description": [
+                        "Quán bún bò lâu đời, nổi tiếng với hương vị đậm đà, mắm ruốc đặc trưng và thịt bò gân."
+                    ],
+                    "images": [
+                        "https://down-vn.img.susercontent.com/vn-11134259-7r98o-lward3zi86vt8c@resize_ss640x400"
+                    ],
+                    "gps": {
+                        "lat": 16.4762444228464,
+                        "lng": 107.582864545563
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Quán Bà Đỏ (Bánh Bèo, Nậm, Lọc)",
+                    "description": [
+                        "Tổng hợp các loại bánh Huế (bánh bèo, bánh nậm, bánh lọc) truyền thống, mắm nêm đậm đà."
+                    ],
+                    "images": [
+                        "https://visithue.vn/Portals/0/VisitHue/Gastronomy/BeoNamLocBaDo/visithue_beonamlocbado1.jpg"
+                    ],
+                    "gps": {
+                        "lat": 16.4841932735052,
+                        "lng": 107.589674200946
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Cơm Hến Bà Gái",
+                    "description": [
+                        "Quán cơm hến, bún hến nổi tiếng. Món ăn dân dã, cay nồng, vị hến ngọt."
+                    ],
+                    "images": [
+                        "https://bazantravel.com/cdn/medias/uploads/27/27644-com-hen-hue-670x446.jpg"
+                    ],
+                    "gps": {
+                        "lat": 16.4618035845464,
+                        "lng": 107.601175496746
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Chè Hẻm",
+                    "description": [
+                        "Khu vực bán chè nổi tiếng với nhiều loại chè truyền thống Huế: chè đậu ngự, chè hạt sen, chè khoai tía."
+                    ],
+                    "images": [
+                        "https://statics.vinpearl.com/che-hem-hue-01_1631538368.jpg"
+                    ],
+                    "gps": {
+                        "lat": 16.4727337173866,
+                        "lng": 107.593532174011
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Nem Lụi, Bánh Khoái Thượng Tứ",
+                    "description": [
+                        "Quán chuyên nem lụi nướng thơm, bánh khoái (loại bánh xèo nhỏ hơn) ăn kèm nước lèo đậu phụng đặc biệt."
+                    ],
+                    "images": [
+                        "https://statics.vinpearl.com/banh-khoai-hue-8_1702311987.jpg"
+                    ],
+                    "gps": {
+                        "lat": 16.4708160811439,
+                        "lng": 107.585359610498
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Phở Sáu",
+                    "description": [
+                        "Phở bò ngon nổi tiếng ở Huế, nước dùng trong, đậm vị, hợp khẩu vị nhiều người."
+                    ],
+                    "images": [
+                        "https://media-cdn-v2.laodong.vn/storage/newsportal/2024/12/21/1438849/Pho-Bo.jpg"
+                    ],
+                    "gps": {
+                        "lat": 16.4705896646468,
+                        "lng": 107.595691000379
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Làng Ẩm Thực Cồn Hến",
+                    "description": [
+                        "Khu vực tập trung nhiều quán ăn hến và các món ăn dân dã khác của Huế."
+                    ],
+                    "images": [
+                        "https://vyda.hue.gov.vn/Portals/54/Uploads/H57.118/Nam2025/Thang6/Hen_Hue_6.jpg"
+                    ],
+                    "gps": {
+                        "lat": 16.4809582658078,
+                        "lng": 107.593545217532
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bánh Ép O Lé",
+                    "description": [
+                        "Bánh ép (một loại bánh tráng nướng mỏng dính) kẹp nhân trứng, thịt, ăn cay."
+                    ],
+                    "images": [
+                        "https://cdn.tgdd.vn/Files/2024/06/15/1566912/banh-ep-hue-la-gi-vi-sao-duoc-goi-la-banh-ep-202406151550271918.jpg"
+                    ],
+                    "gps": {
+                        "lat": 16.4658076213414,
+                        "lng": 107.558299285519
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bánh Mì Trường Tiền",
+                    "description": [
+                        "Quán bánh mì nổi tiếng gần cầu Trường Tiền, nhân thập cẩm đặc sắc."
+                    ],
+                    "images": [
+                        "https://thanhnien.mediacdn.vn/Uploaded/nhanlh/2022_10_11/img-0114-1634.jpg"
+                    ],
+                    "gps": {
+                        "lat": 16.4662305893498,
+                        "lng": 107.591655277305
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                }
+            ]
+        },
+        {
+            "province_name": "Cần Thơ",
+            "places": [
+                {
+                    "name": "Lẩu Mắm Dạ Lý",
+                    "description": [
+                        "Quán lẩu mắm được nhiều người biết đến, nước lèo đậm đà hương mắm, nhiều loại rau và hải sản."
+                    ],
+                    "images": [
+                        "https://scontent.iocvnpt.com/resources/portal/Images/CTO/superadminportal.cto/Nhahang/DaLy/daly1_637024099135987744.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.017077170994,
+                        "lng": 105.760162356803
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bánh Cống Cô Út",
+                    "description": [
+                        "Đặc sản bánh cống Cần Thơ: vỏ giòn rụm, nhân tôm thịt, ăn kèm rau sống và nước mắm chua ngọt."
+                    ],
+                    "images": [
+                        "https://mia.vn/media/uploads/blog-du-lich/diem-danh-top-quan-banh-cong-can-tho-va-huong-vi-kho-quen-12-1649411060.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.0356084650413,
+                        "lng": 105.781280348865
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Chợ Nổi Cái Răng",
+                    "description": [
+                        "Khu vực ẩm thực độc đáo trên sông. Nổi tiếng với bún riêu, hủ tiếu, cà phê, và trái cây."
+                    ],
+                    "images": [
+                        "https://statics.vinpearl.com/cho-noi-cai-rang-2_1624262882.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.0053234949383,
+                        "lng": 105.745988325104
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Ốc Mắm Sữa",
+                    "description": [
+                        "Quán ốc bình dân nổi tiếng, đa dạng món ốc và hải sản tươi ngon với giá cả phải chăng."
+                    ],
+                    "images": [
+                        "https://img.mservice.com.vn/common/u/2e02fb5fe4f64fb55bc713540643c6f8eae702d101cea8c59afc49cfc505fc37/cd3066f0-c8b2-41f1-b76a-41bb05cf0889h23l_u5a.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.802819096992,
+                        "lng": 106.700435841439
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bánh Xèo Bảy Tới",
+                    "description": [
+                        "Bánh xèo miền Tây cỡ lớn, vỏ giòn, nhân tôm, thịt, củ sắn, ăn kèm rau cải bẹ xanh."
+                    ],
+                    "images": [
+                        "https://anhdaomekong2hotel.vn/upload/images/banh-xeo-7-toi-1.png"
+                    ],
+                    "gps": {
+                        "lat": 10.011381546418,
+                        "lng": 105.747339963632
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bún Riêu Cua Đông Hồ",
+                    "description": [
+                        "Quán bún riêu cua lâu năm, nước dùng đậm đà hương vị đồng quê."
+                    ],
+                    "images": [
+                        "https://i.vietgiaitri.com/2020/8/4/bi-quyet-lam-bun-rieu-cua-dong-ngon-nhu-ngoai-hang-an-64e-5133488.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.0230598081591,
+                        "lng": 105.762264658754
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Chợ đêm Ninh Kiều/Khu Ẩm thực Bến Ninh Kiều",
+                    "description": [
+                        "Tập trung nhiều quầy ẩm thực đường phố, các món ăn vặt và đặc sản miền Tây."
+                    ],
+                    "images": [
+                        "https://r2.nucuoimekong.com/wp-content/uploads/cong-cho-dem-can-tho.png"
+                    ],
+                    "gps": {
+                        "lat": 10.0335087561214,
+                        "lng": 105.788581647747
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Quán Ăn Cây Bưởi",
+                    "description": [
+                        "Nổi tiếng với các món ăn đồng quê, dân dã miền Tây như lẩu cá linh bông điên điển (theo mùa)."
+                    ],
+                    "images": [
+                        "https://scontent.iocvnpt.com/resources/portal/Images/CTO/superadminportal.cto/Nhahang/caybuoi2/caybuoi26_637063974471145774.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.0195617175295,
+                        "lng": 105.78523423491
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                }
+            ]
+        },
+        {
+            "province_name": "An Giang",
+            "places": [
+                {
+                    "name": "Bún Nước Lèo Cô Út (Châu Đốc)",
+                    "description": [
+                        "Đặc sản bún nước lèo đậm đà hương mắm, hải sản và rau tươi ngon."
+                    ],
+                    "images": [
+                        "https://cdn.tgdd.vn/Files/2020/07/01/1266749/cach-nau-bun-nuoc-leo-soc-trang-ngon-dam-da-chuan-vi-an-mot-lan-la-nho-mai-202208301437543598.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.5472236100483,
+                        "lng": 105.495146666778
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bò Bảy Núi (Thốt Nốt)",
+                    "description": [
+                        "Quán chuyên các món bò vùng Bảy Núi: bò nướng, bò lúc lắc, thịt bò mềm và ngọt."
+                    ],
+                    "images": [
+                        "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:format(webp):quality(75)/lau_gan_bo_14_c8c91b7fc0.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.6950802204342,
+                        "lng": 105.071486806433
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Lẩu Mắm 999 (Long Xuyên)",
+                    "description": [
+                        "Quán lẩu mắm được yêu thích tại Long Xuyên, nước lẩu chuẩn vị miền Tây."
+                    ],
+                    "images": [
+                        "https://cdn.vietnammoi.vn/171464242508312576/2020/11/18/vietfun-travel-16056931310821100186612-136-0-1501-2048-crop-1605693421391915769772.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.3934396754193,
+                        "lng": 105.43734710394
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Cà phê Út Lành (Châu Đốc)",
+                    "description": [
+                        "Điểm dừng chân nổi tiếng với món nước thốt nốt và các loại bánh đặc sản (bánh bò thốt nốt)."
+                    ],
+                    "images": [
+                        "https://lh6.googleusercontent.com/proxy/YSaJfwCpjnf4U5heoy8t_BrtGi5EWoBbdvgygwBBkgwt-vNTj0OVD_lpz_pawL6CTVYYFmtPpjlesI9GZ4t21xlAMfaI9w6TwcK4ju85ojI"
+                    ],
+                    "gps": {
+                        "lat": 10.4214388312113,
+                        "lng": 105.409536542759
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Chè Xôi Vườn Xoài",
+                    "description": [
+                        "Nổi tiếng với món chè thập cẩm, chè bà ba và các loại xôi chè miền Tây."
+                    ],
+                    "images": [
+                        "https://statics.vinpearl.com/xoi-xoai-06_1632035828.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.4707157335048,
+                        "lng": 104.925976692984
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                }
+            ]
+        },
+        {
+            "province_name": "Vũng Tàu",
+            "places": [
+                {
+                    "name": "Bánh Khọt Gốc Vú Sữa (Vũng Tàu)",
+                    "description": [
+                        "Quán bánh khọt nổi tiếng nhất, vỏ giòn, nhân tôm tươi, ăn kèm rau sống và nước mắm đặc trưng."
+                    ],
+                    "images": [
+                        "https://mia.vn/media/uploads/blog-du-lich/banh-khot-goc-vu-sua-noi-tieng-xa-gan-va-dac-biet-la-khong-co-chi-nhanh-1-1633788042.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.3406633151559,
+                        "lng": 107.078816233323
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Lẩu Cá Đuối Út Mười",
+                    "description": [
+                        "Đặc sản lẩu cá đuối nấu măng chua, vị chua cay đậm đà, thịt cá mềm."
+                    ],
+                    "images": [
+                        "https://laucaduoivungtau.com/wp-content/uploads/2023/11/laucaduoiutmuoi4-601x400.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.3421550163973,
+                        "lng": 107.078308953661
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bánh Bông Lan Trứng Muối Gốc Cột Điện",
+                    "description": [
+                        "Quán bán bánh bông lan trứng muối lâu đời, bánh mềm, vị mặn ngọt hài hòa."
+                    ],
+                    "images": [
+                        "https://hanhtrinhdulich.net/wp-content/uploads/2024/05/banh-bong-lan-trung-muoi-vung-tau-goc-cot-dien.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.3422148145944,
+                        "lng": 107.078335213884
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Hải sản Gành Hào",
+                    "description": [
+                        "Nhà hàng hải sản sang trọng với view biển đẹp, hải sản tươi sống chất lượng cao."
+                    ],
+                    "images": [
+                        "https://bazantravel.com/cdn/medias/uploads/30/30388-ganh-hao-700x471.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.3391639383564,
+                        "lng": 107.071429146991
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bún Riêu Tôm Càng Xanh",
+                    "description": [
+                        "Quán bún riêu nổi tiếng với bún riêu tôm càng xanh tươi, nước dùng thanh ngọt."
+                    ],
+                    "images": [
+                        "https://cdn.tgdd.vn/Files/2022/09/24/1471658/cach-lam-banh-canh-tom-cang-xanh-ngon-an-ngon-kho-cuong-202209240646430749.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.3410438591335,
+                        "lng": 107.083719478524
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                }
+            ]
+        },
+        {
+            "province_name": "Bắc Giang",
+            "places": [
+                {
+                    "name": "Mì Chũ Sợi To",
+                    "description": [
+                        "Đặc sản mì Chũ nổi tiếng. Các quán thường chế biến mì Chũ xào hoặc mì nước với thịt gà, sườn."
+                    ],
+                    "images": [
+                        "https://cdn2.fptshop.com.vn/unsafe/800x0/mi_chu_2_e95b84f91d.png"
+                    ],
+                    "gps": {
+                        "lat": 21.2852089496404,
+                        "lng": 106.196526341001
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Gà Đồi Yên Thế ",
+                    "description": [
+                        "Gà đồi được nuôi thả tự nhiên, thịt săn chắc, thường chế biến thành gà luộc, gà nướng."
+                    ],
+                    "images": [
+                        "https://imgcdn.tapchicongthuong.vn/thumb/w_1920/tcct-media/22/11/21/ga-doi-yen-the-04_486b4.jpg"
+                    ],
+                    "gps": {
+                        "lat": 21.2414994120359,
+                        "lng": 106.14851421032
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Phở Sâm",
+                    "description": [
+                        "Quán phở gia truyền nổi tiếng tại thành phố, nước dùng đậm đà, thịt bò tươi ngon."
+                    ],
+                    "images": [
+                        "https://www.duoclieutuelam.vn/wp-content/uploads/2020/09/d78fa42cb824477a1e35-506x400.jpg"
+                    ],
+                    "gps": {
+                        "lat": 21.2746919836814,
+                        "lng": 106.192615535074
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bún Đậu Mắm Tôm Cô Liên",
+                    "description": [
+                        "Quán bún đậu bình dân được người dân địa phương ưa chuộng, đầy đủ topping."
+                    ],
+                    "images": [
+                        "https://ngon1.vn/uploads/stores/8/2025/05/bun-dau-mam-tom-co-nguon-goc-tu-dau-1-1.jpg"
+                    ],
+                    "gps": {
+                        "lat": 21.2081888178901,
+                        "lng": 106.118125011362
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Quán Ăn Cây Đa (Các Món Dân Dã)",
+                    "description": [
+                        "Nổi tiếng với các món ăn dân dã đồng quê như cá kho, canh cua, thịt heo rừng."
+                    ],
+                    "images": [
+                        "https://hotel84.com/hotel84-images/news/photo/cay-da-quan-76-duy-tan4.jpg"
+                    ],
+                    "gps": {
+                        "lat": 21.2891108848488,
+                        "lng": 106.007524928271
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                }
+            ]
+        },
+        {
+            "province_name": "Bắc Cạn",
+            "places": [
+                {
+                    "name": "Phở Chua Bắc Kạn ",
+                    "description": [
+                        "Món phở đặc trưng vùng núi, có vị chua ngọt nhẹ, ăn lạnh với thịt gà/thịt heo quay."
+                    ],
+                    "images": [
+                        "https://bloganchoi.com/wp-content/uploads/2024/01/pho-chua-696x434.jpg"
+                    ],
+                    "gps": {
+                        "lat": 22.165965464788,
+                        "lng": 105.837086437742
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bánh Dày Giò Mật",
+                    "description": [
+                        "Quán bán bánh dày giò chả nổi tiếng, bánh dày dẻo, giò chả thơm ngon."
+                    ],
+                    "images": [
+                        "https://banhdayngon.vn/wp-content/themes/tonphong/temp/banh-day-gio-ngon-dac-biet.jpg"
+                    ],
+                    "gps": {
+                        "lat": 22.2365403549857,
+                        "lng": 105.850224109524
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Cá Tầm/Cá Hồi Hồ Ba Bể",
+                    "description": [
+                        "Các nhà hàng ven Hồ Ba Bể phục vụ cá nước ngọt tươi ngon, chế biến thành lẩu, nướng."
+                    ],
+                    "images": [
+                        "https://dulichhobabe.com/UserFiles/image/Mien%20Bac/Ba%20Be/Nguoivietdulichviet_canuong.jpg"
+                    ],
+                    "gps": {
+                        "lat": 22.1314330407996,
+                        "lng": 105.868477543562
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Nhà Hàng Lá Cọ Bắc Kạn",
+                    "description": [
+                        "Chuyên các món chế biến từ lợn rừng nuôi thả, thịt săn, như lợn nướng lá móc mật."
+                    ],
+                    "images": [
+                        "https://kenhhomestay.com/wp-content/uploads/2019/04/Quan-heo-rung-sai-gon-1.jpg"
+                    ],
+                    "gps": {
+                        "lat": 22.1984185931468,
+                        "lng": 105.834257151993
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                }
+            ]
+        },
+        {
+            "province_name": "Bạc Liêu",
+            "places": [
+                {
+                    "name": "Bún Nước Lèo 303 (Bạc Liêu)",
+                    "description": [
+                        "Bún nước lèo chuẩn vị miền Tây Nam Bộ, nước dùng ngọt thơm từ tôm cá."
+                    ],
+                    "images": [
+                        "https://saigonesebaguette.vn/wp-content/uploads/2025/10/cach-nau-bun-nuoc-leo-bac-lieu-4f538a.webp"
+                    ],
+                    "gps": {
+                        "lat": 9.28271552665098,
+                        "lng": 105.724451512306
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Cháo Ốc Thúy",
+                    "description": [
+                        "Quán cháo ốc nổi tiếng, cháo nóng hổi, ốc tươi, nhiều người dân địa phương yêu thích."
+                    ],
+                    "images": [
+                        "https://cdn.tgdd.vn/2022/06/CookDish/cach-nau-chao-oc-da-thom-ngon-dam-vi-giau-chat-dinh-duong-avt-1200x676.jpg"
+                    ],
+                    "gps": {
+                        "lat": 9.27733122444515,
+                        "lng": 105.726576940129
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bánh Tằm Bì Bạc Liêu",
+                    "description": [
+                        "Món bánh tằm bì truyền thống, sợi bánh tằm làm từ bột gạo, ăn kèm bì, thịt xíu và nước cốt dừa."
+                    ],
+                    "images": [
+                        "https://images2.thanhnien.vn/528068263637045248/2023/3/15/3363832721972643995950864521189394370686808n-16788610357261540887615.jpg"
+                    ],
+                    "gps": {
+                        "lat": 9.29304454454776,
+                        "lng": 105.728613940222
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Công Tử Bạc Liêu Quán",
+                    "description": [
+                        "Nhà hàng có không gian kiến trúc cổ, phục vụ các món ăn đặc sản Bạc Liêu và miền Tây."
+                    ],
+                    "images": [
+                        "https://www.congtubaclieu.com.vn/wp-content/uploads/sites/86/2025/04/z4283125039051_fc7db169a24d44f10e2ada4f257337ae-2200x1200.jpg"
+                    ],
+                    "gps": {
+                        "lat": 9.28546011241972,
+                        "lng": 105.723462085986
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bánh Xèo A Mật",
+                    "description": [
+                        "Bánh xèo miền Tây cỡ lớn, đổ giòn, nhân tôm, thịt, giá đỗ, chấm nước mắm pha chua ngọt."
+                    ],
+                    "images": [
+                        "https://vietsensetravel.com/view/at_banh-xeo-a-mat_248bafda13d3f8cf1def5b061aba63ed.jpg"
+                    ],
+                    "gps": {
+                        "lat": 9.23742155453949,
+                        "lng": 105.750640543888
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                }
+            ]
+        },
+        {
+            "province_name": "Bắc Ninh",
+            "places": [
+                {
+                    "name": "Bún riêu cua ốc Phượng",
+                    "description": [
+                        "Quán bún riêu ốc nổi tiếng, nước dùng đậm đà, riêu cua béo ngậy, ốc tươi ngon."
+                    ],
+                    "images": [
+                        "https://img.mservice.com.vn/common/u/2e02fb5fe4f64fb55bc713540643c6f8eae702d101cea8c59afc49cfc505fc37/d01ab5a5-8d06-496a-988b-feb7869a5ef5er4y7v47.jpeg"
+                    ],
+                    "gps": {
+                        "lat": 21.5867448079075,
+                        "lng": 106.003221004923
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bánh Tẻ làng Chờ (Yên Phong)",
+                    "description": [
+                        "Đặc sản bánh tẻ gói lá dong, nhân thịt heo, mộc nhĩ, ăn nóng dẻo thơm."
+                    ],
+                    "images": [
+                        "https://statics.vinpearl.com/banh-te-lang-cho-bac-ninh_1753969858.jpg"
+                    ],
+                    "gps": {
+                        "lat": 21.195506070086,
+                        "lng": 105.953647111562
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Nem Bùi Ninh Xá",
+                    "description": [
+                        "Món nem gói lá chuối, làm từ thịt lợn và thính, ăn kèm lá sung, vị chua thanh, bùi béo."
+                    ],
+                    "images": [
+                        "https://poliva.vn/wp-content/uploads/2019/07/nem-bui-ninh-xa-1.jpg"
+                    ],
+                    "gps": {
+                        "lat": 21.0061462893205,
+                        "lng": 106.104710118479
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Cà phê Thềm Xưa",
+                    "description": [
+                        "Quán cà phê với không gian kiến trúc cổ kính, mang phong vị Kinh Bắc xưa, phục vụ các loại nước truyền thống."
+                    ],
+                    "images": [
+                        "https://api.nongthonviet.com.vn/media/2025/12/12/693bff276e6e175cb1e77327_ca%CC%80_phe%CC%82_su%CC%9B%CC%83a_da%CC%81_high.jpg"
+                    ],
+                    "gps": {
+                        "lat": 21.1905595767749,
+                        "lng": 106.062292644783
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Thịt Chó Thui Vàng ",
+                    "description": [
+                        "Đặc sản thịt chó làng nghề thui vàng nổi tiếng, chế biến thành nhiều món ngon."
+                    ],
+                    "images": [
+                        "https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Vietnamese_dog_meat.jpg/250px-Vietnamese_dog_meat.jpg"
+                    ],
+                    "gps": {
+                        "lat": 21.1691314921969,
+                        "lng": 106.111076920684
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                }
+            ]
+        },
+        {
+            "province_name": "Bến Tre",
+            "places": [
+                {
+                    "name": "Bánh Canh Bột Xắt Hai Nhỏ",
+                    "description": [
+                        "Món bánh canh bột xắt đặc trưng, sợi bánh canh được cắt thủ công, dai mềm, nước lèo tôm thịt đậm đà."
+                    ],
+                    "images": [
+                        "https://mia.vn/media/uploads/blog-du-lich/kham-pha-banh-canh-bot-xat-ben-tre-da-an-la-chi-co-ghien-01-1665422393.jpeg"
+                    ],
+                    "gps": {
+                        "lat": 10.243299147584,
+                        "lng": 106.379458277288
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Lẩu Mắm 7 Kỳ",
+                    "description": [
+                        "Quán lẩu mắm được ưa chuộng, nước lẩu nấu từ mắm cá sặc, dùng với nhiều loại rau và hải sản."
+                    ],
+                    "images": [
+                        "https://statics.vincom.com.vn/xu-huong/chi_tiet_xu_huong/lau-mam/lau-mam-chuan-mien-tay.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.2462433049993,
+                        "lng": 106.403001699645
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bánh Xèo Ốc Gạo Cô Tuyết",
+                    "description": [
+                        "Bánh xèo miền Tây nhân ốc gạo (ốc lác) nổi tiếng, ăn kèm rau sống và nước chấm."
+                    ],
+                    "images": [
+                        "https://mms.img.susercontent.com/vn-11134513-7r98o-lsvewq2gwcrde5@resize_ss1242x600!@crop_w1242_h600_cT"
+                    ],
+                    "gps": {
+                        "lat": 10.2526963037467,
+                        "lng": 106.379014555024
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bún riêu Thúy",
+                    "description": [
+                        "Phục vụ các món hủ tiếu, bún riêu bình dân, chuẩn vị miền Tây, giá cả phải chăng."
+                    ],
+                    "images": [
+                        "https://thanhphohue.net/wp-content/uploads/2024/12/bun_rieu_cua_hue_03.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.2294333594552,
+                        "lng": 106.36265712966
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                }
+            ]
+        },
+        {
+            "province_name": "Bình Dương",
+            "places": [
+                {
+                    "name": "Bún Riêu Bành Dã - Nguyễn Đình Chiểu",
+                    "description": [
+                        "Quán bún riêu nổi tiếng tại Thủ Dầu Một, nước dùng chua ngọt thanh, riêu cua chất lượng."
+                    ],
+                    "images": [
+                        "https://img.mservice.com.vn/common/u/2e02fb5fe4f64fb55bc713540643c6f8eae702d101cea8c59afc49cfc505fc37/b25cfa99-78aa-4181-902a-e45dd3918f24zl7ikw1c.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.9813774696155,
+                        "lng": 106.655523209378
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bánh Bèo Bì Mỹ Liên",
+                    "description": [
+                        "Đặc sản bánh bèo bì (bánh bèo ngọt ăn kèm bì lợn), hương vị lạ miệng, là món ăn truyền thống."
+                    ],
+                    "images": [
+                        "https://cdnphoto.dantri.com.vn/pPDQaxJkDKPhvLVAzo1fBdIjpiA=/zoom/1200_630/CXspZr08jJs8s3eIDsHh/Image/2014/09/banh-beo-My-Lien-8082f.JPG"
+                    ],
+                    "gps": {
+                        "lat": 10.947910945045,
+                        "lng": 106.689040373296
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Lẩu Bò Nhúng Mắm Ruốc 5 Ri",
+                    "description": [
+                        "Quán lẩu bò được yêu thích, lẩu bò nhúng mắm ruốc đậm đà, thịt bò mềm."
+                    ],
+                    "images": [
+                        "https://cdn.tgdd.vn/Files/2021/08/25/1377652/cach-lam-lau-bo-nhung-mam-ruoc-thom-ngon-dai-ca-nha-202108250101033849.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.9577175592701,
+                        "lng": 106.658173356541
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Cơm Niêu Vườn Cau",
+                    "description": [
+                        "Nhà hàng chuyên cơm niêu và các món ăn dân dã, đồng quê. Phù hợp cho bữa ăn gia đình."
+                    ],
+                    "images": [
+                        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTSpxHw_o1NjOVSprK0_KTSc8Gwh_ZJQm1aUA&s"
+                    ],
+                    "gps": {
+                        "lat": 10.9852208006233,
+                        "lng": 106.676693878707
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Café Gió và Nước",
+                    "description": [
+                        "Công trình kiến trúc độc đáo, nổi tiếng là điểm check-in và thưởng thức đồ uống trong không gian thoáng mát."
+                    ],
+                    "images": [
+                        "https://down-vn.img.susercontent.com/vn-11134259-7r98o-lw9e1vl2h0ih36@resize_ss640x400"
+                    ],
+                    "gps": {
+                        "lat": 10.9662216928405,
+                        "lng": 106.672901645011
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                }
+            ]
+        },
+        {
+            "province_name": "Bình Định",
+            "places": [
+                {
+                    "name": "Bánh hỏi cháo lòng Diêu Trì",
+                    "description": [
+                        "Đặc sản bánh hỏi lòng heo nổi tiếng, cháo lòng nóng hổi, bánh hỏi mềm dẻo."
+                    ],
+                    "images": [
+                        "https://down-vn.img.susercontent.com/vn-11134259-7r98o-lwcka0pc1byxd4@resize_ss640x400"
+                    ],
+                    "gps": {
+                        "lat": 13.8223884076777,
+                        "lng": 109.147573551043
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bún chả cá Quy Nhơn Phượng Tèo",
+                    "description": [
+                        "Quán bún chả cá lâu đời, nước lèo thanh ngọt, chả cá dai ngon, nổi tiếng với khách du lịch."
+                    ],
+                    "images": [
+                        "https://down-vn.img.susercontent.com/vn-11134513-7r98o-lstqj9icc3ic7e"
+                    ],
+                    "gps": {
+                        "lat": 13.7655077462613,
+                        "lng": 109.225207760158
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bánh Xèo Tôm Nhảy Ông Hùng",
+                    "description": [
+                        "Đặc sản bánh xèo tôm nhảy, tôm tươi rói, vỏ bánh giòn, ăn kèm rau sống và nước mắm."
+                    ],
+                    "images": [
+                        "https://down-vn.img.susercontent.com/vn-11134259-7r98o-lw8xyvcxe863de@resize_ss640x400"
+                    ],
+                    "gps": {
+                        "lat": 13.7703132671006,
+                        "lng": 109.229904170165
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Hải sản Tươi sống Ông Minh",
+                    "description": [
+                        "Khu vực tập trung nhiều quán hải sản tươi sống, giá cả phải chăng, view biển đẹp."
+                    ],
+                    "images": [
+                        "https://quynhontrip.com/wp-content/uploads/2021/04/image-30.jpeg"
+                    ],
+                    "gps": {
+                        "lat": 13.7742296254498,
+                        "lng": 109.221321085285
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bánh Ít Lá Gai Bà Sáu",
+                    "description": [
+                        "Bánh ít lá gai truyền thống, vỏ bánh dẻo thơm mùi lá gai, nhân đậu xanh hoặc dừa."
+                    ],
+                    "images": [
+                        "https://mia.vn/media/uploads/blog-du-lich/thuong-thuc-banh-it-la-gai-binh-dinh-voi-cong-thuc-3-buoc-don-gian-1679331818.jpg"
+                    ],
+                    "gps": {
+                        "lat": 13.7649188694642,
+                        "lng": 109.209789954301
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                }
+            ]
+        },
+        {
+            "province_name": "Bình Phước",
+            "places": [
+                {
+                    "name": "",
+                    "description": [
+                        "Món lẩu gà nấu lá giang chua nhẹ, thịt gà thả vườn dai ngọt. Quán nổi tiếng ở Đồng Xoài."
+                    ],
+                    "images": [
+                        "https://cdn.tgdd.vn/2021/10/CookRecipe/Avatar/lau-ga-la-giang-thumbnail-1.jpg"
+                    ],
+                    "gps": {
+                        "lat": 11.5552015865362,
+                        "lng": 106.888221798613
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Gà Nướng Cơm Lam An Phú",
+                    "description": [
+                        "Đặc sản cơm lam dẻo thơm nấu trong ống tre, ăn kèm thịt heo hoặc gà nướng lá mắc mật."
+                    ],
+                    "images": [
+                        "https://luhanhvietnam.com.vn/du-lich/vnt_upload/news/11_2022/com-lam-binh-phuoc-0.jpg"
+                    ],
+                    "gps": {
+                        "lat": 11.6100001154741,
+                        "lng": 106.577996824103
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Các Quán Phở Bắc/Bún Chả",
+                    "description": [
+                        "Phục vụ các món ăn miền Bắc được yêu thích, phù hợp với dân công sở và công nhân."
+                    ],
+                    "images": [
+                        "https://luhanhvietnam.com.vn/du-lich/vnt_upload/news/10_2024/quan_an_sang_ngon_o_binh_phuoc_hien_vy.jpg"
+                    ],
+                    "gps": {
+                        "lat": 11.6419219896813,
+                        "lng": 106.918507104129
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bò Nướng Ngói Bù Đăng",
+                    "description": [
+                        "Quán chuyên các món bò nướng ngói, thịt bò tươi ngon, nướng trên ngói giữ nhiệt."
+                    ],
+                    "images": [
+                        "https://cdn3.ivivu.com/2018/03/6-dac-san-an-mot-lan-nho-mai-o-binh-phuoc-ivivu-3.jpg"
+                    ],
+                    "gps": {
+                        "lat": 11.8889379922849,
+                        "lng": 107.231551563233
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                }
+            ]
+        },
+        {
+            "province_name": "Bình Thuận",
+            "places": [
+                {
+                    "name": "Bánh Căn & Bánh Khọt Cô Ba",
+                    "description": [
+                        "Quán nổi tiếng với bánh căn (bột gạo nướng khuôn) và bánh khọt giòn rụm, nhân mực hoặc tôm tươi."
+                    ],
+                    "images": [
+                        "https://bazantravel.com/cdn/medias/uploads/71/71733-dac-san-banh-can-phan-thiet-700x394.jpg"
+                    ],
+                    "gps": {
+                        "lat": 11.4736546363691,
+                        "lng": 108.118518097386
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bánh Tráng Cuốn Dì Mai",
+                    "description": [
+                        "Quán bánh tráng cuốn dẻo (bánh tráng dừa) nổi tiếng, ăn kèm trứng cút, nem và nước chấm đặc biệt."
+                    ],
+                    "images": [
+                        "https://down-vn.img.susercontent.com/vn-11134513-7r98o-lstrh0hucmu1cd@resize_ss640x400"
+                    ],
+                    "gps": {
+                        "lat": 10.929439256102,
+                        "lng": 108.097600567855
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Hải sản Cây Dừa (Mũi Né)",
+                    "description": [
+                        "Nhà hàng hải sản được yêu thích, phục vụ các món hải sản tươi sống đánh bắt tại chỗ."
+                    ],
+                    "images": [
+                        "https://down-vn.img.susercontent.com/vn-11134259-7r98o-lwgfun8qhp095a@resize_ss320x200"
+                    ],
+                    "gps": {
+                        "lat": 11.206987186156,
+                        "lng": 108.695597859866
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bún Bò Giò Heo Bà Rơi",
+                    "description": [
+                        "Quán bún bò lâu đời tại Phan Thiết, nước dùng đậm đà hương vị miền Trung."
+                    ],
+                    "images": [
+                        "https://monngonmoingay.com/wp-content/uploads/2018/08/bun-bo-gio-heo-500-min.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.9371666441943,
+                        "lng": 108.108199023889
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Lẩu Thái Phan Thiết",
+                    "description": [
+                        "Món lẩu đặc sản Phan Thiết, dùng cá mai tươi sống, bún, rau và nước lèo từ mắm tôm."
+                    ],
+                    "images": [
+                        "https://media.vietnamplus.vn/images/7255a701687d11cb8c6bbc58a6c807852548842474c0cd48a33265f6c222794699ec3d2a167925860630e815be630bc5a74f6b1bfe70b3203772c7979020cefa/2706lautha1.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.9474765231974,
+                        "lng": 108.112033337739
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                }
+            ]
+        },
+        {
+            "province_name": "Cà Mau",
+            "places": [
+                {
+                    "name": "Cháo Cá Lóc Rau Đắng",
+                    "description": [
+                        "Đặc sản cháo cá lóc nấu với rau đắng, cá lóc đồng ngọt thịt, vị đắng nhẹ, thanh mát."
+                    ],
+                    "images": [
+                        "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:format(webp):quality(75)/2024_1_18_638411849811375644_cach-nau-chao-ca-rau-dang.jpg"
+                    ],
+                    "gps": {
+                        "lat": 9.19393675334215,
+                        "lng": 105.162308737981
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Lẩu Mắm 7 Phước",
+                    "description": [
+                        "Quán lẩu mắm được yêu thích, nước dùng đậm đà, cua và cá tươi."
+                    ],
+                    "images": [
+                        "https://luhanhvietnam.com.vn/du-lich/vnt_upload/news/05_2021/lau-mam-u-minh-min.jpg"
+                    ],
+                    "gps": {
+                        "lat": 9.18561238480667,
+                        "lng": 105.160102156039
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Hải Sản Bờ Sông Ẩm Thực 333",
+                    "description": [
+                        "Khu vực Năm Căn nổi tiếng với cua biển, thường chế biến cua rang me, cua hấp."
+                    ],
+                    "images": [
+                        "https://cuacamau.com/source/TinTuc/fa1b0f688023697d3032.jpg"
+                    ],
+                    "gps": {
+                        "lat": 8.76148390303929,
+                        "lng": 104.997636893121
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Hủ Tiếu Mì Bò Viên A Vòi",
+                    "description": [
+                        "Quán hủ tiếu bình dân lâu đời, nước lèo ngọt thanh, bò viên dai ngon."
+                    ],
+                    "images": [
+                        "https://luhanhvietnam.com.vn/du-lich/vnt_upload/news/01_2024/quan_hu_tieu_ngon_o_ca_mau_dong_dong.png"
+                    ],
+                    "gps": {
+                        "lat": 9.18015116810339,
+                        "lng": 105.151318587183
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bún Nước Lèo Phường 5",
+                    "description": [
+                        "Quán bún nước lèo chuẩn vị Cà Mau, ăn kèm chả cá, thịt quay và tôm."
+                    ],
+                    "images": [
+                        "https://i2-vnexpress.vnecdn.net/2025/12/10/nuocleo-3-1765368285-1765368319.jpg?w=1200&h=0&q=100&dpr=1&fit=crop&s=BJbXtd3TM3dP4yVmzzb4kw"
+                    ],
+                    "gps": {
+                        "lat": 9.18007227927742,
+                        "lng": 105.153223537985
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                }
+            ]
+        },
+        {
+            "province_name": "Cao Bằng",
+            "places": [
+                {
+                    "name": "Phở Chua Cao Bằng",
+                    "description": [
+                        "Món phở đặc trưng vùng núi, sợi phở dai, nước sốt chua ngọt từ măng, ăn kèm thịt ba chỉ quay/thịt heo nướng."
+                    ],
+                    "images": [
+                        "https://scontent.iocvnpt.com/resources/portal/Images/CBG/hongsoncbg/thang_3_2024/z5289409573174_4e8d0178ac7b2456d1fcb8152c039461_217045029.jpg"
+                    ],
+                    "gps": {
+                        "lat": 22.6680514403306,
+                        "lng": 106.256557370996
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bánh Khảo/Bánh Trứng Kiến (theo mùa)",
+                    "description": [
+                        "Các quán bán đặc sản bánh khảo (bánh ngọt khô) và bánh trứng kiến (bánh làm từ trứng kiến đen, theo mùa hè)."
+                    ],
+                    "images": [
+                        "https://cdn.tgdd.vn/Files/2021/06/02/1356872/cach-lam-banh-trung-kien-dac-san-cao-bang-thom-lung-beo-ngay-202109271616305292.jpg"
+                    ],
+                    "gps": {
+                        "lat": 22.666940006847,
+                        "lng": 106.253553281767
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Vịt Quay Bảy Báu ",
+                    "description": [
+                        "Vịt quay Cao Bằng nổi tiếng với vịt được tẩm ướp lá mắc mật, quay da giòn, thịt thơm."
+                    ],
+                    "images": [
+                        "https://xukien.com/wp-content/uploads/2021/05/an-vit-quay-7-vi-cao-bang-o-dau-3-800x445.jpg"
+                    ],
+                    "gps": {
+                        "lat": 22.6708973870723,
+                        "lng": 106.260333891213
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bánh cuốn Cao Bằng",
+                    "description": [
+                        "Bánh cuốn tráng mỏng, nhân thịt băm mộc nhĩ, chấm nước xương hầm nóng hổi (thay vì nước mắm)."
+                    ],
+                    "images": [
+                        "https://media.vov.vn/sites/default/files/styles/large/public/2020-11/a1_10.jpg"
+                    ],
+                    "gps": {
+                        "lat": 22.6645587078317,
+                        "lng": 106.257072309914
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Thắng Cố (Các nhà hàng)",
+                    "description": [
+                        "Món ăn truyền thống của người H’Mông (lòng ngựa, bò nấu với rau thơm), thường phục vụ tại các chợ phiên hoặc khu du lịch."
+                    ],
+                    "images": [
+                        "https://mia.vn/media/uploads/blog-du-lich/thang-co-a-quynh-sapa-nha-hang-hoi-tu-tinh-hoa-am-thuc-van-hoa-cua-thanh-pho-suong-mu-1623301729.jpg"
+                    ],
+                    "gps": {
+                        "lat": 22.6675622113149,
+                        "lng": 106.253861259618
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                }
+            ]
+        },
+        {
+            "province_name": "Đồng Nai",
+            "places": [
+                {
+                    "name": "Lẩu Cá Đuối Hoàng Oanh",
+                    "description": [
+                        "Quán lẩu cá đuối nổi tiếng tại Biên Hòa, nước lẩu chua cay, cá tươi ngon."
+                    ],
+                    "images": [
+                        "https://dongnaitoplist.com/wp-content/uploads/2024/12/quan-lau-ca-duoi-cu-lao-dongnaitoplist.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.9943663655058,
+                        "lng": 106.793978428534
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bánh Canh Xuân Lộc",
+                    "description": [
+                        "Bánh canh trứ danh vùng Xuân Lộc, nước lèo đậm đà, thịt heo và tôm tươi."
+                    ],
+                    "images": [
+                        "https://gcs.tripi.vn/public-tripi/tripi-feed/img/485944CZk/anh-mo-ta.png"
+                    ],
+                    "gps": {
+                        "lat": 10.9794297998776,
+                        "lng": 106.872751147163
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Cơm Gà Xối Mỡ 69",
+                    "description": [
+                        "Các quán ăn bình dân được ưa chuộng, phục vụ cơm gà xối mỡ giòn và cơm tấm sườn bì chả."
+                    ],
+                    "images": [
+                        "https://mms.img.susercontent.com/vn-11134259-7r98o-lxz2ocuneuvt31@resize_ss1242x600!@crop_w1242_h600_cT"
+                    ],
+                    "gps": {
+                        "lat": 11.0073842779196,
+                        "lng": 106.96063766605
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Chè Cột Điện",
+                    "description": [
+                        "Quán chè thập cẩm lâu năm, nhiều loại chè và sữa chua phô mai được yêu thích."
+                    ],
+                    "images": [
+                        "https://mms.img.susercontent.com/vn-11134513-7r98o-lstrf9nob1l092@resize_ss1242x600!@crop_w1242_h600_cT"
+                    ],
+                    "gps": {
+                        "lat": 10.7533439792214,
+                        "lng": 106.657947975548
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                }
+            ]
+        },
+        {
+            "province_name": "Đồng Tháp",
+            "places": [
+                {
+                    "name": "Hủ Tiếu Sa Đéc Cô Liên",
+                    "description": [
+                        "Hủ tiếu Sa Đéc trứ danh, sợi hủ tiếu dai mềm, nước lèo ngọt thanh, nhiều topping."
+                    ],
+                    "images": [
+                        "https://dienmaynewsun.com/wp-content/uploads/2021/07/hu-tieu-sa-dec-ava.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.3832957180188,
+                        "lng": 105.730896854372
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Quán Ăn Lá Sen (Đồng Sen)",
+                    "description": [
+                        "Các nhà hàng phục vụ các món ăn từ sen: gỏi ngó sen, cơm gói lá sen, hạt sen tiềm."
+                    ],
+                    "images": [
+                        "https://ik.imagekit.io/tvlk/blog/2022/03/dong-sen-thap-muoi-5-1024x683.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.8738023721229,
+                        "lng": 105.804792887971
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bún Cá Châu Đốc (Cao Lãnh)",
+                    "description": [
+                        "Bún cá Châu Đốc (món ăn từ An Giang) nhưng rất được yêu thích và nổi tiếng tại Cao Lãnh."
+                    ],
+                    "images": [
+                        "https://down-vn.img.susercontent.com/vn-11134259-7r98o-lw91szzgk4wr04@resize_ss640x400"
+                    ],
+                    "gps": {
+                        "lat": 10.482014540431,
+                        "lng": 105.629956215961
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Lẩu Mắm 397",
+                    "description": [
+                        "Quán lẩu mắm được đánh giá cao, hương vị miền Tây đậm đà, hải sản và rau sống phong phú."
+                    ],
+                    "images": [
+                        "https://www.vietfuntravel.com.vn/image/data/Mekong/dac-san-dong-thap-muoi-lau-mam-1.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.4909709339395,
+                        "lng": 105.63420959742
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Quán ốc nhảy Hai Nam",
+                    "description": [
+                        "Các quán ốc ven sông, nổi tiếng với món ốc lác, ốc bươu nướng mắm tỏi ớt."
+                    ],
+                    "images": [
+                        "https://haisanloccantho.com/wp-content/uploads/2024/12/Oc-nhay-cai-dong-1-scaled.jpg"
+                    ],
+                    "gps": {
+                        "lat": 10.5486908914182,
+                        "lng": 105.849812175915
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                }
+            ]
+        },
+        {
+            "province_name": "Đắk Lắk",
+            "places": [
+                {
+                    "name": "Bún Đỏ Buôn Ma Thuột",
+                    "description": [
+                        "Đặc sản bún đỏ, sợi bún có màu đỏ tự nhiên, nước lèo xương hầm sệt, ăn kèm trứng cút và riêu."
+                    ],
+                    "images": [
+                        "https://mia.vn/media/uploads/blog-du-lich/top-18-mon-ngon-buon-ma-thuot-nhat-dinh-phai-thu-khi-den-day-1713267219.jpg"
+                    ],
+                    "gps": {
+                        "lat": 12.6975144270573,
+                        "lng": 108.071495764397
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Quán Cà Phê Trung Nguyên (Làng Cà Phê)",
+                    "description": [
+                        "Khu phức hợp nổi tiếng về cà phê, trải nghiệm không gian Tây Nguyên và thưởng thức cà phê chồn/đặc sản."
+                    ],
+                    "images": [
+                        "https://mia.vn/media/uploads/blog-du-lich/kham-pha-lang-ca-phe-trung-nguyen-tu-a-den-z-1651644260.jpg"
+                    ],
+                    "gps": {
+                        "lat": 12.7152834858212,
+                        "lng": 108.059810118053
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bò Nhúng Me Cà Te Quán",
+                    "description": [
+                        "Món bò nhúng me chua ngọt nổi tiếng, thịt bò tươi mềm, ăn kèm bánh mì."
+                    ],
+                    "images": [
+                        "https://down-vn.img.susercontent.com/vn-11134259-7r98o-lwh1sgd03rh776@resize_ss640x400"
+                    ],
+                    "gps": {
+                        "lat": 12.6966059857539,
+                        "lng": 108.047578394747
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Lẩu Đuôi Bò Thanh Sương",
+                    "description": [
+                        "Quán lẩu đuôi bò được người dân địa phương ưa chuộng, đuôi bò hầm mềm, nước lẩu đậm đà."
+                    ],
+                    "images": [
+                        "https://cdn.tgdd.vn/2021/12/CookDish/cach-nau-lau-duoi-bo-thuoc-bac-bang-noi-ap-suat-nhanh-chong-avt-1200x676.jpg"
+                    ],
+                    "gps": {
+                        "lat": 12.6964228894697,
+                        "lng": 108.056861532283
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Cơm Lam Thịt Nướng (Buôn Ako Dhong)",
+                    "description": [
+                        "Các quán ăn trong buôn làng phục vụ cơm lam (cơm nấu trong ống tre) và gà/thịt nướng đặc trưng."
+                    ],
+                    "images": [
+                        "https://bmgroup.asia/wp-content/uploads/2023/10/Nha-hang-Kieu-Thi.jpg"
+                    ],
+                    "gps": {
+                        "lat": 12.694411732867,
+                        "lng": 108.048278447792
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                }
+            ]
+        },
+        {
+            "province_name": "Gia Lai",
+            "places": [
+                {
+                    "name": "Phở Khô Hồng",
+                    "description": [
+                        "Phở khô (hoặc phở hai tô) là đặc sản. Một tô phở khô trộn, một tô nước lèo riêng, thịt bò chất lượng."
+                    ],
+                    "images": [
+                        "https://cdn.vntrip.vn/cam-nang/wp-content/uploads/2017/07/pho-kho-pho-2-to-moi-du-do-gia-lai.jpg"
+                    ],
+                    "gps": {
+                        "lat": 14.1977999221084,
+                        "lng": 107.973024035206
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bún Mắm Cô Sương",
+                    "description": [
+                        "Quán bún mắm được yêu thích, nước dùng đậm đà, hải sản và rau sống tươi."
+                    ],
+                    "images": [
+                        "https://mia.vn/media/uploads/blog-du-lich/ghe-bun-mam-cua-co-huong-de-thuong-thuc-dac-san-doc-dao-cua-pho-nui-1659430490.jpg"
+                    ],
+                    "gps": {
+                        "lat": 14.1714801101718,
+                        "lng": 107.98374602839
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Lẩu Lá Rừng ",
+                    "description": [
+                        "Món lẩu độc đáo, dùng nước dùng nấu từ xương, nhúng các loại lá rừng và thịt (thường là bò, gà)."
+                    ],
+                    "images": [
+                        "https://poliva.vn/wp-content/uploads/2019/07/lau-la-rung.jpg"
+                    ],
+                    "gps": {
+                        "lat": 13.9677069392277,
+                        "lng": 108.007226360199
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Gỏi lá Yến Vy Kon Tum",
+                    "description": [
+                        "Đặc sản nổi tiếng của Kon Tum (đã sáp nhập): cuốn hơn 30 loại lá rừng với thịt, tôm, chấm nước chấm đặc biệt."
+                    ],
+                    "images": [
+                        "https://comgroup.com.vn/wp-content/uploads/2024/11/uuu.jpg"
+                    ],
+                    "gps": {
+                        "lat": 14.3735790731458,
+                        "lng": 108.019858490276
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bún Thịt Nướng  Bà Sáu",
+                    "description": [
+                        "Quán bún thịt nướng bình dân lâu đời, thịt nướng thơm lừng, chả giò giòn."
+                    ],
+                    "images": [
+                        "https://mms.img.susercontent.com/vn-11134513-7r98o-lsu7xbo6gqmc14@resize_ss1242x600!@crop_w1242_h600_cT"
+                    ],
+                    "gps": {
+                        "lat": 14.2289024963599,
+                        "lng": 107.940289336283
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                }
+            ]
+        },
+        {
+            "province_name": "Hà Giang",
+            "places": [
+                {
+                    "name": "Thắng Dền (Chợ đêm Đồng Văn)",
+                    "description": [
+                        "Món ăn vặt đặc trưng: bánh trôi nước cỡ nhỏ, nhân vừng/đậu phộng, nấu nước đường gừng nóng hổi."
+                    ],
+                    "images": [
+                        "https://motortrip.vn/wp-content/uploads/2023/02/thang-den-ha-giang_15.jpg"
+                    ],
+                    "gps": {
+                        "lat": 23.2794474084541,
+                        "lng": 105.360999276247
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Thắng Cố ",
+                    "description": [
+                        "Món lẩu truyền thống của người H'Mông (lòng ngựa/bò nấu với rau), thường phục vụ tại các chợ phiên."
+                    ],
+                    "images": [
+                        "https://hoangviettravel.vn/wp-content/uploads/2020/11/thang-co-ha-giang-1.jpg"
+                    ],
+                    "gps": {
+                        "lat": 23.2781554880452,
+                        "lng": 105.361128784498
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bánh Cuốn Trứng Bà Hà",
+                    "description": [
+                        "Bánh cuốn được tráng mỏng, nhân trứng, chấm nước lèo xương hầm nóng thay vì nước mắm."
+                    ],
+                    "images": [
+                        "https://hoangviettravel.vn/wp-content/uploads/2020/11/banh-cuon-trung-ha-giang-1.jpg"
+                    ],
+                    "gps": {
+                        "lat": 23.3379974329483,
+                        "lng": 105.358699770301
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Nhà hàng H'Mông Yên Minh",
+                    "description": [
+                        "Đặc sản gà đen (thịt dai, ngọt), thường chế biến thành lẩu hoặc nướng, tốt cho sức khỏe."
+                    ],
+                    "images": [
+                        "https://motortrip.vn/wp-content/uploads/2023/02/lau-ga-den_17.jpg"
+                    ],
+                    "gps": {
+                        "lat": 23.1192730292619,
+                        "lng": 105.14405773419
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Lẩu Gà Đồi Vinh Tường",
+                    "description": [
+                        "Quán lẩu gà phục vụ gà đồi săn chắc, nước lẩu đậm đà, thích hợp cho bữa ăn tối lạnh."
+                    ],
+                    "images": [
+                        "https://product.hstatic.net/1000093072/product/lau_ga_la_giang_96142521d01145ebb5fc82104c686944_master.jpg"
+                    ],
+                    "gps": {
+                        "lat": 22.8346680623377,
+                        "lng": 104.982858857179
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                }
+            ]
+        },
+        {
+            "province_name": "Hà Nam",
+            "places": [
+                {
+                    "name": "Cá Kho Làng Vũ Đại ",
+                    "description": [
+                        "Đặc sản cá kho niêu đất nổi tiếng, thịt cá trắm kho rục xương, vị mặn ngọt đậm đà."
+                    ],
+                    "images": [
+                        "https://i-giadinh.vnecdn.net/2023/11/14/Bc5Thnhphm5-1699955005-4166-1699955007.jpg"
+                    ],
+                    "gps": {
+                        "lat": 20.4809566625076,
+                        "lng": 106.149467662901
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bún Chả Đỗ Mười",
+                    "description": [
+                        "Quán bún chả được người dân địa phương tin dùng, chả nướng than thơm, nước chấm vừa miệng."
+                    ],
+                    "images": [
+                        "https://mia.vn/media/uploads/blog-du-lich/mach-b%E1%BA%A1n-top-10-quan-bun-cha-ha-noi-ngon-tru-danh-dat-ha-thanh-02-1639475002.png"
+                    ],
+                    "gps": {
+                        "lat": 20.6455421724536,
+                        "lng": 105.991937181351
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bánh Cuốn Bà Lan",
+                    "description": [
+                        "Quán bánh cuốn nóng nổi tiếng, nhân thịt mộc nhĩ, ăn kèm chả lụa và nước chấm truyền thống."
+                    ],
+                    "images": [
+                        "https://mia.vn/media/uploads/blog-du-lich/banh-cuon-ba-xuan-8-1741969426.jpg"
+                    ],
+                    "gps": {
+                        "lat": 20.5649969819028,
+                        "lng": 105.916344921319
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                }
+            ]
+        },
+        {
+            "province_name": "Hà Tĩnh",
+            "places": [
+                {
+                    "name": "Cơm Việt- Nhà Hàng Cơm Niêu Hà Tĩnh",
+                    "description": [
+                        "Cơm niêu & món Việt truyền thống đậm vị địa phương."
+                    ],
+                    "images": [
+                        "https://dulichvn.net/wp-content/uploads/2024/11/Screenshot-2024-11-14-161737.jpg"
+                    ],
+                    "gps": {
+                        "lat": 18.3394924033211,
+                        "lng": 105.891252786734
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Dookki Vincom Hà Tĩnh",
+                    "description": [
+                        "Buffet lẩu & nướng Tokbokki Hàn Quốc rất được yêu thích."
+                    ],
+                    "images": [
+                        "https://statics.vincom.com.vn/vincom-ho/quay-line-1.jpg"
+                    ],
+                    "gps": {
+                        "lat": 18.3395703076221,
+                        "lng": 105.895498602623
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "NHÀ HÀNG CO-RO-NA",
+                    "description": [
+                        "Không gian ấm cúng, thực đơn phong phú."
+                    ],
+                    "images": [
+                        "https://casinocorona.vn/wp-content/uploads/2023/06/food-center.jpg"
+                    ],
+                    "gps": {
+                        "lat": 18.3394830364683,
+                        "lng": 105.894016056048
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Cơm Niêu CỤI",
+                    "description": [
+                        "Quán ăn bình dân với cơm niêu chất lượng."
+                    ],
+                    "images": [
+                        "https://static.vinwonders.com/production/2025/09/com-nieu-cui-ha-tinh.jpg"
+                    ],
+                    "gps": {
+                        "lat": 18.3486539040685,
+                        "lng": 105.891993933325
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Cơm Bông Vang",
+                    "description": [
+                        "Được đánh giá cao về cơm và đồ ăn miền Trung."
+                    ],
+                    "images": [
+                        "https://statics.vinpearl.com/quan-com-ngon-ha-tinh-com-bong-vang_1753970674.jpg"
+                    ],
+                    "gps": {
+                        "lat": 18.3394199649728,
+                        "lng": 105.891384963993
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                }
+            ]
+        },
+        {
+            "province_name": "Hậu Giang",
+            "places": [
+                {
+                    "name": "Quán Ăn Thủy Tiên",
+                    "description": [
+                        "Quán phở & món dân dã địa phương."
+                    ],
+                    "images": [
+                        "https://down-vn.img.susercontent.com/vn-11134259-7r98o-lwe1xqzxb6jd17@resize_ss320x200"
+                    ],
+                    "gps": {
+                        "lat": 9.69206059253435,
+                        "lng": 105.573432482665
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "QUÁN CƠM NGOẠI THÀNH",
+                    "description": [
+                        "Cơm bình dân, phục vụ địa phương."
+                    ],
+                    "images": [
+                        "https://trangtop.com/wp-content/uploads/2024/07/quan-com-ngoai-thanh-1167992.jpg"
+                    ],
+                    "gps": {
+                        "lat": 9.78612019352986,
+                        "lng": 105.502147014527
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Cô 3 Quán",
+                    "description": [
+                        "Hải sản, không gian thân thiện."
+                    ],
+                    "images": [
+                        "https://mia.vn/media/uploads/blog-du-lich/am-thuc-co-3-binh-duong-voi-phong-cach-hap-thuy-nhiet-doc-dao-03-1655714666.jpeg"
+                    ],
+                    "gps": {
+                        "lat": 9.82162792218778,
+                        "lng": 105.649591619208
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "GOGIYA BBQ",
+                    "description": [
+                        "BBQ Hàn Quốc phong cách buffet."
+                    ],
+                    "images": [
+                        "https://down-vn.img.susercontent.com/vn-11134259-7r98o-lwc9t8bjtvbt40@resize_ss640x400"
+                    ],
+                    "gps": {
+                        "lat": 9.77993778934213,
+                        "lng": 105.465875783835
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Bánh Canh Hậu Giang",
+                    "description": [
+                        "Bánh canh truyền thống địa phương."
+                    ],
+                    "images": [
+                        "https://media.haugiang.gov.vn/resources/portal/Images/HGI/adminportal.hgi/2023_10_19_742522942.jpg"
+                    ],
+                    "gps": {
+                        "lat": 9.78229074320659,
+                        "lng": 105.466620975893
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                }
+            ]
+        },
+        {
+            "province_name": "Nha Trang",
+            "places": [
+                {
+                    "name": "Xóm Mới Garden Nha Trang",
+                    "description": [
+                        "Quán nổi tiếng với không gian đẹp và menu đa dạng."
+                    ],
+                    "images": [
+                        "https://travelfun.vn/wp-content/uploads/2024/08/21NYArZ.webp"
+                    ],
+                    "gps": {
+                        "lat": 12.2431468676699,
+                        "lng": 109.191767709031
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Ơi Nha Trang Restaurant",
+                    "description": [
+                        "Ẩm thực Việt đương đại được yêu thích."
+                    ],
+                    "images": [
+                        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2b/86/aa/ae/oi-nha-trang-bistro-11.jpg?w=900&h=500&s=1"
+                    ],
+                    "gps": {
+                        "lat": 12.2499878776647,
+                        "lng": 109.194320316985
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "CUI seafood restaurant",
+                    "description": [
+                        "Hải sản tươi vị biển."
+                    ],
+                    "images": [
+                        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2f/f2/5b/21/nha-trang-seafood-grill.jpg?w=1200&h=1200&s=1"
+                    ],
+                    "gps": {
+                        "lat": 12.2403923908164,
+                        "lng": 109.191476155603
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Skylight & Lá Kitchen Nha Trang",
+                    "description": [
+                        "View đẹp & món ăn phong phú."
+                    ],
+                    "images": [
+                        "https://visitnhatrang.vn/wp-content/uploads/2024/04/banner-skylight-nha-trang.jpg"
+                    ],
+                    "gps": {
+                        "lat": 12.2451567787093,
+                        "lng": 109.195755878349
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Ngoc Trai Seafood Restaurant - Since 2004",
+                    "description": [
+                        "Một trong những nhà hàng hải sản nổi tiếng lâu năm tại Nha Trang."
+                    ],
+                    "images": [
+                        "https://mia.vn/media/uploads/blog-du-lich/Ngoc-Trai-restaurant-Nha-Trang-Vien-ngoc-trai-toa-sang-trong-lang-am-thuc-Nha-Trang-13-1624041731.jpg"
+                    ],
+                    "gps": {
+                        "lat": 12.2395541378221,
+                        "lng": 109.190593354508
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                }
+            ]
+        },
+        {
+            "province_name": "Phú Quốc",
+            "places": [
+                {
+                    "name": "MEO Kitchen",
+                    "description": [
+                        "Quán Việt phong cách địa phương rất được yêu thích."
+                    ],
+                    "images": [
+                        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2b/00/d0/95/love-at-first-sight-friendly.jpg?w=900&h=-1&s=1"
+                    ],
+                    "gps": {
+                        "lat": 10.1938733364104,
+                        "lng": 103.966571176265
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "SEN Restaurant",
+                    "description": [
+                        "Hải sản & món biển phong cách resort."
+                    ],
+                    "images": [
+                        "https://pix10.agoda.net/hotelImages/36304831/0/614865d8f7673c9522131c5f570f1d68.jpg?ce=0&s=414x232"
+                    ],
+                    "gps": {
+                        "lat": 10.2065742905975,
+                        "lng": 103.962860655554
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "#JMT Korea Restaurant Grand World Phú Quốc",
+                    "description": [
+                        "Món Hàn chất lượng cao tại Grand World."
+                    ],
+                    "images": [
+                        "https://statics.vinpearl.com/styles/366x200/public/2023_09/VPRSPQ%20Seaview%20cafe_1694794219.jpg.webp?itok=3GUiQhp_"
+                    ],
+                    "gps": {
+                        "lat": 10.328467331088,
+                        "lng": 103.861636760502
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Camia Restaurant",
+                    "description": [
+                        "Nhà hàng sang trọng bên bãi biển Ông Lang."
+                    ],
+                    "images": [
+                        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2a/5e/8f/e7/restaurant.jpg?w=900&h=500&s=1"
+                    ],
+                    "gps": {
+                        "lat": 10.2657048919216,
+                        "lng": 103.930279560443
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "The Beach Bistro",
+                    "description": [
+                        "Không gian biển + ẩm thực đa dạng."
+                    ],
+                    "images": [
+                        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/1a/f8/8f/80/the-pepper-restaurant.jpg?w=900&h=500&s=1"
+                    ],
+                    "gps": {
+                        "lat": 10.331768813082,
+                        "lng": 103.850999368449
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                }
+            ]
+        },
+        {
+            "province_name": "Đà Lạt",
+            "places": [
+                {
+                    "name": "Moon Dining",
+                    "description": [
+                        "Nhà hàng chất lượng phục vụ cao."
+                    ],
+                    "images": [
+                        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/31/34/ff/0b/caption.jpg?w=1100&h=1100&s=1"
+                    ],
+                    "gps": {
+                        "lat": 11.9384222927021,
+                        "lng": 108.441585462124
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Tiệm ăn Đà Lạt Phố - Restaurant",
+                    "description": [
+                        "Ăn uống kiểu Đà Lạt truyền thống và hiện đại."
+                    ],
+                    "images": [
+                        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2b/16/73/75/view-from-inside.jpg?w=900&h=500&s=1"
+                    ],
+                    "gps": {
+                        "lat": 11.94579495219,
+                        "lng": 108.435068470077
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Chef's Dalat",
+                    "description": [
+                        "Ẩm thực Âu hiện đại kết hợp Việt."
+                    ],
+                    "images": [
+                        "https://tgroup.vn/uploads/images/Dalat/chefs-da-lat-tgroup-travel-9.jpg"
+                    ],
+                    "gps": {
+                        "lat": 11.9493236036041,
+                        "lng": 108.431793416655
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Peace Bistro",
+                    "description": [
+                        "Quán được du khách yêu thích."
+                    ],
+                    "images": [
+                        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/27/78/cb/60/beef-wellington-n-ng.jpg?w=900&h=500&s=1"
+                    ],
+                    "gps": {
+                        "lat": 11.9444127626617,
+                        "lng": 108.449701825687
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Nhà hàng Túi Mơ To Garden Restaurant",
+                    "description": [
+                        "BBQ & không gian ngoài trời đặc sắc."
+                    ],
+                    "images": [
+                        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/29/01/31/f9/the-main-door.jpg?w=900&h=500&s=1"
+                    ],
+                    "gps": {
+                        "lat": 11.9428945619462,
+                        "lng": 108.484133462129
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                }
+            ]
+        },
+        {
+            "province_name": "Lạng Sơn",
+            "places": [
+                {
+                    "name": "Dookki Lạng Sơn - Vincom Plaza",
+                    "description": [
+                        "Buffet Hàn Quốc nổi tiếng."
+                    ],
+                    "images": [
+                        "https://statics.vincom.com.vn/vincom-ho/vong-pho-mai.jpg"
+                    ],
+                    "gps": {
+                        "lat": 21.849768829713,
+                        "lng": 106.757974962341
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "NHÀ HÀNG CƠM NIÊU HUẾ XƯA",
+                    "description": [
+                        "Cơm niêu & đồ Việt thanh lịch."
+                    ],
+                    "images": [
+                        "https://comnieuhuexua.com/wp-content/uploads/2023/03/com-nieu-1024x672.jpg"
+                    ],
+                    "gps": {
+                        "lat": 21.8461978665918,
+                        "lng": 106.74891480891
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Nhà hàng dê Làng Việt",
+                    "description": [
+                        "Món dê đặc sản vùng lạnh."
+                    ],
+                    "images": [
+                        "https://media-cdn-v2.laodong.vn/storage/newsportal/2022/8/20/1082999/De-Thebananatreetamc.jpeg"
+                    ],
+                    "gps": {
+                        "lat": 21.8340996553441,
+                        "lng": 106.76664220094
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Thảo Viên Restaurant Lạng Sơn",
+                    "description": [
+                        "Quán địa phương phổ biến."
+                    ],
+                    "images": [
+                        "https://diadiemvietnam.vn/wp-content/uploads/2023/04/Nha-hang-Thao-Vien-Nha-Hang-Tai-Lang-Son.jpg"
+                    ],
+                    "gps": {
+                        "lat": 21.8510070789932,
+                        "lng": 106.767522293029
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                },
+                {
+                    "name": "Manwah Taiwanese Hotpot Lạng Sơn",
+                    "description": [
+                        "Lẩu Đài Loan phong cách hiện đại."
+                    ],
+                    "images": [
+                        "https://down-vn.img.susercontent.com/vn-11134259-7r98o-lwca9azl0pnd18@resize_w800"
+                    ],
+                    "gps": {
+                        "lat": 21.8613639884944,
+                        "lng": 106.763633385106
+                    },
+                    "tags": [
+                        "Restaurant, food, drink"
+                    ]
+                }
+            ]
+        }
+    ]
+}
