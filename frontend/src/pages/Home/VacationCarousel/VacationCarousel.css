@@ -61,10 +61,12 @@
 
 /* Position: Hidden (ẩn hoàn toàn) */
 .position-hidden {
+  width: 380px;
+  height: 280px;
   opacity: 0;
+  transform: translateX(-545px) scale(0.88);
   visibility: hidden;
-  transform: scale(0.5);
-  z-index: 0;
+  z-index: 1;
 }
 
 /* Position: Left (ảnh trái) */
