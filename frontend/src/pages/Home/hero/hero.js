@@ -149,15 +149,6 @@ export default function Hero({
             />
           </div>
           <div className="hero-command-actions">
-            <label className="hero-icon-button" aria-label="Upload images">
-              <FiPaperclip size={18} />
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleFiles}
-              />
-            </label>
             <button
               type="button"
               className={`hero-icon-button ${isRecording ? "recording" : ""}`}

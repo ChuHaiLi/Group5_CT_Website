@@ -79,6 +79,16 @@ const normalizeString = (str) => {
   return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D").toLowerCase().trim();
 };
 
+// Sanitize search string: remove zero-width chars, punctuation, collapse spaces
+const sanitizeSearch = (str) => {
+  if (!str) return "";
+  return str
+    .replace(/[\u200B-\u200D\uFEFF]/g, "")           // remove zero-width
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")               // remove punctuation (unicode-safe)
+    .replace(/\s+/g, " ")                            // collapse spaces
+    .trim();
+};
+
 const parseTags = (tagsRaw) => {
   if (Array.isArray(tagsRaw)) return tagsRaw;
   if (typeof tagsRaw === 'string') {
@@ -89,6 +99,26 @@ const parseTags = (tagsRaw) => {
     }
   }
   return [];
+};
+
+// Get all valid tags from TAG_CATEGORIES
+const ALL_VALID_TAGS = new Set(TAG_CATEGORIES.flatMap(c => c.tags));
+
+// Check if a string is a valid tag (not a location name)
+const isValidTag = (tag) => ALL_VALID_TAGS.has(tag);
+
+// Filter valid tags from array, return invalid ones as location names
+const separateTagsAndLocations = (items) => {
+  const validTags = [];
+  const locations = [];
+  items.forEach(item => {
+    if (isValidTag(item)) {
+      validTags.push(item);
+    } else {
+      locations.push(item);
+    }
+  });
+  return { validTags, locations };
 };
 
 export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) {
@@ -118,24 +148,127 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
 
   const location = useLocation();
 
-  // Thêm useEffect để xử lý preSelectedTags từ navigation
+  // #region agent log
+  // Debug: Log navigation state and URL params on mount and when location changes
   useEffect(() => {
-    if (location.state?.preSelectedTags) {
-      const tagsToSelect = location.state.preSelectedTags;
-      setSelectedTags((prev) => {
-        const newTags = [...prev];
-        tagsToSelect.forEach((tag) => {
-          if (!newTags.includes(tag)) {
-            newTags.push(tag);
-          }
-        });
-        return newTags;
-      });
+    const urlParams = new URLSearchParams(window.location.search);
+    const tagsParam = urlParams.get("tags");
+    const qParam = urlParams.get("q");
+    
+    fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ExplorePage.js:119',message:'Navigation state received',data:{locationState:location.state,urlTags:tagsParam,urlQ:qParam,fullUrl:window.location.href},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'A,D,E'})}).catch(()=>{});
+  }, [location.state, location.search]);
+  // #endregion
+
+  // Thêm useEffect để xử lý preSelectedTags từ navigation và URL params
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tagsParam = urlParams.get("tags");
+    const qParam = urlParams.get("q");
+    const state = location.state || {};
+    const preSearch = state.preSearch || state.q || "";
+    const preTagsRaw = state.preSelectedTags || state.tags || [];
+
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ExplorePage.js:122',message:'Processing navigation inputs',data:{urlTags:tagsParam,urlQ:qParam,statePreSearch:preSearch,statePreTags:preTagsRaw,fullState:state},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'C,D,E'})}).catch(()=>{});
+    // #endregion
+
+    // Handle URL ?tags= param - separate valid tags from location names
+    if (tagsParam) {
+      const parts = decodeURIComponent(tagsParam).split(",").map(t => t.trim()).filter(Boolean);
+      const { validTags, locations } = separateTagsAndLocations(parts);
       
-      // Clear state sau khi đã xử lý để tránh re-trigger
-      window.history.replaceState({}, document.title);
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ExplorePage.js:150',message:'Parsed URL tags param - separated',data:{parts:parts,validTags:validTags,locations:locations},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
+      
+      // Set valid tags to selectedTags
+      if (validTags.length > 0) {
+        setSelectedTags((prev) => {
+          const newTags = [...prev];
+          validTags.forEach((tag) => {
+            if (!newTags.includes(tag)) {
+              newTags.push(tag);
+            }
+          });
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ExplorePage.js:163',message:'Set valid tags from URL param',data:{newTags:newTags},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
+          // #endregion
+          return newTags;
+        });
+      }
+      
+      // Set location names to search (join with space if multiple)
+      if (locations.length > 0) {
+        const locationSearch = locations.join(" ");
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ExplorePage.js:172',message:'Set search from URL param (location names)',data:{locationSearch:locationSearch},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
+        setSearch(locationSearch);
+      }
     }
-  }, [location.state]);
+
+    // Handle URL ?q= param (search query)
+    if (qParam) {
+      const decodedQ = decodeURIComponent(qParam);
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ExplorePage.js:149',message:'Setting search from URL q param',data:{qParam:decodedQ},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'E'})}).catch(()=>{});
+      // #endregion
+      setSearch(decodedQ);
+    }
+
+    // Handle location.state.preSearch
+    if (preSearch) {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ExplorePage.js:156',message:'Setting search from state.preSearch',data:{preSearch:preSearch},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'E'})}).catch(()=>{});
+      // #endregion
+      setSearch(preSearch);
+    }
+
+    // Handle location.state.preSelectedTags - separate valid tags from location names
+    if (preTagsRaw && preTagsRaw.length > 0) {
+      const tagsToSelect = Array.isArray(preTagsRaw) ? preTagsRaw : [preTagsRaw];
+      const { validTags, locations } = separateTagsAndLocations(tagsToSelect);
+      
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ExplorePage.js:195',message:'Processing preSelectedTags from state - separated',data:{tagsToSelect:tagsToSelect,validTags:validTags,locations:locations},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
+      
+      // Set valid tags to selectedTags
+      if (validTags.length > 0) {
+        setSelectedTags((prev) => {
+          const newTags = [...prev];
+          validTags.forEach((tag) => {
+            if (!newTags.includes(tag)) {
+              newTags.push(tag);
+            }
+          });
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ExplorePage.js:207',message:'Set valid tags from state',data:{newTags:newTags,prevTags:prev},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
+          // #endregion
+          return newTags;
+        });
+      }
+      
+      // Set location names to search
+      if (locations.length > 0) {
+        const locationSearch = locations.join(" ");
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ExplorePage.js:216',message:'Set search from state (location names)',data:{locationSearch:locationSearch},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
+        setSearch(locationSearch);
+      }
+    }
+    
+    // Clear state và URL params sau khi đã xử lý để tránh re-trigger
+    if (location.state || tagsParam || qParam) {
+      window.history.replaceState({}, document.title);
+      // Clear URL params
+      if (tagsParam || qParam) {
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
+      }
+    }
+  }, [location.state, location.search]);
 
   // --- CALL API ---
   useEffect(() => {
@@ -193,17 +326,32 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
   const toggleCategory = (title) => setOpenCategory(prev => prev === title ? null : title);
   const isCategoryActive = (tags) => tags.some(tag => selectedTags.includes(tag));
 
+  // #region agent log
+  // Debug: Log filter state before filtering
+  useEffect(() => {
+    fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ExplorePage.js:196',message:'Filter state before filtering',data:{search:search,searchRaw:JSON.stringify(search),selectedTags:selectedTags,selectedCategory:selectedCategory,selectedProvinceId:selectedProvinceId,totalDestinations:regularDestinations.length},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'A,B,C,D,E'})}).catch(()=>{});
+  }, [search, selectedTags, selectedCategory, selectedProvinceId, regularDestinations.length]);
+  // #endregion
+
   // --- FILTER LOGIC (SECTION 1) ---
   const filteredRegularItems = regularDestinations.filter((dest) => {
     const destNameNorm = normalizeString(dest.name);
     const destProvinceNorm = normalizeString(dest.province_name);
     const destRegionNorm = dest.region_name ? normalizeString(dest.region_name) : "";
-    const searchNorm = normalizeString(search);
+    // Sanitize search before normalizing to handle dirty characters
+    const sanitizedSearch = sanitizeSearch(search);
+    const searchNorm = normalizeString(sanitizedSearch);
+    // Use token-based matching for better flexibility
+    const searchTokens = searchNorm.split(" ").filter(Boolean);
     const destTags = parseTags(dest.tags);
 
-    const matchesSearch = destNameNorm.includes(searchNorm) || 
-                          destProvinceNorm.includes(searchNorm) ||
-                          destRegionNorm.includes(searchNorm);
+    // Token-based search: all tokens must match (more flexible than exact string match)
+    const matchesSearch = searchTokens.length === 0 || 
+      searchTokens.every((token) =>
+        destNameNorm.includes(token) ||
+        destProvinceNorm.includes(token) ||
+        destRegionNorm.includes(token)
+      );
 
     const matchesTags = selectedTags.length === 0 || selectedTags.every((tag) => destTags.includes(tag));
     
@@ -224,7 +372,16 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
         );
     }
 
-    return matchesSearch && matchesTags && matchesProvince && matchesCategory;
+    const finalMatch = matchesSearch && matchesTags && matchesProvince && matchesCategory;
+    
+    // #region agent log
+    // Log first few destinations to understand filter behavior
+    if (regularDestinations.indexOf(dest) < 3) {
+      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ExplorePage.js:227',message:'Filter evaluation for destination',data:{destName:dest.name,destNameNorm:destNameNorm,search:search,searchNorm:searchNorm,matchesSearch:matchesSearch,selectedTags:selectedTags,destTags:destTags,matchesTags:matchesTags,matchesProvince:matchesProvince,matchesCategory:matchesCategory,finalMatch:finalMatch},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'A,B'})}).catch(()=>{});
+    }
+    // #endregion
+
+    return finalMatch;
   });
 
   // --- PAGINATION 1 (SECTION 1) ---
@@ -336,6 +493,12 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
             ? `Found ${filteredRegularItems.length} results` 
             : "Hidden Gems For You ✨"}
         </h2>
+        {/* #region agent log */}
+        {(() => {
+          fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ExplorePage.js:336',message:'Final filter results',data:{filteredCount:filteredRegularItems.length,search:search,selectedTags:selectedTags,selectedCategory:selectedCategory,selectedProvinceId:selectedProvinceId},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'A,B,C,D,E'})}).catch(()=>{});
+          return null;
+        })()}
+        {/* #endregion */}
 
         {currentRegularItems.length > 0 ? (
           <>

@@ -25,6 +25,9 @@ export const sendHeroTextResultToWidget = (payload) =>
 export const refreshChatWidgetHistory = (payload) =>
   emitWidgetEvent({ action: "history-refresh", payload });
 
+export const navigateToExplore = (payload) =>
+  emitWidgetEvent({ action: "navigate-explore", payload });
+
 export const subscribeToChatWidget = (listener) => {
   const handler = (event) => {
     listener(event.detail || { action: "toggle" });
