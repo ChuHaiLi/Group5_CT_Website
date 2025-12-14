@@ -13,14 +13,14 @@ import petImg from "./pet.png";
 import soloImg from "./solo.png";
 
 const vacationData = [
-  { id: 0, image: familyImg, tag: "Family", label: "Family" },
-  { id: 1, image: coupleImg, tag: "Couples", label: "Couples" },
-  { id: 2, image: friendsImg, tag: "Friends", label: "Friends" },
+  { id: 0, image: familyImg, tag: "Family", label: "Family Journey" },
+  { id: 1, image: coupleImg, tag: "Couples", label: "Love Vacation 💕" },
+  { id: 2, image: friendsImg, tag: "Friends", label: "Squad Adventure" },
   { id: 3, image: soloImg, tag: "Solo Traveler", label: "Solo Traveler" },
-  { id: 4, image: kidsImg, tag: "Kids Friendly", label: "Kids Friendly" },
-  { id: 5, image: elderImg, tag: "Elderly Friendly", label: "Elderly Friendly" },
-  { id: 6, image: petImg, tag: "Pet Friendly", label: "Pet Friendly" },
-  { id: 7, image: adventureImg, tag: "Adventure Seekers", label: "Adventure Seekers" },
+  { id: 4, image: kidsImg, tag: "Kids Friendly", label: "Kids Trip" },
+  { id: 5, image: elderImg, tag: "Elderly Friendly", label: "Senior Travel" },
+  { id: 6, image: petImg, tag: "Pet Friendly", label: "Paw Holiday 🐾" },
+  { id: 7, image: adventureImg, tag: "Adventure Seekers", label: "Risk Taker ⚡" },
 ];
 
 export default function VacationCarousel() {

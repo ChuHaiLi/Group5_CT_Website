@@ -51,12 +51,8 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
   // --- FOLDER HANDLERS ---
   const handleCreateFolder = () => {
     if (newFolderName.trim()) {
-      const newFolder = {
-        id: Date.now(),
-        name: newFolderName,
-        items: [],
-      };
-      setFolders([...folders, newFolder]);
+      const newFolder = { id: Date.now(), name: newFolderName, items: [] };
+      setFolders(prev => [...prev, newFolder]);
       setNewFolderName("");
       setShowCreateFolderModal(false);
     }
@@ -69,25 +65,30 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
   };
 
   const handleAddToFolder = (folderId, itemIds) => {
-    setFolders(
-      folders.map((f) => {
+    setFolders(prev =>
+      prev.map(f => {
         if (f.id === folderId) {
           const uniqueItems = [...new Set([...f.items, ...itemIds])];
-          return { ...f, items: uniqueItems };
+          return {
+            ...f,
+            items: uniqueItems,
+          };
         }
         return f;
       })
     );
   };
 
-  const handleRemoveFromFolder = (folderId, itemId) => {
-    const idsToRemove = Array.isArray(itemId) ? itemId : [itemId];
-    setFolders(
-      folders.map((f) => {
+  const handleRemoveFromFolder = (folderId, itemIds) => {
+    const idsToRemove = Array.isArray(itemIds) ? itemIds : [itemIds];
+
+    setFolders(prev =>
+      prev.map(f => {
         if (f.id === folderId) {
+          const newItems = f.items.filter(id => !idsToRemove.includes(id));
           return {
             ...f,
-            items: f.items.filter((id) => !idsToRemove.includes(id)),
+            items: newItems,
           };
         }
         return f;
@@ -128,8 +129,14 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
   }, [token, savedIds]);
 
   const handleUnsave = async (id) => {
-    await handleToggleSave(id);
+      await handleToggleSave(id);
     setDestinations((prev) => prev.filter((d) => d.id !== id));
+    setFolders((prev) =>
+      prev.map((f) => ({
+        ...f,
+        items: f.items.filter((itemId) => itemId !== id),
+      }))
+    );
   };
 
   // --- SEARCH FILTER ---
