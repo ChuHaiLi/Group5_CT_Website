@@ -7,31 +7,75 @@ import './TripDetailsPage.css';
 
 const getAuthToken = () => localStorage.getItem("access_token");
 
+const formatPrice = (value) => {
+    if (value === null || value === undefined) {
+        return "Đang cập nhật";
+    }
+
+    const stringVal = String(value).toLowerCase().trim();
+
+    if (
+        stringVal === "0" ||
+        stringVal === "free" ||
+        stringVal.includes("miễn phí") ||
+        stringVal.includes("mien phi") ||
+        Number(value) === 0
+    ) {
+        return "Miễn phí";
+    }
+
+    if (typeof value === 'number' && value > 0) {
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND'
+        }).format(value);
+    }
+
+    const numValue = Number(value);
+    if (!isNaN(numValue) && numValue > 0) {
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND'
+        }).format(numValue);
+    }
+
+    return value;
+};
+
 export default function TripDetailsPage() {
-    const { tripId } = useParams(); 
+    const { tripId } = useParams();
     const navigate = useNavigate();
-    
+
     const [trip, setTrip] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-    
+
     // State cho destination preview
     const [selectedDestination, setSelectedDestination] = useState(null);
     const [isLoadingDestination, setIsLoadingDestination] = useState(false);
     const [showDestinationModal, setShowDestinationModal] = useState(false);
 
+    // ✅ FIX: Thêm key để force re-fetch mỗi khi component mount
     useEffect(() => {
         const fetchTripDetails = async () => {
+            console.log('🔄 [TripDetailsPage] Fetching trip details for tripId:', tripId);
             setIsLoading(true);
             setError(null);
             try {
-                const response = await axios.get(`/api/trips/${tripId}`, {
+                // ✅ Thêm timestamp để tránh cache
+                const timestamp = new Date().getTime();
+                const response = await axios.get(`/api/trips/${tripId}?_t=${timestamp}`, {
                     headers: { Authorization: `Bearer ${getAuthToken()}` },
                 });
+
+                console.log('✅ [TripDetailsPage] API Response:', response.data);
+                console.log('📊 [TripDetailsPage] Duration từ API:', response.data.duration);
+                console.log('📊 [TripDetailsPage] Số ngày trong itinerary:', response.data.itinerary?.length);
+
                 setTrip(response.data);
             } catch (err) {
+                console.error('❌ [TripDetailsPage] Error:', err);
                 setError("Không tìm thấy chuyến đi hoặc bạn không có quyền truy cập.");
-                console.error("Error fetching trip details:", err);
             } finally {
                 setIsLoading(false);
             }
@@ -40,16 +84,16 @@ export default function TripDetailsPage() {
         if (tripId) {
             fetchTripDetails();
         }
-    }, [tripId]); 
-    
+    }, [tripId]); // ✅ QUAN TRỌNG: Chỉ depend vào tripId, sẽ re-run khi tripId thay đổi
+
     // Fetch destination details when clicking on a place
     const handleViewDestinationDetails = async (destinationId) => {
         // Skip for special items
         if (destinationId === 'LUNCH' || destinationId === 'TRAVEL') return;
-        
+
         setIsLoadingDestination(true);
         setSelectedDestination(null);
-        
+
         try {
             const response = await axios.get(`/api/destinations/${destinationId}`, {
                 headers: { Authorization: `Bearer ${getAuthToken()}` },
@@ -92,7 +136,7 @@ export default function TripDetailsPage() {
     if (!trip) {
         return <div className="details-container">Không có dữ liệu chuyến đi.</div>;
     }
-    
+
     const metadata = trip.metadata || {};
 
     return (
@@ -101,7 +145,7 @@ export default function TripDetailsPage() {
             <button onClick={handleBackToMyTrips} className="back-button">
                 <FaArrowLeft /> Quay lại My Trips
             </button>
-            
+
             {/* Trip Header with Title */}
             <div className="trip-header-new">
                 <h2>{trip.name}
@@ -115,7 +159,7 @@ export default function TripDetailsPage() {
                     <FaEdit /> Chỉnh sửa
                 </button>
             </div>
-            
+
             {/* Info Bar - Prominent */}
             <div className="trip-info-bar">
                 <div className="info-bar-item">
@@ -125,7 +169,7 @@ export default function TripDetailsPage() {
                         <span className="info-bar-value">{trip.province_name}</span>
                     </div>
                 </div>
-                
+
                 <div className="info-bar-item">
                     <FaCalendarAlt className="info-bar-icon" />
                     <div className="info-bar-content">
@@ -135,7 +179,7 @@ export default function TripDetailsPage() {
                         </span>
                     </div>
                 </div>
-                
+
                 <div className="info-bar-item date-info">
                     <FaCalendarAlt className="info-bar-icon" />
                     <div className="info-bar-content">
@@ -150,10 +194,18 @@ export default function TripDetailsPage() {
                     <FaClock className="info-bar-icon" />
                     <div className="info-bar-content">
                         <span className="info-bar-label">Thời lượng</span>
-                        <span className="info-bar-value">{trip.duration} ngày</span>
+                        <span className="info-bar-value">
+                            {trip.duration} ngày
+                            {/* DEBUG: Hiển thị cả số ngày trong itinerary */}
+                            {trip.itinerary && trip.itinerary.length !== trip.duration && (
+                                <span style={{ color: 'red', fontSize: '0.8em', marginLeft: '5px' }}>
+                                    (Itinerary: {trip.itinerary.length})
+                                </span>
+                            )}
+                        </span>
                     </div>
                 </div>
-                
+
                 <div className="info-bar-item">
                     <FaUsers className="info-bar-icon" />
                     <div className="info-bar-content">
@@ -161,7 +213,7 @@ export default function TripDetailsPage() {
                         <span className="info-bar-value">{metadata.people || '—'}</span>
                     </div>
                 </div>
-                
+
                 <div className="info-bar-item">
                     <FaMoneyBillWave className="info-bar-icon" />
                     <div className="info-bar-content">
@@ -176,7 +228,7 @@ export default function TripDetailsPage() {
                 {/* LEFT: Itinerary */}
                 <div className="trip-itinerary-column">
                     <h3 className="column-title">📅 Lịch trình Chi tiết</h3>
-                    
+
                     <div className="itinerary-schedule-vertical">
                         {trip.itinerary.map((dayPlan) => (
                             <div key={dayPlan.day} className="day-card-vertical">
@@ -189,28 +241,28 @@ export default function TripDetailsPage() {
                                                 <li key={index} className="item-lunch-vertical">
                                                     <span className="time-slot-vertical">
                                                         <FaUtensils /> {item.time_slot}
-                                                    </span> 
+                                                    </span>
                                                     <strong className="item-name-vertical">{item.name}</strong>
                                                 </li>
                                             );
                                         }
-                                        
+
                                         // TRAVEL
                                         if (item.id === 'TRAVEL') {
                                             return (
                                                 <li key={index} className="item-travel-vertical">
                                                     <span className="time-slot-vertical">
                                                         <FaRoute /> {item.time_slot}
-                                                    </span> 
+                                                    </span>
                                                     <em className="item-name-vertical">{item.name}</em>
                                                 </li>
                                             );
                                         }
-                                        
+
                                         // DESTINATION
                                         return (
-                                            <li 
-                                                key={index} 
+                                            <li
+                                                key={index}
                                                 className={`item-destination-vertical ${selectedDestination?.id === item.id ? 'active' : ''}`}
                                                 onClick={() => handleViewDestinationDetails(item.id)}
                                             >
@@ -233,7 +285,7 @@ export default function TripDetailsPage() {
                 {/* RIGHT: Destination Preview */}
                 <div className="trip-preview-column">
                     <h3 className="column-title">📍 Thông tin Địa điểm</h3>
-                    
+
                     {!selectedDestination && !isLoadingDestination && (
                         <div className="preview-placeholder">
                             <div className="placeholder-icon">🗺️</div>
@@ -252,7 +304,7 @@ export default function TripDetailsPage() {
                         <div className="destination-preview-card">
                             {/* Image */}
                             {selectedDestination.images && selectedDestination.images.length > 0 && (
-                                <div 
+                                <div
                                     className="preview-image"
                                     style={{ backgroundImage: `url(${selectedDestination.images[0]})` }}
                                 />
@@ -261,7 +313,7 @@ export default function TripDetailsPage() {
                             {/* Content */}
                             <div className="preview-content">
                                 <h4>{selectedDestination.name}</h4>
-                                
+
                                 {selectedDestination.type && (
                                     <span className="preview-badge">{selectedDestination.type}</span>
                                 )}
@@ -278,15 +330,16 @@ export default function TripDetailsPage() {
                                         </div>
                                     )}
 
-                                    {selectedDestination.entry_fee && (
-                                        <div className="preview-info-item">
-                                            <FaMoneyBillWave />
-                                            <div>
-                                                <strong>Giá vé</strong>
-                                                <p>{selectedDestination.entry_fee}</p>
+                                    {(selectedDestination.entry_fee !== null &&
+                                        selectedDestination.entry_fee !== undefined) && (
+                                            <div className="preview-info-item">
+                                                <FaMoneyBillWave />
+                                                <div>
+                                                    <strong>Giá vé</strong>
+                                                    <p>{formatPrice(selectedDestination.entry_fee)}</p>
+                                                </div>
                                             </div>
-                                        </div>
-                                    )}
+                                        )}
                                 </div>
 
                                 {/* Description */}
@@ -306,7 +359,7 @@ export default function TripDetailsPage() {
                                 )}
 
                                 {/* View Full Details Button */}
-                                <button 
+                                <button
                                     className="preview-view-full-btn"
                                     onClick={() => setShowDestinationModal(true)}
                                 >
@@ -329,6 +382,7 @@ export default function TripDetailsPage() {
                 <DestinationModal
                     destination={selectedDestination}
                     onClose={() => setShowDestinationModal(false)}
+                    hideCreateButton={true}
                 />
             )}
         </div>

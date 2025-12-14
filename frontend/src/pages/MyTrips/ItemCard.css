@@ -1,9 +1,40 @@
-/* ItemCard.css - Modern Card Design */
+/* ItemCard.css - FIXED: Time & Duration cùng hàng */
+
+/* ============ RESET & OVERRIDE ============ */
+.item-card * {
+    box-sizing: border-box;
+}
+
+.item-card .time-duration-group {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    width: 100% !important;
+}
+
+.item-card .input-group {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+}
+
+.item-card .input-group h3 {
+    display: block !important;
+    text-align: left !important;
+}
+
+.item-card .time-input,
+.item-card .duration-select {
+    display: block !important;
+}
 
 .item-card {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
     padding: 1rem;
     background: white;
     border-radius: 12px;
@@ -11,6 +42,14 @@
     margin-bottom: 0.75rem;
     transition: all 0.3s ease;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.item-card-main {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 1rem !important;
+    width: 100% !important;
 }
 
 .item-card:hover {
@@ -60,42 +99,71 @@
 
 /* ============ CONTENT SECTION ============ */
 .item-content {
-    flex: 1;
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+}
+
+/* ============ TIME & DURATION GROUP ============ */
+.time-duration-group {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    margin-top: 0.25rem;
 }
 
-.time-input-wrapper {
+.input-group {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
 }
 
-.time-icon {
-    color: #667eea;
+.input-group h3 {
     font-size: 0.875rem;
+    font-weight: 600;
+    color: #475569;
+    margin: 0;
+    min-width: 80px;
+    flex-shrink: 0;
 }
 
-.time-input {
-    width: 130px;
+.time-input,
+.duration-select {
+    flex: 1;
     padding: 0.5rem 0.75rem;
     border: 1px solid #cbd5e1;
     border-radius: 6px;
     font-size: 0.875rem;
     font-weight: 600;
     color: #475569;
+    background: white;
+    cursor: pointer;
     transition: all 0.2s ease;
 }
 
-.time-input:focus {
+/* Tùy chỉnh mũi tên xuống (select dropdown) */
+.duration-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000000' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: calc(100% - 12px) center; /* 👈 Cách mép phải 12px */
+    background-size: 24px; /* 👈 Tăng kích thước lên 24px */
+    padding-right: 3rem; /* 👈 Tăng padding để text không đè lên mũi tên */
+}
+
+.time-input:focus,
+.duration-select:focus {
     outline: none;
     border-color: #667eea;
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .name-input {
-    width: 90%;
+    width: 100%;
     padding: 0.75rem;
     border: 1px solid #cbd5e1;
     border-radius: 8px;
@@ -122,30 +190,67 @@
     width: fit-content;
 }
 
-/* ============ DELETE BUTTON ============ */
-.delete-btn {
+/* ============ ACTION GROUP ============ */
+.action-group {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 0.75rem !important;
+    width: 100% !important;
+    margin-top: 0.5rem !important;
+}
+
+.view-link-btn {
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    background: #fee2e2;
-    color: #dc2626;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: #3182ce;
+    color: white;
     border: none;
     border-radius: 8px;
-    font-size: 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.view-link-btn:hover {
+    background: #2c5aa0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
+}
+
+.view-link-btn:active {
+    transform: translateY(0);
+}
+
+.delete-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: #fee2e2;
+    color: #dc2626;
+    border: 2px solid #fecaca;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
-    flex-shrink: 0;
 }
 
 .delete-btn:hover {
     background: #fecaca;
-    transform: scale(1.1);
+    border-color: #fca5a5;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
 }
 
 .delete-btn:active {
-    transform: scale(0.95);
+    transform: translateY(0);
 }
 
 /* ============ THEME VARIATIONS ============ */
@@ -184,63 +289,27 @@
         align-self: center;
     }
 
-    .time-input {
-        width: 100%;
+    .input-group {
+        flex-direction: column;
+        align-items: stretch;
     }
 
+    .input-group h3 {
+        min-width: auto;
+    }
+
+    .time-input,
+    .duration-select {
+        width: 100%;
+    }
+    
+    .action-group {
+        width: 100%;
+        justify-content: stretch;
+    }
+    
+    .view-link-btn,
     .delete-btn {
-        width: 100%;
+        flex: 1;
     }
-}
-
-/* Thêm vào ItemCard.css */
-
-/* ============ TIME & DURATION GROUP ============ */
-.time-duration-group {
-    display: flex;
-    gap: 1rem; /* Khoảng cách giữa Giờ và Thời lượng */
-    margin-top: 0.25rem;
-}
-
-.input-group {
-    display: flex;
-    align-items: center;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    padding: 0.25rem 0.5rem;
-    transition: all 0.2s ease;
-}
-
-.input-group:focus-within {
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.input-group .icon {
-    color: #667eea;
-    margin-right: 0.5rem;
-    font-size: 0.875rem;
-}
-
-.time-input,
-.duration-select {
-    border: none;
-    padding: 0;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #475569;
-    background: transparent;
-    cursor: pointer;
-    /* Xóa bỏ CSS cũ cho time-input */
-}
-
-.time-input:focus,
-.duration-select:focus {
-    outline: none;
-}
-
-/* Điều chỉnh lại name-input để không còn xung đột với time/duration group */
-.name-input {
-    width: 100%; /* Đảm bảo nó chiếm đủ chiều rộng */
-    /* ... giữ nguyên các style khác ... */
 }

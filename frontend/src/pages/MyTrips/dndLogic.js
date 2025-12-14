@@ -1,6 +1,6 @@
-// -------------------------
-//  SORT BY TIME (HH:MM)
-// -------------------------
+// dndLogic.js - MERGED VERSION
+
+// --- SORT BY TIME (NEW FEATURE) ---
 export const sortByTime = (items) => {
     return [...items].sort((a, b) => {
         const t1 = a.time_slot ? a.time_slot.substring(0, 5) : "23:59";
@@ -9,9 +9,7 @@ export const sortByTime = (items) => {
     });
 };
 
-// -------------------------
-//  REORDER (KÉO TRONG CÙNG NGÀY)
-// -------------------------
+// --- REORDER (Original) ---
 export const reorder = (list, startIndex, endIndex) => {
     const result = Array.from(list);
     const [removed] = result.splice(startIndex, 1);
@@ -19,9 +17,23 @@ export const reorder = (list, startIndex, endIndex) => {
     return result;
 };
 
-// -------------------------
-//  TIME HELPERS
-// -------------------------
+// --- MOVE (Original - giữ lại cho tương thích) ---
+export const move = (source, destination, droppableSource, droppableDestination) => {
+    const sourceClone = Array.from(source);
+    const destClone = Array.from(destination);
+    const [removed] = sourceClone.splice(droppableSource.index, 1);
+
+    const moved = { ...removed, day: parseInt(droppableDestination.droppableId.split('-')[1], 10) };
+    destClone.splice(droppableDestination.index, 0, moved);
+
+    const result = {};
+    result[droppableSource.droppableId] = sourceClone;
+    result[droppableDestination.droppableId] = destClone;
+
+    return result;
+};
+
+// --- TIME HELPERS (NEW) ---
 const parseTimeToMs = (timeString) => {
     if (!timeString) return null;
     const clean = timeString.substring(0, 8);
@@ -38,9 +50,7 @@ const msToHHMMSS = (ms) => {
     return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00`;
 };
 
-// -------------------------
-//  REBUILD DAY (CHỈNH GIỜ TỰ ĐỘNG)
-// -------------------------
+// --- REBUILD DAY (NEW ADVANCED FEATURE) ---
 export const rebuildDay = async (places, opts = {}) => {
     if (!places) return places;
 
@@ -93,9 +103,41 @@ export const rebuildDay = async (places, opts = {}) => {
     return result;
 };
 
-// -------------------------
-//  ALIAS
-// -------------------------
-export const recalculateTimeSlots = async (places, opts = {}) => {
-    return await rebuildDay(places, opts);
+// --- RECALCULATE TIME SLOTS (Giữ lại phiên bản cũ đơn giản) ---
+const getDuration = (item) => {
+    if (item.id === 'LUNCH' || item.category === 'Ăn uống') return 60;
+    if (item.id === 'TRAVEL' || item.category === 'Di chuyển') return 45;
+    return 90;
+};
+
+const formatTime = (ms) => {
+    const totalMinutes = Math.floor(ms / (60 * 1000));
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+};
+
+export const recalculateTimeSlots = (itinerary) => {
+    const START_TIME_MS = 9 * 60 * 60 * 1000;
+
+    return itinerary.map(dayPlan => {
+        let currentTimeMs = START_TIME_MS;
+        
+        const newPlaces = dayPlan.places.map(item => {
+            const durationMinutes = getDuration(item);
+            const durationMs = durationMinutes * 60 * 1000;
+
+            const endTimeMs = currentTimeMs + durationMs;
+            const newTimeSlot = `${formatTime(currentTimeMs)}-${formatTime(endTimeMs)}`;
+            
+            currentTimeMs = endTimeMs;
+
+            return {
+                ...item,
+                time_slot: newTimeSlot,
+            };
+        });
+
+        return { ...dayPlan, places: newPlaces };
+    });
 };

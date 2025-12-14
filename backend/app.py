@@ -1776,20 +1776,39 @@ def update_trip(trip_id):
     data = request.get_json() or {}
     user_id = int(get_jwt_identity())
     
-    # 1. Tìm chuyến đi
     trip = db.session.get(Itinerary, trip_id)
-
     if not trip or trip.user_id != user_id:
         return jsonify({"message": "Trip not found or unauthorized access."}), 404
 
     trip_changed = False
     
-    # 2. Cập nhật Tên
+    # 1. Cập nhật Tên
     if "name" in data and data["name"] != trip.name:
         trip.name = data["name"]
         trip_changed = True
 
-    # 3. Cập nhật Metadata (ví dụ: people, budget)
+    # 🔥 FIX: Cập nhật Duration VÀ tính lại End Date
+    if "duration" in data:
+        new_duration = int(data["duration"])
+        if new_duration != trip.duration:
+            trip.duration = new_duration
+            
+            # ✅ QUAN TRỌNG: Tính lại end_date nếu có start_date
+            if trip.start_date:
+                trip.end_date = trip.start_date + timedelta(days=new_duration - 1)
+                
+                # Cập nhật status dựa trên ngày mới
+                current_date = datetime.now().date()
+                if trip.start_date > current_date:
+                    trip.status = 'UPCOMING'
+                elif trip.end_date >= current_date:
+                    trip.status = 'ONGOING'
+                else:
+                    trip.status = 'COMPLETED'
+            
+            trip_changed = True
+
+    # 3. Cập nhật Metadata
     if "metadata" in data:
         new_metadata = data["metadata"]
         try:
@@ -1800,30 +1819,23 @@ def update_trip(trip_id):
         except TypeError:
             return jsonify({"message": "Invalid metadata format."}), 400
 
-    # 4. Xử lý Ngày bắt đầu và Trạng thái
+    # 4. Xử lý Ngày bắt đầu (nếu có thay đổi riêng)
     start_date_str = data.get("start_date")
-    
-    # Chỉ cập nhật nếu start_date được gửi lên và khác với giá trị hiện tại
     if start_date_str:
         try:
             new_start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
             if new_start_date != trip.start_date:
-                
-                # Tính lại ngày kết thúc dựa trên duration hiện tại
-                new_end_date = new_start_date + timedelta(days=trip.duration - 1)
-                
-                # Xác định trạng thái mới (UPCOMING, ONGOING, COMPLETED)
-                current_date = datetime.now().date()
-                if new_start_date > current_date:
-                    new_status = 'UPCOMING'
-                elif new_end_date >= current_date:
-                    new_status = 'ONGOING'
-                else:
-                    new_status = 'COMPLETED'
-                    
                 trip.start_date = new_start_date
-                trip.end_date = new_end_date
-                trip.status = new_status
+                trip.end_date = new_start_date + timedelta(days=trip.duration - 1)
+                
+                current_date = datetime.now().date()
+                if trip.start_date > current_date:
+                    trip.status = 'UPCOMING'
+                elif trip.end_date >= current_date:
+                    trip.status = 'ONGOING'
+                else:
+                    trip.status = 'COMPLETED'
+                    
                 trip_changed = True
                 
         except ValueError:
@@ -1834,10 +1846,9 @@ def update_trip(trip_id):
         return jsonify({"message": "No changes detected."}), 200
 
     try:
-        trip.updated_at = datetime.now() # Cập nhật thời gian sửa đổi
+        trip.updated_at = datetime.now()
         db.session.commit()
-
-        # Tải lại metadata từ JSON để trả về (đảm bảo nó là dict Python)
+        
         metadata = json.loads(trip.metadata_json) if trip.metadata_json else {}
         province_name = trip.province.name if trip.province else "Unknown Province"
         
@@ -1849,6 +1860,7 @@ def update_trip(trip_id):
                 "province_name": province_name,
                 "duration": trip.duration,
                 "start_date": trip.start_date.strftime("%Y-%m-%d") if trip.start_date else None,
+                "end_date": trip.end_date.strftime("%Y-%m-%d") if trip.end_date else None,
                 "status": trip.status,
                 "metadata": metadata,
             }
@@ -1857,7 +1869,7 @@ def update_trip(trip_id):
     except Exception as e:
         db.session.rollback()
         print(f"Error updating trip: {e}")
-        return jsonify({"message": "An error occurred while updating the trip."}), 500
+        return jsonify({"message": "Failed to update trip."}), 500
 
 # -------------------------------------------------------------
 # ENDPOINT MỚI: CẬP NHẬT LỊCH TRÌNH (ITINERARY) RIÊNG BIỆT

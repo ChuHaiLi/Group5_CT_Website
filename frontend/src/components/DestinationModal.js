@@ -1,8 +1,16 @@
+// DestinationModal.js - FIXED: Ẩn nút "Tạo chuyến đi" khi mở từ TripDetailsPage
+
 import React, { useEffect, useState } from "react";
 import { FaTimes, FaMapMarkerAlt, FaClock, FaMoneyBillWave, FaTag, FaExternalLinkAlt, FaMapPin, FaChevronLeft, FaChevronRight, FaImages } from "react-icons/fa";
 import "./DestinationModal.css";
 
-export default function DestinationModal({ destination, onClose, onCreateTrip }) {
+// 🔥 THÊM PROP: hideCreateButton (default = false)
+export default function DestinationModal({ 
+  destination, 
+  onClose, 
+  onCreateTrip,
+  hideCreateButton = false  // 🔥 THÊM PROP NÀY
+}) {
   const [showImageViewer, setShowImageViewer] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -20,7 +28,6 @@ export default function DestinationModal({ destination, onClose, onCreateTrip })
     return () => window.removeEventListener("keydown", handleEsc);
   }, [onClose, showImageViewer]);
 
-  // Chặn scroll khi modal mở
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     return () => {
@@ -30,7 +37,8 @@ export default function DestinationModal({ destination, onClose, onCreateTrip })
 
   if (!destination) return null;
 
-  // --- HÀM TÌM DỮ LIỆU THÔNG MINH ---
+  // ... (giữ nguyên các helper functions: findValue, processDescription, formatPrice, renderOpeningHours)
+
   const findValue = (obj, keywords) => {
     if (!obj) return null;
     for (const key of keywords) {
@@ -47,25 +55,9 @@ export default function DestinationModal({ destination, onClose, onCreateTrip })
     return null;
   };
 
-  const rawPrice = findValue(destination, ['entry_fee', 'entryFee', 'price', 'cost', 'fee']);
-  const rawHours = findValue(destination, ['opening_hours', 'openingHours', 'open_time', 'time']);
-  const rawAddress = findValue(destination, ['address', 'location', 'province_name', 'province']);
-  
-  // Lấy tất cả ảnh
-  const allImages = Array.isArray(destination.images) && destination.images.length > 0
-    ? destination.images
-    : destination.image_url 
-    ? [destination.image_url]
-    : [];
-
-  const coverImage = allImages.length > 0 ? allImages[0] : null;
-
-  // --- XỬ LÝ MÔ TẢ ---
   const processDescription = (desc) => {
     if (!desc) return null;
-    
     let finalDesc = desc;
-
     if (typeof desc === 'string') {
       const trimmed = desc.trim();
       if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
@@ -83,13 +75,9 @@ export default function DestinationModal({ destination, onClose, onCreateTrip })
         return [desc];
       }
     }
-
     return Array.isArray(finalDesc) ? finalDesc : [finalDesc];
   };
 
-  const descriptionList = processDescription(destination.description);
-
-  // --- ĐỊNH DẠNG ---
   const formatPrice = (value) => {
     if (value === null || value === undefined) return "Đang cập nhật";
     const stringVal = String(value).toLowerCase();
@@ -119,9 +107,20 @@ export default function DestinationModal({ destination, onClose, onCreateTrip })
     return <span>{hours}</span>;
   };
 
+  const rawPrice = findValue(destination, ['entry_fee', 'entryFee', 'price', 'cost', 'fee']);
+  const rawHours = findValue(destination, ['opening_hours', 'openingHours', 'open_time', 'time']);
+  const rawAddress = findValue(destination, ['address', 'location', 'province_name', 'province']);
+  
+  const allImages = Array.isArray(destination.images) && destination.images.length > 0
+    ? destination.images
+    : destination.image_url 
+    ? [destination.image_url]
+    : [];
+
+  const coverImage = allImages.length > 0 ? allImages[0] : null;
+  const descriptionList = processDescription(destination.description);
   const processedTags = processDescription(destination.tags);
 
-  // --- XỬ LÝ IMAGE VIEWER ---
   const openImageViewer = (index) => {
     setCurrentImageIndex(index);
     setShowImageViewer(true);
@@ -264,16 +263,21 @@ export default function DestinationModal({ destination, onClose, onCreateTrip })
           )}
         </div>
 
+        {/* 🔥 FOOTER - ẨN NÚT "Tạo chuyến đi" KHI hideCreateButton = true */}
         <div className="modal-footer">
           <button className="modal-btn secondary" onClick={onClose}>Đóng</button>
-          <button 
-            className="modal-btn primary"
-            onClick={() => {
-              if(onCreateTrip) onCreateTrip(destination);
-            }}
-          >
-            Tạo chuyến đi
-          </button>
+          
+          {/* 🔥 CHỈ HIỂN THỊ KHI hideCreateButton = false */}
+          {!hideCreateButton && (
+            <button 
+              className="modal-btn primary"
+              onClick={() => {
+                if(onCreateTrip) onCreateTrip(destination);
+              }}
+            >
+              Tạo chuyến đi
+            </button>
+          )}
         </div>
       </div>
 
