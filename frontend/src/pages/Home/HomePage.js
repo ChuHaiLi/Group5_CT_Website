@@ -3,21 +3,80 @@ import { toast } from "react-toastify";
 import API from "../../untils/axios";
 import { usePageContext } from "../../context/PageContext";
 import { resizeImageTo128 } from "../../untils/imageResizer";
-import "./HomePage.css";
 import HeroSection from "./hero/hero";
 import CreateTripForm from "../../components/CreateTripForm";
-
 import HomeIntro from "./HomeIntro";
 import RelaxationSection from "./Relaxation/RelaxationSection";
 import TrendingSection from "./Trending/TrendingSection";
 import VacationCarousel from "./VacationCarousel/VacationCarousel";
 import WildlifeSection from "./Wildlife/WildlifeSection";
-
 import {
   sendVisionRequestToWidget,
   sendVisionResultToWidget,
   refreshChatWidgetHistory,
 } from "../../untils/chatWidgetEvents";
+import "./HomePage.css";
+
+// Mapping từ tags tiếng Anh sang tiếng Việt để hiển thị trong search bar
+const TAG_VIETNAMESE_MAP = {
+  "Beach": "biển",
+  "Mountain": "núi",
+  "Historical Site": "di tích lịch sử",
+  "Cultural Site": "di tích văn hóa",
+  "Gastronomy": "ẩm thực",
+  "Adventure": "phiêu lưu",
+  "Nature Park": "công viên thiên nhiên",
+  "Urban Area": "đô thị",
+  "Island": "đảo",
+  "Lake/River": "hồ/sông",
+  "Trekking/Hiking": "leo núi",
+  "Photography": "chụp ảnh",
+  "Camping": "cắm trại",
+  "Relaxation/Resort": "nghỉ dưỡng",
+  "Shopping": "mua sắm",
+  "Water Sports": "thể thao dưới nước",
+  "Cycling": "đạp xe",
+  "Sightseeing": "tham quan",
+  "Wildlife Watching": "xem động vật hoang dã",
+  "Local Workshop": "workshop địa phương",
+  "Family": "gia đình",
+  "Couples": "cặp đôi",
+  "Friends": "bạn bè",
+  "Solo Traveler": "du lịch một mình",
+  "Kids Friendly": "thân thiện trẻ em",
+  "Elderly Friendly": "thân thiện người già",
+  "Pet Friendly": "thân thiện thú cưng",
+  "Adventure Seekers": "người tìm kiếm phiêu lưu",
+  "Half Day": "nửa ngày",
+  "Full Day": "cả ngày",
+  "2 Days": "2 ngày",
+  "3+ Days": "3+ ngày",
+  "Weekend Trip": "chuyến cuối tuần",
+  "Overnight": "qua đêm",
+  "Multi-day Adventure": "phiêu lưu nhiều ngày",
+  "Spring": "mùa xuân",
+  "Summer": "mùa hè",
+  "Autumn": "mùa thu",
+  "Winter": "mùa đông",
+  "Morning": "buổi sáng",
+  "Afternoon": "buổi chiều",
+  "Evening": "buổi tối",
+  "Night": "ban đêm",
+  "Free": "miễn phí",
+  "Scenic Views": "cảnh đẹp",
+  "Instagrammable Spots": "điểm sống ảo",
+  "Local Cuisine": "ẩm thực địa phương",
+  "Festivals & Events": "lễ hội và sự kiện",
+  "Adventure Sports": "thể thao mạo hiểm",
+  "Relaxing Spots": "điểm nghỉ ngơi",
+  "Cultural Immersion": "trải nghiệm văn hóa",
+  "Hidden Gems": "địa điểm ẩn"
+};
+
+// Convert English tag to Vietnamese for display in search bar
+const getVietnameseTag = (tag) => {
+  return TAG_VIETNAMESE_MAP[tag] || tag;
+};
 
 const MAX_VISION_IMAGES = 4;
 
@@ -159,9 +218,18 @@ export default function HomePage({ savedIds, handleToggleSave }) {
               params.set("tags", tags.join(","));
             }
           } 
-          // Priority 2: If only tags exist, use ?tags=
+          // Priority 2: If only tags exist, use first tag (or all tags) for ?q= to fill search bar
           else if (tags.length > 0) {
-            params.set("tags", tags.join(","));
+            // Use Vietnamese translation of first tag as search query to display in search bar
+            const vietnameseTag = getVietnameseTag(tags[0]);
+            params.set("q", vietnameseTag);
+            // Add all tags for filtering
+            if (tags.length > 1) {
+              params.set("tags", tags.join(","));
+            } else {
+              // If only one tag, still add it to tags param for filtering
+              params.set("tags", tags[0]);
+            }
           }
           
           if (params.toString()) {

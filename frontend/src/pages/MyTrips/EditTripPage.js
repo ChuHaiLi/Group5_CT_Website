@@ -287,6 +287,7 @@ export default function EditTripPage() {
   };
 
   // Safe merge: merge AI suggestions into existing itinerary without losing data
+  // eslint-disable-next-line no-unused-vars
   const safeMergeItinerary = (currentItinerary, aiItinerary) => {
     if (!validateItinerary(aiItinerary)) {
       return null; // Invalid AI response
@@ -667,6 +668,7 @@ export default function EditTripPage() {
     setShowAIModal(false);
   };
 
+  // eslint-disable-next-line no-unused-vars
   const handleConfirmAISave = async () => {
     // call existing save handler to persist current (AI-applied) itinerary
     await handleSave();
@@ -730,7 +732,8 @@ export default function EditTripPage() {
     };
 
     fetchTripDetails();
-  }, [tripId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tripId]); // pendingAiChanges is intentionally excluded - we use pendingAiChangesRef to avoid race conditions
 
 
   // --- DND LOGIC ---
@@ -949,6 +952,7 @@ export default function EditTripPage() {
   };
 
   // --- AI reorder handler: ask backend to produce a suggested ordering and apply it to UI
+  // eslint-disable-next-line no-unused-vars
   const handleAIReorder = async () => {
     if (!tripData) return;
     setAiLoading(true);
@@ -1602,7 +1606,7 @@ export default function EditTripPage() {
                           >
                             {(() => {
 
-                              const suggestions = aiResult?.suggestions;
+                              let suggestions = aiResult?.suggestions;
                               
                               // Ensure suggestions is an array
                               if (!Array.isArray(suggestions) || suggestions.length === 0) {
