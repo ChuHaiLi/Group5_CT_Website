@@ -61,10 +61,14 @@ export default function ProfilePage() {
   const [statsLoading, setStatsLoading] = useState(true);
   const [statsError, setStatsError] = useState("");
   const fileInputRef = useRef(null);
-
+  
+  const [isGoogleUser, setIsGoogleUser] = useState(false);
+  const [isGitHubUser, setIsGitHubUser] = useState(false); 
+  
   // Validation states
   const [touched, setTouched] = useState({
     email: false,
+    username: false,
     currentPassword: false,  
     newPassword: false,       
     confirmPassword: false,
@@ -84,6 +88,7 @@ export default function ProfilePage() {
 
   const [validation, setValidation] = useState({
     emailValid: true,
+    usernameValid: true, 
     newPasswordValid: true,   
     passwordsMatch: true,
   });
@@ -94,47 +99,51 @@ export default function ProfilePage() {
   // Validate fields
   useEffect(() => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const usernameRegex = /^[a-zA-Z0-9._-]{3,}$/;
+
+    const usernameValid = profileData.username.length === 0 || (usernameRegex.test(profileData.username) && profileData.username.length >= 3);
     const emailValid = profileData.email.length === 0 || emailRegex.test(profileData.email);
     const newPasswordValid = profileData.newPassword.length === 0 || profileData.newPassword.length >= 6;
     const passwordsMatch = profileData.newPassword.length === 0 || profileData.newPassword === profileData.confirmPassword;
 
     setValidation({
-      emailValid,
-      newPasswordValid,
-      passwordsMatch,
-    });
-  }, [profileData.email, profileData.newPassword, profileData.confirmPassword]);
+    usernameValid,   
+    emailValid,
+    newPasswordValid,
+    passwordsMatch,
+  });
+}, [profileData.email, profileData.username, profileData.newPassword, profileData.confirmPassword]); 
 
-  // ← NEW: Scroll spy effect
- useEffect(() => {
-  if (activeSection !== "settings") return;
+  // Scroll spy effect
+  useEffect(() => {
+    if (activeSection !== "settings") return;
 
-  const handleScroll = () => {
-    const scrollY = window.scrollY + 150;
+    const handleScroll = () => {
+      const scrollY = window.scrollY + 150;
 
-    const sections = [
-      { ref: accountSectionRef, name: 'account' },
-      { ref: personalInfoSectionRef, name: 'personal' },
-      { ref: passwordSectionRef, name: 'password' }
-    ];
+      const sections = [];
+      
+      // Always include these sections
+      sections.push({ ref: accountSectionRef, name: 'account' });
+      sections.push({ ref: personalInfoSectionRef, name: 'personal' });
+      sections.push({ ref: passwordSectionRef, name: 'password' });
 
-    // Tìm section hiện tại dựa trên scroll position
-    for (let i = sections.length - 1; i >= 0; i--) {
-      const section = sections[i];
-      if (section.ref.current) {
-        const sectionTop = section.ref.current.offsetTop;
-        if (scrollY >= sectionTop - 50) {
-          setActiveScrollSection(section.name);
-          break;
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const section = sections[i];
+        if (section.ref.current) {
+          const sectionTop = section.ref.current.offsetTop;
+          if (scrollY >= sectionTop - 50) {
+            setActiveScrollSection(section.name);
+            break;
+          }
         }
       }
-    }
-  };
+    };
 
-  window.addEventListener("scroll", handleScroll);
-  handleScroll();
-  return () => window.removeEventListener("scroll", handleScroll);
-}, [activeSection]);
+    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [activeSection]);
 
   const broadcastProfile = useCallback((payload = {}, persist = false) => {
     const normalized = {
@@ -155,6 +164,13 @@ export default function ProfilePage() {
   const fetchProfile = useCallback(async () => {
     try {
       const { data } = await API.get("/auth/me");
+      
+      const isGoogle = Boolean(data.google_id);
+      const isGitHub = Boolean(data.github_id);
+
+      setIsGoogleUser(isGoogle);
+      setIsGitHubUser(isGitHub);
+
       let taglineSuffix = "";
       if (data.tagline) {
       taglineSuffix = data.tagline.replace(/^#VN/, "");
@@ -186,6 +202,7 @@ export default function ProfilePage() {
       );
     } catch (error) {
       console.error("Failed to load profile", error);
+      toast.error("Unable to load profile. Please try again.");
     }
   }, [broadcastProfile]);
 
@@ -202,6 +219,7 @@ export default function ProfilePage() {
     } catch (error) {
       console.error("Failed to load dashboard data", error);
       setStatsError("Không thể tải dữ liệu thống kê. Vui lòng thử lại sau.");
+      toast.error("Unable to load dashboard data.");
     } finally {
       setStatsLoading(false);
     }
@@ -270,10 +288,10 @@ export default function ProfilePage() {
           true
         );
 
-        alert("✅ Avatar has been updated!");
+        toast.success("Avatar updated successfully!");
       } catch (error) {
         console.error("Avatar upload failed", error);
-        alert("⚠️ Unable to upload avatar. Please try again.");
+        toast.error("Unable to upload avatar. Please try again.");
       } finally {
         setUploadingAvatar(false);
       }
@@ -376,18 +394,24 @@ export default function ProfilePage() {
     // Validate based on section
     if (section === 'accountId') {  
       if (!profileData.username || !profileData.username.trim()) {
-        alert("❌ Username is required.");
+        toast.error("Username is required.");
         return;
       }
+
+      if (!validation.usernameValid) {
+        toast.error("Username can only contain letters, numbers, dots (.), underscores (_), and hyphens (-), minimum 3 characters.");
+        return;
+      }
+
       if (profileData.taglineSuffix.length < 3 || profileData.taglineSuffix.length > 5) {
-        alert("❌ Tagline must be between 3 and 5 characters.");
+        toast.error("Tagline must be between 3 and 5 characters.");
         return;
       }
     } else if (section === 'personalInfo') {
       setTouched(prev => ({ ...prev, email: true }));
       
       if (!validation.emailValid) {
-        alert("❌ Please enter a valid email address.");
+        toast.error("Please enter a valid email address.");
         return;
       }
 
@@ -440,22 +464,24 @@ export default function ProfilePage() {
       const wantsPasswordChange = profileData.newPassword && profileData.newPassword.trim();
       
       if (wantsPasswordChange) {
-        if (!profileData.currentPassword || !profileData.currentPassword.trim()) {
-          alert("❌ Please enter your current password to change password.");
-          return;
+        if (!isGoogleUser && !isGitHubUser) {
+          if (!profileData.currentPassword || !profileData.currentPassword.trim()) {
+            toast.error("Please enter your current password to change pase if (section === 'password') {sword.");
+            return;
+          }
         }
         
         if (!validation.newPasswordValid) {
-          alert("❌ New password must be at least 6 characters.");
+          toast.error("New password must be at least 6 characters.");
           return;
         }
         
         if (!validation.passwordsMatch) {
-          alert("❌ New passwords do not match.");
+          toast.error("New passwords do not match.");
           return;
         }
       } else {
-        alert("❌ Please enter a new password to change your password.");
+        toast.error("Please enter a new password to change your password.");
         return;
       }
     }
@@ -481,9 +507,12 @@ export default function ProfilePage() {
       } else if (section === 'password') {
         // Chỉ gửi password fields
         payload = {
-          currentPassword: profileData.currentPassword.trim(),
-          newPassword: profileData.newPassword.trim(),
+          newPassword: profileData.newPassword.trim(),  
         };
+
+        if (!isGoogleUser && !isGitHubUser) {
+          payload.currentPassword = profileData.currentPassword.trim();
+        }
       }
 
       const { data } = await API.put("/profile", payload);
@@ -551,11 +580,11 @@ export default function ProfilePage() {
       // Reset states based on section
       if (section === 'accountId') {
         setModified(prev => ({ ...prev, accountId: false }));
-        alert("✅ Account ID updated successfully!");
+        toast.success("Account ID updated successfully!");
       } else if (section === 'personalInfo') {
         setTouched(prev => ({ ...prev, email: false }));
         setModified(prev => ({ ...prev, personalInfo: false }));
-        alert("✅ Personal information updated successfully!");
+        toast.success("Personal information updated successfully!");  
       } else if (section === 'password') {
         setTouched({
           email: false,
@@ -564,7 +593,12 @@ export default function ProfilePage() {
           confirmPassword: false,
         });
         setModified(prev => ({ ...prev, password: false }));
-        alert("✅ Password updated successfully!");
+
+        if (isGoogleUser || isGitHubUser) { // 🔥 UPDATED
+        toast.success("Password set successfully! You can now use it to sign in.");
+      } else {
+        toast.success("Password updated successfully!");
+      }
       }
       
     } catch (error) {
@@ -573,20 +607,22 @@ export default function ProfilePage() {
       const errorResponse = error.response?.data;
       
       if (errorResponse?.errors) {
-        const errorMessages = Object.entries(errorResponse.errors)
-          .map(([field, msg]) => `${field}: ${msg}`)
-          .join("\n");
-        alert(`❌ Update failed:\n${errorMessages}`);
+        if (errorResponse.errors.username) {
+          toast.error(errorResponse.errors.username);
+        } else {
+          const firstError = Object.values(errorResponse.errors)[0];
+          toast.error(firstError);
+        }
       } else if (errorResponse?.message) {
         if (errorResponse.message.includes("current password")) {
-          alert("❌ Current password is incorrect. Please try again.");
+          toast.error("Current password is incorrect. Please try again.");
         } else if (errorResponse.message.includes("password")) {
-          alert(`❌ Password update failed: ${errorResponse.message}`);
+          toast.error(`Password update failed: ${errorResponse.message}`);
         } else {
-          alert(`❌ ${errorResponse.message}`);
+          toast.error(errorResponse.message);
         }
       } else {
-        alert("❌ Unable to update profile. Please check your connection and try again.");
+        toast.error("Unable to update profile. Please check your connection and try again.");
       }
     } finally {
       setSavingProfile(false);
@@ -682,10 +718,35 @@ export default function ProfilePage() {
                     name="username"
                     value={profileData.username}
                     onChange={handleInputChange}
+                    onBlur={() => setTouched(prev => ({ ...prev, username: true }))} // 🔥 THÊM
                     placeholder="Enter your username"
                     className="form-input"
+                    style={{
+                      borderColor: touched.username && !validation.usernameValid && profileData.username.length > 0
+                        ? '#f44336'  
+                        : '#d0d0d0'  
+                    }}
                   />
                 </div>
+                
+                {/*  THÊM: Error message */}
+                {touched.username && !validation.usernameValid && profileData.username.length > 0 && (
+                  <div className="validation-message error" style={{ 
+                    marginTop: '8px',
+                    fontSize: '13px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    color: '#f44336'
+                  }}>
+                    <FaTimesCircle />
+                    <span>Username must be 3+ characters (letters, numbers, . _ - only)</span>
+                  </div>
+                )}
+                
+                <span className="input-hint">
+                  💡 Choose a unique username (3+ characters, letters, numbers, . _ - only)
+                </span>
               </label>
 
               {/* Tagline */}
@@ -840,7 +901,7 @@ export default function ProfilePage() {
                     ? "Processing..." 
                     : (profileData.email.toLowerCase() !== originalData.email.toLowerCase()
                         ? "Send Verification Code" 
-                        : "Save Changes"
+                        : "Save Changes & Verify"
                       )
                   }
                 </button>
@@ -862,32 +923,34 @@ export default function ProfilePage() {
               </div>
 
               {/* Current Password */}
-              <label className="form-field">
-                <span className="form-field__label">
-                  <FaLock className="field-icon" /> 
-                  <span>Current Password</span>
-                </span>
-                <div className="input-wrapper">
-                  <input
-                    id="currentPassword"
-                    name="currentPassword"
-                    type={showPassword.current ? "text" : "password"}
-                    value={profileData.currentPassword}
-                    onChange={handleInputChange}
-                    onBlur={() => handleBlur('currentPassword')}
-                    placeholder="Enter current password"
-                    className="form-input"
-                  />
-                  <button
-                    type="button"
-                    className="show-hide"
-                    onClick={() => setShowPassword(prev => ({ ...prev, current: !prev.current }))}
-                    aria-label={showPassword.current ? "Hide password" : "Show password"}
-                  >
-                    {showPassword.current ? <FaEyeSlash /> : <FaEye />}
-                  </button>
-                </div>
-              </label>
+              {!isGoogleUser && !isGitHubUser && (
+                <label className="form-field">
+                  <span className="form-field__label">
+                    <FaLock className="field-icon" /> 
+                    <span>Current Password</span>
+                  </span>
+                  <div className="input-wrapper">
+                    <input
+                      id="currentPassword"
+                      name="currentPassword"
+                      type={showPassword.current ? "text" : "password"}
+                      value={profileData.currentPassword}
+                      onChange={handleInputChange}
+                      onBlur={() => handleBlur('currentPassword')}
+                      placeholder="Enter current password"
+                      className="form-input"
+                    />
+                    <button
+                      type="button"
+                      className="show-hide"
+                      onClick={() => setShowPassword(prev => ({ ...prev, current: !prev.current }))}
+                      aria-label={showPassword.current ? "Hide password" : "Show password"}
+                    >
+                      {showPassword.current ? <FaEyeSlash /> : <FaEye />}
+                    </button>
+                  </div>
+                </label>
+              )}
 
               {/* New Password */}
               <label className="form-field">

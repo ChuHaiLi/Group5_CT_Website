@@ -109,7 +109,7 @@ export default function ForgotPasswordPage() {
           </div>
 
           {/* Email Error Message */}
-          {emailTouched && !isEmailValid && email.length > 0 && (
+          {!isEmailValid && email.length > 0 && (
             <div className="validation-message">
               <FaTimesCircle />
               Please enter a valid email address

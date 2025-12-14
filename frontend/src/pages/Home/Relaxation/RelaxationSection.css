@@ -1,7 +1,7 @@
 .relaxation-section {
   width: 100%;
   max-width: 1400px;
-  margin: 4rem auto 3rem;
+  margin: 0rem auto 3rem;
   padding: 0 20px;
   transform: scale(0.9);
   transform-origin: center top;
@@ -175,32 +175,4 @@
   .relaxation-card-wrapper {
     width: 300px;
   }
-}
-
-/* Thanh phân trang */
-.relaxation-section {
-  width: 100%;
-  max-width: 1400px;
-  margin: 4rem auto 3rem;
-  padding: 0 20px 3rem 20px;
-  position: relative;
-  transform: scale(0.9);
-  transform-origin: center top;
-}
-
-.relaxation-section::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 95%;
-  height: 1px;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    #d1d5db 20%, 
-    #9ca3af 50%, 
-    #d1d5db 80%, 
-    transparent 100%
-  );
 }

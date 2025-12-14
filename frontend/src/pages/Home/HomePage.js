@@ -10,11 +10,10 @@ import CreateTripForm from "../../components/CreateTripForm";
 import HomeIntro from "./HomeIntro";
 import RelaxationSection from "./Relaxation/RelaxationSection";
 import TrendingSection from "./Trending/TrendingSection";
-import ContactSection from "./ContactSection/ContactSection";
+import VacationCarousel from "./VacationCarousel/VacationCarousel";
+import WildlifeSection from "./Wildlife/WildlifeSection";
 
 import {
-  sendHeroTextRequestToWidget,
-  sendHeroTextResultToWidget,
   sendVisionRequestToWidget,
   sendVisionResultToWidget,
   refreshChatWidgetHistory,
@@ -131,38 +130,65 @@ export default function HomePage({ savedIds, handleToggleSave }) {
   const handleTextSearch = async () => {
     const query = (searchTerm || "").trim();
     if (!query) {
-      toast.info("Nhập câu hỏi du lịch trước khi tìm kiếm nhé.");
+      toast.info("Please enter a travel query before searching.");
       return;
     }
     setTextLoading(true);
-    const requestId = `hero-text-${Date.now()}`;
-    sendHeroTextRequestToWidget({ requestId, content: query });
+
+    // First try to extract destination tags and location name from the user's query.
+    try {
+      const tagRes = await API.post("/chat/extract_tags", {
+        message: query,
+        page_context: undefined,
+      });
+      if (tagRes.data && tagRes.data.ok) {
+        const result = tagRes.data.result || {};
+        const tags = result.tags || [];
+        const locationName = result.location_name || null;
+        const navigate = result.navigate || (Array.isArray(tags) && tags.length > 0) || !!locationName;
+        
+        if (navigate) {
+          // Build navigation URL
+          const params = new URLSearchParams();
+          
+          // Priority 1: If location_name exists, use ?q= to fill search bar
+          if (locationName) {
+            params.set("q", locationName);
+            // If there are also valid tags, add them too
+            if (tags.length > 0) {
+              params.set("tags", tags.join(","));
+            }
+          } 
+          // Priority 2: If only tags exist, use ?tags=
+          else if (tags.length > 0) {
+            params.set("tags", tags.join(","));
+          }
+          
+          if (params.toString()) {
+            window.location.href = `/explore?${params.toString()}`;
+            return;
+          }
+        }
+      }
+    } catch (err) {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn("Tag extraction failed:", err);
+      }
+    }
+
+    // Fallback: call existing text search endpoint for suggestions (no chat forwarding)
     try {
       const res = await API.post("/search/text", { query });
       const friendly =
         res.data?.message || res.data?.summary || res.data?.analysis;
-      sendHeroTextResultToWidget({ requestId, response: friendly });
-      const persisted = await persistHeroConversation({
-        userContent: query,
-        assistantContent: friendly,
-      });
-      if (persisted) {
-        refreshChatWidgetHistory({ dropClientRequestId: requestId });
+      if (friendly) {
+        toast.info(friendly);
       }
     } catch (error) {
       console.error(error);
       const fallback =
-        error.response?.data?.message ||
-        "Không thể tìm kiếm gợi ý từ văn bản lúc này.";
+        error.response?.data?.message || "Unable to search right now.";
       toast.error(fallback);
-      sendHeroTextResultToWidget({ requestId, response: fallback });
-      const persisted = await persistHeroConversation({
-        userContent: query,
-        assistantContent: fallback,
-      });
-      if (persisted) {
-        refreshChatWidgetHistory({ dropClientRequestId: requestId });
-      }
     } finally {
       setTextLoading(false);
       setSearchTerm("");
@@ -302,6 +328,8 @@ export default function HomePage({ savedIds, handleToggleSave }) {
 
       <HomeIntro />
 
+      <VacationCarousel />
+
       <TrendingSection />
 
       <RelaxationSection
@@ -310,7 +338,11 @@ export default function HomePage({ savedIds, handleToggleSave }) {
         onCreateTrip={handleRelaxationCreateTrip} // Truyền handler xuống
       />
 
-      <ContactSection />
+      <WildlifeSection
+        savedIds={savedIds}
+        handleToggleSave={handleToggleSave}
+        onCreateTrip={handleCreateTrip}
+      />
 
       {showForm && selectedDestination && (
         <CreateTripForm

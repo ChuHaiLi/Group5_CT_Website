@@ -1807,10 +1807,10 @@
                             "Theo quan niệm phong thủy, núi này được coi là nơi \"thủy tụ\" và có địa thế \"long bàn hổ cứ\", tức rồng cuộn hổ ngồi, mang ý nghĩa linh thiêng."
                         ],
                         "images": [
-                            "https://hub2s.com/uploads/2023-11-20/thu-gian-ben-suoi-lu-bu.jpg",
                             "https://i.ytimg.com/vi/qnP93F2fP9s/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLDn19tOwg7kMm_zGRqd0y1d_BJH5Q",
                             "https://lalawater.com.vn/img/upload/images/tin-tuc/kham-pha-nui-lu-bu-bao-loc-so-huu-ve-dep-linh-thieng-hung-vi-1654496640.jpg",
-                            "https://nongnhan.com/wp-content/uploads/2020/01/nui1.jpg"
+                            "https://nongnhan.com/wp-content/uploads/2020/01/nui1.jpg",
+                            "https://mia.vn/media/uploads/blog-du-lich/kham-pha-nui-lu-bu-bao-loc-so-huu-ve-dep-linh-thieng-hung-vi-06-1654495685.jpeg"
                         ],
                         "gps": {
                             "lat": 11.513729994688944,
@@ -1877,45 +1877,6 @@
                             "Elderly Friendly",
                             "Half Day",
                             "Free",
-                            "Spring",
-                            "Autumn",
-                            "Winter"
-                        ],
-                        "source": "https://www.bachhoaxanh.com/kinh-nghiem-hay/top-22-dia-diem-du-lich-lam-dong-dep-nhat-dinh-khong-nen-bo-qua-1553008"
-                    },
-                    {
-                        "name": "Thánh Địa Cát Tiên",
-                        "type": "Di tích khảo cổ/Văn hóa",
-                        "description": [
-                            "Khu di tích khảo cổ Cát Tiên hay Thánh địa Cát Tiên là một trong những khu phế tích đặc biệt cấp quốc gia tại nước ta.",
-                            "Nơi đây lưu giữ nhiều kiến trúc cổ có liên quan đến vương quốc Phù Nam cổ cùng nhiều hiện vật gắn liền với tín ngưỡng Bà La Môn mang giá trị văn hóa - lịch sử to lớn.",
-                            "Bên cạnh đó, phong cảnh thiên nhiên nguyên sơ, đẹp mắt cũng là điểm thu hút nhiều du khách đến tham quan."
-                        ],
-                        "images": [
-                            "https://media.vietnamplus.vn/images/7255a701687d11cb8c6bbc58a6c807852beea9b05951376c446c9de18640e2ceff2e529eb23d85325520ad56185ac35dcdb57feb901aea868e56e8a402356a73/tet_cattien2.jpg",
-                            "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Cat_Tien%27s_2C_relic.jpg/250px-Cat_Tien%27s_2C_relic.jpg",
-                            "https://baothainguyen.vn/file//oldimage/baothainguyen/UserFiles/image/1(321).jpg",
-                            "https://upload.wikimedia.org/wikipedia/vi/thumb/8/8f/Cat_Tien%27s_research.jpg/250px-Cat_Tien%27s_research.jpg"
-                        ],
-                        "gps": {
-                            "lat": 11.529435698654584,
-                            "lng": 107.39877103145311
-                        },
-                        "opening_hours": "07:30 - 17:00 (Hàng ngày)",
-                        "entry_fee": "Khoảng 30,000 - 50,000 VND",
-                        "tags": [
-                            "Sightseeing",
-                            "Photography",
-                            "Instagrammable Spots",
-                            "Adventure Seekers",
-                            "Solo Traveler",
-                            "Couples",
-                            "Family",
-                            "Kids Friendly",
-                            "Friends",
-                            "Elderly Friendly",
-                            "Half Day",
-                            "<=50000",
                             "Spring",
                             "Autumn",
                             "Winter"
@@ -2789,7 +2750,10 @@
                             "Thời lượng: 1 giờ - 1 giờ 30 phút."
                         ],
                         "images": [
-                            "https://divui.com/content/images/thumbs/0026980_tour-01-tham-quan-vinh-va-ngam-san-ho-bang-tau-day-kinh.jpeg"
+                            "https://divui.com/content/images/thumbs/0026980_tour-01-tham-quan-vinh-va-ngam-san-ho-bang-tau-day-kinh.jpeg", 
+                            "https://dulichviet.com.vn/images/bandidau/tour-du-lich-lan-ngam-san-ho(1).jpg",
+                            "https://bizweb.dktcdn.net/thumb/grande/100/101/075/articles/nt-410a6ede-b5b0-45d4-bf51-7fba27bca23e.jpg?v=1561798852783",
+                            "https://divui.com/content/images/thumbs/0029392_tour-02-tham-quan-vinh-va-boi-ngam-san-ho_550.jpeg"
                         ],
                         "gps": {
                             "lat": 11.72364254041561,
@@ -4159,17 +4123,17 @@
                         "source": "https://www.bachhoaxanh.com/kinh-nghiem-hay/top-10-dia-diem-du-lich-noi-tieng-va-dep-nhat-tai-quang-nam-1366357"
                     },
                     {
-                        "name": "Hang Gợp: Hang Gợp, còn được biết đến với cái tên \"Cổng Trời\"",
+                        "name": "Hang Gợp",
                         "type": "Địa điểm tự nhiên/Hang động",
                         "description": [
-                            ", là một kỳ quan thiên nhiên độc đáo tọa lạc ở Đông Giang.",
+                            "Hang Gợp, còn được biết đến với cái tên \"Cổng Trời\", là một kỳ quan thiên nhiên độc đáo tọa lạc ở Đông Giang.",
                             "Nằm giữa một khu rừng rậm hoang sơ, hang Gợp tạo nên một cầu nối tuyệt vời giữa hai ngọn núi riêng biệt.",
                             "Dưới chân cầu, dòng sông Bhơm Lom chảy ngang qua, tạo thêm sự mênh mông và hùng vĩ cho cảnh quan này."
                         ],
                         "images": [
                             "https://congtroidongiang.vn/wp-content/uploads/2024/05/he-thong-hang-dong-1.jpg",
                             "https://openstock.vn/wp-content/uploads/2019/04/kham-pha-dong-giang.jpg",
-                            "https://icdn.dantri.com.vn/thumb_w/960/2019/02/23/1-1550890895392.jpg.",
+                            "https://congtroidongiang.vn/wp-content/uploads/2024/05/he-thong-hang-dong-2.jpg",
                             "https://image.viettimes.vn/w800/Uploaded/2025/ebhuthp/2022_05_02/vt-quang-nam-cong-troi-dong-giang-0-copy-5300.jpg"
                         ],
                         "gps": {
@@ -4694,10 +4658,10 @@
                         "source": "https://www.bachhoaxanh.com/kinh-nghiem-hay/top-10-dia-diem-du-lich-noi-tieng-va-dep-nhat-tai-quang-nam-1366357"
                     },
                     {
-                        "name": "Thác Ồ Ồ: Thác Ồ Ồ (hay còn được gọi là thác Tiên)",
+                        "name": "Thác Ồ Ồ",
                         "type": "Thác nước/Địa điểm tự nhiên",
                         "description": [
-                            "Thác Ồ Ồ là một điểm đến đáng chú ý tại Tiên Phước, Quảng Nam.",
+                            "Thác Ồ Ồ (hay còn được gọi là thác Tiên). Thác Ồ Ồ là một điểm đến đáng chú ý tại Tiên Phước, Quảng Nam.",
                             "Với vị trí nằm ở thôn Thanh Khê, Xã Tiên Châu, cách Hội An khoảng 70km, thác Ồ Ồ nổi tiếng với vẻ đẹp thiên đường của núi rừng hoang sơ."
                         ],
                         "images": [
@@ -5349,7 +5313,12 @@
                             "Hang Bua gắn liền với truyền thuyết lịch sử, văn hóa sinh hoạt, phong tục của đồng bào người Thái ở miền núi Nghệ An.",
                             "Nơi đây có khung cảnh vô cùng hùng vĩ, khi đến đây các bạn sẽ được chiêm ngưỡng những nhũ đá với hình thu sinh động."
                         ],
-                        "images": [],
+                        "images": [
+                            "https://cdnphoto.dantri.com.vn/vDXEUH49d6qCK83S4A_Kscsj0Gg=/zoom/1200_630/71015b9e13/2016/02/27/b29-1456560954442.jpg",
+                            "https://icdn.dantri.com.vn/k:71015b9e13/2016/02/27/b32-1456560952466/chiem-nguong-ve-dep-ngat-ngay-hang-bua-o-dai-ngan-xu-nghe.jpg",
+                            "https://icdn.dantri.com.vn/k:71015b9e13/2016/02/27/b13-1456560952544/chiem-nguong-ve-dep-ngat-ngay-hang-bua-o-dai-ngan-xu-nghe.jpg",
+                            "https://icdn.dantri.com.vn/k:71015b9e13/2016/02/27/b22-1456560953160/chiem-nguong-ve-dep-ngat-ngay-hang-bua-o-dai-ngan-xu-nghe.jpg"
+                        ],
                         "gps": {
                             "lat": 19.615045181579383,
                             "lng": 105.02389193932089
@@ -5880,7 +5849,7 @@
                             "Ngoài ra, đền cũng đang được cải tiến để trở thành một địa điểm mang đậm tính văn hóa và tâm linh cho người dân nơi đây và cả du khách thăm quan."
                         ],
                         "images": [
-                            "https://thoitiethomnay.vn//storage/photos/1/thoi-tiet-anh-son-nghe-an-11.jpg",
+                            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJhA3Sk3tjgx545Gte8iUAZ59OLXoKyztTBw&s",
                             "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSE-HWwLI-uRGEI7yw3_NJ-Og1E71lPJkZuyQ&s",
                             "https://photos.wikimapia.org/p/00/00/20/80/03_big.jpg",
                             "https://mia.vn/media/uploads/blog-du-lich/thanh-co-luy-lau-4-1744464144.jpg"

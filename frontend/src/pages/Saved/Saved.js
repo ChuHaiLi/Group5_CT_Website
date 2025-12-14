@@ -4,7 +4,6 @@ import CreateTripForm from "../../components/CreateTripForm";
 import API from "../../untils/axios";
 import {
   FaSearch,
-  FaFilter,
   FaSortAmountDown,
   FaSortAmountUp,
   FaLayerGroup,
@@ -19,7 +18,7 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
   const token = localStorage.getItem("access_token");
 
   const [activeTab, setActiveTab] = useState("saved");
-  
+
   // --- FOLDER STATE ---
   const [folders, setFolders] = useState(() => {
     const saved = localStorage.getItem("my_user_folders");
@@ -55,7 +54,7 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
       const newFolder = {
         id: Date.now(),
         name: newFolderName,
-        items: []
+        items: [],
       };
       setFolders([...folders, newFolder]);
       setNewFolderName("");
@@ -65,18 +64,20 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
 
   const handleDeleteFolder = (folderId) => {
     if (window.confirm("Are you sure you want to delete this folder?")) {
-      setFolders(folders.filter(f => f.id !== folderId));
+      setFolders(folders.filter((f) => f.id !== folderId));
     }
   };
 
   const handleAddToFolder = (folderId, itemIds) => {
-    setFolders(folders.map(f => {
-      if (f.id === folderId) {
-        const uniqueItems = [...new Set([...f.items, ...itemIds])];
-        return { ...f, items: uniqueItems };
-      }
-      return f;
-    }));
+    setFolders(
+      folders.map((f) => {
+        if (f.id === folderId) {
+          const uniqueItems = [...new Set([...f.items, ...itemIds])];
+          return { ...f, items: uniqueItems };
+        }
+        return f;
+      })
+    );
   };
 
   const handleRemoveFromFolder = (folderId, itemId) => {
@@ -84,7 +85,10 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
     setFolders(
       folders.map((f) => {
         if (f.id === folderId) {
-          return { ...f, items: f.items.filter((id) => !idsToRemove.includes(id)) };
+          return {
+            ...f,
+            items: f.items.filter((id) => !idsToRemove.includes(id)),
+          };
         }
         return f;
       })
@@ -104,21 +108,21 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
 
   useEffect(() => {
     const fetchData = async () => {
-        if (!token) {
-            setDestinations([]);
-            setLoading(false);
-            return;
-        }
-        setLoading(true);
-        try {
-            const res = await API.get("/saved/list");
-            setDestinations(Array.isArray(res.data) ? res.data : []);
-        } catch (error) {
-            console.error("Failed to fetch saved list:", error);
-            setDestinations([]);
-        } finally {
-            setLoading(false);
-        }
+      if (!token) {
+        setDestinations([]);
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      try {
+        const res = await API.get("/saved/list");
+        setDestinations(Array.isArray(res.data) ? res.data : []);
+      } catch (error) {
+        console.error("Failed to fetch saved list:", error);
+        setDestinations([]);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchData();
   }, [token, savedIds]);
@@ -130,7 +134,7 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
 
   // --- SEARCH FILTER ---
   const filteredDestinations = useMemo(() => {
-    return destinations.filter(dest =>
+    return destinations.filter((dest) =>
       dest.name.toLowerCase().includes(search.toLowerCase())
     );
   }, [destinations, search]);
@@ -220,10 +224,13 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
     <div className="saved-wrapper">
       <div className="saved-header">
         <h1>Places You’re Keeping</h1>
-        <p>Keep all your dream destinations in one place — a personalized space where every spot you save becomes a trip waiting to happen. ✨</p>
+        <p>
+          Keep all your dream destinations in one place — a personalized space
+          where every spot you save becomes a trip waiting to happen. ✨
+        </p>
 
         <div className="saved-tabs">
-          <button 
+          <button
             className={activeTab === "saved" ? "active" : ""}
             onClick={() => setActiveTab("saved")}
           >
@@ -234,7 +241,6 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
             className={activeTab === "collections" ? "active" : ""}
             onClick={() => setActiveTab("collections")}
           >
-            Collections ({folders.length})
             Collections ({folders.length})
           </button>
         </div>
@@ -296,7 +302,9 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
 
       <div className="saved-content">
         {loading ? (
-            <div className="saved-empty"><p>Loading...</p></div>
+          <div className="saved-empty">
+            <p>Loading...</p>
+          </div>
         ) : (
           <>
             {activeTab === "saved" && (
@@ -334,7 +342,9 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
                       ) : (
                         <div key={dataItem.title} className="group-section">
                           <div className="group-header">
-                            <span className="header-text">{dataItem.title}</span>
+                            <span className="header-text">
+                              {dataItem.title}
+                            </span>
                             <span className="header-count">
                               {dataItem.items.length}
                             </span>
@@ -377,16 +387,23 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
         <div className="modal-overlay">
           <div className="create-folder-modal">
             <h3>New Folder</h3>
-            <input 
-              type="text" 
-              placeholder="Name your folder (e.g. Summer Trip)" 
+            <input
+              type="text"
+              placeholder="Name your folder (e.g. Summer Trip)"
               value={newFolderName}
               onChange={(e) => setNewFolderName(e.target.value)}
               autoFocus
             />
             <div className="modal-footer">
-              <button className="btn-cancel" onClick={() => setShowCreateFolderModal(false)}>Cancel</button>
-              <button className="btn-create" onClick={handleCreateFolder}>Create</button>
+              <button
+                className="btn-cancel"
+                onClick={() => setShowCreateFolderModal(false)}
+              >
+                Cancel
+              </button>
+              <button className="btn-create" onClick={handleCreateFolder}>
+                Create
+              </button>
             </div>
           </div>
         </div>
