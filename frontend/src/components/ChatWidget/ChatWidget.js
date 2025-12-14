@@ -21,8 +21,69 @@ import {
 import { resizeImageTo128 } from "../../untils/imageResizer";
 import "./ChatWidget.css";
 
-const BOT_NAME = "Travel Planner";
+const BOT_NAME = "WonderAI BOT";
 const MAX_VISION_IMAGES = 4;
+
+// Mapping từ tags tiếng Anh sang tiếng Việt để hiển thị trong search bar
+const TAG_VIETNAMESE_MAP = {
+  Beach: "biển",
+  Mountain: "núi",
+  "Historical Site": "di tích lịch sử",
+  "Cultural Site": "di tích văn hóa",
+  Gastronomy: "ẩm thực",
+  Adventure: "phiêu lưu",
+  "Nature Park": "công viên thiên nhiên",
+  "Urban Area": "đô thị",
+  Island: "đảo",
+  "Lake/River": "hồ/sông",
+  "Trekking/Hiking": "leo núi",
+  Photography: "chụp ảnh",
+  Camping: "cắm trại",
+  "Relaxation/Resort": "nghỉ dưỡng",
+  Shopping: "mua sắm",
+  "Water Sports": "thể thao dưới nước",
+  Cycling: "đạp xe",
+  Sightseeing: "tham quan",
+  "Wildlife Watching": "xem động vật hoang dã",
+  "Local Workshop": "workshop địa phương",
+  Family: "gia đình",
+  Couples: "cặp đôi",
+  Friends: "bạn bè",
+  "Solo Traveler": "du lịch một mình",
+  "Kids Friendly": "thân thiện trẻ em",
+  "Elderly Friendly": "thân thiện người già",
+  "Pet Friendly": "thân thiện thú cưng",
+  "Adventure Seekers": "người tìm kiếm phiêu lưu",
+  "Half Day": "nửa ngày",
+  "Full Day": "cả ngày",
+  "2 Days": "2 ngày",
+  "3+ Days": "3+ ngày",
+  "Weekend Trip": "chuyến cuối tuần",
+  Overnight: "qua đêm",
+  "Multi-day Adventure": "phiêu lưu nhiều ngày",
+  Spring: "mùa xuân",
+  Summer: "mùa hè",
+  Autumn: "mùa thu",
+  Winter: "mùa đông",
+  Morning: "buổi sáng",
+  Afternoon: "buổi chiều",
+  Evening: "buổi tối",
+  Night: "ban đêm",
+  Free: "miễn phí",
+  "Scenic Views": "cảnh đẹp",
+  "Instagrammable Spots": "điểm sống ảo",
+  "Local Cuisine": "ẩm thực địa phương",
+  "Festivals & Events": "lễ hội và sự kiện",
+  "Adventure Sports": "thể thao mạo hiểm",
+  "Relaxing Spots": "điểm nghỉ ngơi",
+  "Cultural Immersion": "trải nghiệm văn hóa",
+  "Hidden Gems": "địa điểm ẩn",
+};
+
+// Convert English tag to Vietnamese for display in search bar
+const getVietnameseTag = (tag) => {
+  return TAG_VIETNAMESE_MAP[tag] || tag;
+};
 
 const formatVisionResponse = (vision) => {
   if (!vision) return "";
@@ -65,14 +126,179 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
     };
   }, []);
 
-  const fetchHistory = useCallback(() => {
-    if (!isAuthenticated) return;
-    setLoadingHistory(true);
-    API.get("/chat/widget/history")
-      .then((res) => setMessages(res.data || []))
-      .catch(() => toast.error("Unable to load conversation history"))
-      .finally(() => setLoadingHistory(false));
-  }, [isAuthenticated]);
+  const fetchHistory = useCallback(
+    (mergeMode = false) => {
+      if (!isAuthenticated) return;
+      setLoadingHistory(true);
+      // #region agent log
+      fetch(
+        "http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            location: "ChatWidget.js:68",
+            message: "fetchHistory called",
+            data: { isAuthenticated, mergeMode },
+            timestamp: Date.now(),
+            sessionId: "debug-session",
+            runId: "run1",
+            hypothesisId: "B",
+          }),
+        }
+      ).catch(() => {});
+      // #endregion
+      API.get("/chat/widget/history")
+        .then((res) => {
+          // #region agent log
+          fetch(
+            "http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                location: "ChatWidget.js:72",
+                message: "fetchHistory response received",
+                data: {
+                  historyCount: (res.data || []).length,
+                  history: (res.data || []).map((m) => ({
+                    id: m.id,
+                    role: m.role,
+                    content: m.content?.substring(0, 50),
+                  })),
+                },
+                timestamp: Date.now(),
+                sessionId: "debug-session",
+                runId: "run1",
+                hypothesisId: "B",
+              }),
+            }
+          ).catch(() => {});
+          // #endregion
+          if (mergeMode) {
+            // Merge mode: replace optimistic messages with server messages, keep assistant messages that aren't in server yet
+            const serverMessages = res.data || [];
+            // #region agent log
+            fetch(
+              "http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  location: "ChatWidget.js:79",
+                  message: "Merge mode: before setMessages",
+                  data: {
+                    serverCount: serverMessages.length,
+                    serverMessages: serverMessages.map((m) => ({
+                      id: m.id,
+                      role: m.role,
+                      content: m.content?.substring(0, 50),
+                    })),
+                  },
+                  timestamp: Date.now(),
+                  sessionId: "debug-session",
+                  runId: "run1",
+                  hypothesisId: "B",
+                }),
+              }
+            ).catch(() => {});
+            // #endregion
+            setMessages((prev) => {
+              const serverMessageIds = new Set(serverMessages.map((m) => m.id));
+              // Find optimistic messages to replace (safely check if id is a string)
+              const optimisticMessages = prev.filter((msg) => {
+                const id = msg?.id;
+                return id && typeof id === "string" && id.startsWith("temp-");
+              });
+              // Keep non-optimistic messages that are not in server response (e.g., newly added assistant messages)
+              const keptMessages = prev.filter((msg) => {
+                const id = msg?.id;
+                const isOptimistic =
+                  id && typeof id === "string" && id.startsWith("temp-");
+                return !isOptimistic && !serverMessageIds.has(id);
+              });
+              // Replace optimistic messages with server messages (matching by content)
+              // For each optimistic message, find matching server message with same content
+              const usedServerIds = new Set();
+              const replacedMessages = optimisticMessages.map((optMsg) => {
+                // Find server message with same content and role
+                const matchingServerMsg = serverMessages.find(
+                  (sMsg) =>
+                    sMsg.role === optMsg.role &&
+                    sMsg.content === optMsg.content &&
+                    !usedServerIds.has(sMsg.id)
+                );
+                if (matchingServerMsg) {
+                  usedServerIds.add(matchingServerMsg.id);
+                  return matchingServerMsg;
+                }
+                return optMsg; // Keep optimistic if no match found
+              });
+
+              // Add remaining server messages that weren't used for replacement
+              const remainingServerMessages = serverMessages.filter(
+                (sMsg) => !usedServerIds.has(sMsg.id)
+              );
+              const combined = [
+                ...keptMessages,
+                ...replacedMessages,
+                ...remainingServerMessages,
+              ];
+              const sorted = combined.sort((a, b) => {
+                const aTime = new Date(a.created_at || 0).getTime();
+                const bTime = new Date(b.created_at || 0).getTime();
+                return aTime - bTime;
+              });
+              // #region agent log
+              fetch(
+                "http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596",
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    location: "ChatWidget.js:105",
+                    message: "Merge mode: messages after merge",
+                    data: {
+                      prevCount: prev.length,
+                      optimisticCount: optimisticMessages.length,
+                      keptCount: keptMessages.length,
+                      replacedCount: replacedMessages.filter((m) => {
+                        const mid = m?.id;
+                        return (
+                          mid &&
+                          typeof mid === "string" &&
+                          !mid.startsWith("temp-")
+                        );
+                      }).length,
+                      serverCount: serverMessages.length,
+                      remainingServerCount: remainingServerMessages.length,
+                      combinedCount: combined.length,
+                      sortedCount: sorted.length,
+                      sorted: sorted.map((m) => ({
+                        id: m.id,
+                        role: m.role,
+                        content: m.content?.substring(0, 50),
+                      })),
+                    },
+                    timestamp: Date.now(),
+                    sessionId: "debug-session",
+                    runId: "run1",
+                    hypothesisId: "B",
+                  }),
+                }
+              ).catch(() => {});
+              // #endregion
+              return sorted;
+            });
+          } else {
+            setMessages(res.data || []);
+          }
+        })
+        .catch(() => toast.error("Unable to load conversation history"))
+        .finally(() => setLoadingHistory(false));
+    },
+    [isAuthenticated]
+  );
 
   const persistVisionConversation = useCallback(
     async (userMessage, attachmentImages, assistantMessage) => {
@@ -121,11 +347,55 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
     const unsubscribe = subscribeToChatWidget(
       ({ action = "toggle", payload }) => {
         if (action === "history-refresh") {
+          // #region agent log
+          fetch(
+            "http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                location: "ChatWidget.js:131",
+                message: "history-refresh event received",
+                data: { dropId: payload?.dropClientRequestId },
+                timestamp: Date.now(),
+                sessionId: "debug-session",
+                runId: "run1",
+                hypothesisId: "B",
+              }),
+            }
+          ).catch(() => {});
+          // #endregion
           const dropId = payload?.dropClientRequestId;
           if (dropId) {
-            setMessages((prev) =>
-              prev.filter((msg) => msg._requestId !== dropId)
-            );
+            setMessages((prev) => {
+              // #region agent log
+              fetch(
+                "http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596",
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    location: "ChatWidget.js:134",
+                    message: "Filtering messages by dropId",
+                    data: {
+                      prevCount: prev.length,
+                      dropId,
+                      prevMessages: prev.map((m) => ({
+                        id: m.id,
+                        role: m.role,
+                        _requestId: m._requestId,
+                      })),
+                    },
+                    timestamp: Date.now(),
+                    sessionId: "debug-session",
+                    runId: "run1",
+                    hypothesisId: "B",
+                  }),
+                }
+              ).catch(() => {});
+              // #endregion
+              return prev.filter((msg) => msg._requestId !== dropId);
+            });
           }
           fetchHistory();
           return;
@@ -275,7 +545,31 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
       _requestId: `direct-${Date.now()}`,
     };
 
-    setMessages((prev) => [...prev, optimistic]);
+    setMessages((prev) => {
+      // #region agent log
+      fetch(
+        "http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            location: "ChatWidget.js:278",
+            message: "Added optimistic user message",
+            data: {
+              optimisticId: optimistic.id,
+              prevCount: prev.length,
+              newCount: prev.length + 1,
+            },
+            timestamp: Date.now(),
+            sessionId: "debug-session",
+            runId: "run1",
+            hypothesisId: "A",
+          }),
+        }
+      ).catch(() => {});
+      // #endregion
+      return [...prev, optimistic];
+    });
     setInput("");
     setSending(true);
 
@@ -294,13 +588,114 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
         ? [payload]
         : [];
 
+      // #region agent log
+      fetch(
+        "http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            location: "ChatWidget.js:297",
+            message: "Before updating messages with AI response",
+            data: {
+              assistantMessagesCount: assistantMessages.length,
+              assistantMessages: assistantMessages.map((m) => ({
+                id: m.id,
+                role: m.role,
+              })),
+              optimisticId: optimistic.id,
+            },
+            timestamp: Date.now(),
+            sessionId: "debug-session",
+            runId: "run1",
+            hypothesisId: "A",
+          }),
+        }
+      ).catch(() => {});
+      // #endregion
+
+      // Keep optimistic user message and append assistant messages
+      // Backend only returns assistant message, so we must keep the optimistic user message
       setMessages((prev) => {
-        // remove optimistic message and append assistant(s)
-        const withoutOptimistic = prev.filter(
-          (msg) => msg.id !== optimistic.id
-        );
-        return withoutOptimistic.concat(assistantMessages);
+        // #region agent log
+        fetch(
+          "http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              location: "ChatWidget.js:299",
+              message: "Inside setMessages - before update",
+              data: {
+                prevCount: prev.length,
+                prevMessages: prev.map((m) => ({
+                  id: m.id,
+                  role: m.role,
+                  content: m.content?.substring(0, 50),
+                })),
+                optimisticId: optimistic.id,
+                assistantMessagesCount: assistantMessages.length,
+              },
+              timestamp: Date.now(),
+              sessionId: "debug-session",
+              runId: "run1",
+              hypothesisId: "A",
+            }),
+          }
+        ).catch(() => {});
+        // #endregion
+        const result = [...prev, ...assistantMessages];
+        // #region agent log
+        fetch(
+          "http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              location: "ChatWidget.js:303",
+              message: "Final messages after update - keeping optimistic",
+              data: {
+                resultCount: result.length,
+                result: result.map((m) => ({
+                  id: m.id,
+                  role: m.role,
+                  content: m.content?.substring(0, 50),
+                })),
+              },
+              timestamp: Date.now(),
+              sessionId: "debug-session",
+              runId: "run1",
+              hypothesisId: "A",
+            }),
+          }
+        ).catch(() => {});
+        // #endregion
+        return result;
       });
+
+      // After updating messages, fetch history to sync with server (merge mode)
+      // This will replace optimistic message with actual user message from server
+      setTimeout(() => {
+        // #region agent log
+        fetch(
+          "http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              location: "ChatWidget.js:330",
+              message: "Calling fetchHistory to sync with server (merge mode)",
+              data: { optimisticId: optimistic.id },
+              timestamp: Date.now(),
+              sessionId: "debug-session",
+              runId: "run1",
+              hypothesisId: "A",
+            }),
+          }
+        ).catch(() => {});
+        // #endregion
+        fetchHistory(true); // Use merge mode to preserve assistant message
+      }, 1000); // Increase delay to ensure server has committed user message
 
       // After updating messages, ensure scroll happens (extra guard)
       if (scrollRef.current) {
@@ -320,18 +715,21 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
           const result = tagRes.data.result || {};
           const tags = result.tags || [];
           const locationName = result.location_name || null;
-          const navigate = result.navigate || (Array.isArray(tags) && tags.length > 0) || !!locationName;
-          
+          const navigate =
+            result.navigate ||
+            (Array.isArray(tags) && tags.length > 0) ||
+            !!locationName;
+
           if (navigate) {
             // emit event for other components
             if (tags.length > 0) {
               navigateToExplore({ tags });
             }
-            
+
             // Build navigation URL
             try {
               const params = new URLSearchParams();
-              
+
               // Priority 1: If location_name exists, use ?q= to fill search bar
               if (locationName) {
                 params.set("q", locationName);
@@ -339,17 +737,26 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
                 if (tags.length > 0) {
                   params.set("tags", tags.join(","));
                 }
-              } 
-              // Priority 2: If only tags exist, use ?tags=
-              else if (tags.length > 0) {
-                params.set("tags", tags.join(","));
               }
-              
+              // Priority 2: If only tags exist, use first tag (or all tags) for ?q= to fill search bar
+              else if (tags.length > 0) {
+                // Use Vietnamese translation of first tag as search query to display in search bar
+                const vietnameseTag = getVietnameseTag(tags[0]);
+                params.set("q", vietnameseTag);
+                // Add all tags for filtering
+                if (tags.length > 1) {
+                  params.set("tags", tags.join(","));
+                } else {
+                  // If only one tag, still add it to tags param for filtering
+                  params.set("tags", tags[0]);
+                }
+              }
+
               if (params.toString()) {
                 window.location.href = `/explore?${params.toString()}`;
               }
             } catch (e) {
-              if (process.env.NODE_ENV === 'development') {
+              if (process.env.NODE_ENV === "development") {
                 console.warn("Navigation failed", e);
               }
             }
@@ -365,7 +772,7 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
           );
         }
       } catch (err) {
-        if (process.env.NODE_ENV === 'development') {
+        if (process.env.NODE_ENV === "development") {
           console.warn("Tag extraction failed", err);
         }
         toast.info(
@@ -411,6 +818,7 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
     setVisionImages((prev) => prev.filter((img) => img.id !== id));
   };
 
+  // eslint-disable-next-line no-unused-vars
   const handleVisionImagesAdd = async (event) => {
     const fileList = Array.from(event?.target?.files || []);
     if (event?.target) {
