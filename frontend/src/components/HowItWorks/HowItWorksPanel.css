@@ -1,0 +1,182 @@
+.howitworks-shell {
+  position: fixed;
+  top: 80px;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.howitworks-toggle {
+  width: 38px;
+  height: 64px;
+  border-radius: 20px;
+  border: none;
+  background: rgba(7, 15, 26, 0.9);
+  color: #f7fbff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+  pointer-events: auto;
+}
+
+.howitworks-toggle:hover {
+  background: rgba(110, 110, 112, 0.95);
+}
+
+.howitworks-panel {
+  width: 520px;
+  margin-left: 12px;
+  padding: 20px;
+  border-radius: 20px;
+  background: rgba(4, 14, 26, 0.92);
+  backdrop-filter: blur(10px);
+  color: #eaf3ff;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-20px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: auto;
+}
+
+.howitworks-shell.open .howitworks-panel {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+}
+
+.howitworks-title {
+  font-weight: 1000;
+  font-size: 22px;   
+  margin-bottom: 16px;
+}
+
+
+.howitworks-panel ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.howitworks-panel li {
+  display: flex;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.howitworks-step-item { cursor: pointer; }
+
+.howitworks-step-item:hover {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  transform: translateX(4px);
+}
+
+.howitworks-panel li:last-child {
+  border-bottom: none;
+}
+
+.howitworks-panel strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.howitworks-step-content {
+  flex: 1 1 auto;
+}
+
+
+
+.howitworks-panel span {
+  color: #bcd2ea;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  display: block;
+  margin-bottom: 4px;
+}
+
+
+/* Render the icon provided by JS (data-icon attribute) as a circular badge */
+.howitworks-panel li {
+  align-items: flex-start;
+}
+
+.howitworks-panel li::before {
+  content: attr(data-icon);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  margin-right: 14px;
+  margin-top: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+/* If the icon is an svg/img node (unlikely when using emoji), scale it */
+.howitworks-panel li::before svg,
+.howitworks-panel li::before img {
+  max-width: 70%;
+  max-height: 70%;
+}
+
+/* preview and edit controls removed */
+@media (max-width: 768px) {
+  .howitworks-shell {
+    top: auto;
+    bottom: 90px;
+    left: 10px;
+  }
+
+  .howitworks-panel {
+    width: 260px;
+  }
+}
+
+/* Khung preview ảnh */
+.howitworks-preview {
+  width: auto;
+  max-width: 920px;
+  height: auto;
+  max-height: 620px;
+  margin-left: 20px;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity .25s ease, transform .25s ease;
+}
+
+.howitworks-shell.open .howitworks-preview {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.howitworks-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Hover highlight */
+.howitworks-step-item:hover {
+  background: rgba(255,255,255,0.06);
+  cursor: pointer;
+  transform: translateX(4px);
+  transition: 0.2s ease;
+}
