@@ -14,8 +14,6 @@ import VacationCarousel from "./VacationCarousel/VacationCarousel";
 import WildlifeSection from "./Wildlife/WildlifeSection";
 
 import {
-  sendHeroTextRequestToWidget,
-  sendHeroTextResultToWidget,
   sendVisionRequestToWidget,
   sendVisionResultToWidget,
   refreshChatWidgetHistory,
@@ -137,7 +135,7 @@ export default function HomePage({ savedIds, handleToggleSave }) {
     }
     setTextLoading(true);
 
-    // First try to extract destination tags/intents from the user's query.
+    // First try to extract destination tags and location name from the user's query.
     try {
       const tagRes = await API.post("/chat/extract_tags", {
         message: query,
@@ -146,17 +144,36 @@ export default function HomePage({ savedIds, handleToggleSave }) {
       if (tagRes.data && tagRes.data.ok) {
         const result = tagRes.data.result || {};
         const tags = result.tags || [];
-        const navigate =
-          result.navigate || (Array.isArray(tags) && tags.length > 0);
-        if (navigate && tags.length > 0) {
-          // Navigate to Explore with tags as query param (comma-separated)
-          const q = encodeURIComponent(tags.join(","));
-          window.location.href = `/explore?tags=${q}`;
-          return;
+        const locationName = result.location_name || null;
+        const navigate = result.navigate || (Array.isArray(tags) && tags.length > 0) || !!locationName;
+        
+        if (navigate) {
+          // Build navigation URL
+          const params = new URLSearchParams();
+          
+          // Priority 1: If location_name exists, use ?q= to fill search bar
+          if (locationName) {
+            params.set("q", locationName);
+            // If there are also valid tags, add them too
+            if (tags.length > 0) {
+              params.set("tags", tags.join(","));
+            }
+          } 
+          // Priority 2: If only tags exist, use ?tags=
+          else if (tags.length > 0) {
+            params.set("tags", tags.join(","));
+          }
+          
+          if (params.toString()) {
+            window.location.href = `/explore?${params.toString()}`;
+            return;
+          }
         }
       }
     } catch (err) {
-      console.warn("Tag extraction failed:", err);
+      if (process.env.NODE_ENV === 'development') {
+        console.warn("Tag extraction failed:", err);
+      }
     }
 
     // Fallback: call existing text search endpoint for suggestions (no chat forwarding)
@@ -321,8 +338,8 @@ export default function HomePage({ savedIds, handleToggleSave }) {
         onCreateTrip={handleRelaxationCreateTrip} // Truyền handler xuống
       />
 
-      <WildlifeSection 
-        savedIds={savedIds} 
+      <WildlifeSection
+        savedIds={savedIds}
         handleToggleSave={handleToggleSave}
         onCreateTrip={handleCreateTrip}
       />

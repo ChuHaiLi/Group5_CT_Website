@@ -13,6 +13,25 @@ import "./EditTripPage.css";
 // --- HÀM GIẢ ĐỊNH: Lấy token JWT
 const getAuthToken = () => localStorage.getItem("access_token");
 
+// Helper: Only log in development mode
+const devLog = {
+  warn: (...args) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(...args);
+    }
+  },
+  error: (...args) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.error(...args);
+    }
+  },
+  log: (...args) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log(...args);
+    }
+  }
+};
+
 // --- Component Chính ---
 export default function EditTripPage() {
   const { tripId } = useParams();
@@ -242,20 +261,20 @@ export default function EditTripPage() {
   // Validate itinerary structure before applying
   const validateItinerary = (itinerary) => {
     if (!Array.isArray(itinerary)) {
-      console.error("Invalid itinerary: not an array", itinerary);
+      devLog.error("Invalid itinerary: not an array", itinerary);
       return false;
     }
     if (itinerary.length === 0) {
-      console.error("Invalid itinerary: empty array");
+      devLog.error("Invalid itinerary: empty array");
       return false;
     }
     for (const day of itinerary) {
       if (!day || typeof day !== "object") {
-        console.error("Invalid itinerary: day is not an object", day);
+        devLog.error("Invalid itinerary: day is not an object", day);
         return false;
       }
       if (!Array.isArray(day.places)) {
-        console.error("Invalid itinerary: day.places is not an array", day);
+        devLog.error("Invalid itinerary: day.places is not an array", day);
         return false;
       }
     }
@@ -318,14 +337,14 @@ export default function EditTripPage() {
   const mapOptimizedToFrontend = (optimized, sourceItineraryForMatching = null) => {
     
     if (!Array.isArray(optimized)) {
-      console.error("mapOptimizedToFrontend: optimized is not an array", optimized);
+      devLog.error("mapOptimizedToFrontend: optimized is not an array", optimized);
       return [];
     }
     
     let uniqueIdCounter = 0;
     const mapped = optimized.map((dayObj) => {
       if (!dayObj || typeof dayObj !== "object") {
-        console.error("mapOptimizedToFrontend: invalid dayObj", dayObj);
+        devLog.error("mapOptimizedToFrontend: invalid dayObj", dayObj);
         return { day: 0, places: [] };
       }
 
@@ -523,7 +542,7 @@ export default function EditTripPage() {
       
       
       if (!Array.isArray(items)) {
-        console.error("mapOptimizedToFrontend: items is not an array", items);
+        devLog.error("mapOptimizedToFrontend: items is not an array", items);
         return { day: dayNum, places: [] };
       }
 
@@ -856,7 +875,7 @@ export default function EditTripPage() {
       navigate(`/trips/${tripId}`);
     } catch (err) {
       setError("Lỗi khi lưu lịch trình.");
-      console.error("Error saving itinerary:", err.response?.data || err);
+      devLog.error("Error saving itinerary:", err.response?.data || err);
     } finally {
       setIsSaving(false);
     }
@@ -890,7 +909,7 @@ export default function EditTripPage() {
         
         // Ensure suggestions exist and is an array
         if (!Array.isArray(result.suggestions)) {
-          console.warn("AI result missing suggestions array, initializing empty array");
+          devLog.warn("AI result missing suggestions array, initializing empty array");
           result.suggestions = [];
         }
         
@@ -912,7 +931,7 @@ export default function EditTripPage() {
       }
       setShowAIModal(true);
     } catch (err) {
-      console.error("AI evaluate error", err);
+      devLog.error("AI evaluate error", err);
       const respData = err?.response?.data;
       const rawErr = respData
         ? typeof respData === "string"
@@ -966,7 +985,7 @@ export default function EditTripPage() {
         alert("Error: unable to get AI suggestion.");
       }
     } catch (err) {
-      console.error("AI reorder error", err);
+      devLog.error("AI reorder error", err);
       const msg = err?.response?.data
         ? JSON.stringify(err.response.data)
         : err.message || String(err);
@@ -1109,7 +1128,7 @@ export default function EditTripPage() {
               if (placeName) seenPlaceNames.add(placeName);
               uniquePlaces.push(place);
             } else {
-              console.warn(`Removing duplicate place: ${place.name} (id: ${placeId})`);
+              devLog.warn(`Removing duplicate place: ${place.name} (id: ${placeId})`);
             }
           } else {
             // Non-sightseeing items (food/rest/move) can appear multiple times
@@ -1125,7 +1144,7 @@ export default function EditTripPage() {
       
       // Ensure we have all days from original (fill missing days if any)
       if (replacedItinerary.length < itinerary.length) {
-        console.warn("AI itinerary has fewer days than original. Filling missing days.");
+        devLog.warn("AI itinerary has fewer days than original. Filling missing days.");
         const aiDaysSet = new Set(replacedItinerary.map(d => d.day || 0));
         const missingDays = itinerary.filter(d => !aiDaysSet.has(d.day || 0));
         missingDays.forEach(day => {
@@ -1177,7 +1196,7 @@ export default function EditTripPage() {
       }, 100);
       
     } catch (err) {
-      console.error("Apply AI suggestions error", err);
+      devLog.error("Apply AI suggestions error", err);
       // Rollback on error
       setItinerary(backupItinerary);
       setPreAiItinerary(null);
@@ -1652,7 +1671,7 @@ export default function EditTripPage() {
                               const suggestionsByDay = {};
                               suggestions.forEach((s) => {
                                 if (typeof s !== 'string') {
-                                  console.warn("Invalid suggestion format:", s);
+                                  devLog.warn("Invalid suggestion format:", s);
                                   return;
                                 }
                                 const dayMatch = s.match(/^Day\s+(\d+):\s*(.+)/i);
@@ -1665,7 +1684,7 @@ export default function EditTripPage() {
                                   suggestionsByDay[dayNum].push(suggestionText);
                                 } else {
                                   // If no day match, try to extract day from context or assign to day 1
-                                  console.warn("Suggestion doesn't match Day X format:", s);
+                                  devLog.warn("Suggestion doesn't match Day X format:", s);
                                   if (!suggestionsByDay[1]) {
                                     suggestionsByDay[1] = [];
                                   }

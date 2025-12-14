@@ -310,7 +310,7 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
           } catch (e) {}
         }, 120);
       }
-      // Ask backend to extract explore tags and navigate if applicable
+      // Ask backend to extract explore tags and location name, then navigate if applicable
       try {
         const tagRes = await API.post("/chat/extract_tags", {
           message: trimmed,
@@ -319,17 +319,39 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
         if (tagRes.data && tagRes.data.ok) {
           const result = tagRes.data.result || {};
           const tags = result.tags || [];
-          const navigate =
-            result.navigate || (Array.isArray(tags) && tags.length > 0);
-          if (navigate && tags.length > 0) {
+          const locationName = result.location_name || null;
+          const navigate = result.navigate || (Array.isArray(tags) && tags.length > 0) || !!locationName;
+          
+          if (navigate) {
             // emit event for other components
-            navigateToExplore({ tags });
-            // build query string using URLSearchParams to ensure consistent encoding
+            if (tags.length > 0) {
+              navigateToExplore({ tags });
+            }
+            
+            // Build navigation URL
             try {
-              const params = new URLSearchParams({ tags: tags.join(",") });
-              window.location.href = `/explore?${params.toString()}`;
+              const params = new URLSearchParams();
+              
+              // Priority 1: If location_name exists, use ?q= to fill search bar
+              if (locationName) {
+                params.set("q", locationName);
+                // If there are also valid tags, add them too
+                if (tags.length > 0) {
+                  params.set("tags", tags.join(","));
+                }
+              } 
+              // Priority 2: If only tags exist, use ?tags=
+              else if (tags.length > 0) {
+                params.set("tags", tags.join(","));
+              }
+              
+              if (params.toString()) {
+                window.location.href = `/explore?${params.toString()}`;
+              }
             } catch (e) {
-              console.warn("Navigation failed", e);
+              if (process.env.NODE_ENV === 'development') {
+                console.warn("Navigation failed", e);
+              }
             }
           } else {
             // Inform user that no clear destination was detected
@@ -343,7 +365,9 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
           );
         }
       } catch (err) {
-        console.warn("Tag extraction failed", err);
+        if (process.env.NODE_ENV === 'development') {
+          console.warn("Tag extraction failed", err);
+        }
         toast.info(
           "Couldn't detect a travel destination from your message. Try specifying a place (e.g., 'Da Lat', 'beach', 'Sapa')."
         );
