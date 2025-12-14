@@ -1,5 +1,5 @@
 // EditTripPage.jsx
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { DragDropContext, Droppable } from "@hello-pangea/dnd";
@@ -48,6 +48,9 @@ export default function EditTripPage() {
   const [showAIModal, setShowAIModal] = useState(false);
   const [pendingAiChanges, setPendingAiChanges] = useState(false);
   const [preAiItinerary, setPreAiItinerary] = useState(null);
+  
+  // Use ref to avoid stale closure in useEffect
+  const pendingAiChangesRef = useRef(false);
 
   // Summarize raw AI response for user-friendly display (English)
   const summarizeRaw = (raw) => {
@@ -660,10 +663,14 @@ export default function EditTripPage() {
   };
 
   const handleRevertAIChanges = () => {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EditTripPage.js:662',message:'handleRevertAIChanges called',data:{hasPreAiItinerary:!!preAiItinerary},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+    // #endregion
     if (preAiItinerary) {
       setItinerary(preAiItinerary);
     }
     setPreAiItinerary(null);
+    pendingAiChangesRef.current = false;
     setPendingAiChanges(false);
     setShowAIModal(false);
   };
@@ -705,13 +712,22 @@ export default function EditTripPage() {
   // --- FETCH DATA ---
   useEffect(() => {
     const fetchTripDetails = async () => {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EditTripPage.js:707',message:'fetchTripDetails called',data:{tripId,pendingAiChanges,pendingAiChangesRef:pendingAiChangesRef.current},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
+      // #endregion
       if (!tripId) return;
-      // Don't reset itinerary if we have pending AI changes
-      if (pendingAiChanges) {
+      // Don't reset itinerary if we have pending AI changes - use ref to avoid stale closure
+      if (pendingAiChangesRef.current) {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EditTripPage.js:712',message:'fetchTripDetails skipped - pendingAiChangesRef is true',data:{pendingAiChangesRef:pendingAiChangesRef.current},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
+        // #endregion
         return;
       }
       setIsLoading(true);
       try {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EditTripPage.js:718',message:'fetchTripDetails fetching data',data:{tripId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
+        // #endregion
         const response = await axios.get(`/api/trips/${tripId}`, {
           headers: { Authorization: `Bearer ${getAuthToken()}` },
         });
@@ -720,9 +736,16 @@ export default function EditTripPage() {
 
         const flattened = flattenItinerary(fetchedTrip.itinerary || []);
         setOriginalItinerary(flattened); // Lưu bản gốc
-        // Only set itinerary if we don't have pending AI changes
-        if (!pendingAiChanges) {
+        // Only set itinerary if we don't have pending AI changes - use ref to avoid stale closure
+        if (!pendingAiChangesRef.current) {
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EditTripPage.js:729',message:'fetchTripDetails setting itinerary',data:{flattenedLength:flattened.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
+          // #endregion
           setItinerary(flattened); // Bản để chỉnh sửa
+        } else {
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EditTripPage.js:733',message:'fetchTripDetails NOT setting itinerary - pendingAiChangesRef is true',data:{pendingAiChangesRef:pendingAiChangesRef.current},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
+          // #endregion
         }
       } catch (err) {
         setError("Không tìm thấy chuyến đi hoặc bạn không có quyền truy cập.");
@@ -735,6 +758,12 @@ export default function EditTripPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tripId]); // pendingAiChanges is intentionally excluded - we use pendingAiChangesRef to avoid race conditions
 
+  // Track itinerary state changes for debugging
+  useEffect(() => {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EditTripPage.js:740',message:'itinerary state changed',data:{itineraryLength:itinerary.length,itineraryDays:itinerary.map(d=>d.day),firstDayPlacesCount:itinerary[0]?.places?.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H4'})}).catch(()=>{});
+    // #endregion
+  }, [itinerary]);
 
   // --- DND LOGIC ---
   const getList = useCallback(
@@ -1173,8 +1202,15 @@ export default function EditTripPage() {
       // Note: recalculateTimeSlots will apply time slots in order, so AI's start_time will be respected
       const flattened = flattenItinerary(replacedItinerary);
       
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EditTripPage.js:1174',message:'Before recalculateTimeSlots',data:{flattenedLength:flattened.length,firstDayPlaces:flattened[0]?.places?.map(p=>({name:p.name,start_time:p.start_time,time_slot:p.time_slot}))},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H3'})}).catch(()=>{});
+      // #endregion
       
       const enhanced = recalculateTimeSlots(flattened);
+      
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EditTripPage.js:1180',message:'After recalculateTimeSlots',data:{enhancedLength:enhanced.length,firstDayPlaces:enhanced[0]?.places?.map(p=>({name:p.name,start_time:p.start_time,time_slot:p.time_slot}))},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H3'})}).catch(()=>{});
+      // #endregion
       
       
       // Final check: ensure enhanced is valid
@@ -1188,14 +1224,31 @@ export default function EditTripPage() {
 
       // Success: apply the changes
       // Set pendingAiChanges FIRST to prevent fetchTripDetails from resetting
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EditTripPage.js:1190',message:'About to apply AI suggestions',data:{enhancedLength:enhanced.length,enhancedDays:enhanced.map(d=>d.day)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+      // #endregion
+      
+      // Update ref FIRST (synchronous) to prevent race condition
+      pendingAiChangesRef.current = true;
       setPendingAiChanges(true);
       
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EditTripPage.js:1196',message:'pendingAiChangesRef set to true, about to setItinerary',data:{pendingAiChangesRef:pendingAiChangesRef.current},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+      // #endregion
       
       setItinerary(enhanced);
+      
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EditTripPage.js:1201',message:'setItinerary called with enhanced',data:{enhancedLength:enhanced.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H4'})}).catch(()=>{});
+      // #endregion
+      
       setShowAIModal(false);
       
       // Force UI update
       setTimeout(() => {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EditTripPage.js:1208',message:'Force UI update - resize event dispatched',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H4'})}).catch(()=>{});
+        // #endregion
         window.dispatchEvent(new Event('resize'));
       }, 100);
       
