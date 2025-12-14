@@ -158,14 +158,24 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
     const preSearch = state.preSearch || state.q || "";
     const preTagsRaw = state.preSelectedTags || state.tags || [];
 
+    // Priority 1: Handle URL ?q= param (search query) - location_name from AI
+    // This takes highest priority to ensure location_name is always in search bar
+    if (qParam) {
+      const decodedQ = decodeURIComponent(qParam);
+      setSearch(decodedQ);
+    }
+    // If no ?q= but have preSearch from state, use that
+    else if (preSearch) {
+      setSearch(preSearch);
+    }
 
-    // Handle URL ?tags= param - separate valid tags from location names
+    // Priority 2: Handle URL ?tags= param - separate valid tags from location names
+    // Tags are supplementary filters, location_name (from ?q=) takes priority
     if (tagsParam) {
       const parts = decodeURIComponent(tagsParam).split(",").map(t => t.trim()).filter(Boolean);
       const { validTags, locations } = separateTagsAndLocations(parts);
       
-      
-      // Set valid tags to selectedTags
+      // Set valid tags to selectedTags (supplementary filters)
       if (validTags.length > 0) {
         setSelectedTags((prev) => {
           const newTags = [...prev];
@@ -178,31 +188,21 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
         });
       }
       
-      // Set location names to search (join with space if multiple)
-      if (locations.length > 0) {
+      // Only set location names to search if ?q= was not provided
+      // This ensures ?q= (location_name from AI) always takes priority
+      if (locations.length > 0 && !qParam && !preSearch) {
         const locationSearch = locations.join(" ");
         setSearch(locationSearch);
       }
     }
 
-    // Handle URL ?q= param (search query)
-    if (qParam) {
-      const decodedQ = decodeURIComponent(qParam);
-      setSearch(decodedQ);
-    }
-
-    // Handle location.state.preSearch
-    if (preSearch) {
-      setSearch(preSearch);
-    }
-
     // Handle location.state.preSelectedTags - separate valid tags from location names
-    if (preTagsRaw && preTagsRaw.length > 0) {
+    // Only process if ?q= was not provided (location_name takes priority)
+    if (preTagsRaw && preTagsRaw.length > 0 && !qParam && !preSearch) {
       const tagsToSelect = Array.isArray(preTagsRaw) ? preTagsRaw : [preTagsRaw];
       const { validTags, locations } = separateTagsAndLocations(tagsToSelect);
       
-      
-      // Set valid tags to selectedTags
+      // Set valid tags to selectedTags (supplementary filters)
       if (validTags.length > 0) {
         setSelectedTags((prev) => {
           const newTags = [...prev];
@@ -215,7 +215,7 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
         });
       }
       
-      // Set location names to search
+      // Set location names to search only if ?q= was not provided
       if (locations.length > 0) {
         const locationSearch = locations.join(" ");
         setSearch(locationSearch);
@@ -442,7 +442,8 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
           </div>
         </div>
 
-        {selectedTags.length > 0 && (
+        {/* Active filter pills hidden to save space - filters are applied via search bar */}
+        {false && selectedTags.length > 0 && (
           <div className="selected-tags-container">
             <span className="selected-label">Filters:</span>
             <div className="selected-tags-list">
