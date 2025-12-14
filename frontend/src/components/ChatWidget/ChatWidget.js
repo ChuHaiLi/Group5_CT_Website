@@ -8,7 +8,6 @@ import React, {
 import {
   FaComments,
   FaPaperPlane,
-  FaPaperclip,
   FaTimes,
   FaMicrophone,
 } from "react-icons/fa";
@@ -17,6 +16,7 @@ import API from "../../untils/axios";
 import {
   subscribeToChatWidget,
   refreshChatWidgetHistory,
+  navigateToExplore,
 } from "../../untils/chatWidgetEvents";
 import { resizeImageTo128 } from "../../untils/imageResizer";
 import "./ChatWidget.css";
@@ -230,9 +230,21 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
   }, [isOpen, isAuthenticated, fetchHistory]);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    if (!scrollRef.current) return;
+    // Ensure we scroll to bottom after DOM updates (images/async content may change height)
+    const el = scrollRef.current;
+    // Use requestAnimationFrame then a small timeout as a robust fallback
+    const raf = window.requestAnimationFrame(() => {
+      el.scrollTop = el.scrollHeight;
+    });
+    const t = setTimeout(() => {
+      el.scrollTop = el.scrollHeight;
+    }, 120);
+
+    return () => {
+      window.cancelAnimationFrame(raf);
+      clearTimeout(t);
+    };
   }, [messages, isOpen]);
 
   const userDisplayName = useMemo(() => {
@@ -273,12 +285,93 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
         page_context: pageContext,
         display_name: userDisplayName,
       });
+
+      // Normalize API result: backend returns a single message object for widget
+      const payload = res?.data;
+      const assistantMessages = Array.isArray(payload)
+        ? payload
+        : payload
+        ? [payload]
+        : [];
+
       setMessages((prev) => {
-        const updated = prev
-          .filter((msg) => msg.id !== optimistic.id)
-          .concat(res.data || []);
-        return updated;
+        // remove optimistic message and append assistant(s)
+        const withoutOptimistic = prev.filter(
+          (msg) => msg.id !== optimistic.id
+        );
+        return withoutOptimistic.concat(assistantMessages);
       });
+
+      // After updating messages, ensure scroll happens (extra guard)
+      if (scrollRef.current) {
+        setTimeout(() => {
+          try {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+          } catch (e) {}
+        }, 120);
+      }
+      // Ask backend to extract explore tags and location name, then navigate if applicable
+      try {
+        const tagRes = await API.post("/chat/extract_tags", {
+          message: trimmed,
+          page_context: pageContext,
+        });
+        if (tagRes.data && tagRes.data.ok) {
+          const result = tagRes.data.result || {};
+          const tags = result.tags || [];
+          const locationName = result.location_name || null;
+          const navigate = result.navigate || (Array.isArray(tags) && tags.length > 0) || !!locationName;
+          
+          if (navigate) {
+            // emit event for other components
+            if (tags.length > 0) {
+              navigateToExplore({ tags });
+            }
+            
+            // Build navigation URL
+            try {
+              const params = new URLSearchParams();
+              
+              // Priority 1: If location_name exists, use ?q= to fill search bar
+              if (locationName) {
+                params.set("q", locationName);
+                // If there are also valid tags, add them too
+                if (tags.length > 0) {
+                  params.set("tags", tags.join(","));
+                }
+              } 
+              // Priority 2: If only tags exist, use ?tags=
+              else if (tags.length > 0) {
+                params.set("tags", tags.join(","));
+              }
+              
+              if (params.toString()) {
+                window.location.href = `/explore?${params.toString()}`;
+              }
+            } catch (e) {
+              if (process.env.NODE_ENV === 'development') {
+                console.warn("Navigation failed", e);
+              }
+            }
+          } else {
+            // Inform user that no clear destination was detected
+            toast.info(
+              "Couldn't detect a travel destination from your message. Try specifying a place (e.g., 'Da Lat', 'beach', 'Sapa')."
+            );
+          }
+        } else {
+          toast.info(
+            "Couldn't detect a travel destination from your message. Try specifying a place (e.g., 'Da Lat', 'beach', 'Sapa')."
+          );
+        }
+      } catch (err) {
+        if (process.env.NODE_ENV === 'development') {
+          console.warn("Tag extraction failed", err);
+        }
+        toast.info(
+          "Couldn't detect a travel destination from your message. Try specifying a place (e.g., 'Da Lat', 'beach', 'Sapa')."
+        );
+      }
     } catch (error) {
       const fallback =
         error.response?.data?.message || "Failed to send message";
@@ -624,15 +717,7 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
             )}
 
             <div className="chat-widget-composer-controls">
-              <label className="chat-widget-attach" aria-label="Tải ảnh">
-                <FaPaperclip size={14} />
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleVisionImagesAdd}
-                />
-              </label>
+              {/* attachment control removed per design */}
               <button
                 type="button"
                 className={`chat-widget-mic ${isRecording ? "recording" : ""}`}

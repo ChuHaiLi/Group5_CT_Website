@@ -104,13 +104,7 @@ export default function TripDetailsPage() {
             
             {/* Trip Header with Title */}
             <div className="trip-header-new">
-                <h2>{trip.name}
-                    {trip.status && (
-                        <span className={`status-badge status-${trip.status}`}>
-                            {trip.status}
-                        </span>
-                    )}
-                </h2>
+                <h2>{trip.name}</h2>
                 <button onClick={handleEditTrip} className="edit-btn-header">
                     <FaEdit /> Chỉnh sửa
                 </button>
@@ -136,16 +130,6 @@ export default function TripDetailsPage() {
                     </div>
                 </div>
                 
-                <div className="info-bar-item date-info">
-                    <FaCalendarAlt className="info-bar-icon" />
-                    <div className="info-bar-content">
-                        <span className="info-bar-label">Ngày về</span>
-                        <span className="info-bar-value">
-                            {trip.end_date || 'Chưa xác định'}
-                        </span>
-                    </div>
-                </div>
-
                 <div className="info-bar-item">
                     <FaClock className="info-bar-icon" />
                     <div className="info-bar-content">

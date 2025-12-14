@@ -1,5 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
+import json
+import re
 
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
@@ -446,3 +448,133 @@ def widget_log_messages():
     db.session.commit()
 
     return jsonify([_serialize_message(msg) for msg in created]), 201
+
+
+@chat_bp.route("/extract_tags", methods=["POST"])
+@jwt_required()
+def extract_tags():
+    """
+    Extract travel-related tags and location names from user message.
+    Returns: { ok: bool, result: { tags: [], location_name: str, navigate: bool } }
+    """
+    if not chat_client.is_ready():
+        return jsonify({"ok": False, "error": "OPENAI_API_KEY is missing"}), 500
+
+    payload = request.get_json() or {}
+    message = (payload.get("message") or "").strip()
+    page_context = (payload.get("page_context") or "").strip()
+
+    if not message:
+        return jsonify({"ok": False, "error": "Message is required"}), 400
+
+    # Get valid tags and location names from database destinations
+    # Use limit to avoid loading all destinations (performance optimization)
+    destinations_sample = Destination.query.limit(200).all()
+    valid_tags_set = set()
+    location_names_set = set()
+    
+    for dest in destinations_sample:
+        # Extract tags from destination
+        tags_raw = dest.tags
+        if tags_raw:
+            try:
+                if isinstance(tags_raw, str):
+                    tags_list = json.loads(tags_raw.replace("'", '"'))
+                else:
+                    tags_list = tags_raw
+                if isinstance(tags_list, list):
+                    for tag in tags_list:
+                        if tag:
+                            valid_tags_set.add(str(tag).strip())
+            except (json.JSONDecodeError, TypeError, AttributeError):
+                pass
+        # Collect location names
+        if dest.name:
+            location_names_set.add(dest.name.lower().strip())
+
+    # Build system prompt for AI to extract tags and location names
+    valid_tags_list = sorted(list(valid_tags_set))[:50]  # Limit to avoid token overflow
+    location_names_list = sorted(list(location_names_set))[:100]  # Limit to avoid token overflow
+    
+    system_prompt = f"""You are a travel destination analyzer. Extract travel-related information from user messages.
+
+VALID TAGS (use these exact strings if mentioned):
+{', '.join(valid_tags_list[:30])}
+
+KNOWN LOCATION NAMES (examples):
+{', '.join(location_names_list[:30])}
+
+TASK:
+1. Extract valid tags from the message (must match exactly with VALID TAGS list above)
+2. Extract location/destination names (cities, provinces, or specific places in Vietnam)
+3. Return ONLY a JSON object with this structure:
+{{
+  "tags": ["tag1", "tag2"],  // Array of valid tags found (empty array if none)
+  "location_name": "Da Lat",  // Main location name found (null if none)
+  "navigate": true  // true if tags or location_name found, false otherwise
+}}
+
+IMPORTANT:
+- Tags must match EXACTLY with VALID TAGS list (case-sensitive)
+- Location names can be Vietnamese place names (e.g., "Đà Lạt", "Sapa", "Hà Nội", "Hồ Chí Minh")
+- If user mentions a place name, set location_name to that place name
+- If user mentions activity types (beach, mountain, etc.) that match VALID TAGS, include them in tags array
+- Return ONLY valid JSON, no extra text."""
+
+    user_content = f"User message: {message}"
+    if page_context:
+        user_content += f"\nPage context: {page_context}"
+
+    try:
+        raw_reply = chat_client.generate_reply([
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_content},
+        ])
+
+        # Try to parse JSON from response
+        try:
+            # Extract JSON from response (handle cases where AI adds extra text)
+            json_match = re.search(r'\{[^{}]*"tags"[^{}]*\}', raw_reply, re.DOTALL)
+            if json_match:
+                parsed = json.loads(json_match.group(0))
+            else:
+                parsed = json.loads(raw_reply)
+        except (json.JSONDecodeError, ValueError):
+            # Fallback: try to extract location name manually
+            parsed = {"tags": [], "location_name": None, "navigate": False}
+            # Simple heuristic: check if message contains known location names
+            message_lower = message.lower()
+            for loc_name in location_names_list:
+                if loc_name in message_lower:
+                    parsed["location_name"] = loc_name.title()
+                    parsed["navigate"] = True
+                    break
+
+        # Validate and normalize response
+        tags = parsed.get("tags") or []
+        if not isinstance(tags, list):
+            tags = []
+        # Filter to only include valid tags
+        valid_tags = [t for t in tags if t in valid_tags_set]
+        
+        location_name = parsed.get("location_name")
+        if location_name:
+            location_name = str(location_name).strip()
+            if not location_name:
+                location_name = None
+        
+        navigate = parsed.get("navigate", False)
+        if not navigate and (valid_tags or location_name):
+            navigate = True
+
+        return jsonify({
+            "ok": True,
+            "result": {
+                "tags": valid_tags,
+                "location_name": location_name,
+                "navigate": navigate
+            }
+        })
+
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500

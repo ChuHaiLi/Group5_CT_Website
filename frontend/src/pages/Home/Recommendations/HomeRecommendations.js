@@ -16,7 +16,11 @@ export default function HomeRecommendations({
       axios
         .get("/api/destinations")
         .then((res) => setFetchedDestinations(res.data))
-        .catch(console.error);
+        .catch((err) => {
+          if (process.env.NODE_ENV === 'development') {
+            console.error("Error fetching destinations:", err);
+          }
+        });
     }
   }, [destinations]);
 
@@ -27,9 +31,12 @@ export default function HomeRecommendations({
   const handleCreateTrip = (dest) => {
     if (onCreateTrip) {
       onCreateTrip(dest); // gửi luôn object
-    } else {
-      console.log("trip", dest);
     }
+  };
+
+  const handleViewDetails = (id) => {
+    // Placeholder for view details functionality
+    // Can be implemented later if needed
   };
 
   return (
@@ -40,7 +47,7 @@ export default function HomeRecommendations({
           destination={dest}
           isSaved={savedIds ? savedIds.has(dest.id) : false}
           onToggleSave={handleToggleSave}
-          onViewDetails={(id) => console.log("view", id)}
+          onViewDetails={handleViewDetails}
           onCreateTrip={() => handleCreateTrip(dest)} // gửi luôn object
         />
       ))}

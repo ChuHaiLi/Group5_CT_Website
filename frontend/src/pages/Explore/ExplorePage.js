@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import API from "../../untils/axios";
 import { TAG_CATEGORIES } from "../../data/tags.js";
 import { toast } from "react-toastify";
@@ -79,6 +79,16 @@ const normalizeString = (str) => {
   return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D").toLowerCase().trim();
 };
 
+// Sanitize search string: remove zero-width chars, punctuation, collapse spaces
+const sanitizeSearch = (str) => {
+  if (!str) return "";
+  return str
+    .replace(/[\u200B-\u200D\uFEFF]/g, "")           // remove zero-width
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")               // remove punctuation (unicode-safe)
+    .replace(/\s+/g, " ")                            // collapse spaces
+    .trim();
+};
+
 const parseTags = (tagsRaw) => {
   if (Array.isArray(tagsRaw)) return tagsRaw;
   if (typeof tagsRaw === 'string') {
@@ -89,6 +99,26 @@ const parseTags = (tagsRaw) => {
     }
   }
   return [];
+};
+
+// Get all valid tags from TAG_CATEGORIES
+const ALL_VALID_TAGS = new Set(TAG_CATEGORIES.flatMap(c => c.tags));
+
+// Check if a string is a valid tag (not a location name)
+const isValidTag = (tag) => ALL_VALID_TAGS.has(tag);
+
+// Filter valid tags from array, return invalid ones as location names
+const separateTagsAndLocations = (items) => {
+  const validTags = [];
+  const locations = [];
+  items.forEach(item => {
+    if (isValidTag(item)) {
+      validTags.push(item);
+    } else {
+      locations.push(item);
+    }
+  });
+  return { validTags, locations };
 };
 
 export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) {
@@ -118,24 +148,90 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
 
   const location = useLocation();
 
-  // Thêm useEffect để xử lý preSelectedTags từ navigation
+
+  // Thêm useEffect để xử lý preSelectedTags từ navigation và URL params
   useEffect(() => {
-    if (location.state?.preSelectedTags) {
-      const tagsToSelect = location.state.preSelectedTags;
-      setSelectedTags((prev) => {
-        const newTags = [...prev];
-        tagsToSelect.forEach((tag) => {
-          if (!newTags.includes(tag)) {
-            newTags.push(tag);
-          }
-        });
-        return newTags;
-      });
+    const urlParams = new URLSearchParams(window.location.search);
+    const tagsParam = urlParams.get("tags");
+    const qParam = urlParams.get("q");
+    const state = location.state || {};
+    const preSearch = state.preSearch || state.q || "";
+    const preTagsRaw = state.preSelectedTags || state.tags || [];
+
+
+    // Handle URL ?tags= param - separate valid tags from location names
+    if (tagsParam) {
+      const parts = decodeURIComponent(tagsParam).split(",").map(t => t.trim()).filter(Boolean);
+      const { validTags, locations } = separateTagsAndLocations(parts);
       
-      // Clear state sau khi đã xử lý để tránh re-trigger
-      window.history.replaceState({}, document.title);
+      
+      // Set valid tags to selectedTags
+      if (validTags.length > 0) {
+        setSelectedTags((prev) => {
+          const newTags = [...prev];
+          validTags.forEach((tag) => {
+            if (!newTags.includes(tag)) {
+              newTags.push(tag);
+            }
+          });
+          return newTags;
+        });
+      }
+      
+      // Set location names to search (join with space if multiple)
+      if (locations.length > 0) {
+        const locationSearch = locations.join(" ");
+        setSearch(locationSearch);
+      }
     }
-  }, [location.state]);
+
+    // Handle URL ?q= param (search query)
+    if (qParam) {
+      const decodedQ = decodeURIComponent(qParam);
+      setSearch(decodedQ);
+    }
+
+    // Handle location.state.preSearch
+    if (preSearch) {
+      setSearch(preSearch);
+    }
+
+    // Handle location.state.preSelectedTags - separate valid tags from location names
+    if (preTagsRaw && preTagsRaw.length > 0) {
+      const tagsToSelect = Array.isArray(preTagsRaw) ? preTagsRaw : [preTagsRaw];
+      const { validTags, locations } = separateTagsAndLocations(tagsToSelect);
+      
+      
+      // Set valid tags to selectedTags
+      if (validTags.length > 0) {
+        setSelectedTags((prev) => {
+          const newTags = [...prev];
+          validTags.forEach((tag) => {
+            if (!newTags.includes(tag)) {
+              newTags.push(tag);
+            }
+          });
+          return newTags;
+        });
+      }
+      
+      // Set location names to search
+      if (locations.length > 0) {
+        const locationSearch = locations.join(" ");
+        setSearch(locationSearch);
+      }
+    }
+    
+    // Clear state và URL params sau khi đã xử lý để tránh re-trigger
+    if (location.state || tagsParam || qParam) {
+      window.history.replaceState({}, document.title);
+      // Clear URL params
+      if (tagsParam || qParam) {
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
+      }
+    }
+  }, [location.state, location.search]);
 
   // --- CALL API ---
   useEffect(() => {
@@ -172,7 +268,11 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
         }
         setVietnamLocations(provinces);
       })
-      .catch((err) => console.error(err));
+      .catch((err) => {
+        if (process.env.NODE_ENV === 'development') {
+          console.error("Error fetching Vietnam locations:", err);
+        }
+      });
   }, []);
 
   // --- HANDLERS ---
@@ -193,39 +293,66 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
   const toggleCategory = (title) => setOpenCategory(prev => prev === title ? null : title);
   const isCategoryActive = (tags) => tags.some(tag => selectedTags.includes(tag));
 
+
   // --- FILTER LOGIC (SECTION 1) ---
-  const filteredRegularItems = regularDestinations.filter((dest) => {
-    const destNameNorm = normalizeString(dest.name);
-    const destProvinceNorm = normalizeString(dest.province_name);
-    const destRegionNorm = dest.region_name ? normalizeString(dest.region_name) : "";
-    const searchNorm = normalizeString(search);
-    const destTags = parseTags(dest.tags);
+  // Filter destinations based on search, tags, category, and province
+  // This runs automatically when filter states change (React re-render)
+  const filteredRegularItems = useMemo(() => {
+    return regularDestinations.filter((dest) => {
+      const destNameNorm = normalizeString(dest.name);
+      const destProvinceNorm = normalizeString(dest.province_name);
+      const destRegionNorm = dest.region_name ? normalizeString(dest.region_name) : "";
+      
+      // Sanitize search before normalizing to handle dirty characters
+      const sanitizedSearch = sanitizeSearch(search);
+      const searchNorm = normalizeString(sanitizedSearch);
+      
+      // Use token-based matching for better flexibility
+      // Split search into tokens and check if all tokens match
+      const searchTokens = searchNorm.split(" ").filter(Boolean);
+      const destTags = parseTags(dest.tags);
 
-    const matchesSearch = destNameNorm.includes(searchNorm) || 
-                          destProvinceNorm.includes(searchNorm) ||
-                          destRegionNorm.includes(searchNorm);
+      // Token-based search: all tokens must match (more flexible than exact string match)
+      // Match against destination name, province name, or region name
+      const matchesSearch = searchTokens.length === 0 || 
+        searchTokens.every((token) =>
+          destNameNorm.includes(token) ||
+          destProvinceNorm.includes(token) ||
+          destRegionNorm.includes(token)
+        );
 
-    const matchesTags = selectedTags.length === 0 || selectedTags.every((tag) => destTags.includes(tag));
-    
-    let matchesProvince = true;
-    if (selectedProvinceId) {
-        if (dest.province_id) matchesProvince = String(dest.province_id) === String(selectedProvinceId);
-        else if (dest.province_name) {
-             const selectedProvObj = vietnamLocations.find(p => String(p.id) === String(selectedProvinceId));
-             if (selectedProvObj) matchesProvince = normalizeString(dest.province_name).includes(normalizeString(selectedProvObj.name));
+      // Tags: AND logic - all selected tags must be present in destination tags
+      const matchesTags = selectedTags.length === 0 || 
+        selectedTags.every((tag) => destTags.includes(tag));
+      
+      // Province: Exact match by province_id or province_name
+      let matchesProvince = true;
+      if (selectedProvinceId) {
+        if (dest.province_id) {
+          matchesProvince = String(dest.province_id) === String(selectedProvinceId);
+        } else if (dest.province_name) {
+          const selectedProvObj = vietnamLocations.find(p => String(p.id) === String(selectedProvinceId));
+          if (selectedProvObj) {
+            matchesProvince = normalizeString(dest.province_name).includes(normalizeString(selectedProvObj.name));
+          }
         }
-    }
+      }
 
-    let matchesCategory = true;
-    if (selectedCategory) {
+      // Category: Exact match - check if any destination tag matches the selected category
+      let matchesCategory = true;
+      if (selectedCategory) {
         matchesCategory = destTags.some(tag => 
           normalizeString(tag).includes(normalizeString(selectedCategory)) || 
           normalizeString(selectedCategory).includes(normalizeString(tag))
         );
-    }
+      }
 
-    return matchesSearch && matchesTags && matchesProvince && matchesCategory;
-  });
+      // Final match: all conditions must be true (AND logic)
+      const finalMatch = matchesSearch && matchesTags && matchesProvince && matchesCategory;
+
+      return finalMatch;
+    });
+  }, [regularDestinations, search, selectedTags, selectedCategory, selectedProvinceId, vietnamLocations]);
 
   // --- PAGINATION 1 (SECTION 1) ---
   const indexOfLastItem = currentPage * REGULAR_ITEMS_PER_PAGE;
