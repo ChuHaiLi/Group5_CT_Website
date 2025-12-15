@@ -3,15 +3,18 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { DragDropContext, Droppable } from "@hello-pangea/dnd";
-import { FaArrowLeft, FaSave, FaClock, FaCog } from "react-icons/fa";
+import { FaArrowLeft, FaSave, FaClock, FaMapMarkerAlt, FaPlus, FaRedo, FaCalendarPlus, FaTrash, FaCog } from 'react-icons/fa';
+import { toast } from 'react-toastify';
 
 // 🔑 IMPORT LOGIC VÀ AUTO-TIME TỪ FILE RIÊNG
-import { reorder, move, recalculateTimeSlots } from "./dndLogic";
+import { reorder, move, rebuildDay, recalculateTimeSlots } from "./dndLogic";
 import ItemCard from "./ItemCard";
 import "./EditTripPage.css";
 
 // --- HÀM GIẢ ĐỊNH: Lấy token JWT
 const getAuthToken = () => localStorage.getItem("access_token");
+const peopleOptions = ["1 person", "2-4 people", "5-10 people", "10+ people"];
+const budgetOptions = ["< 5 triệu", "5-10 triệu", "10-20 triệu", "> 20 triệu"];
 
 // Helper: Only log in development mode
 const devLog = {
@@ -48,7 +51,18 @@ export default function EditTripPage() {
   const [showAIModal, setShowAIModal] = useState(false);
   const [pendingAiChanges, setPendingAiChanges] = useState(false);
   const [preAiItinerary, setPreAiItinerary] = useState(null);
-  
+  const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false);
+  const [showDeleteDayConfirm, setShowDeleteDayConfirm] = useState(false);
+  const [dayToDelete, setDayToDelete] = useState(null);
+  const [editableData, setEditableData] = useState({
+    name: '',
+    startDate: '',
+    duration: 1,
+    people: '',
+    budget: '',
+    provinceId: null,
+  });
+
   // Use ref to avoid stale closure in useEffect
   const pendingAiChangesRef = useRef(false);
 
@@ -116,8 +130,8 @@ export default function EditTripPage() {
               (p.id === "LUNCH"
                 ? "Ăn uống"
                 : p.id === "TRAVEL"
-                ? "Di chuyển"
-                : "Địa điểm");
+                  ? "Di chuyển"
+                  : "Địa điểm");
           return p;
         });
       });
@@ -204,9 +218,9 @@ export default function EditTripPage() {
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos((lat1 * Math.PI) / 180) *
-        Math.cos((lat2 * Math.PI) / 180) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return Math.round(R * c * 100) / 100; // Round to 2 decimals
   };
@@ -339,12 +353,12 @@ export default function EditTripPage() {
 
   // Convert optimized_itinerary from backend into frontend flattened structure
   const mapOptimizedToFrontend = (optimized, sourceItineraryForMatching = null) => {
-    
+
     if (!Array.isArray(optimized)) {
       devLog.error("mapOptimizedToFrontend: optimized is not an array", optimized);
       return [];
     }
-    
+
     let uniqueIdCounter = 0;
     const mapped = optimized.map((dayObj) => {
       if (!dayObj || typeof dayObj !== "object") {
@@ -354,7 +368,7 @@ export default function EditTripPage() {
 
       const dayNum = dayObj.day || 0;
       let items = dayObj.items || [];
-      
+
       // Build a lookup map of all places from source itinerary for matching
       const allPlacesMap = new Map();
       const sourceForMatching = sourceItineraryForMatching || itinerary || [];
@@ -366,18 +380,18 @@ export default function EditTripPage() {
           }
         });
       });
-      
+
       // Handle case where AI returns 'schedule' or 'activities' array instead of 'items' array
       if (!Array.isArray(items) || items.length === 0) {
         // Try 'schedule' first (has time info)
         const schedule = dayObj.schedule || [];
         if (Array.isArray(schedule) && schedule.length > 0) {
-          
+
           // Parse schedule strings into items
           // Format: "HH:MM-HH:MM - Activity Name - Description"
           items = schedule.map((scheduleStr, idx) => {
             if (typeof scheduleStr !== "string") return null;
-            
+
             // Parse time range and activity name
             // Try multiple formats:
             // 1. "HH:MM-HH:MM - Activity Name - Description"
@@ -385,7 +399,7 @@ export default function EditTripPage() {
             // 3. "HH:MM-HH:MM Activity Name"
             let timeMatch = scheduleStr.match(/^(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})\s*-\s*(.+?)(?:\s*-\s*(.+))?$/);
             let startTime, endTime, activityName;
-            
+
             if (timeMatch) {
               [, startTime, endTime, activityName] = timeMatch;
             } else {
@@ -403,11 +417,11 @@ export default function EditTripPage() {
                 }
               }
             }
-            
+
             const duration = calculateDurationMinutes(startTime, endTime);
             const activityNameTrimmed = activityName.trim();
             const activityNameLower = activityNameTrimmed.toLowerCase();
-            
+
             // Try to match with existing place from itinerary
             let matchedPlace = null;
             for (const [key, place] of allPlacesMap.entries()) {
@@ -416,7 +430,7 @@ export default function EditTripPage() {
                 break;
               }
             }
-            
+
             return {
               id: matchedPlace?.id || null,
               name: activityNameTrimmed,
@@ -434,15 +448,15 @@ export default function EditTripPage() {
           // Try 'activities' array (can be strings or objects with activity/time)
           const activities = dayObj.activities || [];
           if (Array.isArray(activities) && activities.length > 0) {
-            
+
             // Generate default times starting from 8:00 AM
             let currentTimeMinutes = 8 * 60; // 8:00 AM
             const defaultDuration = 90; // 90 minutes default
-            
+
             items = activities.map((activityItem, idx) => {
               // Handle both string and object formats
               let activityName, timeRange = null;
-              
+
               if (typeof activityItem === "string") {
                 // Check if string contains time prefix like "08:00-10:30 - Activity Name"
                 const timePrefixMatch = activityItem.match(/^(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})\s*-\s*(.+)$/);
@@ -467,14 +481,14 @@ export default function EditTripPage() {
               } else {
                 return null;
               }
-              
+
               const activityNameTrimmed = activityName.trim();
               if (!activityNameTrimmed) {
                 return null;
               }
-              
+
               const activityNameLower = activityNameTrimmed.toLowerCase();
-              
+
               // Try to match with existing place from itinerary
               let matchedPlace = null;
               for (const [key, place] of allPlacesMap.entries()) {
@@ -483,10 +497,10 @@ export default function EditTripPage() {
                   break;
                 }
               }
-              
+
               // Parse time range if provided, otherwise calculate
               let startTime, endTime, duration;
-              
+
               if (timeRange) {
                 // Parse "HH:MM-HH:MM" format
                 const timeMatch = timeRange.match(/^(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})$/);
@@ -508,17 +522,17 @@ export default function EditTripPage() {
                 // Calculate duration based on type
                 const itemType = inferTypeFromName(activityNameTrimmed);
                 duration = itemType === "food" ? 60 : itemType === "move" ? 45 : itemType === "rest" ? 30 : defaultDuration;
-                
+
                 startTime = minutesToTimeString(currentTimeMinutes);
                 endTime = minutesToTimeString(currentTimeMinutes + duration);
-                
+
                 currentTimeMinutes += duration;
                 // Add travel time between activities (except for last one)
                 if (idx < activities.length - 1 && itemType !== "move") {
                   currentTimeMinutes += 30; // 30 min travel
                 }
               }
-              
+
               const result = {
                 id: matchedPlace?.id || null,
                 name: activityNameTrimmed,
@@ -531,8 +545,8 @@ export default function EditTripPage() {
                 distance_from_prev_km: 0,
                 needs_data: !!matchedPlace?.needs_data,
               };
-              
-              
+
+
               return result;
             }).filter((item) => {
               const isValid = item !== null && item !== undefined;
@@ -543,8 +557,8 @@ export default function EditTripPage() {
           }
         }
       }
-      
-      
+
+
       if (!Array.isArray(items)) {
         devLog.error("mapOptimizedToFrontend: items is not an array", items);
         return { day: dayNum, places: [] };
@@ -563,14 +577,14 @@ export default function EditTripPage() {
             it.type === "food"
               ? "Ăn uống"
               : it.type === "move"
-              ? "Di chuyển"
-              : it.type === "rest"
-              ? "Nghỉ ngơi"
-              : it.type === "hotel"
-              ? "Khách sạn"
-              : it.type === "sightseeing"
-              ? "Địa điểm"
-              : it.type || "Địa điểm",
+                ? "Di chuyển"
+                : it.type === "rest"
+                  ? "Nghỉ ngơi"
+                  : it.type === "hotel"
+                    ? "Khách sạn"
+                    : it.type === "sightseeing"
+                      ? "Địa điểm"
+                      : it.type || "Địa điểm",
           lat: it.lat || it.latitude || null,
           lon: it.lng || it.longitude || null,
           time_slot: it.start_time || it.time_slot || null,
@@ -587,12 +601,12 @@ export default function EditTripPage() {
         places: places,
       };
     }).filter((day) => day.day > 0); // Remove invalid days
-    
-    
+
+
     // Enhance with calculated distances
     const enhanced = enhanceItineraryWithDistances(mapped);
-    
-    
+
+
     return enhanced;
   };
 
@@ -619,7 +633,7 @@ export default function EditTripPage() {
   // Helper: Infer item type from activity name
   const inferTypeFromName = (name) => {
     const nameLower = (name || "").toLowerCase();
-    
+
     // Check for food-related keywords (only as whole words or in food context)
     // Match "ăn" only when it's a separate word or in food context (ăn trưa, ăn tối, ăn sáng, etc.)
     const foodPatterns = [
@@ -638,33 +652,183 @@ export default function EditTripPage() {
       /\bquán\s+ăn\b/i,
       /\bquán\s+nước\b/i,
     ];
-    
+
     if (foodPatterns.some(pattern => pattern.test(nameLower))) {
       return "food";
     }
-    
+
     // Check for travel/move keywords
     if (nameLower.includes("travel") || nameLower.includes("di chuyển") || nameLower.includes("move") || nameLower.includes("đi đến") || nameLower.includes("travel to")) {
       return "move";
     }
-    
+
     // Check for rest keywords
     if (nameLower.includes("rest") || nameLower.includes("nghỉ") || nameLower.includes("break")) {
       return "rest";
     }
-    
+
     // Check for hotel keywords
     if (nameLower.includes("hotel") || nameLower.includes("khách sạn")) {
       return "hotel";
     }
-    
+
     // Default to sightseeing
     return "sightseeing";
   };
 
+  const validateDailyLimits = (places) => {
+    const destinationCount = (places || []).filter(p => p.category === 'Địa điểm').length;
+    const foodCount = (places || []).filter(p => p.category === 'Ăn uống').length;
+    return { canAddDestination: destinationCount < 4, canAddFood: foodCount < 3 };
+  };
+
+  const clampDuration = (item, duration) => {
+    let d = parseInt(duration, 10);
+    if (Number.isNaN(d)) d = item.duration || 60;
+    if (item.category === 'Địa điểm') {
+      if (d < 30) d = 30;
+      if (d > 240) d = 240;
+    }
+    return d;
+  };
+
+  // 1. Regenerate Full
+  const handleRegenerateFull = async () => {
+    const { name, startDate, provinceId } = editableData;
+    const durationNum = itinerary.length;
+
+    if (!name?.trim() || !startDate || durationNum <= 0 || isNaN(durationNum) || !(typeof provinceId === 'number' && provinceId > 0)) {
+      toast.error('Vui lòng đảm bảo các trường Tên, Ngày, Thời lượng và ID Tỉnh hợp lệ.');
+      return;
+    }
+
+    // ✅ Hiển thị modal xác nhận thay vì toast
+    setShowRegenerateConfirm(true);
+  };
+
+  // ✅ Hàm thực thi tái tạo (tách riêng)
+  const executeRegenerate = async () => {
+    setShowRegenerateConfirm(false);
+    setIsSaving(true);
+    setError(null);
+
+    const durationNum = itinerary.length;
+    const loadingToast = toast.info('Đang tái tạo lịch trình...', { autoClose: false });
+
+    try {
+      const updateMetadataPayload = {
+        name: editableData.name,
+        duration: durationNum,
+        start_date: editableData.startDate,
+        metadata: {
+          people: editableData.people,
+          budget: editableData.budget,
+        },
+      };
+      await axios.put(`/api/trips/${tripId}`, updateMetadataPayload, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
+
+      const regeneratePayload = {
+        province_id: editableData.provinceId,
+        duration: durationNum,
+        must_include_place_ids: tripData.must_include_place_ids || [],
+      };
+
+      const regenRes = await axios.post(`/api/trips/${tripId}/regenerate`, regeneratePayload, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
+
+      toast.dismiss(loadingToast);
+      toast.success('Đã cập nhật thông tin và TÁI TẠO lịch trình thành công!', { autoClose: 3000 });
+
+      setEditableData(prev => ({ ...prev, duration: regenRes.data.trip?.duration || prev.duration }));
+
+      const flattened = flattenItinerary(regenRes.data.trip?.itinerary || []);
+      setOriginalItinerary(flattened);
+      setItinerary(flattened);
+
+      navigate(`/trips/${tripId}`);
+
+    } catch (err) {
+      toast.dismiss(loadingToast);
+      setError('Lỗi khi tái tạo lịch trình. Vui lòng kiểm tra API backend.');
+      toast.error('Không thể tái tạo lịch trình. Vui lòng thử lại.');
+      console.error("Regenerate Error:", err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // 2. Extend Trip
+  const handleExtendTrip = async () => {
+    const { startDate } = editableData;
+    const currentDuration = itinerary.length;
+
+    if (currentDuration >= 30 || currentDuration < 1) {
+      toast.error('Thời lượng chuyến đi không hợp lệ hoặc đã đạt giới hạn (30 ngày).');
+      return;
+    }
+
+    if (!startDate) {
+      toast.error('Cần có Ngày xuất phát để mở rộng.');
+      return;
+    }
+
+    const newDuration = currentDuration + 1;
+
+    const newDay = {
+      day: newDuration,
+      places: []
+    };
+
+    const updatedItinerary = [...itinerary, newDay];
+
+    setItinerary(updatedItinerary);
+
+    toast.success(`Đã thêm Ngày ${newDuration}! Nhớ nhấn "Lưu Thay Đổi" để lưu vĩnh viễn.`, {
+      autoClose: 4000
+    });
+  };
+
+  // 3. Delete Day
+  const handleDeleteDay = async (dayNumber) => {
+    if (itinerary.length <= 1) {
+      toast.error('Không thể xóa ngày cuối cùng! Chuyến đi phải có ít nhất 1 ngày.');
+      return;
+    }
+
+    setDayToDelete(dayNumber);
+    setShowDeleteDayConfirm(true);
+  };
+
+  const confirmDeleteDay = async () => {
+    if (!dayToDelete) return;
+
+    setShowDeleteDayConfirm(false);
+
+    let newItinerary = itinerary.filter(d => d.day !== dayToDelete);
+
+    newItinerary = newItinerary.map((day, index) => ({
+      ...day,
+      day: index + 1,
+      places: day.places.map(place => ({
+        ...place,
+        day: index + 1
+      }))
+    }));
+
+    setItinerary(newItinerary);
+    setDayToDelete(null);
+
+    toast.success(`Đã xóa Ngày ${dayToDelete}! Nhớ nhấn "Lưu Thay Đổi" để lưu vĩnh viễn.`, {
+      autoClose: 4000
+    });
+  };
+
   const handleRevertAIChanges = () => {
     // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EditTripPage.js:662',message:'handleRevertAIChanges called',data:{hasPreAiItinerary:!!preAiItinerary},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+    fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:662', message: 'handleRevertAIChanges called', data: { hasPreAiItinerary: !!preAiItinerary }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H1' }) }).catch(() => { });
     // #endregion
     if (preAiItinerary) {
       setItinerary(preAiItinerary);
@@ -684,7 +848,7 @@ export default function EditTripPage() {
   };
 
   const flattenItinerary = (apiItinerary) => {
-    
+
     let uniqueIdCounter = 0;
     const flattened = apiItinerary.map((dayPlan) => ({
       ...dayPlan,
@@ -694,8 +858,8 @@ export default function EditTripPage() {
         day: dayPlan.day,
       })),
     }));
-    
-    
+
+
     return flattened;
   };
 
@@ -713,20 +877,20 @@ export default function EditTripPage() {
   useEffect(() => {
     const fetchTripDetails = async () => {
       // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EditTripPage.js:707',message:'fetchTripDetails called',data:{tripId,pendingAiChanges,pendingAiChangesRef:pendingAiChangesRef.current},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:707', message: 'fetchTripDetails called', data: { tripId, pendingAiChanges, pendingAiChangesRef: pendingAiChangesRef.current }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
       // #endregion
       if (!tripId) return;
       // Don't reset itinerary if we have pending AI changes - use ref to avoid stale closure
       if (pendingAiChangesRef.current) {
         // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EditTripPage.js:712',message:'fetchTripDetails skipped - pendingAiChangesRef is true',data:{pendingAiChangesRef:pendingAiChangesRef.current},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
+        fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:712', message: 'fetchTripDetails skipped - pendingAiChangesRef is true', data: { pendingAiChangesRef: pendingAiChangesRef.current }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
         // #endregion
         return;
       }
       setIsLoading(true);
       try {
         // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EditTripPage.js:718',message:'fetchTripDetails fetching data',data:{tripId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
+        fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:718', message: 'fetchTripDetails fetching data', data: { tripId }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
         // #endregion
         const response = await axios.get(`/api/trips/${tripId}`, {
           headers: { Authorization: `Bearer ${getAuthToken()}` },
@@ -739,16 +903,36 @@ export default function EditTripPage() {
         // Only set itinerary if we don't have pending AI changes - use ref to avoid stale closure
         if (!pendingAiChangesRef.current) {
           // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EditTripPage.js:729',message:'fetchTripDetails setting itinerary',data:{flattenedLength:flattened.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
+          fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:729', message: 'fetchTripDetails setting itinerary', data: { flattenedLength: flattened.length }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
           // #endregion
           setItinerary(flattened); // Bản để chỉnh sửa
+          // ✅ THÊM ĐOẠN NÀY để set editableData
+          const currentlyUsedIds = new Set();
+          fetchedTrip.itinerary.forEach(day => {
+            (day.places || []).forEach(item => {
+              if (item.id && typeof item.id === 'number') {
+                currentlyUsedIds.add(item.id);
+              }
+            });
+          });
+
+          setEditableData({
+            name: fetchedTrip.name || '',
+            startDate: fetchedTrip.start_date || '',
+            duration: fetchedTrip.duration || 1,
+            people: fetchedTrip.metadata?.people || '',
+            budget: fetchedTrip.metadata?.budget || '',
+            provinceId: fetchedTrip.province_id,
+            usedPlaceIds: Array.from(currentlyUsedIds),
+          });
         } else {
           // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EditTripPage.js:733',message:'fetchTripDetails NOT setting itinerary - pendingAiChangesRef is true',data:{pendingAiChangesRef:pendingAiChangesRef.current},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
+          fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:733', message: 'fetchTripDetails NOT setting itinerary - pendingAiChangesRef is true', data: { pendingAiChangesRef: pendingAiChangesRef.current }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
           // #endregion
         }
       } catch (err) {
         setError("Không tìm thấy chuyến đi hoặc bạn không có quyền truy cập.");
+        toast.error("Không thể tải dữ liệu chuyến đi!");
       } finally {
         setIsLoading(false);
       }
@@ -761,7 +945,7 @@ export default function EditTripPage() {
   // Track itinerary state changes for debugging
   useEffect(() => {
     // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EditTripPage.js:740',message:'itinerary state changed',data:{itineraryLength:itinerary.length,itineraryDays:itinerary.map(d=>d.day),firstDayPlacesCount:itinerary[0]?.places?.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H4'})}).catch(()=>{});
+    fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:740', message: 'itinerary state changed', data: { itineraryLength: itinerary.length, itineraryDays: itinerary.map(d => d.day), firstDayPlacesCount: itinerary[0]?.places?.length }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H4' }) }).catch(() => { });
     // #endregion
   }, [itinerary]);
 
@@ -775,139 +959,213 @@ export default function EditTripPage() {
   );
 
   const onDragEnd = useCallback(
-    (result) => {
+    async (result) => {
       const { source, destination } = result;
       if (!destination) return;
 
       const sId = source.droppableId;
       const dId = destination.droppableId;
 
-      let newItinerary;
+      let newItinerary = [...itinerary];
 
       if (sId === dId) {
-        const items = reorder(getList(sId), source.index, destination.index);
+        const dayIndex = newItinerary.findIndex(
+          d => `day-${d.day}` === sId
+        );
+        if (dayIndex === -1) return;
 
-        newItinerary = itinerary.map((dayPlan) => {
-          if (`day-${dayPlan.day}` === sId)
-            return { ...dayPlan, places: items };
-          return dayPlan;
-        });
-      } else {
-        const resultMove = move(
-          getList(sId),
-          getList(dId),
-          source,
-          destination
+        const items = reorder(
+          newItinerary[dayIndex].places,
+          source.index,
+          destination.index
         );
 
-        newItinerary = itinerary.map((dayPlan) => {
-          if (`day-${dayPlan.day}` === sId)
-            return { ...dayPlan, places: resultMove[sId] };
-          if (`day-${dayPlan.day}` === dId)
-            return { ...dayPlan, places: resultMove[dId] };
-          return dayPlan;
-        });
+        newItinerary[dayIndex] = {
+          ...newItinerary[dayIndex],
+          places: items
+        };
+
+        const rebuilt = await rebuildDay(items);
+        newItinerary[dayIndex] = {
+          ...newItinerary[dayIndex],
+          places: rebuilt
+        };
+      } else {
+        const sourceIndex = newItinerary.findIndex(d => `day-${d.day}` === sId);
+        const destIndex = newItinerary.findIndex(d => `day-${d.day}` === dId);
+        if (sourceIndex === -1 || destIndex === -1) return;
+
+        const sourcePlaces = Array.from(newItinerary[sourceIndex].places || []);
+        const destPlaces = Array.from(newItinerary[destIndex].places || []);
+        const [moved] = sourcePlaces.splice(source.index, 1);
+        destPlaces.splice(destination.index, 0, moved);
+
+        newItinerary[sourceIndex] = { ...newItinerary[sourceIndex], places: sourcePlaces };
+        newItinerary[destIndex] = { ...newItinerary[destIndex], places: destPlaces };
+
+        // ✅ Sử dụng rebuildDay
+        const rebuiltSource = await rebuildDay(newItinerary[sourceIndex].places || []);
+        const rebuiltDest = await rebuildDay(newItinerary[destIndex].places || []);
+        newItinerary[sourceIndex] = { ...newItinerary[sourceIndex], places: rebuiltSource };
+        newItinerary[destIndex] = { ...newItinerary[destIndex], places: rebuiltDest };
       }
 
-      const recalculatedItinerary = recalculateTimeSlots(newItinerary);
-      setItinerary(recalculatedItinerary);
+      setItinerary(newItinerary);
     },
     [itinerary, getList]
   );
 
+
   // --- CRUD ITEM LOGIC ---
-  const handleUpdateItem = useCallback((dayId, uniqueIdToUpdate, changes) => {
-    setItinerary((currentItinerary) => {
-      const newItinerary = currentItinerary.map((dayPlan) => {
-        if (`day-${dayPlan.day}` === dayId) {
-          return {
-            ...dayPlan,
-            places: dayPlan.places.map((item) => {
-              if (item.uniqueId === uniqueIdToUpdate)
-                return { ...item, ...changes };
-              return item;
-            }),
-          };
+  const handleUpdateItem = useCallback(async (dayId, uniqueIdToUpdate, changes) => {
+    const nextItinerary = itinerary.map(dayPlan => {
+      if (`day-${dayPlan.day}` !== dayId) return dayPlan;
+      const updatedPlaces = dayPlan.places.map(item => {
+        if (item.uniqueId !== uniqueIdToUpdate) return item;
+        const patched = { ...item, ...changes };
+        // ✅ Clamp duration
+        if ('duration' in changes) patched.duration = clampDuration(item, changes.duration);
+        // ✅ Auto-format time_slot
+        if ('time_slot' in changes && typeof changes.time_slot === 'string' && changes.time_slot.length === 5) {
+          patched.time_slot = `${changes.time_slot}:00`;
         }
-        return dayPlan;
+        return patched;
       });
-      return recalculateTimeSlots(newItinerary);
+      return { ...dayPlan, places: updatedPlaces };
     });
-  }, []);
 
-  const handleRemoveItem = useCallback((uniqueIdToRemove) => {
-    setItinerary((currentItinerary) => {
-      const newItinerary = currentItinerary.map((dayPlan) => ({
-        ...dayPlan,
-        places: dayPlan.places.filter(
-          (item) => item.uniqueId !== uniqueIdToRemove
-        ),
-      }));
+    const dayIndex = nextItinerary.findIndex(d => `day-${d.day}` === dayId);
+    if (dayIndex !== -1) {
+      // ✅ Sử dụng rebuildDay
+      const rebuilt = await rebuildDay(nextItinerary[dayIndex].places || []);
+      nextItinerary[dayIndex] = { ...nextItinerary[dayIndex], places: rebuilt };
+    }
 
-      return recalculateTimeSlots(newItinerary);
-    });
-  }, []);
+    setItinerary(nextItinerary);
+  }, [itinerary]);
 
-  const handleAddItem = useCallback((day, type) => {
-    const newUniqueId = `new-item-${Date.now()}-${Math.floor(
-      Math.random() * 100
-    )}`;
-    let newItem = {
-      id: newUniqueId,
-      uniqueId: newUniqueId,
-      day: day,
-      name: "Địa điểm mới",
-      category: "Địa điểm",
+  const handleRemoveItem = useCallback(async (uniqueIdToRemove) => {
+    const nextItinerary = itinerary.map(dayPlan => ({
+      ...dayPlan,
+      places: (dayPlan.places || []).filter(item => item.uniqueId !== uniqueIdToRemove)
+    }));
+
+    // ✅ Rebuild tất cả các ngày
+    const rebuiltDays = await Promise.all(
+      nextItinerary.map(async d => ({
+        ...d,
+        places: await rebuildDay(d.places || [])
+      }))
+    );
+
+    setItinerary(rebuiltDays);
+    toast.success("Đã xóa địa điểm khỏi lịch trình"); // ✅ Toast
+  }, [itinerary]);
+
+  const handleAddItem = useCallback(async (day, type) => {
+    const nextItinerary = [...itinerary];
+    const dayIndex = nextItinerary.findIndex(d => d.day === day);
+    if (dayIndex === -1) return;
+
+    // ✅ Validation từ local
+    const limits = validateDailyLimits(nextItinerary[dayIndex].places || []);
+    if (type === 'DESTINATION' && !limits.canAddDestination) {
+      toast.warning('Mỗi ngày chỉ tối đa 4 địa điểm.');
+      return;
+    }
+    if (type === 'LUNCH' && !limits.canAddFood) {
+      toast.warning('Mỗi ngày chỉ tối đa 3 điểm ăn uống.');
+      return;
+    }
+
+    const newUniqueId = `new-item-${Date.now()}-${Math.floor(Math.random() * 100)}`;
+    const base = { id: null, uniqueId: newUniqueId, day, time_slot: null };
+
+    let newItem = { ...base, name: 'Địa điểm mới', category: 'Địa điểm', duration: 60 };
+    if (type === 'LUNCH') newItem = { ...base, id: 'LUNCH', name: 'Ăn trưa', category: 'Ăn uống', duration: 45 };
+    if (type === 'TRAVEL') newItem = { ...base, id: 'TRAVEL', name: 'Di chuyển/Nghỉ ngơi', category: 'Di chuyển', duration: 30 };
+
+    nextItinerary[dayIndex] = {
+      ...nextItinerary[dayIndex],
+      places: [...(nextItinerary[dayIndex].places || []), newItem]
     };
 
-    if (type === "LUNCH")
-      newItem = {
-        ...newItem,
-        id: "LUNCH",
-        name: "Ăn trưa",
-        category: "Ăn uống",
-      };
-    if (type === "TRAVEL")
-      newItem = {
-        ...newItem,
-        id: "TRAVEL",
-        name: "Di chuyển/Nghỉ ngơi",
-        category: "Di chuyển",
-      };
+    // ✅ Rebuild
+    const rebuilt = await rebuildDay(nextItinerary[dayIndex].places || []);
+    nextItinerary[dayIndex] = { ...nextItinerary[dayIndex], places: rebuilt };
 
-    setItinerary((currentItinerary) => {
-      const newItinerary = currentItinerary.map((dayPlan) => {
-        if (dayPlan.day === day) {
-          return {
-            ...dayPlan,
-            places: [...dayPlan.places, newItem],
-          };
-        }
-        return dayPlan;
-      });
+    setItinerary(nextItinerary);
+    toast.success(`Đã thêm ${newItem.name} vào Ngày ${day}`); // ✅ Toast
+  }, [itinerary]);
 
-      return recalculateTimeSlots(newItinerary);
-    });
+  const handleMetadataChange = useCallback((field, value) => {
+    setEditableData(prev => ({ ...prev, [field]: value }));
   }, []);
 
   // --- HÀM LƯU DỮ LIỆU CHÍNH ---
   const handleSave = async () => {
     if (!tripData) return;
+
+    const { name, startDate, people, budget } = editableData;
+    // ✅ Lấy duration từ itinerary.length thực tế
+    const actualDuration = itinerary.length;
+
+    console.log('💾 [EditTripPage] Saving with:');
+    console.log('   - Actual Duration:', actualDuration);
+    console.log('   - Itinerary days:', itinerary.length);
+
+    if (!name?.trim() || !startDate || actualDuration <= 0) {
+      toast.error('Vui lòng đảm bảo các trường Tên, Ngày, Thời lượng hợp lệ.');
+      return;
+    }
+
     setIsSaving(true);
     setError(null);
 
-    const updatedItinerary = restoreItinerary(itinerary);
-    const itineraryPayload = { itinerary: updatedItinerary };
+    const loadingToast = toast.info('Đang lưu thay đổi...', { autoClose: false });
 
     try {
+      // 1. ✅ Lưu Metadata với ACTUAL duration
+      const metadataPayload = {
+        name: name,
+        duration: actualDuration, // ✅ Dùng actualDuration
+        start_date: startDate,
+        metadata: {
+          people: people,
+          budget: budget,
+        },
+      };
+
+      console.log('📤 Sending metadata payload:', metadataPayload);
+
+      await axios.put(`/api/trips/${tripId}`, metadataPayload, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` },
+      });
+
+      // 2. Lưu Itinerary
+      const updatedItinerary = restoreItinerary(itinerary);
+      const itineraryPayload = { itinerary: updatedItinerary };
+
       await axios.put(`/api/trips/${tripId}/itinerary`, itineraryPayload, {
         headers: { Authorization: `Bearer ${getAuthToken()}` },
       });
-      alert("Đã lưu chỉnh sửa thành công!");
-      navigate(`/trips/${tripId}`);
+
+      toast.dismiss(loadingToast);
+      toast.success("Đã lưu TẤT CẢ thay đổi thành công!", { autoClose: 3000 });
+
+      // ✅ Cập nhật editableData.duration
+      setEditableData(prev => ({ ...prev, duration: actualDuration }));
+
+      // ✅ Navigate với force reload
+      setTimeout(() => {
+        window.location.href = `/trips/${tripId}`;
+      }, 1000);
+
     } catch (err) {
-      setError("Lỗi khi lưu lịch trình.");
-      devLog.error("Error saving itinerary:", err.response?.data || err);
+      toast.dismiss(loadingToast);
+      setError("Lỗi khi lưu dữ liệu chuyến đi.");
+      toast.error("Không thể lưu thay đổi. Vui lòng thử lại.");
+      console.error("Error saving:", err.response?.data || err);
     } finally {
       setIsSaving(false);
     }
@@ -929,23 +1187,23 @@ export default function EditTripPage() {
         context: { tripId: tripId, tripName: tripData?.name || null },
         evaluation_instructions: evaluationInstructions,
       };
-      
+
 
       const res = await axios.post("/api/ai/evaluate_itinerary", payload, {
         headers: { Authorization: `Bearer ${getAuthToken()}` },
       });
-      
+
 
       if (res.data && res.data.ok && res.data.result) {
         const result = res.data.result;
-        
+
         // Ensure suggestions exist and is an array
         if (!Array.isArray(result.suggestions)) {
           devLog.warn("AI result missing suggestions array, initializing empty array");
           result.suggestions = [];
         }
-        
-        
+
+
         setAiResult(result);
       } else if (res.data && res.data.result) {
         const result = res.data.result;
@@ -970,7 +1228,7 @@ export default function EditTripPage() {
           ? respData
           : JSON.stringify(respData, null, 2)
         : err.message || String(err);
-      setAiResult({ 
+      setAiResult({
         raw: rawErr,
         suggestions: [], // Ensure suggestions exists even for error case
       });
@@ -1037,8 +1295,8 @@ export default function EditTripPage() {
 
     setAiLoading(true);
     const backupItinerary = deepCloneItinerary(itinerary); // Backup for rollback
-    
-    
+
+
     try {
       // Snapshot current itinerary so user can revert if needed
       setPreAiItinerary(backupItinerary);
@@ -1052,10 +1310,10 @@ export default function EditTripPage() {
         Array.isArray(aiResult.optimized_itinerary) &&
         aiResult.optimized_itinerary.length > 0
       ) {
-        
+
         const mapped = mapOptimizedToFrontend(aiResult.optimized_itinerary, backupItinerary);
-        
-        
+
+
         if (validateItinerary(mapped)) {
           aiItineraryToApply = mapped;
         }
@@ -1074,7 +1332,7 @@ export default function EditTripPage() {
       }
       // Otherwise ask the reorder endpoint
       else {
-        
+
         const evaluationInstructions = `You are a professional travel assistant. Analyze and return a re-ordered itinerary optimized to reduce travel time, balance activities across days, and avoid empty days. Return a JSON object with the key 'optimized_itinerary' containing the array of day objects. Each day object must have: { "day": number, "items": [ { "id": string|null, "name": string, "type": "sightseeing|food|rest|hotel|move", "lat": number|null, "lng": number|null, "start_time": "HH:MM", "duration_min": number } ] }. Respond in English and return ONLY valid JSON.`;
 
         const payload = {
@@ -1095,20 +1353,20 @@ export default function EditTripPage() {
             res.data.result.optimized_itinerary ||
             res.data.result.suggested_itinerary ||
             res.data.result;
-          
-          
+
+
           if (Array.isArray(optimized) && optimized.length > 0) {
             if (res.data.result.optimized_itinerary) {
               const mapped = mapOptimizedToFrontend(res.data.result.optimized_itinerary, backupItinerary);
-              
-              
+
+
               if (validateItinerary(mapped)) {
                 aiItineraryToApply = mapped;
               }
             } else {
               const normalized = normalizeAndFillSuggested(optimized);
-              
-              
+
+
               if (validateItinerary(normalized)) {
                 aiItineraryToApply = normalized;
               }
@@ -1118,9 +1376,9 @@ export default function EditTripPage() {
       }
 
       // Validate and apply AI itinerary
-      
+
       if (!aiItineraryToApply || !validateItinerary(aiItineraryToApply)) {
-        
+
         // Rollback: restore backup
         setItinerary(backupItinerary);
         setPreAiItinerary(null);
@@ -1132,30 +1390,30 @@ export default function EditTripPage() {
       // REPLACE entire itinerary with AI optimized itinerary (not merge)
       // This ensures the AI suggestions are applied exactly as suggested, in the correct time order
       let replacedItinerary = deepCloneItinerary(aiItineraryToApply);
-      
+
       // Remove duplicate places: each sightseeing place should appear only once
       const seenPlaceIds = new Set();
       const seenPlaceNames = new Set();
-      
+
       replacedItinerary = replacedItinerary.map((dayPlan) => {
         const uniquePlaces = [];
         const places = dayPlan.places || [];
-        
+
         places.forEach((place) => {
           const placeId = place.id || null;
           const placeName = (place.name || "").toLowerCase().trim();
-          const isSightseeing = place.category !== "Ăn uống" && 
-                               place.category !== "Di chuyển" && 
-                               place.category !== "Nghỉ ngơi" &&
-                               place.type !== "food" &&
-                               place.type !== "move" &&
-                               place.type !== "rest";
-          
+          const isSightseeing = place.category !== "Ăn uống" &&
+            place.category !== "Di chuyển" &&
+            place.category !== "Nghỉ ngơi" &&
+            place.type !== "food" &&
+            place.type !== "move" &&
+            place.type !== "rest";
+
           if (isSightseeing) {
             // Check for duplicates by id or name
-            const isDuplicate = (placeId && seenPlaceIds.has(placeId)) || 
-                               (placeName && seenPlaceNames.has(placeName));
-            
+            const isDuplicate = (placeId && seenPlaceIds.has(placeId)) ||
+              (placeName && seenPlaceNames.has(placeName));
+
             if (!isDuplicate) {
               if (placeId) seenPlaceIds.add(placeId);
               if (placeName) seenPlaceNames.add(placeName);
@@ -1168,13 +1426,13 @@ export default function EditTripPage() {
             uniquePlaces.push(place);
           }
         });
-        
+
         return {
           ...dayPlan,
           places: uniquePlaces,
         };
       });
-      
+
       // Ensure we have all days from original (fill missing days if any)
       if (replacedItinerary.length < itinerary.length) {
         devLog.warn("AI itinerary has fewer days than original. Filling missing days.");
@@ -1201,21 +1459,21 @@ export default function EditTripPage() {
       // Apply: flatten, recalculate time slots, then set state
       // Note: recalculateTimeSlots will apply time slots in order, so AI's start_time will be respected
       const flattened = flattenItinerary(replacedItinerary);
-      
+
       // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EditTripPage.js:1174',message:'Before recalculateTimeSlots',data:{flattenedLength:flattened.length,firstDayPlaces:flattened[0]?.places?.map(p=>({name:p.name,start_time:p.start_time,time_slot:p.time_slot}))},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H3'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:1174', message: 'Before recalculateTimeSlots', data: { flattenedLength: flattened.length, firstDayPlaces: flattened[0]?.places?.map(p => ({ name: p.name, start_time: p.start_time, time_slot: p.time_slot })) }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H3' }) }).catch(() => { });
       // #endregion
-      
+
       const enhanced = recalculateTimeSlots(flattened);
-      
+
       // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EditTripPage.js:1180',message:'After recalculateTimeSlots',data:{enhancedLength:enhanced.length,firstDayPlaces:enhanced[0]?.places?.map(p=>({name:p.name,start_time:p.start_time,time_slot:p.time_slot}))},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H3'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:1180', message: 'After recalculateTimeSlots', data: { enhancedLength: enhanced.length, firstDayPlaces: enhanced[0]?.places?.map(p => ({ name: p.name, start_time: p.start_time, time_slot: p.time_slot })) }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H3' }) }).catch(() => { });
       // #endregion
-      
-      
+
+
       // Final check: ensure enhanced is valid
       if (!validateItinerary(enhanced)) {
-        
+
         setItinerary(backupItinerary);
         setPreAiItinerary(null);
         alert("Không thể áp dụng: Lỗi khi tính toán thời gian. Lịch trình đã được khôi phục.");
@@ -1225,33 +1483,33 @@ export default function EditTripPage() {
       // Success: apply the changes
       // Set pendingAiChanges FIRST to prevent fetchTripDetails from resetting
       // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EditTripPage.js:1190',message:'About to apply AI suggestions',data:{enhancedLength:enhanced.length,enhancedDays:enhanced.map(d=>d.day)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:1190', message: 'About to apply AI suggestions', data: { enhancedLength: enhanced.length, enhancedDays: enhanced.map(d => d.day) }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H1' }) }).catch(() => { });
       // #endregion
-      
+
       // Update ref FIRST (synchronous) to prevent race condition
       pendingAiChangesRef.current = true;
       setPendingAiChanges(true);
-      
+
       // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EditTripPage.js:1196',message:'pendingAiChangesRef set to true, about to setItinerary',data:{pendingAiChangesRef:pendingAiChangesRef.current},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:1196', message: 'pendingAiChangesRef set to true, about to setItinerary', data: { pendingAiChangesRef: pendingAiChangesRef.current }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H1' }) }).catch(() => { });
       // #endregion
-      
+
       setItinerary(enhanced);
-      
+
       // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EditTripPage.js:1201',message:'setItinerary called with enhanced',data:{enhancedLength:enhanced.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H4'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:1201', message: 'setItinerary called with enhanced', data: { enhancedLength: enhanced.length }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H4' }) }).catch(() => { });
       // #endregion
-      
+
       setShowAIModal(false);
-      
+
       // Force UI update
       setTimeout(() => {
         // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EditTripPage.js:1208',message:'Force UI update - resize event dispatched',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H4'})}).catch(()=>{});
+        fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:1208', message: 'Force UI update - resize event dispatched', data: {}, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H4' }) }).catch(() => { });
         // #endregion
         window.dispatchEvent(new Event('resize'));
       }, 100);
-      
+
     } catch (err) {
       devLog.error("Apply AI suggestions error", err);
       // Rollback on error
@@ -1394,6 +1652,80 @@ export default function EditTripPage() {
         </div>
       )}
 
+      {/* ========== METADATA FORM ========== */}
+      <div className="edit-trip-metadata-form">
+        <h2>⚙️ Thiết lập kế hoạch chuyến đi</h2>
+        <div className="metadata-grid">
+          <div className="input-group">
+            <label>Tên chuyến đi</label>
+            <input
+              type="text"
+              value={editableData.name}
+              onChange={(e) => handleMetadataChange('name', e.target.value)}
+              placeholder="Tên chuyến đi"
+            />
+          </div>
+
+          <div className="input-group">
+            <label>Ngày xuất phát</label>
+            <input
+              type="date"
+              value={editableData.startDate}
+              onChange={(e) => handleMetadataChange('startDate', e.target.value)}
+            />
+          </div>
+
+          <div className="input-group">
+            <label>Thời lượng (Ngày)</label>
+            <input
+              type="text"
+              value={itinerary.length}
+              disabled={true}
+              className="disabled-input"
+              title="Thời lượng được điều chỉnh bằng nút 'Tăng thêm 1 Ngày' hoặc 'Xóa ngày'"
+            />
+          </div>
+
+          <div className="input-group">
+            <label>Số người</label>
+            <select
+              value={editableData.people}
+              onChange={(e) => handleMetadataChange('people', e.target.value)}
+            >
+              <option value="">Chọn số lượng</option>
+              {peopleOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+            </select>
+          </div>
+
+          <div className="input-group">
+            <label>Ngân sách</label>
+            <select
+              value={editableData.budget}
+              onChange={(e) => handleMetadataChange('budget', e.target.value)}
+            >
+              <option value="">Chọn ngân sách</option>
+              {budgetOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+            </select>
+          </div>
+
+          <div className="input-group">
+            <label>&nbsp;</label>
+            <button onClick={handleRegenerateFull} className="regenerate-btn" disabled={isSaving}>
+              <FaRedo /> TÁI TẠO LỊCH TRÌNH MỚI
+            </button>
+          </div>
+
+          <div className="input-group">
+            <label>&nbsp;</label>
+            <button onClick={handleExtendTrip} className="extend-btn" disabled={isSaving}>
+              <FaCalendarPlus /> Tăng thêm 1 Ngày
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <hr className="separator" />
+
       {/* Main Content: 2 Columns */}
       <div className="edit-trip-content">
         {/* LEFT: Original Itinerary */}
@@ -1409,7 +1741,9 @@ export default function EditTripPage() {
                 key={`original-${dayPlan.day}`}
                 className="day-section original"
               >
+                {/* ⛔ LOẠI BỎ phần nút "Xóa ngày" ở đây */}
                 <h3 className="day-title">Ngày {dayPlan.day}</h3>
+
                 <div className="places-list">
                   {dayPlan.places.map((item, index) => (
                     <div key={index} className="place-item-readonly">
@@ -1422,8 +1756,8 @@ export default function EditTripPage() {
                             ? "🍽️"
                             : item.category === "Di chuyển" ||
                               item.id === "TRAVEL"
-                            ? "✈️"
-                            : "📍"}
+                              ? "✈️"
+                              : "📍"}
                         </span>
                         <span className="place-name">{item.name}</span>
                         <span className="place-category">
@@ -1452,16 +1786,25 @@ export default function EditTripPage() {
                   key={`edit-${dayPlan.day}`}
                   className="day-section editable"
                 >
-                  <h3 className="day-title">Ngày {dayPlan.day}</h3>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                    <h3 className="day-title" style={{ margin: 0 }}>Ngày {dayPlan.day}</h3>
+                    <button
+                      onClick={() => handleDeleteDay(dayPlan.day)}
+                      className="delete-day-btn"
+                      disabled={isSaving || itinerary.length <= 1}
+                      title={itinerary.length <= 1 ? "Không thể xóa ngày cuối cùng" : "Xóa ngày này"}
+                    >
+                      <FaTrash /> Xóa ngày
+                    </button>
+                  </div>
 
                   <Droppable droppableId={`day-${dayPlan.day}`}>
                     {(provided, snapshot) => (
                       <div
                         ref={provided.innerRef}
                         {...provided.droppableProps}
-                        className={`droppable-area ${
-                          snapshot.isDraggingOver ? "dragging-over" : ""
-                        }`}
+                        className={`droppable-area ${snapshot.isDraggingOver ? "dragging-over" : ""
+                          }`}
                       >
                         {dayPlan.places.map((item, index) => (
                           <ItemCard
@@ -1660,7 +2003,7 @@ export default function EditTripPage() {
                             {(() => {
 
                               let suggestions = aiResult?.suggestions;
-                              
+
                               // Ensure suggestions is an array
                               if (!Array.isArray(suggestions) || suggestions.length === 0) {
                                 // Generate fallback suggestions from itinerary if AI didn't provide
@@ -1669,7 +2012,7 @@ export default function EditTripPage() {
                                   itinerary.forEach((dayPlan) => {
                                     const dayNum = dayPlan.day || 0;
                                     const places = dayPlan.places || [];
-                                    
+
                                     if (places.length === 0) {
                                       fallbackSuggestions.push(
                                         `Day ${dayNum}: 08:00-10:00 - Tham quan địa điểm - Ngày này còn trống, nên thêm địa điểm tham quan.`,
@@ -1685,19 +2028,19 @@ export default function EditTripPage() {
                                         const endTime = currentTime + duration;
                                         const endHour = Math.floor(endTime / 60);
                                         const endMin = endTime % 60;
-                                        
+
                                         const startStr = `${startHour.toString().padStart(2, '0')}:${startMin.toString().padStart(2, '0')}`;
                                         const endStr = `${endHour.toString().padStart(2, '0')}:${endMin.toString().padStart(2, '0')}`;
-                                        
+
                                         fallbackSuggestions.push(
                                           `Day ${dayNum}: ${startStr}-${endStr} - ${place.name || 'Địa điểm'} - Tham quan địa điểm này.`
                                         );
-                                        
+
                                         currentTime = endTime;
                                         if (idx < places.length - 1) {
                                           currentTime += 30; // Travel time
                                         }
-                                        
+
                                         // Add lunch around 12:30
                                         if (12 * 60 <= currentTime && currentTime < 13 * 60 && idx < places.length - 1) {
                                           fallbackSuggestions.push(
@@ -1709,9 +2052,9 @@ export default function EditTripPage() {
                                     }
                                   });
                                 }
-                                
+
                                 const displaySuggestions = fallbackSuggestions.length > 0 ? fallbackSuggestions : suggestions || [];
-                                
+
                                 if (displaySuggestions.length === 0) {
                                   return (
                                     <div style={{ color: "#9ca3af", fontStyle: "italic", padding: "12px" }}>
@@ -1719,7 +2062,7 @@ export default function EditTripPage() {
                                     </div>
                                   );
                                 }
-                                
+
                                 // Use fallback suggestions for display
                                 suggestions = displaySuggestions;
                               }
@@ -1806,7 +2149,7 @@ export default function EditTripPage() {
                                               if (!timeMatch) {
                                                 timeMatch = suggestion.match(/^(\d{1,2}:\d{2})\s+đến\s+(\d{1,2}:\d{2})\s*[-:]\s*(.+)/i);
                                               }
-                                              
+
                                               if (timeMatch) {
                                                 const [, startTime, endTime, activity] = timeMatch;
                                                 // Normalize time format
@@ -1819,7 +2162,7 @@ export default function EditTripPage() {
                                                 };
                                                 const normalizedStart = normalizeTime(startTime);
                                                 const normalizedEnd = normalizeTime(endTime);
-                                                
+
                                                 // Extract description/tips if exists (after second dash)
                                                 const parts = activity.split(" - ");
                                                 const activityName = parts[0].trim();
@@ -2014,6 +2357,49 @@ export default function EditTripPage() {
                 style={{ padding: "8px 14px", cursor: "pointer" }}
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ========== CONFIRM DELETE DAY MODAL ========== */}
+      {showDeleteDayConfirm && (
+        <div className="modal-overlay confirm-modal-overlay" onClick={() => setShowDeleteDayConfirm(false)}>
+          <div className="confirm-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="confirm-modal-icon">🗑️</div>
+            <h3>Xác nhận xóa ngày</h3>
+            <p>Bạn có chắc chắn muốn xóa <strong>Ngày {dayToDelete}</strong> khỏi lịch trình?</p>
+            <p className="warning-text">Tất cả địa điểm trong ngày này sẽ bị xóa vĩnh viễn!</p>
+            <p className="warning-text">Hành động này không thể hoàn tác!</p>
+
+            <div className="confirm-modal-actions">
+              <button onClick={() => setShowDeleteDayConfirm(false)} className="btn-cancel">
+                Hủy
+              </button>
+              <button onClick={confirmDeleteDay} className="btn-confirm-delete">
+                Xóa ngày
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========== CONFIRM REGENERATE MODAL (MỚI) ========== */}
+      {showRegenerateConfirm && (
+        <div className="modal-overlay confirm-modal-overlay" onClick={() => setShowRegenerateConfirm(false)}>
+          <div className="confirm-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="confirm-modal-icon">🔄</div>
+            <h3>Xác nhận tái tạo lịch trình</h3>
+            <p>Bạn có chắc chắn muốn <strong>TÁI TẠO LỊCH TRÌNH MỚI</strong> không?</p>
+            <p className="warning-text">Tất cả địa điểm trong ngày này sẽ bị xóa vĩnh viễn!</p>
+            <p className="warning-text">Hành động này không thể hoàn tác!</p>
+
+            <div className="confirm-modal-actions">
+              <button onClick={() => setShowRegenerateConfirm(false)} className="btn-cancel">
+                Hủy
+              </button>
+              <button onClick={executeRegenerate} className="btn-confirm-delete">
+                Xác nhận
               </button>
             </div>
           </div>

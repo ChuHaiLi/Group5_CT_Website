@@ -7,6 +7,42 @@ import './TripDetailsPage.css';
 
 const getAuthToken = () => localStorage.getItem("access_token");
 
+// ✅ formatPrice helper
+const formatPrice = (value) => {
+    if (value === null || value === undefined) {
+        return "Đang cập nhật";
+    }
+
+    const stringVal = String(value).toLowerCase().trim();
+
+    if (
+        stringVal === "0" ||
+        stringVal === "free" ||
+        stringVal.includes("miễn phí") ||
+        stringVal.includes("mien phi") ||
+        Number(value) === 0
+    ) {
+        return "Miễn phí";
+    }
+
+    if (typeof value === 'number' && value > 0) {
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND'
+        }).format(value);
+    }
+
+    const numValue = Number(value);
+    if (!isNaN(numValue) && numValue > 0) {
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND'
+        }).format(numValue);
+    }
+
+    return value;
+};
+
 export default function TripDetailsPage() {
     const { tripId } = useParams(); 
     const navigate = useNavigate();
@@ -20,18 +56,40 @@ export default function TripDetailsPage() {
     const [isLoadingDestination, setIsLoadingDestination] = useState(false);
     const [showDestinationModal, setShowDestinationModal] = useState(false);
 
+    // ✅ Force re-fetch mỗi khi component mount
     useEffect(() => {
         const fetchTripDetails = async () => {
+            console.log('🔄 [TripDetailsPage] Fetching trip details for tripId:', tripId);
             setIsLoading(true);
             setError(null);
             try {
-                const response = await axios.get(`/api/trips/${tripId}`, {
+                // ✅ Thêm timestamp để tránh cache
+                const timestamp = new Date().getTime();
+                const response = await axios.get(`/api/trips/${tripId}?_t=${timestamp}`, {
                     headers: { Authorization: `Bearer ${getAuthToken()}` },
                 });
-                setTrip(response.data);
+
+                console.log('✅ [TripDetailsPage] API Response:', response.data);
+                console.log('📊 [TripDetailsPage] Duration từ API:', response.data.duration);
+                console.log('📊 [TripDetailsPage] Số ngày trong itinerary:', response.data.itinerary?.length);
+
+                // ✅ FIX: Sync duration với itinerary.length nếu không khớp
+                const fetchedTrip = response.data;
+                const actualDays = fetchedTrip.itinerary?.length || 0;
+                
+                if (fetchedTrip.duration !== actualDays && actualDays > 0) {
+                    console.warn('⚠️ [TripDetailsPage] Duration mismatch detected. Syncing...');
+                    console.warn('   - trip.duration:', fetchedTrip.duration);
+                    console.warn('   - itinerary.length:', actualDays);
+                    
+                    // ✅ Sử dụng itinerary.length làm source of truth
+                    fetchedTrip.duration = actualDays;
+                }
+
+                setTrip(fetchedTrip);
             } catch (err) {
+                console.error('❌ [TripDetailsPage] Error:', err);
                 setError("Không tìm thấy chuyến đi hoặc bạn không có quyền truy cập.");
-                console.error("Error fetching trip details:", err);
             } finally {
                 setIsLoading(false);
             }
@@ -40,7 +98,7 @@ export default function TripDetailsPage() {
         if (tripId) {
             fetchTripDetails();
         }
-    }, [tripId]); 
+    }, [tripId]); // ✅ QUAN TRỌNG: Chỉ depend vào tripId, sẽ re-run khi tripId thay đổi
     
     // Fetch destination details when clicking on a place
     const handleViewDestinationDetails = async (destinationId) => {
@@ -104,7 +162,14 @@ export default function TripDetailsPage() {
             
             {/* Trip Header with Title */}
             <div className="trip-header-new">
-                <h2>{trip.name}</h2>
+                <h2>{trip.name}
+                    {/* ✅ Status badge */}
+                    {trip.status && (
+                        <span className={`status-badge status-${trip.status}`}>
+                            {trip.status}
+                        </span>
+                    )}
+                </h2>
                 <button onClick={handleEditTrip} className="edit-btn-header">
                     <FaEdit /> Chỉnh sửa
                 </button>
@@ -129,12 +194,26 @@ export default function TripDetailsPage() {
                         </span>
                     </div>
                 </div>
+
+                {/* ✅ End date */}
+                <div className="info-bar-item date-info">
+                    <FaCalendarAlt className="info-bar-icon" />
+                    <div className="info-bar-content">
+                        <span className="info-bar-label">Ngày về</span>
+                        <span className="info-bar-value">
+                            {trip.end_date || 'Chưa xác định'}
+                        </span>
+                    </div>
+                </div>
                 
                 <div className="info-bar-item">
                     <FaClock className="info-bar-icon" />
                     <div className="info-bar-content">
                         <span className="info-bar-label">Thời lượng</span>
-                        <span className="info-bar-value">{trip.duration} ngày</span>
+                        <span className="info-bar-value">
+                            {/* ✅ FIX: Hiển thị đúng duration đã sync */}
+                            {trip.duration} ngày
+                        </span>
                     </div>
                 </div>
                 
@@ -216,7 +295,7 @@ export default function TripDetailsPage() {
 
                 {/* RIGHT: Destination Preview */}
                 <div className="trip-preview-column">
-                    <h3 className="column-title">📍 Thông tin Địa điểm</h3>
+                    <h3 className="column-title">🔍 Thông tin Địa điểm</h3>
                     
                     {!selectedDestination && !isLoadingDestination && (
                         <div className="preview-placeholder">
@@ -262,12 +341,14 @@ export default function TripDetailsPage() {
                                         </div>
                                     )}
 
-                                    {selectedDestination.entry_fee && (
+                                    {/* ✅ Improved price formatting */}
+                                    {(selectedDestination.entry_fee !== null &&
+                                        selectedDestination.entry_fee !== undefined) && (
                                         <div className="preview-info-item">
                                             <FaMoneyBillWave />
                                             <div>
                                                 <strong>Giá vé</strong>
-                                                <p>{selectedDestination.entry_fee}</p>
+                                                <p>{formatPrice(selectedDestination.entry_fee)}</p>
                                             </div>
                                         </div>
                                     )}
@@ -308,11 +389,12 @@ export default function TripDetailsPage() {
                 </div>
             </div>
 
-            {/* Destination Modal */}
+            {/* ✅ Destination Modal với hideCreateButton */}
             {showDestinationModal && selectedDestination && (
                 <DestinationModal
                     destination={selectedDestination}
                     onClose={() => setShowDestinationModal(false)}
+                    hideCreateButton={true}
                 />
             )}
         </div>
