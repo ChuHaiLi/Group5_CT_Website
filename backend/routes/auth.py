@@ -495,10 +495,15 @@ def verify_email_change():
 @auth_bp.route("/login", methods=["POST"])
 def login():
     data = request.get_json() or {}
-    email = (data.get("email") or "").strip().lower()
+    email_or_username = (data.get("email") or "").strip().lower()
     password = data.get("password") or ""
 
-    user = User.query.filter(db.func.lower(User.email) == email.lower()).first()
+    user = User.query.filter(
+        db.or_(
+            db.func.lower(User.email) == email_or_username,
+            db.func.lower(User.username) == email_or_username
+        )
+    ).first()
     
     if not user or not check_password_hash(user.password, password):
         return jsonify({"message": "Invalid email or password"}), 401
