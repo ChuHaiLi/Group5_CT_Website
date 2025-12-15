@@ -231,28 +231,23 @@ export default function VerifyEmailPage({ setIsAuthenticated }) {
         </form>
 
         {/* Resend Code Section */}
-        <div style={{ textAlign: "center", marginTop: "20px" }}>
+       <div className="resend-section">
           {countdown > 0 ? (
-            <p style={{ color: "#999", fontSize: "14px" }}>
+            <p className="countdown-text">
               Resend code in {countdown}s
             </p>
           ) : (
-            <button
-              type="button"
-              onClick={handleResend}
-              disabled={resending}
-              style={{
-                background: "none",
-                border: "none",
-                color: "#2196F3",
-                textDecoration: "underline",
-                cursor: "pointer",
-                fontSize: "14px",
-                padding: "0"
-              }}
-            >
-              {resending ? "Sending..." : "Didn't receive code? Resend"}
-            </button>
+            <p className="countdown-text">
+              Didn't receive code?{" "}
+              <button
+                type="button"
+                className="resend-button"
+                onClick={handleResend}
+                disabled={resending}
+              >
+                {resending ? "Sending..." : "Resend"}
+              </button>
+            </p>
           )}
         </div>
 

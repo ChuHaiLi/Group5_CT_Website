@@ -1,6 +1,7 @@
 // src/components/GoogleLoginButton.js
 import React, { useState } from "react";
 import { GoogleLogin } from "@react-oauth/google";
+import { GOOGLE_CLIENT_ID } from "../config";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
@@ -54,7 +55,11 @@ export default function GoogleLoginButton({ setIsAuthenticated }) {
  return (
     <button
       onClick={() => {
-        // Trigger Google Login programmatically
+        // Trigger Google Login programmatically (only if configured)
+        if (!GOOGLE_CLIENT_ID) {
+          toast.error("Google OAuth is not configured.");
+          return;
+        }
         document.querySelector('[aria-labelledby="button-label"]')?.click();
       }}
       disabled={loading}
@@ -85,11 +90,13 @@ export default function GoogleLoginButton({ setIsAuthenticated }) {
       
       {/* Hidden Google Login - triggered programmatically */}
       <div style={{ display: "none" }}>
-        <GoogleLogin
-          onSuccess={handleGoogleSuccess}
-          onError={handleGoogleError}
-          useOneTap={false}
-        />
+        {GOOGLE_CLIENT_ID && (
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+            useOneTap={false}
+          />
+        )}
       </div>
     </button>
   );
