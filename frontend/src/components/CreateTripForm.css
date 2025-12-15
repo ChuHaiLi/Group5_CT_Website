@@ -12,7 +12,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 10000; /* 'Navbar z-index is 9999' + 1 = 10000*/
+    z-index: 10000;
+    /* 'Navbar z-index is 9999' + 1 = 10000*/
     padding: 20px;
     animation: fadeIn 0.3s ease-out;
 }
@@ -21,6 +22,7 @@
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
     }
@@ -43,10 +45,12 @@
 /* Scrollbars for both columns */
 .create-trip-form,
 .destinations-preview {
-    height: 100%;        /* quan trọng */
+    height: 100%;
+    /* quan trọng */
     overflow-y: auto;
     box-sizing: border-box;
-    padding-bottom: 20px; /* tránh text dính đáy */
+    padding-bottom: 20px;
+    /* tránh text dính đáy */
 }
 
 @keyframes slideUp {
@@ -54,6 +58,7 @@
         opacity: 0;
         transform: translateY(40px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -101,11 +106,11 @@
 }
 
 /* ===== INPUT GROUPS ===== */
-.input-group {
+.create-trip-form-input-group {
     margin-bottom: 28px;
 }
 
-.input-group label {
+.create-trip-form-input-group label {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -115,7 +120,7 @@
     font-size: 0.95rem;
 }
 
-.input-group label svg {
+.create-trip-form-input-group label svg {
     color: #2563eb;
     font-size: 1.1rem;
 }
@@ -140,6 +145,36 @@
 
 .trip-name-input::placeholder {
     color: #9ca3af;
+}
+
+/* Start Date Input */
+.start-date-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 0.2s;
+    background: white;
+    box-sizing: border-box;
+    cursor: pointer;
+    color: #374151;
+}
+
+.start-date-input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.start-date-input::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    color: #2563eb;
+}
+
+/* Date select group spacing */
+.date-select-group {
+    margin-bottom: 28px;
 }
 
 /* Province Select */
@@ -382,11 +417,13 @@
 
 /* Class màu chữ */
 .dark {
-    color: #111827; /* đen */
+    color: #111827;
+    /* đen */
 }
 
 .light {
-    color: #ffffff; /* trắng */
+    color: #ffffff;
+    /* trắng */
 }
 
 .destinations-preview h3 svg {

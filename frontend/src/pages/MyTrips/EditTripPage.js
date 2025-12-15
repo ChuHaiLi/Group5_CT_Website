@@ -1685,7 +1685,7 @@ export default function EditTripPage() {
           <FaArrowLeft /> Quay lại
         </button>
         <h1 className="trip-title">
-          ✏️ Chỉnh sửa: {tripData?.name || "Loading"}
+          ✏️ {tripData?.name || "Loading"}
         </h1>
         <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
           <button onClick={handleSave} className="save-btn" disabled={isSaving}>
@@ -1759,7 +1759,7 @@ export default function EditTripPage() {
       <div className="edit-trip-metadata-form">
         <h2>⚙️ Thiết lập kế hoạch chuyến đi</h2>
         <div className="metadata-grid">
-          <div className="input-group">
+          <div className="edit-page-input-group">
             <label>Tên chuyến đi</label>
             <input
               type="text"
@@ -1769,7 +1769,7 @@ export default function EditTripPage() {
             />
           </div>
 
-          <div className="input-group">
+          <div className="edit-page-input-group">
             <label>Ngày xuất phát</label>
             <input
               type="date"
@@ -1778,7 +1778,7 @@ export default function EditTripPage() {
             />
           </div>
 
-          <div className="input-group">
+          <div className="edit-page-input-group">
             <label>Thời lượng (Ngày)</label>
             <input
               type="text"
@@ -1789,7 +1789,7 @@ export default function EditTripPage() {
             />
           </div>
 
-          <div className="input-group">
+          <div className="edit-page-input-group">
             <label>Số người</label>
             <select
               value={editableData.people}
@@ -1800,7 +1800,7 @@ export default function EditTripPage() {
             </select>
           </div>
 
-          <div className="input-group">
+          <div className="edit-page-input-group">
             <label>Ngân sách</label>
             <select
               value={editableData.budget}
@@ -1811,14 +1811,14 @@ export default function EditTripPage() {
             </select>
           </div>
 
-          <div className="input-group">
+          <div className="edit-page-input-group">
             <label>&nbsp;</label>
             <button onClick={handleRegenerateFull} className="regenerate-btn" disabled={isSaving}>
               <FaRedo /> TÁI TẠO LỊCH TRÌNH MỚI
             </button>
           </div>
 
-          <div className="input-group">
+          <div className="edit-page-input-group">
             <label>&nbsp;</label>
             <button onClick={handleExtendTrip} className="extend-btn" disabled={isSaving}>
               <FaCalendarPlus /> Tăng thêm 1 Ngày
