@@ -9,7 +9,7 @@ import {
   FaComments,
   FaPaperPlane,
   FaTimes,
-  FaMicrophone,
+  FaImage,
 } from "react-icons/fa";
 import { toast } from "react-toastify";
 import API from "../../untils/axios";
@@ -110,10 +110,12 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
   const [sending, setSending] = useState(false);
   const [visionImages, setVisionImages] = useState([]);
   const [visionLoading, setVisionLoading] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
   const [activePreview, setActivePreview] = useState(null);
   const scrollRef = useRef(null);
   const recognitionRef = useRef(null);
+  const panelRef = useRef(null);
+  const buttonRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     return () => {
@@ -125,6 +127,33 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
       }
     };
   }, []);
+
+  // Handle click outside to close panel
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleClickOutside = (event) => {
+      // Check if click is outside both panel and button
+      if (
+        panelRef.current &&
+        buttonRef.current &&
+        !panelRef.current.contains(event.target) &&
+        !buttonRef.current.contains(event.target)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    // Add event listener with a small delay to avoid immediate close on open
+    const timeoutId = setTimeout(() => {
+      document.addEventListener("mousedown", handleClickOutside);
+    }, 100);
+
+    return () => {
+      clearTimeout(timeoutId);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
 
   const fetchHistory = useCallback(
     (mergeMode = false) => {
@@ -222,11 +251,22 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
               const usedServerIds = new Set();
               const replacedMessages = optimisticMessages.map((optMsg) => {
                 // Find server message with same content and role
+                // Also consider messages with attachments - match by role and similar content
                 const matchingServerMsg = serverMessages.find(
-                  (sMsg) =>
-                    sMsg.role === optMsg.role &&
-                    sMsg.content === optMsg.content &&
-                    !usedServerIds.has(sMsg.id)
+                  (sMsg) => {
+                    const sameRole = sMsg.role === optMsg.role;
+                    const sameContent = sMsg.content === optMsg.content;
+                    const hasAttachments = (optMsg.attachments?.length > 0 || sMsg.attachments?.length > 0);
+                    // For messages with attachments, also check if attachments match
+                    const attachmentsMatch = hasAttachments
+                      ? (optMsg.attachments?.length === sMsg.attachments?.length &&
+                         optMsg.attachments?.every((att, idx) => 
+                           sMsg.attachments?.[idx]?.name === att.name ||
+                           sMsg.attachments?.[idx]?.previewUrl === att.previewUrl
+                         ))
+                      : true;
+                    return sameRole && (sameContent || (hasAttachments && attachmentsMatch)) && !usedServerIds.has(sMsg.id);
+                  }
                 );
                 if (matchingServerMsg) {
                   usedServerIds.add(matchingServerMsg.id);
@@ -307,7 +347,9 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
         const attachments = (attachmentImages || [])
           .map((img) => ({
             name: img?.name,
-            data_url: img?.previewUrl,
+            data_url: img?.previewUrl || img?.thumbnailUrl,
+            previewUrl: img?.previewUrl || img?.thumbnailUrl,
+            thumbnailUrl: img?.thumbnailUrl || img?.previewUrl,
           }))
           .filter((img) => img.data_url);
         entries.push({
@@ -706,6 +748,8 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
         }, 120);
       }
       // Ask backend to extract explore tags and location name, then navigate if applicable
+      // Chat widget panel is a personal conversation, so we don't show "Couldn't detect" notifications
+      // Navigation to explore page still works if location/tags are detected
       try {
         const tagRes = await API.post("/chat/extract_tags", {
           message: trimmed,
@@ -760,24 +804,15 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
                 console.warn("Navigation failed", e);
               }
             }
-          } else {
-            // Inform user that no clear destination was detected
-            toast.info(
-              "Couldn't detect a travel destination from your message. Try specifying a place (e.g., 'Da Lat', 'beach', 'Sapa')."
-            );
           }
-        } else {
-          toast.info(
-            "Couldn't detect a travel destination from your message. Try specifying a place (e.g., 'Da Lat', 'beach', 'Sapa')."
-          );
+          // Silently skip if no location/tags detected - no notification in chat widget panel
         }
+        // Silently skip if extract_tags fails - no notification in chat widget panel
       } catch (err) {
         if (process.env.NODE_ENV === "development") {
           console.warn("Tag extraction failed", err);
         }
-        toast.info(
-          "Couldn't detect a travel destination from your message. Try specifying a place (e.g., 'Da Lat', 'beach', 'Sapa')."
-        );
+        // Silently skip - no notification in chat widget panel
       }
     } catch (error) {
       const fallback =
@@ -800,19 +835,6 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
     }
   };
 
-  const ensureRecognition = () => {
-    if (typeof window === "undefined") return null;
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) return null;
-    if (!recognitionRef.current) {
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.lang = "vi-VN";
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
-    }
-    return recognitionRef.current;
-  };
 
   const handleVisionImageRemove = (id) => {
     setVisionImages((prev) => prev.filter((img) => img.id !== id));
@@ -853,48 +875,9 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
     }
   };
 
-  const toggleVoice = () => {
-    const recognition = ensureRecognition();
-    if (!recognition) {
-      toast.info("Trình duyệt chưa hỗ trợ nhập bằng giọng nói.");
-      return;
-    }
-
-    if (isRecording) {
-      recognition.stop();
-      setIsRecording(false);
-      return;
-    }
-
-    recognition.onresult = (event) => {
-      const transcript = Array.from(event.results || [])
-        .map((result) => result[0]?.transcript || "")
-        .join(" ")
-        .trim();
-      if (transcript) {
-        setInput((prev) =>
-          prev ? `${prev.trim()} ${transcript}` : transcript
-        );
-      }
-    };
-
-    recognition.onerror = (event) => {
-      console.error("Speech recognition error", event);
-      toast.error("Không thể ghi âm. Vui lòng thử lại.");
-      setIsRecording(false);
-    };
-
-    recognition.onend = () => {
-      setIsRecording(false);
-    };
-
-    try {
-      recognition.start();
-      setIsRecording(true);
-    } catch (error) {
-      console.error("Unable to start speech recognition", error);
-      toast.error("Không thể bắt đầu ghi âm.");
-      setIsRecording(false);
+  const handleImageUploadClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
     }
   };
 
@@ -934,13 +917,14 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
 
     const userText = question || "Tìm kiếm bằng ảnh";
     let assistantText = "";
+    let responsePayload = null;
 
     try {
       const res = await API.post("/search/vision", {
         images: queuedImages.map((img) => img.base64),
         question,
       });
-      const responsePayload = res.data || {};
+      responsePayload = res.data || {};
       const formatted =
         formatVisionResponse(responsePayload) ||
         "Mình đã nhận ảnh của bạn nhưng chưa thể diễn giải rõ hơn.";
@@ -984,6 +968,8 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
     } finally {
       setSending(false);
       setVisionLoading(false);
+      
+      // Persist messages first before navigation
       const persisted = await persistVisionConversation(
         userText,
         queuedImages,
@@ -991,6 +977,64 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
       );
       if (persisted) {
         refreshChatWidgetHistory({ dropClientRequestId: optimisticId });
+      }
+
+      // Extract tags and location from vision response text and navigate to explore
+      // Use the same algorithm as HomePage text search
+      // Only navigate after messages are persisted
+      if (assistantText && !assistantText.includes("Không thể phân tích")) {
+        try {
+          // Use the same extract_tags approach as HomePage
+          const tagRes = await API.post("/chat/extract_tags", {
+            message: assistantText,
+            page_context: pageContext,
+          });
+          if (tagRes.data && tagRes.data.ok) {
+            const result = tagRes.data.result || {};
+            const tags = result.tags || [];
+            const locationName = result.location_name || null;
+            const navigate = result.navigate || (Array.isArray(tags) && tags.length > 0) || !!locationName;
+            
+            if (navigate) {
+              // Build navigation URL - same logic as HomePage
+              const params = new URLSearchParams();
+              
+              // Priority 1: If location_name exists, use ?q= to fill search bar
+              if (locationName) {
+                params.set("q", locationName);
+                // If there are also valid tags, add them too
+                if (tags.length > 0) {
+                  params.set("tags", tags.join(","));
+                }
+              } 
+              // Priority 2: If only tags exist, use first tag (or all tags) for ?q= to fill search bar
+              else if (tags.length > 0) {
+                // Use Vietnamese translation of first tag as search query to display in search bar
+                const vietnameseTag = getVietnameseTag(tags[0]);
+                params.set("q", vietnameseTag);
+                // Add all tags for filtering
+                if (tags.length > 1) {
+                  params.set("tags", tags.join(","));
+                } else {
+                  // If only one tag, still add it to tags param for filtering
+                  params.set("tags", tags[0]);
+                }
+              }
+              
+              if (params.toString()) {
+                // Small delay to ensure UI updates are complete before navigation
+                setTimeout(() => {
+                  window.location.href = `/explore?${params.toString()}`;
+                }, 300);
+              }
+            }
+          }
+        } catch (err) {
+          if (process.env.NODE_ENV === "development") {
+            console.warn("Tag extraction from vision response failed", err);
+          }
+          // Silently fail - navigation is optional
+        }
       }
     }
   };
@@ -1003,9 +1047,262 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
     return message.content.replace(/\s*\(kèm\s+\d+\s+ảnh:.*?\)$/i, "").trim();
   }, []);
 
+  // Simple markdown renderer for bot messages
+  const renderMarkdown = useCallback((text) => {
+    if (!text) return null;
+    
+    // Split by lines to handle block elements
+    const lines = text.split('\n');
+    const elements = [];
+    let currentList = [];
+    let listType = null; // 'ul' or 'ol'
+    
+    const flushList = () => {
+      if (currentList.length > 0) {
+        elements.push(
+          <ul key={`list-${elements.length}`} className="chat-widget-markdown-list">
+            {currentList.map((item, idx) => (
+              <li key={idx}>{renderInlineMarkdown(item)}</li>
+            ))}
+          </ul>
+        );
+        currentList = [];
+        listType = null;
+      }
+    };
+    
+    const renderInlineMarkdown = (str) => {
+      if (!str || typeof str !== 'string') return str;
+      
+      // First, mark positions that are part of bold/code to avoid matching as italic
+      const boldMarkers = new Set();
+      const codeMarkers = new Set();
+      
+      // Mark bold positions
+      const boldPatterns = [
+        { regex: /\*\*(.+?)\*\*/g },
+        { regex: /__(.+?)__/g },
+      ];
+      boldPatterns.forEach(({ regex }) => {
+        let match;
+        regex.lastIndex = 0;
+        while ((match = regex.exec(str)) !== null) {
+          for (let i = match.index; i < match.index + match[0].length; i++) {
+            boldMarkers.add(i);
+          }
+        }
+      });
+      
+      // Mark code positions
+      const codeRegex = /`(.+?)`/g;
+      let match;
+      codeRegex.lastIndex = 0;
+      while ((match = codeRegex.exec(str)) !== null) {
+        for (let i = match.index; i < match.index + match[0].length; i++) {
+          codeMarkers.add(i);
+        }
+      }
+      
+      const parts = [];
+      let lastIndex = 0;
+      const matches = [];
+      
+      // Find bold matches
+      boldPatterns.forEach(({ regex }) => {
+        regex.lastIndex = 0;
+        while ((match = regex.exec(str)) !== null) {
+          matches.push({
+            start: match.index,
+            end: match.index + match[0].length,
+            type: 'bold',
+            content: match[1],
+          });
+        }
+      });
+      
+      // Find code matches
+      codeRegex.lastIndex = 0;
+      while ((match = codeRegex.exec(str)) !== null) {
+        matches.push({
+          start: match.index,
+          end: match.index + match[0].length,
+          type: 'code',
+          content: match[1],
+        });
+      }
+      
+      // Find italic matches (single * or _ not part of bold/code)
+      const italicPatterns = [
+        { regex: /\*([^*]+?)\*/g },
+        { regex: /_([^_]+?)_/g },
+      ];
+      italicPatterns.forEach(({ regex }) => {
+        regex.lastIndex = 0;
+        while ((match = regex.exec(str)) !== null) {
+          // Check if this match overlaps with bold or code
+          let overlaps = false;
+          for (let i = match.index; i < match.index + match[0].length; i++) {
+            if (boldMarkers.has(i) || codeMarkers.has(i)) {
+              overlaps = true;
+              break;
+            }
+          }
+          if (!overlaps) {
+            matches.push({
+              start: match.index,
+              end: match.index + match[0].length,
+              type: 'italic',
+              content: match[1],
+            });
+          }
+        }
+      });
+      
+      // Sort matches by position
+      matches.sort((a, b) => a.start - b.start);
+      
+      // Remove overlapping matches (keep first)
+      const filteredMatches = [];
+      matches.forEach((match) => {
+        const overlaps = filteredMatches.some(
+          (m) => !(match.end <= m.start || match.start >= m.end)
+        );
+        if (!overlaps) {
+          filteredMatches.push(match);
+        }
+      });
+      
+      // Build parts
+      filteredMatches.forEach((match) => {
+        // Add text before match
+        if (match.start > lastIndex) {
+          const textBefore = str.substring(lastIndex, match.start);
+          if (textBefore) {
+            parts.push(textBefore);
+          }
+        }
+        
+        // Add formatted content
+        if (match.type === 'bold') {
+          parts.push(<strong key={`bold-${parts.length}-${match.start}`}>{match.content}</strong>);
+        } else if (match.type === 'italic') {
+          parts.push(<em key={`italic-${parts.length}-${match.start}`}>{match.content}</em>);
+        } else if (match.type === 'code') {
+          parts.push(<code key={`code-${parts.length}-${match.start}`}>{match.content}</code>);
+        }
+        
+        lastIndex = match.end;
+      });
+      
+      // Add remaining text
+      if (lastIndex < str.length) {
+        const remainingText = str.substring(lastIndex);
+        if (remainingText) {
+          parts.push(remainingText);
+        }
+      }
+      
+      // Clean up any remaining markdown symbols in string parts
+      // Only remove ** and __ (bold markers), keep single * and _ as they might be valid text or italic
+      const cleanedParts = parts.map((part) => {
+        if (typeof part === 'string') {
+          // Remove ** and __ that weren't parsed
+          return part.replace(/\*\*/g, '').replace(/__/g, '');
+        }
+        return part;
+      });
+      
+      // If no markdown found, clean up and return plain text
+      if (cleanedParts.length === 0 || cleanedParts.every(p => typeof p === 'string')) {
+        const allText = cleanedParts.join('');
+        return allText || str.replace(/\*\*/g, '').replace(/__/g, '');
+      }
+      
+      return <>{cleanedParts}</>;
+    };
+    
+    lines.forEach((line, lineIdx) => {
+      const trimmed = line.trim();
+      
+      // Headers
+      if (trimmed.startsWith('### ')) {
+        flushList();
+        elements.push(
+          <h3 key={`h3-${lineIdx}`} className="chat-widget-markdown-h3">
+            {renderInlineMarkdown(trimmed.substring(4))}
+          </h3>
+        );
+        return;
+      }
+      if (trimmed.startsWith('## ')) {
+        flushList();
+        elements.push(
+          <h2 key={`h2-${lineIdx}`} className="chat-widget-markdown-h2">
+            {renderInlineMarkdown(trimmed.substring(3))}
+          </h2>
+        );
+        return;
+      }
+      if (trimmed.startsWith('# ')) {
+        flushList();
+        elements.push(
+          <h1 key={`h1-${lineIdx}`} className="chat-widget-markdown-h1">
+            {renderInlineMarkdown(trimmed.substring(2))}
+          </h1>
+        );
+        return;
+      }
+      
+      // Lists
+      if (trimmed.match(/^[-*]\s+/)) {
+        if (listType !== 'ul') {
+          flushList();
+          listType = 'ul';
+        }
+        currentList.push(trimmed.substring(2));
+        return;
+      }
+      if (trimmed.match(/^\d+\.\s+/)) {
+        if (listType !== 'ol') {
+          flushList();
+          listType = 'ol';
+        }
+        currentList.push(trimmed.replace(/^\d+\.\s+/, ''));
+        return;
+      }
+      
+      // Empty line
+      if (trimmed === '') {
+        flushList();
+        if (lineIdx < lines.length - 1) {
+          elements.push(<br key={`br-${lineIdx}`} />);
+        }
+        return;
+      }
+      
+      // Regular paragraph
+      flushList();
+      elements.push(
+        <p key={`p-${lineIdx}`} className="chat-widget-markdown-p">
+          {renderInlineMarkdown(trimmed)}
+        </p>
+      );
+    });
+    
+    flushList();
+    
+    // If no elements were created, return plain text wrapped in a paragraph
+    if (elements.length === 0) {
+      return <p className="chat-widget-markdown-p">{text}</p>;
+    }
+    
+    return <div className="chat-widget-markdown">{elements}</div>;
+  }, []);
+
   return (
     <>
       <button
+        ref={buttonRef}
         className="chat-widget-button"
         onClick={() => setIsOpen((prev) => !prev)}
         aria-label="Open chat widget"
@@ -1014,7 +1311,7 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
       </button>
 
       {isOpen && (
-        <div className="chat-widget-panel">
+        <div ref={panelRef} className="chat-widget-panel">
           <div className="chat-widget-header">
             <div>
               <p className="chat-widget-title">{BOT_NAME}</p>
@@ -1058,9 +1355,15 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
                     {message.role === "user" ? userDisplayName : BOT_NAME}
                   </span>
                   {getDisplayContent(message) && (
-                    <p className="chat-widget-text-block">
-                      {getDisplayContent(message)}
-                    </p>
+                    message.role === "bot" ? (
+                      <div className="chat-widget-text-block">
+                        {renderMarkdown(getDisplayContent(message))}
+                      </div>
+                    ) : (
+                      <p className="chat-widget-text-block">
+                        {getDisplayContent(message)}
+                      </p>
+                    )
                   )}
                   {message.attachments && message.attachments.length > 0 && (
                     <div className="chat-widget-bubble-attachments">
@@ -1125,15 +1428,23 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
             )}
 
             <div className="chat-widget-composer-controls">
-              {/* attachment control removed per design */}
+              {/* Hidden file input for image upload */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                style={{ display: "none" }}
+                onChange={handleVisionImagesAdd}
+              />
               <button
                 type="button"
-                className={`chat-widget-mic ${isRecording ? "recording" : ""}`}
-                onClick={toggleVoice}
+                className="chat-widget-mic"
+                onClick={handleImageUploadClick}
                 disabled={sending || visionLoading}
-                aria-label="Nhập bằng giọng nói"
+                aria-label="Thêm ảnh để AI nhận dạng địa điểm"
               >
-                <FaMicrophone size={14} />
+                <FaImage size={14} />
               </button>
               <textarea
                 placeholder="Type a travel question or describe your photo…"

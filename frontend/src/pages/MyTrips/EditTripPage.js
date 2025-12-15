@@ -51,6 +51,9 @@ export default function EditTripPage() {
   const [showAIModal, setShowAIModal] = useState(false);
   const [pendingAiChanges, setPendingAiChanges] = useState(false);
   const [preAiItinerary, setPreAiItinerary] = useState(null);
+  const [userFeedback, setUserFeedback] = useState(""); // User feedback for AI suggestions
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
+  
   const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false);
   const [showDeleteDayConfirm, setShowDeleteDayConfirm] = useState(false);
   const [dayToDelete, setDayToDelete] = useState(null);
@@ -351,6 +354,130 @@ export default function EditTripPage() {
     return merged.length > 0 ? merged : null;
   };
 
+  // Parse AI suggestions (string array) into itinerary format
+  const parseSuggestionsToItinerary = (suggestions, sourceItineraryForMatching = null) => {
+    if (!Array.isArray(suggestions) || suggestions.length === 0) {
+      return null;
+    }
+
+    // Build map of existing places from source itinerary for matching
+    const allPlacesMap = new Map();
+    if (sourceItineraryForMatching && Array.isArray(sourceItineraryForMatching)) {
+      sourceItineraryForMatching.forEach((dayPlan) => {
+        (dayPlan.places || []).forEach((p) => {
+          if (p && p.name) {
+            const nameKey = (p.name || "").toLowerCase().trim();
+            if (nameKey) {
+              allPlacesMap.set(nameKey, p);
+            }
+          }
+        });
+      });
+    }
+
+    // Group suggestions by day
+    const suggestionsByDay = {};
+    suggestions.forEach((s) => {
+      if (typeof s !== 'string') return;
+      
+      // Parse format: "Day X: HH:MM-HH:MM - Activity Name - Description"
+      const dayMatch = s.match(/^Day\s+(\d+):\s*(.+)/i);
+      if (dayMatch) {
+        const dayNum = parseInt(dayMatch[1], 10);
+        const suggestionText = dayMatch[2].trim();
+        
+        // Parse time and activity: "HH:MM-HH:MM - Activity Name - Description"
+        // Try multiple formats to handle variations
+        let timeMatch = suggestionText.match(/^(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})\s*-\s*(.+?)(?:\s*-\s*(.+))?$/);
+        if (!timeMatch) {
+          // Try format without description: "HH:MM-HH:MM - Activity Name"
+          timeMatch = suggestionText.match(/^(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})\s*-\s*(.+)$/);
+        }
+        if (!timeMatch) {
+          // Try format without dash separator: "HH:MM-HH:MM Activity Name"
+          timeMatch = suggestionText.match(/^(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})\s+(.+)$/);
+        }
+        
+        if (timeMatch) {
+          const [, startTime, endTime, activityName] = timeMatch;
+          
+          if (!suggestionsByDay[dayNum]) {
+            suggestionsByDay[dayNum] = [];
+          }
+          
+          suggestionsByDay[dayNum].push({
+            startTime,
+            endTime,
+            activityName: activityName.trim(),
+          });
+        }
+      }
+    });
+
+    // Convert to itinerary format
+    const itinerary = [];
+    Object.keys(suggestionsByDay).forEach((dayKey) => {
+      const dayNum = parseInt(dayKey, 10);
+      const daySuggestions = suggestionsByDay[dayNum];
+      
+      const places = daySuggestions.map((suggestion) => {
+        const activityNameLower = suggestion.activityName.toLowerCase();
+        
+        // Try to match with existing place
+        let matchedPlace = null;
+        for (const [key, place] of allPlacesMap.entries()) {
+          if (activityNameLower.includes(key) || key.includes(activityNameLower)) {
+            matchedPlace = place;
+            break;
+          }
+        }
+
+        // Infer type from name
+        const inferType = (name) => {
+          const nameLower = name.toLowerCase();
+          if (nameLower.includes('ăn') || nameLower.includes('lunch') || nameLower.includes('dinner') || nameLower.includes('breakfast') || nameLower.includes('meal')) {
+            return 'food';
+          }
+          if (nameLower.includes('di chuyển') || nameLower.includes('travel') || nameLower.includes('move') || nameLower.includes('về') || nameLower.includes('return') || nameLower.includes('chuyển về')) {
+            return 'move';
+          }
+          if (nameLower.includes('nghỉ') || nameLower.includes('rest') || nameLower.includes('break')) {
+            return 'rest';
+          }
+          return 'sightseeing';
+        };
+
+        const duration = calculateDurationMinutes(suggestion.startTime, suggestion.endTime);
+        const itemType = inferType(suggestion.activityName);
+
+        return {
+          id: matchedPlace?.id || null,
+          name: suggestion.activityName,
+          type: itemType,
+          lat: matchedPlace?.lat || matchedPlace?.latitude || null,
+          lng: matchedPlace?.lon || matchedPlace?.lng || matchedPlace?.longitude || null,
+          start_time: suggestion.startTime,
+          end_time: suggestion.endTime,
+          duration_min: duration,
+          distance_from_prev_km: 0,
+          needs_data: !!matchedPlace?.needs_data,
+        };
+      });
+
+      itinerary.push({
+        day: dayNum,
+        items: places,
+      });
+    });
+
+    if (itinerary.length === 0) {
+      return null;
+    }
+
+    // Use mapOptimizedToFrontend to convert to frontend format
+    return mapOptimizedToFrontend(itinerary, sourceItineraryForMatching);
+  };
+
   // Convert optimized_itinerary from backend into frontend flattened structure
   const mapOptimizedToFrontend = (optimized, sourceItineraryForMatching = null) => {
 
@@ -569,6 +696,16 @@ export default function EditTripPage() {
           return null;
         }
         const uid = `ai-${Date.now()}-${uniqueIdCounter++}`;
+        // Create time_slot from start_time and end_time if both are available
+        let timeSlot = it.time_slot || null;
+        if (!timeSlot && it.start_time && it.end_time) {
+          // Both start_time and end_time are available, create time_slot
+          timeSlot = `${it.start_time}-${it.end_time}`;
+        } else if (!timeSlot && it.start_time) {
+          // Only start_time is available, use it as time_slot (will be completed later)
+          timeSlot = it.start_time;
+        }
+        
         return {
           uniqueId: uid,
           id: it.id || null,
@@ -587,7 +724,9 @@ export default function EditTripPage() {
                       : it.type || "Địa điểm",
           lat: it.lat || it.latitude || null,
           lon: it.lng || it.longitude || null,
-          time_slot: it.start_time || it.time_slot || null,
+          time_slot: timeSlot,
+          start_time: it.start_time || null,
+          end_time: it.end_time || null,
           duration_hours: it.duration_min
             ? Number(it.duration_min) / 60
             : it.duration_hours || null,
@@ -827,9 +966,6 @@ export default function EditTripPage() {
   };
 
   const handleRevertAIChanges = () => {
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:662', message: 'handleRevertAIChanges called', data: { hasPreAiItinerary: !!preAiItinerary }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H1' }) }).catch(() => { });
-    // #endregion
     if (preAiItinerary) {
       setItinerary(preAiItinerary);
     }
@@ -876,22 +1012,13 @@ export default function EditTripPage() {
   // --- FETCH DATA ---
   useEffect(() => {
     const fetchTripDetails = async () => {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:707', message: 'fetchTripDetails called', data: { tripId, pendingAiChanges, pendingAiChangesRef: pendingAiChangesRef.current }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
-      // #endregion
       if (!tripId) return;
       // Don't reset itinerary if we have pending AI changes - use ref to avoid stale closure
       if (pendingAiChangesRef.current) {
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:712', message: 'fetchTripDetails skipped - pendingAiChangesRef is true', data: { pendingAiChangesRef: pendingAiChangesRef.current }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
-        // #endregion
         return;
       }
       setIsLoading(true);
       try {
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:718', message: 'fetchTripDetails fetching data', data: { tripId }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
-        // #endregion
         const response = await axios.get(`/api/trips/${tripId}`, {
           headers: { Authorization: `Bearer ${getAuthToken()}` },
         });
@@ -902,33 +1029,7 @@ export default function EditTripPage() {
         setOriginalItinerary(flattened); // Lưu bản gốc
         // Only set itinerary if we don't have pending AI changes - use ref to avoid stale closure
         if (!pendingAiChangesRef.current) {
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:729', message: 'fetchTripDetails setting itinerary', data: { flattenedLength: flattened.length }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
-          // #endregion
           setItinerary(flattened); // Bản để chỉnh sửa
-          // ✅ THÊM ĐOẠN NÀY để set editableData
-          const currentlyUsedIds = new Set();
-          fetchedTrip.itinerary.forEach(day => {
-            (day.places || []).forEach(item => {
-              if (item.id && typeof item.id === 'number') {
-                currentlyUsedIds.add(item.id);
-              }
-            });
-          });
-
-          setEditableData({
-            name: fetchedTrip.name || '',
-            startDate: fetchedTrip.start_date || '',
-            duration: fetchedTrip.duration || 1,
-            people: fetchedTrip.metadata?.people || '',
-            budget: fetchedTrip.metadata?.budget || '',
-            provinceId: fetchedTrip.province_id,
-            usedPlaceIds: Array.from(currentlyUsedIds),
-          });
-        } else {
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:733', message: 'fetchTripDetails NOT setting itinerary - pendingAiChangesRef is true', data: { pendingAiChangesRef: pendingAiChangesRef.current }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
-          // #endregion
         }
       } catch (err) {
         setError("Không tìm thấy chuyến đi hoặc bạn không có quyền truy cập.");
@@ -942,12 +1043,6 @@ export default function EditTripPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tripId]); // pendingAiChanges is intentionally excluded - we use pendingAiChangesRef to avoid race conditions
 
-  // Track itinerary state changes for debugging
-  useEffect(() => {
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:740', message: 'itinerary state changed', data: { itineraryLength: itinerary.length, itineraryDays: itinerary.map(d => d.day), firstDayPlacesCount: itinerary[0]?.places?.length }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H4' }) }).catch(() => { });
-    // #endregion
-  }, [itinerary]);
 
   // --- DND LOGIC ---
   const getList = useCallback(
@@ -1171,12 +1266,75 @@ export default function EditTripPage() {
     }
   };
 
+  // --- Regenerate AI suggestions with user feedback ---
+  const handleAddFeedback = async () => {
+    if (!tripData || !userFeedback.trim()) return;
+    setFeedbackLoading(true);
+    try {
+      const baseInstructions = `You are a Professional Travel Guide with 30 years of experience. Evaluate the itinerary and provide detailed day-by-day suggestions with complete timeline (8:00-17:00). Return ONLY a single, valid JSON object with this structure:\n{ "score": 0-100, "decision": "accept|adjust|reorder|add_days|balance", "summary": "3-5 sentences like an experienced tour guide", "suggestions": ["Day 1: 08:00-10:00 - [Activity] - [Tips]", "Day 1: 12:30-13:00 - Ăn trưa - 30 phút", ...], "details_per_day": [...], "optimized_itinerary": [...] }\n- suggestions MUST be detailed day-by-day with time ranges (8:00-17:00)\n- Each suggestion format: "Day X: HH:MM-HH:MM - [Activity Name] - [Description/Tips]"\n- Provide suggestions for ALL days in the itinerary\n- Respond in English and avoid adding extra text outside the JSON.`;
+
+      const evaluationInstructions = `${baseInstructions}\n\nIMPORTANT: The user has provided additional feedback and requirements:\n"${userFeedback.trim()}"\n\nPlease incorporate these requirements into your suggestions. Adjust the itinerary based on the user's specific needs, preferences, and requests.`;
+
+      const payload = {
+        original_itinerary: restoreItinerary(originalItinerary),
+        edited_itinerary: restoreItinerary(itinerary),
+        context: { tripId: tripId, tripName: tripData?.name || null },
+        evaluation_instructions: evaluationInstructions,
+      };
+
+      const res = await axios.post("/api/ai/evaluate_itinerary", payload, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` },
+      });
+
+      if (res.data && res.data.ok && res.data.result) {
+        const result = res.data.result;
+        
+        if (!Array.isArray(result.suggestions)) {
+          devLog.warn("AI result missing suggestions array, initializing empty array");
+          result.suggestions = [];
+        }
+        
+        setAiResult(result);
+        setUserFeedback(""); // Clear feedback after successful regeneration
+      } else if (res.data && res.data.result) {
+        const result = res.data.result;
+        if (!Array.isArray(result.suggestions)) {
+          result.suggestions = [];
+        }
+        setAiResult(result);
+        setUserFeedback("");
+      } else {
+        const raw =
+          res.data && res.data.error ? res.data.error : "No response from AI";
+        setAiResult({
+          raw: typeof raw === "string" ? raw : JSON.stringify(raw, null, 2),
+          suggestions: [],
+        });
+      }
+    } catch (err) {
+      devLog.error("AI feedback error", err);
+      const respData = err?.response?.data;
+      const rawErr = respData
+        ? typeof respData === "string"
+          ? respData
+          : JSON.stringify(respData, null, 2)
+        : err.message || String(err);
+      setAiResult({ 
+        raw: rawErr,
+        suggestions: [],
+      });
+    } finally {
+      setFeedbackLoading(false);
+    }
+  };
+
   // --- AI evaluate handler ---
   const handleAIEvaluate = async () => {
     if (!tripData) return;
     setAiLoading(true);
     setAiResult(null);
     setShowAIModal(false);
+    setUserFeedback(""); // Clear feedback when starting new evaluation
     try {
 
       const evaluationInstructions = `You are a Professional Travel Guide with 30 years of experience. Evaluate the itinerary and provide detailed day-by-day suggestions with complete timeline (8:00-17:00). Return ONLY a single, valid JSON object with this structure:\n{ "score": 0-100, "decision": "accept|adjust|reorder|add_days|balance", "summary": "3-5 sentences like an experienced tour guide", "suggestions": ["Day 1: 08:00-10:00 - [Activity] - [Tips]", "Day 1: 12:30-13:00 - Ăn trưa - 30 phút", ...], "details_per_day": [...], "optimized_itinerary": [...] }\n- suggestions MUST be detailed day-by-day with time ranges (8:00-17:00)\n- Each suggestion format: "Day X: HH:MM-HH:MM - [Activity Name] - [Description/Tips]"\n- Provide suggestions for ALL days in the itinerary\n- Respond in English and avoid adding extra text outside the JSON.`;
@@ -1330,6 +1488,19 @@ export default function EditTripPage() {
           aiItineraryToApply = normalized;
         }
       }
+      // If AI evaluation provided suggestions (string array), parse them into itinerary
+      else if (
+        aiResult &&
+        aiResult.suggestions &&
+        Array.isArray(aiResult.suggestions) &&
+        aiResult.suggestions.length > 0
+      ) {
+        const parsed = parseSuggestionsToItinerary(aiResult.suggestions, backupItinerary);
+        
+        if (parsed && validateItinerary(parsed)) {
+          aiItineraryToApply = parsed;
+        }
+      }
       // Otherwise ask the reorder endpoint
       else {
 
@@ -1378,7 +1549,6 @@ export default function EditTripPage() {
       // Validate and apply AI itinerary
 
       if (!aiItineraryToApply || !validateItinerary(aiItineraryToApply)) {
-
         // Rollback: restore backup
         setItinerary(backupItinerary);
         setPreAiItinerary(null);
@@ -1387,53 +1557,12 @@ export default function EditTripPage() {
       }
 
 
-      // REPLACE entire itinerary with AI optimized itinerary (not merge)
-      // This ensures the AI suggestions are applied exactly as suggested, in the correct time order
+      // Apply AI suggestions directly - NO MERGE, NO SORTING, NO REMOVE DUPLICATES
+      // Just use AI suggestions as-is, preserving the exact order from AI
       let replacedItinerary = deepCloneItinerary(aiItineraryToApply);
-
-      // Remove duplicate places: each sightseeing place should appear only once
-      const seenPlaceIds = new Set();
-      const seenPlaceNames = new Set();
-
-      replacedItinerary = replacedItinerary.map((dayPlan) => {
-        const uniquePlaces = [];
-        const places = dayPlan.places || [];
-
-        places.forEach((place) => {
-          const placeId = place.id || null;
-          const placeName = (place.name || "").toLowerCase().trim();
-          const isSightseeing = place.category !== "Ăn uống" &&
-            place.category !== "Di chuyển" &&
-            place.category !== "Nghỉ ngơi" &&
-            place.type !== "food" &&
-            place.type !== "move" &&
-            place.type !== "rest";
-
-          if (isSightseeing) {
-            // Check for duplicates by id or name
-            const isDuplicate = (placeId && seenPlaceIds.has(placeId)) ||
-              (placeName && seenPlaceNames.has(placeName));
-
-            if (!isDuplicate) {
-              if (placeId) seenPlaceIds.add(placeId);
-              if (placeName) seenPlaceNames.add(placeName);
-              uniquePlaces.push(place);
-            } else {
-              devLog.warn(`Removing duplicate place: ${place.name} (id: ${placeId})`);
-            }
-          } else {
-            // Non-sightseeing items (food/rest/move) can appear multiple times
-            uniquePlaces.push(place);
-          }
-        });
-
-        return {
-          ...dayPlan,
-          places: uniquePlaces,
-        };
-      });
-
+      
       // Ensure we have all days from original (fill missing days if any)
+      // But don't change the order of AI suggestions
       if (replacedItinerary.length < itinerary.length) {
         devLog.warn("AI itinerary has fewer days than original. Filling missing days.");
         const aiDaysSet = new Set(replacedItinerary.map(d => d.day || 0));
@@ -1457,20 +1586,10 @@ export default function EditTripPage() {
 
 
       // Apply: flatten, recalculate time slots, then set state
-      // Note: recalculateTimeSlots will apply time slots in order, so AI's start_time will be respected
+      // Note: recalculateTimeSlots will preserve AI's time if provided
       const flattened = flattenItinerary(replacedItinerary);
-
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:1174', message: 'Before recalculateTimeSlots', data: { flattenedLength: flattened.length, firstDayPlaces: flattened[0]?.places?.map(p => ({ name: p.name, start_time: p.start_time, time_slot: p.time_slot })) }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H3' }) }).catch(() => { });
-      // #endregion
-
       const enhanced = recalculateTimeSlots(flattened);
-
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:1180', message: 'After recalculateTimeSlots', data: { enhancedLength: enhanced.length, firstDayPlaces: enhanced[0]?.places?.map(p => ({ name: p.name, start_time: p.start_time, time_slot: p.time_slot })) }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H3' }) }).catch(() => { });
-      // #endregion
-
-
+      
       // Final check: ensure enhanced is valid
       if (!validateItinerary(enhanced)) {
 
@@ -1482,31 +1601,15 @@ export default function EditTripPage() {
 
       // Success: apply the changes
       // Set pendingAiChanges FIRST to prevent fetchTripDetails from resetting
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:1190', message: 'About to apply AI suggestions', data: { enhancedLength: enhanced.length, enhancedDays: enhanced.map(d => d.day) }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H1' }) }).catch(() => { });
-      // #endregion
-
       // Update ref FIRST (synchronous) to prevent race condition
       pendingAiChangesRef.current = true;
       setPendingAiChanges(true);
-
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:1196', message: 'pendingAiChangesRef set to true, about to setItinerary', data: { pendingAiChangesRef: pendingAiChangesRef.current }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H1' }) }).catch(() => { });
-      // #endregion
-
+      
       setItinerary(enhanced);
-
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:1201', message: 'setItinerary called with enhanced', data: { enhancedLength: enhanced.length }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H4' }) }).catch(() => { });
-      // #endregion
-
       setShowAIModal(false);
 
       // Force UI update
       setTimeout(() => {
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:1208', message: 'Force UI update - resize event dispatched', data: {}, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H4' }) }).catch(() => { });
-        // #endregion
         window.dispatchEvent(new Event('resize'));
       }, 100);
 
@@ -1874,11 +1977,13 @@ export default function EditTripPage() {
               maxWidth: 940,
               width: "100%",
               maxHeight: "85vh",
-              overflow: "auto",
+              display: "flex",
+              flexDirection: "column",
               boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
             }}
             className="ai-modal"
           >
+            {/* Fixed Header */}
             <div
               style={{
                 display: "flex",
@@ -1886,12 +1991,60 @@ export default function EditTripPage() {
                 alignItems: "center",
                 padding: "12px 16px",
                 borderBottom: "1px solid #eee",
+                position: "sticky",
+                top: 0,
+                background: "#fff",
+                zIndex: 10,
+                borderRadius: "8px 8px 0 0",
               }}
             >
               <h3 style={{ margin: 0 }}>AI Evaluation</h3>
+              <button
+                onClick={() => {
+                  setShowAIModal(false);
+                  setUserFeedback("");
+                }}
+                style={{
+                  background: "rgba(239, 68, 68, 0.7)",
+                  border: "none",
+                  borderRadius: "50%",
+                  width: "28px",
+                  height: "28px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  color: "#fff",
+                  fontSize: "18px",
+                  fontWeight: "bold",
+                  lineHeight: 1,
+                  transition: "all 0.2s ease",
+                  padding: 0,
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = "rgba(239, 68, 68, 0.9)";
+                  e.target.style.transform = "scale(1.1)";
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = "rgba(239, 68, 68, 0.7)";
+                  e.target.style.transform = "scale(1)";
+                }}
+                aria-label="Close modal"
+              >
+                ×
+              </button>
             </div>
 
-            <div style={{ padding: 16 }} className="ai-modal-body">
+            {/* Scrollable Body */}
+            <div 
+              style={{ 
+                padding: 16, 
+                overflowY: "auto",
+                flex: 1,
+                minHeight: 0, // Important for flex scrolling
+              }} 
+              className="ai-modal-body"
+            >
               {aiResult ? (
                 aiResult.raw || typeof aiResult === "string" ? (
                   <div
@@ -2328,36 +2481,112 @@ export default function EditTripPage() {
               ) : (
                 <p>No result.</p>
               )}
-            </div>
 
-            <div
-              style={{
-                padding: 12,
-                borderTop: "1px solid #eee",
-                textAlign: "right",
-              }}
-              className="ai-modal-footer"
-            >
+              {/* Add informations chat section */}
+              <div
+                style={{
+                  padding: "14px 16px",
+                  marginTop: 16,
+                  borderTop: "1px solid #eee",
+                  backgroundColor: "#f9fafb",
+                  borderRadius: 6,
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 16,
+                    fontWeight: "bold",
+                    color: "#374151",
+                    marginBottom: 10,
+                  }}
+                >
+                  Add informations
+                </div>
+                <textarea
+                  value={userFeedback}
+                  onChange={(e) => setUserFeedback(e.target.value)}
+                  placeholder="Enter your request, adjustments, or additional details so the AI can create a more suitable itinerary..."
+                  style={{
+                    width: "100%",
+                    minHeight: 70,
+                    maxHeight: 120,
+                    padding: "10px 12px",
+                    border: "1px solid #d1d5db",
+                    borderRadius: 6,
+                    fontSize: 13,
+                    fontFamily: "inherit",
+                    resize: "vertical",
+                    boxSizing: "border-box",
+                    lineHeight: 1.5,
+                  }}
+                  disabled={feedbackLoading || aiLoading}
+                />
+              </div>
+
+              {/* Footer with buttons */}
+              <div
+                style={{
+                  padding: "14px 16px",
+                  marginTop: 16,
+                  borderTop: "1px solid #eee",
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  alignItems: "center",
+                  gap: "10px",
+                }}
+                className="ai-modal-footer"
+              >
               <button
                 onClick={handleApplyAISuggestions}
                 className="apply-btn"
-                disabled={aiLoading}
+                disabled={aiLoading || feedbackLoading}
                 style={{
-                  padding: "8px 14px",
-                  cursor: "pointer",
-                  marginRight: 8,
+                  padding: "10px 20px",
+                  minWidth: "160px",
+                  cursor: aiLoading || feedbackLoading ? "not-allowed" : "pointer",
+                  opacity: aiLoading || feedbackLoading ? 0.6 : 1,
                 }}
               >
                 {aiLoading ? "Applying..." : "Apply AI Suggestions"}
               </button>
 
               <button
-                onClick={() => setShowAIModal(false)}
+                onClick={handleAddFeedback}
+                className="add-btn"
+                disabled={feedbackLoading || aiLoading || !userFeedback.trim()}
+                style={{
+                  padding: "10px 16px",
+                  minWidth: "80px",
+                  cursor: feedbackLoading || aiLoading || !userFeedback.trim() ? "not-allowed" : "pointer",
+                  background: feedbackLoading || aiLoading || !userFeedback.trim() 
+                    ? "#9ca3af" 
+                    : "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                  border: "none",
+                  borderRadius: 10,
+                  color: "white",
+                  fontWeight: 600,
+                  fontSize: 14,
+                  transition: "all 0.3s ease",
+                }}
+              >
+                {feedbackLoading ? "Processing..." : "Add"}
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowAIModal(false);
+                  setUserFeedback("");
+                }}
                 className="close-btn"
-                style={{ padding: "8px 14px", cursor: "pointer" }}
+                style={{ 
+                  padding: "10px 20px",
+                  minWidth: "100px",
+                  cursor: "pointer",
+                }}
               >
                 Close
               </button>
+              </div>
             </div>
           </div>
         </div>
