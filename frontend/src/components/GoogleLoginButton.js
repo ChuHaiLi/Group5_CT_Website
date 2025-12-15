@@ -10,14 +10,14 @@ import { FaGoogle } from "react-icons/fa";
 
 export default function GoogleLoginButton({ setIsAuthenticated }) {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       // Decode JWT token từ Google
       const decoded = jwtDecode(credentialResponse.credential);
-      
+
       console.log("Google User Info:", decoded);
 
       // Gửi thông tin đến backend
@@ -52,7 +52,7 @@ export default function GoogleLoginButton({ setIsAuthenticated }) {
     toast.error("Google login failed. Please try again.");
   };
 
- return (
+  return (
     <button
       onClick={() => {
         // Trigger Google Login programmatically (only if configured)
@@ -79,7 +79,10 @@ export default function GoogleLoginButton({ setIsAuthenticated }) {
         cursor: loading ? "not-allowed" : "pointer",
         opacity: loading ? 0.6 : 1,
         transition: "all 0.3s ease",
-        boxShadow: isHovered && !loading ? "0 4px 12px rgba(0, 0, 0, 0.1)" : "0 2px 4px rgba(0, 0, 0, 0.05)",
+        boxShadow:
+          isHovered && !loading
+            ? "0 4px 12px rgba(0, 0, 0, 0.1)"
+            : "0 2px 4px rgba(0, 0, 0, 0.05)",
         transform: isHovered && !loading ? "translateY(-2px)" : "translateY(0)",
       }}
       onMouseEnter={() => setIsHovered(true)}
@@ -87,7 +90,7 @@ export default function GoogleLoginButton({ setIsAuthenticated }) {
     >
       <FaGoogle style={{ fontSize: "20px", color: "#DB4437" }} />
       {loading ? "Signing in..." : "Continue with Google"}
-      
+
       {/* Hidden Google Login - triggered programmatically */}
       <div style={{ display: "none" }}>
         {GOOGLE_CLIENT_ID && (

@@ -1,6 +1,6 @@
-// -------------------------
-//  SORT BY TIME (HH:MM)
-// -------------------------
+// dndLogic.js - MERGED: Giữ tính năng AI từ remote + Advanced features từ local
+
+// --- SORT BY TIME (NEW FEATURE từ local) ---
 export const sortByTime = (items) => {
     return [...items].sort((a, b) => {
         const t1 = a.time_slot ? a.time_slot.substring(0, 5) : "23:59";
@@ -9,9 +9,7 @@ export const sortByTime = (items) => {
     });
 };
 
-// -------------------------
-//  REORDER (KÉO TRONG CÙNG NGÀY)
-// -------------------------
+// --- REORDER (Original từ remote) ---
 export const reorder = (list, startIndex, endIndex) => {
     const result = Array.from(list);
     const [removed] = result.splice(startIndex, 1);
@@ -19,9 +17,23 @@ export const reorder = (list, startIndex, endIndex) => {
     return result;
 };
 
-// -------------------------
-//  TIME HELPERS
-// -------------------------
+// --- MOVE (Original từ remote - giữ lại cho tương thích) ---
+export const move = (source, destination, droppableSource, droppableDestination) => {
+    const sourceClone = Array.from(source);
+    const destClone = Array.from(destination);
+    const [removed] = sourceClone.splice(droppableSource.index, 1);
+
+    const moved = { ...removed, day: parseInt(droppableDestination.droppableId.split('-')[1], 10) };
+    destClone.splice(droppableDestination.index, 0, moved);
+
+    const result = {};
+    result[droppableSource.droppableId] = sourceClone;
+    result[droppableDestination.droppableId] = destClone;
+
+    return result;
+};
+
+// --- TIME HELPERS (NEW từ local) ---
 const parseTimeToMs = (timeString) => {
     if (!timeString) return null;
     const clean = timeString.substring(0, 8);
@@ -38,9 +50,7 @@ const msToHHMMSS = (ms) => {
     return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00`;
 };
 
-// -------------------------
-//  REBUILD DAY (CHỈNH GIỜ TỰ ĐỘNG)
-// -------------------------
+// --- REBUILD DAY (NEW ADVANCED FEATURE từ local) ---
 export const rebuildDay = async (places, opts = {}) => {
     if (!places) return places;
 
@@ -93,9 +103,80 @@ export const rebuildDay = async (places, opts = {}) => {
     return result;
 };
 
-// -------------------------
-//  ALIAS
-// -------------------------
-export const recalculateTimeSlots = async (places, opts = {}) => {
-    return await rebuildDay(places, opts);
+// --- RECALCULATE TIME SLOTS (Giữ lại từ remote - hỗ trợ AI time calculation) ---
+const getDuration = (item) => {
+    if (item.id === 'LUNCH' || item.category === 'Ăn uống') return 60;
+    if (item.id === 'TRAVEL' || item.category === 'Di chuyển') return 45;
+    return 90;
+};
+
+const formatTime = (ms) => {
+    const totalMinutes = Math.floor(ms / (60 * 1000));
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+};
+
+/**
+ * Tái tính toán khung giờ cho toàn bộ lịch trình.
+ * ✅ HỖ TRỢ AI: Nếu item có start_time từ AI, sử dụng nó; nếu không, tính tự động từ 8:00.
+ * @param {Array} itinerary - Dữ liệu lịch trình (mảng các dayPlan)
+ * @returns {Array} Lịch trình đã cập nhật khung giờ
+ */
+export const recalculateTimeSlots = (itinerary) => {
+    const DEFAULT_START_TIME_MS = 8 * 60 * 60 * 1000; // Bắt đầu lúc 8:00 AM
+
+    return itinerary.map(dayPlan => {
+        let currentTimeMs = DEFAULT_START_TIME_MS; // Reset giờ cho mỗi ngày
+        
+        const newPlaces = dayPlan.places.map((item, index) => {
+            // ✅ If AI provided start_time, use it; otherwise use calculated time
+            let startTimeMs = currentTimeMs;
+            
+            if (item.time_slot && typeof item.time_slot === 'string') {
+                // Try to parse existing time_slot (format: "HH:MM-HH:MM" or "HH:MM")
+                const timeMatch = item.time_slot.match(/(\d{1,2}):(\d{2})/);
+                if (timeMatch) {
+                    const hours = parseInt(timeMatch[1], 10);
+                    const minutes = parseInt(timeMatch[2], 10);
+                    startTimeMs = (hours * 60 + minutes) * 60 * 1000;
+                }
+            } else if (item.start_time && typeof item.start_time === 'string') {
+                // ✅ Parse AI's start_time (format: "HH:MM")
+                const timeMatch = item.start_time.match(/(\d{1,2}):(\d{2})/);
+                if (timeMatch) {
+                    const hours = parseInt(timeMatch[1], 10);
+                    const minutes = parseInt(timeMatch[2], 10);
+                    startTimeMs = (hours * 60 + minutes) * 60 * 1000;
+                }
+            }
+            
+            // ✅ Get duration from item or calculate default
+            let durationMinutes;
+            if (item.duration_hours) {
+                durationMinutes = item.duration_hours * 60;
+            } else if (item.duration_min) {
+                durationMinutes = item.duration_min;
+            } else {
+                durationMinutes = getDuration(item);
+            }
+            
+            const durationMs = durationMinutes * 60 * 1000;
+            const endTimeMs = startTimeMs + durationMs;
+            
+            // Định dạng slot giờ: "HH:MM-HH:MM"
+            const newTimeSlot = `${formatTime(startTimeMs)}-${formatTime(endTimeMs)}`;
+            
+            // Update currentTimeMs for next item (use endTimeMs, not startTimeMs)
+            currentTimeMs = endTimeMs;
+
+            return {
+                ...item,
+                time_slot: newTimeSlot,
+                start_time: formatTime(startTimeMs), // Store normalized start_time
+            };
+        });
+
+        return { ...dayPlan, places: newPlaces };
+    });
 };

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 
 /* ==========================================================================
    1. GLOBAL LAYOUT
@@ -71,7 +71,11 @@
   height: 100%;
 }
 
-.search-icon { font-size: 1.25rem; color: #1e293b; flex-shrink: 0; }
+.search-icon {
+  font-size: 1.25rem;
+  color: #1e293b;
+  flex-shrink: 0;
+}
 
 .search-bar input {
   width: 100%;
@@ -82,9 +86,30 @@
   font-weight: 500;
   outline: none;
   height: 100%;
+  border-radius: inherit; /* match the pill container */
+  box-shadow: none !important; /* remove any browser-added inner shadow */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
 }
 
-.search-bar input::placeholder { color: #94a3b8; font-weight: 400; }
+.search-bar input:focus {
+  outline: none;
+  box-shadow: none !important;
+}
+
+/* remove inner clear/search decorations on some browsers */
+.search-bar input::-webkit-search-decoration,
+.search-bar input::-webkit-search-cancel-button,
+.search-bar input::-webkit-search-results-button,
+.search-bar input::-webkit-search-results-decoration {
+  display: none;
+}
+
+.search-bar input::placeholder {
+  color: #94a3b8;
+  font-weight: 400;
+}
 
 .search-divider {
   width: 1px;
@@ -107,10 +132,17 @@
   height: calc(100% - 8px);
 }
 
-.search-location-wrapper:hover { background-color: #f1f5f9; }
+.search-location-wrapper:hover {
+  background-color: #f1f5f9;
+}
 
-.globe-icon { color: #4f46e5; font-size: 1.2rem; }
-.search-location-wrapper:hover .globe-icon { transform: rotate(15deg); }
+.globe-icon {
+  color: #4f46e5;
+  font-size: 1.2rem;
+}
+.search-location-wrapper:hover .globe-icon {
+  transform: rotate(15deg);
+}
 
 .select-container {
   flex: 1;
@@ -145,7 +177,10 @@
   pointer-events: none;
 }
 
-.search-location-wrapper:hover .select-arrow-icon { color: #4f46e5; transform: rotate(180deg); }
+.search-location-wrapper:hover .select-arrow-icon {
+  color: #4f46e5;
+  transform: rotate(180deg);
+}
 
 /* ==========================================================================
    3. CATEGORIES FILTER (STICKY)
@@ -166,7 +201,10 @@
   margin-bottom: 1.5rem;
 }
 
-.category-item { position: relative; z-index: 10; }
+.category-item {
+  position: relative;
+  z-index: 10;
+}
 .category-btn {
   padding: 8px 16px;
   border-radius: 30px;
@@ -176,13 +214,34 @@
   cursor: pointer;
   font-weight: 600;
   font-size: 0.9rem;
-  display: flex; align-items: center; gap: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   transition: all 0.2s ease;
 }
-.category-btn:hover { background: #f8fafc; border-color: #cbd5e1; color: #1e293b; }
-.category-btn.active { background: #e0e7ff; color: #4f46e5; border-color: #c7d2fe; }
-.category-left { display: flex; align-items: center; gap: 6px; }
-.active-count { font-size: 0.75rem; background: #4338ca; color: white; padding: 2px 6px; border-radius: 10px; margin-left: 4px; }
+.category-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #1e293b;
+}
+.category-btn.active {
+  background: #e0e7ff;
+  color: #4f46e5;
+  border-color: #c7d2fe;
+}
+.category-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.active-count {
+  font-size: 0.75rem;
+  background: #4338ca;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: 4px;
+}
 
 /* Dropdown */
 .tag-list-vertical {
@@ -203,17 +262,43 @@
   overflow-y: auto;
   border: 1px solid #f1f5f9;
 }
-.tag-list-vertical.open { display: flex !important; animation: dropdownFadeIn 0.2s ease forwards; }
+.tag-list-vertical.open {
+  display: flex !important;
+  animation: dropdownFadeIn 0.2s ease forwards;
+}
 .tag-btn {
   padding: 10px 12px;
-  border-radius: 8px; border: none; background: transparent;
-  font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 10px;
-  color: #4b5563; width: 100%; text-align: left;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #4b5563;
+  width: 100%;
+  text-align: left;
 }
-.tag-btn:hover { background: #f9fafb; color: #111827; }
-.tag-btn.active { background: #eef2ff; color: #4f46e5; font-weight: 600; }
-.checkbox-circle { width: 16px; height: 16px; border-radius: 4px; border: 2px solid #d1d5db; }
-.tag-btn.active .checkbox-circle { background: #4f46e5; border-color: #4f46e5; }
+.tag-btn:hover {
+  background: #f9fafb;
+  color: #111827;
+}
+.tag-btn.active {
+  background: #eef2ff;
+  color: #4f46e5;
+  font-weight: 600;
+}
+.checkbox-circle {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 2px solid #d1d5db;
+}
+.tag-btn.active .checkbox-circle {
+  background: #4f46e5;
+  border-color: #4f46e5;
+}
 
 /* ==========================================================================
    4. QUICK QUESTIONS BAR (CẬP NHẬT: THANH CUỘN NGANG)
@@ -229,15 +314,15 @@
 .quick-categories-scroll {
   display: flex;
   gap: 12px;
-  
+
   /* --- THANH CUỘN --- */
   width: 100%;
   max-width: 1200px; /* Giới hạn chiều rộng để thanh cuộn đẹp */
-  overflow-x: auto;  /* Bật tính năng cuộn ngang */
-  
+  overflow-x: auto; /* Bật tính năng cuộn ngang */
+
   justify-content: flex-start; /* Nội dung bắt đầu từ trái sang */
   padding: 5px 5px 15px 5px; /* Padding dưới để chứa thanh cuộn */
-  
+
   /* Tùy chỉnh thanh cuộn cho đẹp */
   scrollbar-width: thin; /* Firefox: thanh cuộn mỏng */
   scrollbar-color: #cbd5e1 transparent;
@@ -270,18 +355,21 @@
   white-space: nowrap; /* Không xuống dòng */
   font-weight: 500;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
   flex-shrink: 0; /* Không bị co nhỏ khi hết chỗ */
 }
 
 .question-pill:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  border-color: #cbd5e1; color: #1e293b;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: #cbd5e1;
+  color: #1e293b;
 }
 
 .question-pill.active {
-  background: #1e293b; color: #ffffff; border-color: #1e293b;
+  background: #1e293b;
+  color: #ffffff;
+  border-color: #1e293b;
   box-shadow: 0 4px 15px rgba(30, 41, 59, 0.3);
 }
 
@@ -289,24 +377,31 @@
    5. RESULTS GRID (CẬP NHẬT: 3 CỘT/HÀNG)
    ========================================================================== */
 .recommend-header {
-  font-size: 1.8rem; font-weight: 700;
-  margin-top: 1rem; margin-bottom: 2rem;
-  color: #1f2937; text-align: center; width: 100%;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+  color: #1f2937;
+  text-align: center;
+  width: 100%;
 }
 
 .explore-grid-container {
   display: grid;
   /* --- FIX CỐ ĐỊNH 3 CỘT --- */
-  grid-template-columns: repeat(3, 1fr); 
-  
+  grid-template-columns: repeat(3, 1fr);
+
   gap: 32px;
   justify-content: center;
-  width: 100%; 
+  width: 100%;
   max-width: 1200px; /* Chiều rộng tối đa vừa phải để 3 cột đẹp */
   margin-bottom: 3rem;
 }
 
-.explore-grid-item { display: flex; justify-content: center; }
+.explore-grid-item {
+  display: flex;
+  justify-content: center;
+}
 
 /* Responsive Grid cho màn hình nhỏ */
 @media (max-width: 1024px) {
@@ -319,49 +414,82 @@
   .explore-grid-container {
     grid-template-columns: 1fr; /* Mobile: 1 cột */
   }
-  
-  .search-bar { height: auto; flex-direction: column; border-radius: 20px; padding: 10px; }
-  .search-divider { display: none; }
-  .search-input-wrapper, .search-location-wrapper { width: 100%; padding: 10px; }
+
+  .search-bar {
+    height: auto;
+    flex-direction: column;
+    border-radius: 20px;
+    padding: 10px;
+  }
+  .search-divider {
+    display: none;
+  }
+  .search-input-wrapper,
+  .search-location-wrapper {
+    width: 100%;
+    padding: 10px;
+  }
 }
 
 /* ==========================================================================
    6. PAGINATION & SELECTED TAGS
    ========================================================================== */
 .selected-tags-container {
-  display: flex; align-items: center; justify-content: center;
-  gap: 1rem; margin-bottom: 2rem; width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  width: 100%;
 }
 .selected-tag-chip {
-  display: flex; align-items: center; gap: 6px; padding: 6px 14px; 
-  background: #e0e7ff; color: #4338ca; border-radius: 20px; font-size: 0.85rem; font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: #e0e7ff;
+  color: #4338ca;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
 }
-.remove-tag-btn, .clear-all-btn { background: transparent; border: none; cursor: pointer; }
-.remove-tag-btn { color: #4338ca; } .clear-all-btn { color: #6b7280; text-decoration: underline; }
+.remove-tag-btn,
+.clear-all-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+.remove-tag-btn {
+  color: #4338ca;
+}
+.clear-all-btn {
+  color: #6b7280;
+  text-decoration: underline;
+}
 
 .pagination-wrapper {
-  display: flex; 
-  justify-content: center; 
+  display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 12px; 
-  margin-top: 30px; 
-  margin-bottom: 10px; 
+  gap: 12px;
+  margin-top: 30px;
+  margin-bottom: 10px;
   width: 100%;
 }
 
 .pagination-scroll {
-  display: flex; 
-  gap: 8px; 
-  
+  display: flex;
+  gap: 8px;
+
   /* --- CẤU HÌNH THANH TRƯỢT (SCROLLBAR) --- */
-  overflow-x: auto;      /* Cho phép cuộn ngang */
-  max-width: 350px;      /* Giới hạn chiều rộng để thanh cuộn xuất hiện nếu nhiều trang */
+  overflow-x: auto; /* Cho phép cuộn ngang */
+  max-width: 350px; /* Giới hạn chiều rộng để thanh cuộn xuất hiện nếu nhiều trang */
   padding: 5px 5px 12px 5px; /* Thêm padding dưới để chứa thanh cuộn */
-  
+
   /* Style cho Firefox */
-  scrollbar-width: thin; 
+  scrollbar-width: thin;
   scrollbar-color: #cbd5e1 transparent;
-  
+
   /* Căn giữa các số */
   align-items: center;
 }
@@ -387,42 +515,44 @@
 }
 
 /* Style nút Prev/Next và Số trang */
-.pagination-btn, .pagination-number {
-  min-width: 40px; 
-  height: 40px; 
-  display: flex; 
-  align-items: center; 
+.pagination-btn,
+.pagination-number {
+  min-width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
   justify-content: center;
-  border-radius: 10px; 
-  border: 1px solid #e5e7eb; 
-  background: #fff; 
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
   cursor: pointer;
-  font-weight: 600; 
-  color: #374151; 
+  font-weight: 600;
+  color: #374151;
   transition: all 0.2s;
-  
+
   /* Đảm bảo nút không bị co méo khi nằm trong flex */
-  flex-shrink: 0; 
+  flex-shrink: 0;
 }
 
-.pagination-btn:hover:not(:disabled), .pagination-number:hover {
-  border-color: #6366f1; 
-  color: #6366f1; 
+.pagination-btn:hover:not(:disabled),
+.pagination-number:hover {
+  border-color: #6366f1;
+  color: #6366f1;
   background: #f9fafb;
   transform: translateY(-2px);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .pagination-number.active {
-  background: #111827; 
-  color: #fff; 
+  background: #111827;
+  color: #fff;
   border-color: #111827;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-.pagination-btn:disabled { 
-  opacity: 0.4; 
-  cursor: default; 
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
   background: #f3f4f6;
   transform: none;
 }
@@ -430,24 +560,43 @@
    7. SECTIONS & EMPTY STATE
    ========================================================================== */
 .section-divider-line {
-  width: 80%; height: 1px;
+  width: 80%;
+  height: 1px;
   background: linear-gradient(to right, transparent, #e2e8f0, transparent);
   margin: 2rem auto;
 }
-.section-header-center { text-align: center; margin-bottom: 2.5rem; }
-.section-header-center h2 { font-size: 2.2rem; color: #1e293b; margin-bottom: 0.5rem; font-weight: 800; }
-.section-header-center p { font-size: 1.1rem; color: #64748b; }
+.section-header-center {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+.section-header-center h2 {
+  font-size: 2.2rem;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+  font-weight: 800;
+}
+.section-header-center p {
+  font-size: 1.1rem;
+  color: #64748b;
+}
 
 .trending-scroll-container {
-  display: flex; gap: 24px; overflow-x: auto;
-  padding: 10px 5px 20px 5px; scroll-snap-type: x mandatory; justify-content: flex-start;
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  padding: 10px 5px 20px 5px;
+  scroll-snap-type: x mandatory;
+  justify-content: flex-start;
 }
-.trending-card-wrapper { min-width: 320px; scroll-snap-align: start; }
+.trending-card-wrapper {
+  min-width: 320px;
+  scroll-snap-align: start;
+}
 
 .region-cards-grid {
   display: grid;
   /* Cố định 3 cột trên màn hình lớn */
-  grid-template-columns: repeat(3, 1fr); 
+  grid-template-columns: repeat(3, 1fr);
   gap: 30px;
   justify-content: center;
   width: 100%;
@@ -459,7 +608,7 @@
   position: relative;
   overflow: hidden;
   cursor: pointer;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   background-size: cover;
   background-position: center;
@@ -467,13 +616,18 @@
 
 .region-card:hover {
   transform: translateY(-10px) scale(1.02);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
 }
 
 .region-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.1), transparent);
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.8),
+    rgba(0, 0, 0, 0.1),
+    transparent
+  );
   transition: opacity 0.3s;
 }
 
@@ -490,28 +644,28 @@
   font-size: 2.2rem;
   margin: 0 0 12px 0;
   font-weight: 800;
-  text-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  text-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
 }
 
 .region-content span {
   font-size: 1.1rem;
   font-weight: 600;
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
   padding: 8px 16px;
   border-radius: 30px;
   backdrop-filter: blur(5px);
-  border: 1px solid rgba(255,255,255,0.4);
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 /* Ảnh nền chất lượng cao (Unsplash) */
 .card-north {
-  background-image: url('https://images.unsplash.com/photo-1506665531195-3566af2b4dfa?q=80&w=2670&auto=format&fit=crop'); /* Hạ Long Bay - Rất nét */
+  background-image: url("https://images.unsplash.com/photo-1506665531195-3566af2b4dfa?q=80&w=2670&auto=format&fit=crop"); /* Hạ Long Bay - Rất nét */
 }
 .card-central {
-  background-image: url('https://image.vietgoing.com/destination/2024/1_20240105143218.jpg'); /* Hội An */
+  background-image: url("https://image.vietgoing.com/destination/2024/1_20240105143218.jpg"); /* Hội An */
 }
 .card-south {
-  background-image: url('https://dulichhaugiang.com.vn/wp-content/uploads/2025/07/hinh-anh-mien-tay-1.jpg'); /* Miền Tây sông nước - Rất nét */
+  background-image: url("https://dulichhaugiang.com.vn/wp-content/uploads/2025/07/hinh-anh-mien-tay-1.jpg"); /* Miền Tây sông nước - Rất nét */
 }
 
 /* Responsive cho Tablet & Mobile */
@@ -525,21 +679,50 @@
   .region-cards-grid {
     grid-template-columns: 1fr; /* 1 cột trên Mobile */
   }
-  .region-card { height: 300px; }
+  .region-card {
+    height: 300px;
+  }
 }
 
 .region-content span {
-  font-size: 1.1rem; font-weight: 500; background: rgba(255,255,255,0.2);
-  padding: 6px 12px; border-radius: 20px; backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.3);
+  font-size: 1.1rem;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 6px 12px;
+  border-radius: 20px;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.empty-state-container { display: flex; flex-direction: column; align-items: center; padding: 4rem 20px; text-align: center; }
-.empty-state-img { width: 180px; opacity: 0.8; margin-bottom: 1.5rem; }
+.empty-state-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4rem 20px;
+  text-align: center;
+}
+.empty-state-img {
+  width: 180px;
+  opacity: 0.8;
+  margin-bottom: 1.5rem;
+}
 .empty-state-btn {
-  padding: 12px 24px; background: #4f46e5; color: white; border: none;
-  border-radius: 50px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+  padding: 12px 24px;
+  background: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 @keyframes dropdownFadeIn {
-  from { opacity: 0; transform: translate(-50%, -10px) scale(0.95); }
-  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translate(-50%, -10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
 }
