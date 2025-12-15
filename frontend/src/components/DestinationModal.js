@@ -1,12 +1,20 @@
+// DestinationModal.js - MERGED: Giữ tính năng AI từ remote + UI improvements từ local
+
 import React, { useEffect, useState } from "react";
 import { FaTimes, FaMapMarkerAlt, FaClock, FaMoneyBillWave, FaTag, FaExternalLinkAlt, FaMapPin, FaChevronLeft, FaChevronRight, FaImages } from "react-icons/fa";
 import "./DestinationModal.css";
 
-export default function DestinationModal({ destination, onClose, onCreateTrip }) {
+// ✅ THÊM PROP từ local: hideCreateButton (default = false)
+export default function DestinationModal({ 
+  destination, 
+  onClose, 
+  onCreateTrip,
+  hideCreateButton = false  // 🔥 PROP MỚI từ local
+}) {
   const [showImageViewer, setShowImageViewer] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // ✅ FIX: ESC key chỉ đóng image viewer, KHÔNG đóng modal chính
+  // ✅ FIX từ remote: ESC key chỉ đóng image viewer, KHÔNG đóng modal chính
   useEffect(() => {
     const handleEsc = (e) => {
       if (e.key === "Escape") {
@@ -33,7 +41,7 @@ export default function DestinationModal({ destination, onClose, onCreateTrip })
 
   if (!destination) return null;
 
-  // --- HÀM TÌM DỮ LIỆU THÔNG MINH ---
+  // --- HÀM TÌM DỮ LIỆU THÔNG MINH (từ remote) ---
   const findValue = (obj, keywords) => {
     if (!obj) return null;
     for (const key of keywords) {
@@ -63,7 +71,7 @@ export default function DestinationModal({ destination, onClose, onCreateTrip })
 
   const coverImage = allImages.length > 0 ? allImages[0] : null;
 
-  // --- XỬ LÝ MÔ TẢ ---
+  // --- XỬ LÝ MÔ TẢ (từ remote) ---
   const processDescription = (desc) => {
     if (!desc) return null;
     
@@ -92,7 +100,7 @@ export default function DestinationModal({ destination, onClose, onCreateTrip })
 
   const descriptionList = processDescription(destination.description);
 
-  // --- ĐỊNH DẠNG ---
+  // --- ĐỊNH DẠNG (từ remote) ---
   const formatPrice = (value) => {
     if (value === null || value === undefined) return "Đang cập nhật";
     const stringVal = String(value).toLowerCase();
@@ -124,13 +132,13 @@ export default function DestinationModal({ destination, onClose, onCreateTrip })
 
   const processedTags = processDescription(destination.tags);
 
-  // --- XỬ LÝ IMAGE VIEWER ---
+  // --- XỬ LÝ IMAGE VIEWER (từ remote) ---
   const openImageViewer = (index) => {
     setCurrentImageIndex(index);
     setShowImageViewer(true);
   };
 
-  // ✅ FIX: Đóng image viewer KHÔNG đóng modal chính
+  // ✅ FIX từ remote: Đóng image viewer KHÔNG đóng modal chính
   const closeImageViewer = () => {
     setShowImageViewer(false);
   };
@@ -270,21 +278,26 @@ export default function DestinationModal({ destination, onClose, onCreateTrip })
             )}
           </div>
 
+          {/* 🔥 FOOTER - ẨN NÚT "Tạo chuyến đi" KHI hideCreateButton = true (từ local) */}
           <div className="modal-footer">
             <button className="modal-btn secondary" onClick={onClose}>Đóng</button>
-            <button 
-              className="modal-btn primary"
-              onClick={() => {
-                if(onCreateTrip) onCreateTrip(destination);
-              }}
-            >
-              Tạo chuyến đi
-            </button>
+            
+            {/* 🔥 CHỈ HIỂN THỊ KHI hideCreateButton = false */}
+            {!hideCreateButton && (
+              <button 
+                className="modal-btn primary"
+                onClick={() => {
+                  if(onCreateTrip) onCreateTrip(destination);
+                }}
+              >
+                Tạo chuyến đi
+              </button>
+            )}
           </div>
         </div>
       </div>
 
-      {/* ✅ IMAGE VIEWER OVERLAY - RIÊNG BIỆT, KHÔNG ĐÓNG MODAL CHÍNH */}
+      {/* ✅ IMAGE VIEWER OVERLAY - RIÊNG BIỆT, KHÔNG ĐÓNG MODAL CHÍNH (từ remote) */}
       {showImageViewer && allImages.length > 0 && (
         <div 
           className="image-viewer-overlay" 

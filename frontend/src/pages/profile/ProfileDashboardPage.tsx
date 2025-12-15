@@ -8,8 +8,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { SidebarNavigation } from "../../components/profile/SidebarNavigation";
-import { StatsCard } from "../../components/profile/StatsCard";
+import { SidebarNavigation } from "../../components/Profile/SidebarNavigation";
+import { StatsCard } from "../../components/Profile/StatsCard";
 
 const stats = [
   {

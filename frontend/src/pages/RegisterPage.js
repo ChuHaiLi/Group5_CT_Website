@@ -16,6 +16,8 @@ import GoogleLoginButton from "../components/GoogleLoginButton";
 import GitHubLoginButton from "../components/GitHubLoginButton";
 import "../styles/AuthForm.css";
 
+const DEFAULT_AVATAR = "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80";
+
 export default function RegisterPage({ setIsAuthenticated }) {
   const [form, setForm] = useState({
     username: "",
@@ -104,6 +106,24 @@ export default function RegisterPage({ setIsAuthenticated }) {
       email: form.email,
       password: form.password,
     });
+    
+    const userData = {
+        id: res.data.user?.id || null,
+        username: res.data.user?.username || form.username,
+        email: res.data.user?.email || form.email,
+        avatar: res.data.user?.avatar || DEFAULT_AVATAR,
+        phone: res.data.user?.phone || "",
+      };
+
+      // Save to localStorage
+      localStorage.setItem("user", JSON.stringify(userData));
+
+      // Broadcast profile update event immediately
+      window.dispatchEvent(
+        new CustomEvent("wonder-profile-updated", { 
+          detail: userData 
+        })
+      );
 
     toast.success(res.data.message || "Registration successful! Check your email. 📧");
     

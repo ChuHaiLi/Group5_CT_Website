@@ -85,7 +85,7 @@ export default function Footer() {
             </li>
             <li>
               <FaPhoneAlt />
-              <a href="tel:+15559876543">+1 555 987 6543</a>
+              <a href="tel:+84 99999 99999">+84 99999 99999</a>
             </li>
             <li>
               <FaMapMarkerAlt />

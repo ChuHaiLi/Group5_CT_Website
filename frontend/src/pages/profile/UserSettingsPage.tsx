@@ -1,6 +1,6 @@
 import React, { ChangeEvent, FormEvent, useState } from "react";
-import { AvatarUpload } from "../../components/profile/AvatarUpload";
-import { SidebarNavigation } from "../../components/profile/SidebarNavigation";
+import { AvatarUpload } from "../../components/Profile/AvatarUpload";
+import { SidebarNavigation } from "../../components/Profile/SidebarNavigation";
 
 type UserProfile = {
   username: string;

@@ -10,6 +10,8 @@ import {
 import API from "../../untils/axios";
 import { useClickOutside } from "../../hooks/useClickOutside"; 
 import "./Navbar.css";
+import ProfileDropdown from "../Profile/ProfileDropdown"
+
 import logo from "./assets/logo.png";
 
 export default function Navbar() {
@@ -119,34 +121,11 @@ export default function Navbar() {
       {/* Right user avatar / login */}
       <div className="navbar-right">
         {token ? (
-          <div className="profile-dropdown-wrapper" ref={dropdownRef}> 
-            {/* Avatar trigger */}
-            <div
-              className="profile-trigger"
-              onClick={() => setDropdownOpen((prev) => !prev)}
-            >
-              {user?.avatar ? (
-                <img src={user.avatar} alt="avatar" className="navbar-avatar" />
-              ) : (
-                <FaUserCircle className="navbar-avatar-icon" />
-              )}
-            </div>
-
-            {/* Dropdown menu */}
-            {dropdownOpen && (
-              <div className="dropdown-menu">
-                <button 
-                  onClick={() => {
-                    setDropdownOpen(false); 
-                    navigate("/profile");
-                  }}
-                >
-                  👤 Profile
-                </button>
-                <button onClick={handleLogout}>🚪 Logout</button>
-              </div>
-            )}
-          </div>
+          // Sử dụng component ProfileDropdown mới
+          <ProfileDropdown 
+            user={user}
+            onLogout={handleLogout}
+          />
         ) : (
           <>
             <NavLink to="/login">Login</NavLink>

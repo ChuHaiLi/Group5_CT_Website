@@ -58,6 +58,9 @@ class User(db.Model):
     verification_token = db.Column(db.String(200), nullable=True)  
     pending_email = db.Column(db.String(120), nullable=True)
 
+    # Phone verification 
+    is_phone_verified = db.Column(db.Boolean, default=False)
+
     # Password reset
     reset_token = db.Column(db.String(200), nullable=True)
     reset_token_expiry = db.Column(db.DateTime, nullable=True)  

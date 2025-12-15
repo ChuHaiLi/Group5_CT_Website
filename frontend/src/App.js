@@ -32,8 +32,7 @@ import Footer from "./components/Footer/Footer";
 import { PageContext } from "./context/PageContext";
 import HowItWorksPanel from "./components/HowItWorks/HowItWorksPanel";
 import "./App.css";
-
-const GOOGLE_CLIENT_ID = "587186101518-cv410npc301f93m0r6f8558bsl27h3pd.apps.googleusercontent.com";
+import { GOOGLE_CLIENT_ID } from './config';
 
 // ------------------- PrivateRoute -------------------
 function PrivateRoute({ isAuthenticated, children }) {
