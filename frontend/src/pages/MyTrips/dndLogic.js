@@ -103,11 +103,12 @@ export const rebuildDay = async (places, opts = {}) => {
     return result;
 };
 
-// --- RECALCULATE TIME SLOTS (Giữ lại từ remote - hỗ trợ AI time calculation) ---
+// --- HÀM TỰ ĐỘNG TÍNH TOÁN GIỜ (AUTO-TIME) ---
 const getDuration = (item) => {
-    if (item.id === 'LUNCH' || item.category === 'Ăn uống') return 60;
-    if (item.id === 'TRAVEL' || item.category === 'Di chuyển') return 45;
-    return 90;
+    // Thời lượng mặc định cho các loại hoạt động
+    if (item.id === 'LUNCH' || item.category === 'Ăn uống') return 60; // 60 phút
+    if (item.id === 'TRAVEL' || item.category === 'Di chuyển') return 45; // 45 phút
+    return 90; // Địa điểm (DEFAULT): 90 phút (1.5 giờ)
 };
 
 const formatTime = (ms) => {
@@ -119,12 +120,12 @@ const formatTime = (ms) => {
 
 /**
  * Tái tính toán khung giờ cho toàn bộ lịch trình.
- * ✅ HỖ TRỢ AI: Nếu item có start_time từ AI, sử dụng nó; nếu không, tính tự động từ 8:00.
+ * Nếu item có start_time từ AI, sử dụng nó; nếu không, tính tự động từ 8:00.
  * @param {Array} itinerary - Dữ liệu lịch trình (mảng các dayPlan)
  * @returns {Array} Lịch trình đã cập nhật khung giờ
  */
 export const recalculateTimeSlots = (itinerary) => {
-    const DEFAULT_START_TIME_MS = 8 * 60 * 60 * 1000; // Bắt đầu lúc 8:00 AM
+    const DEFAULT_START_TIME_MS = 8 * 60 * 60 * 1000; // Bắt đầu lúc 8:00 AM (8 giờ * 60 phút * 60 giây * 1000 ms)
 
     return itinerary.map(dayPlan => {
         // DO NOT SORT - preserve the exact order from AI
@@ -177,43 +178,69 @@ export const recalculateTimeSlots = (itinerary) => {
             
             // If both start_time and end_time are provided, use them directly
             if (hasExplicitTime && endTimeMs !== null) {
-                const timeSlot = `${formatTime(startTimeMs)}-${formatTime(endTimeMs)}`;
+                const newTimeSlot = `${formatTime(startTimeMs)}-${formatTime(endTimeMs)}`;
                 currentTimeMs = Math.max(currentTimeMs, endTimeMs);
                 return {
                     ...item,
-                    time_slot: timeSlot,
+                    time_slot: newTimeSlot,
                     start_time: formatTime(startTimeMs),
                     end_time: formatTime(endTimeMs),
                 };
             }
             
-            // Get duration from item or calculate default
-            let durationMinutes;
-            if (item.duration_hours) {
-                durationMinutes = item.duration_hours * 60;
-            } else if (item.duration_min) {
-                durationMinutes = item.duration_min;
-            } else {
-                durationMinutes = getDuration(item);
+            // If time_slot is already complete but we have end_time from AI, use it
+            if (item.end_time && typeof item.end_time === 'string' && hasExplicitTime) {
+                const endTimeMatch = item.end_time.match(/(\d{1,2}):(\d{2})/);
+                if (endTimeMatch) {
+                    const hours = parseInt(endTimeMatch[1], 10);
+                    const minutes = parseInt(endTimeMatch[2], 10);
+                    endTimeMs = (hours * 60 + minutes) * 60 * 1000;
+                    const newTimeSlot = `${formatTime(startTimeMs)}-${formatTime(endTimeMs)}`;
+                    currentTimeMs = Math.max(currentTimeMs, endTimeMs);
+                    return {
+                        ...item,
+                        time_slot: newTimeSlot,
+                        start_time: formatTime(startTimeMs),
+                        end_time: formatTime(endTimeMs),
+                    };
+                }
             }
             
             // If only start_time is provided, calculate end_time from duration
             if (hasExplicitTime) {
+                let durationMinutes;
+                if (item.duration_hours) {
+                    durationMinutes = item.duration_hours * 60;
+                } else if (item.duration_min) {
+                    durationMinutes = item.duration_min;
+                } else {
+                    durationMinutes = getDuration(item);
+                }
+                
                 const durationMs = durationMinutes * 60 * 1000;
                 endTimeMs = startTimeMs + durationMs;
                 currentTimeMs = Math.max(currentTimeMs, endTimeMs);
             } else {
                 // No explicit time, calculate sequentially
+                let durationMinutes;
+                if (item.duration_hours) {
+                    durationMinutes = item.duration_hours * 60;
+                } else if (item.duration_min) {
+                    durationMinutes = item.duration_min;
+                } else {
+                    durationMinutes = getDuration(item);
+                }
+                
                 const durationMs = durationMinutes * 60 * 1000;
                 endTimeMs = startTimeMs + durationMs;
                 currentTimeMs = endTimeMs;
             }
             
-            const timeSlot = `${formatTime(startTimeMs)}-${formatTime(endTimeMs)}`;
+            const newTimeSlot = `${formatTime(startTimeMs)}-${formatTime(endTimeMs)}`;
             
             return {
                 ...item,
-                time_slot: timeSlot,
+                time_slot: newTimeSlot,
                 start_time: formatTime(startTimeMs),
             };
         });
