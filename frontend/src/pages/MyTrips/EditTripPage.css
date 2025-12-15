@@ -980,7 +980,7 @@
     .confirm-modal-actions button {
         max-width: none;
     }
-}
+
 
 @media (max-width: 480px) {
     .edit-trip-container {
