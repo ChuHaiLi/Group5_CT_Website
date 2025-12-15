@@ -406,27 +406,35 @@
   .ai-modal-footer {
     display: flex;
     justify-content: flex-end;
-    gap: 8px;
+    align-items: center;
+    gap: 10px;
   }
   
   .apply-btn {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
-    padding: 0.6rem 1.25rem;
+    padding: 10px 20px;
+    min-width: 160px;
     border: none;
     border-radius: 10px;
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 14px;
     cursor: pointer;
     transition: all 0.3s ease;
     color: white;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   }
   
-  .apply-btn:hover {
+  .apply-btn:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+  }
+  
+  .apply-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
   
   .close-btn {
@@ -435,18 +443,40 @@
     border-radius: 10px;
     color: white;
     font-weight: 600;
-    padding: 0.6rem 1.25rem;
+    padding: 10px 20px;
+    min-width: 100px;
     cursor: pointer;
     transition: all 0.3s ease;
+    font-size: 14px;
   }
   
   .close-btn:hover {
-    background: #da3434;
+    background: #c82333;
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
   }
   
-  .apply-but .close-btn:hover:not(:disabled) {
+  .add-btn {
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 50px !important;
+    min-width: 80px;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+  }
+  
+  .add-btn:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+  }
+  
+  .add-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
