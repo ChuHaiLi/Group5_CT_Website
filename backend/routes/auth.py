@@ -13,6 +13,8 @@ from utils.email_utils import send_email, generate_otp
 
 auth_bp = Blueprint("auth", __name__)
 
+DEFAULT_AVATAR = "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80"
+
 def is_valid_email(email):
     return re.match(r"[^@]+@[^@]+\.[^@]+", email)
 
@@ -48,6 +50,7 @@ def register():
         username=username, 
         email=email, 
         password=hashed_pw, 
+        avatar_url=DEFAULT_AVATAR,
         is_email_verified=False,
         verification_token=otp_code,
         reset_token_expiry=datetime.utcnow() + timedelta(minutes=10)
@@ -97,7 +100,14 @@ def register():
     return jsonify({
         "message": "Registration successful! Please check your email for verification code.",
         "email": email,
-        "requires_verification": True
+        "requires_verification": True,
+        "user": {  
+            "id": new_user.id,
+            "username": new_user.username,
+            "email": new_user.email,
+            "avatar": new_user.avatar_url,
+            "phone": "",
+        }
     }), 201
 
 # -------- VERIFY EMAIL --------
@@ -220,6 +230,267 @@ def resend_verification():
         "success": True
     }), 200
 
+# -------- Email change verify --------
+@auth_bp.route("/request-email-change", methods=["POST"])
+@jwt_required()
+def request_email_change():
+    """
+    Gửi OTP đến email mới khi user muốn thay đổi email trong profile
+    """
+    data = request.get_json() or {}
+    user_id = int(get_jwt_identity())
+    new_email = (data.get("new_email") or "").strip().lower()
+    
+    user = db.session.get(User, user_id)
+    
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+    
+    # Validate email format
+    if not is_valid_email(new_email):
+        return jsonify({"message": "Invalid email format"}), 400
+    
+    # Kiểm tra email đã tồn tại chưa
+    if User.query.filter(db.func.lower(User.email) == new_email, User.id != user_id).first():
+        return jsonify({"message": "Email already exists"}), 400
+    
+    # Kiểm tra cooldown (60 giây)
+    if user.reset_token_expiry:
+        time_since_last = datetime.utcnow() - (user.reset_token_expiry - timedelta(minutes=10))
+        if time_since_last.total_seconds() < 60:
+            return jsonify({
+                "message": "Please wait before requesting a new code.",
+                "wait_seconds": 60 - int(time_since_last.total_seconds())
+            }), 429
+    
+    # Tạo OTP
+    otp_code = generate_otp(6)
+    
+    # Lưu OTP và email mới tạm thời (dùng field pending_email)
+    user.verification_token = otp_code
+    user.reset_token_expiry = datetime.utcnow() + timedelta(minutes=10)
+    
+    # Lưu email mới vào field tạm (cần thêm column này vào DB)
+    # Hoặc dùng metadata_json để lưu
+    user.pending_email = new_email  # 🔥 CẦN THÊM COLUMN NÀY VÀO MODEL User
+    
+    db.session.commit()
+    
+    # Gửi email OTP
+    email_html = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <h2 style="color: #2196F3; text-align: center;">Verify Your New Email</h2>
+                
+                <p>Hi <strong>{user.username}</strong>,</p>
+                
+                <p>You've requested to change your email address to <strong>{new_email}</strong>. Please verify this email using the code below:</p>
+                
+                <div style="background-color: #e3f2fd; border: 2px dashed #2196F3; border-radius: 8px; padding: 20px; text-align: center; margin: 30px 0;">
+                    <p style="margin: 0; color: #666; font-size: 14px;">Your verification code:</p>
+                    <h1 style="margin: 10px 0; color: #2196F3; font-size: 48px; letter-spacing: 8px; font-family: 'Courier New', monospace;">
+                        {otp_code}
+                    </h1>
+                </div>
+                
+                <p style="color: #f44336; font-weight: bold;">⏰ This code will expire in 10 minutes.</p>
+                
+                <p style="color: #666; font-size: 14px;">If you didn't request this change, please ignore this email or contact support immediately.</p>
+                
+                <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;">
+                
+                <p style="color: #999; font-size: 12px; text-align: center;">
+                    This is an automated message, please do not reply.
+                </p>
+            </div>
+        </body>
+    </html>
+    """
+    
+    send_email(new_email, "Verify Your New Email Address", email_html)
+    
+    return jsonify({
+        "message": "A verification code has been sent to your new email address.",
+        "new_email": new_email,
+        "requires_verification": True
+    }), 200
+
+    """
+    Gá»­i OTP Ä‘áº¿n email má»›i khi user muá»‘n thay Ä‘á»•i email trong profile
+    """
+    data = request.get_json() or {}
+    user_id = int(get_jwt_identity())
+    new_email = (data.get("new_email") or "").strip().lower()
+    
+    user = db.session.get(User, user_id)
+    
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+    
+    # Validate email format
+    if not is_valid_email(new_email):
+        return jsonify({"message": "Invalid email format"}), 400
+    
+    # Kiá»ƒm tra email Ä‘Ã£ tá»“n táº¡i chÆ°a
+    if User.query.filter(db.func.lower(User.email) == new_email, User.id != user_id).first():
+        return jsonify({"message": "Email already exists"}), 400
+    
+    # Kiá»ƒm tra cooldown (60 giÃ¢y)
+    if user.reset_token_expiry:
+        time_since_last = datetime.utcnow() - (user.reset_token_expiry - timedelta(minutes=10))
+        if time_since_last.total_seconds() < 60:
+            return jsonify({
+                "message": "Please wait before requesting a new code.",
+                "wait_seconds": 60 - int(time_since_last.total_seconds())
+            }), 429
+    
+    # Táº¡o OTP
+    otp_code = generate_otp(6)
+    
+    # LÆ°u OTP vÃ  email má»›i táº¡m thá»i (dÃ¹ng field pending_email)
+    user.verification_token = otp_code
+    user.reset_token_expiry = datetime.utcnow() + timedelta(minutes=10)
+    
+    # LÆ°u email má»›i vÃ o field táº¡m (cáº§n thÃªm column nÃ y vÃ o DB)
+    # Hoáº·c dÃ¹ng metadata_json Ä‘á»ƒ lÆ°u
+    user.pending_email = new_email  # ðŸ”¥ Cáº¦N THÃŠM COLUMN NÃ€Y VÃ€O MODEL User
+    
+    db.session.commit()
+    
+    # Gá»­i email OTP
+    email_html = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <h2 style="color: #2196F3; text-align: center;">Verify Your New Email</h2>
+                
+                <p>Hi <strong>{user.username}</strong>,</p>
+                
+                <p>You've requested to change your email address to <strong>{new_email}</strong>. Please verify this email using the code below:</p>
+                
+                <div style="background-color: #e3f2fd; border: 2px dashed #2196F3; border-radius: 8px; padding: 20px; text-align: center; margin: 30px 0;">
+                    <p style="margin: 0; color: #666; font-size: 14px;">Your verification code:</p>
+                    <h1 style="margin: 10px 0; color: #2196F3; font-size: 48px; letter-spacing: 8px; font-family: 'Courier New', monospace;">
+                        {otp_code}
+                    </h1>
+                </div>
+                
+                <p style="color: #f44336; font-weight: bold;">â° This code will expire in 10 minutes.</p>
+                
+                <p style="color: #666; font-size: 14px;">If you didn't request this change, please ignore this email or contact support immediately.</p>
+                
+                <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;">
+                
+                <p style="color: #999; font-size: 12px; text-align: center;">
+                    This is an automated message, please do not reply.
+                </p>
+            </div>
+        </body>
+    </html>
+    """
+    
+    send_email(new_email, "Verify Your New Email Address", email_html)
+    
+    return jsonify({
+        "message": "A verification code has been sent to your new email address.",
+        "new_email": new_email,
+        "requires_verification": True
+    }), 200
+
+
+@auth_bp.route("/verify-email-change", methods=["POST"])
+@jwt_required()
+def verify_email_change():
+    """
+    Xác nhận OTP và thay đổi email chính thức
+    """
+    data = request.get_json() or {}
+    user_id = int(get_jwt_identity())
+    otp_code = data.get("otp_code", "").strip()
+    
+    user = db.session.get(User, user_id)
+    
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+    
+    if not user.pending_email:
+        return jsonify({"message": "No pending email change request"}), 400
+    
+    # Kiểm tra OTP
+    if user.verification_token != otp_code:
+        return jsonify({
+            "message": "Invalid verification code",
+            "error_type": "invalid_otp"
+        }), 400
+    
+    # Kiểm tra hết hạn
+    if not user.reset_token_expiry or user.reset_token_expiry < datetime.utcnow():
+        return jsonify({
+            "message": "Verification code has expired",
+            "error_type": "otp_expired"
+        }), 400
+    
+    # Xác minh thành công - Cập nhật email
+    old_email = user.email
+    user.email = user.pending_email
+    user.pending_email = None
+    user.verification_token = None
+    user.reset_token_expiry = None
+    user.updated_at = datetime.utcnow()
+    
+    db.session.commit()
+    
+    return jsonify({
+        "message": "Email changed successfully!",
+        "new_email": user.email,
+        "old_email": old_email
+    }), 200
+    """
+    XÃ¡c nháº­n OTP vÃ  thay Ä‘á»•i email chÃ­nh thá»©c
+    """
+    data = request.get_json() or {}
+    user_id = int(get_jwt_identity())
+    otp_code = data.get("otp_code", "").strip()
+    
+    user = db.session.get(User, user_id)
+    
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+    
+    if not user.pending_email:
+        return jsonify({"message": "No pending email change request"}), 400
+    
+    # Kiá»ƒm tra OTP
+    if user.verification_token != otp_code:
+        return jsonify({
+            "message": "Invalid verification code",
+            "error_type": "invalid_otp"
+        }), 400
+    
+    # Kiá»ƒm tra háº¿t háº¡n
+    if not user.reset_token_expiry or user.reset_token_expiry < datetime.utcnow():
+        return jsonify({
+            "message": "Verification code has expired",
+            "error_type": "otp_expired"
+        }), 400
+    
+    # XÃ¡c minh thÃ nh cÃ´ng - Cáº­p nháº­t email
+    old_email = user.email
+    user.email = user.pending_email
+    user.pending_email = None
+    user.verification_token = None
+    user.reset_token_expiry = None
+    user.updated_at = datetime.utcnow()
+    
+    db.session.commit()
+    
+    return jsonify({
+        "message": "Email changed successfully!",
+        "new_email": user.email,
+        "old_email": old_email
+    }), 200
+
 # -------- LOGIN --------
 @auth_bp.route("/login", methods=["POST"])
 def login():
@@ -275,6 +546,8 @@ def login():
     access_token = create_access_token(identity=str(user.id))
     refresh_token = create_refresh_token(identity=str(user.id))
 
+    avatar = user.avatar_url or user.picture or DEFAULT_AVATAR
+
     return jsonify({
         "message": "Login successful",
         "access_token": access_token,
@@ -284,7 +557,7 @@ def login():
             "username": user.username,
             "email": user.email,
             "phone": user.phone or "",
-            "avatar": user.avatar_url or user.picture or "",
+            "avatar": avatar,
         }
     }), 200
 
@@ -305,7 +578,7 @@ def me():
     if not user:
         return jsonify({"message": "User not found"}), 404
     
-    avatar = user.avatar_url or user.picture or ""
+    avatar = user.avatar_url or user.picture or DEFAULT_AVATAR
     
     return jsonify({
         "id": user.id,

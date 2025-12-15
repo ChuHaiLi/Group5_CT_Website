@@ -68,3 +68,11 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+## Reading a central `.env` from repo root
+
+This project supports keeping a single `.env` file at the repository root (same level as `frontend/` and `backend/`).
+
+When you run `npm start` or `npm run build` in `frontend`, the script at `scripts/load-root-env.js` will copy the FIREBASE and GOOGLE values from the repo root `.env` into `frontend/.env.local` (prefixed as `REACT_APP_*`) so Create React App can pick them up at build/dev time.
+
+If you prefer to manage `frontend/.env.local` manually you can skip this — the script runs only before start/build and will not add variables that are missing from the repo root `.env`.

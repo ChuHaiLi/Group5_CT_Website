@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import API from "../untils/axios";
+import PhoneVerification from './PhoneVerification';
 import "../styles/ProfilePage.css";
 
 import { 
@@ -45,7 +46,7 @@ export default function ProfilePage() {
     tabParam === "dashboard" || tabParam === "settings" ? tabParam : "settings";
   const [activeSection, setActiveSection] = useState(initialTab);
 
-  // ← NEW: Scroll sections
+  // Scroll sections
   const [activeScrollSection, setActiveScrollSection] = useState("account");
   const accountSectionRef = useRef(null);
   const personalInfoSectionRef = useRef(null);
@@ -65,6 +66,9 @@ export default function ProfilePage() {
   const [isGoogleUser, setIsGoogleUser] = useState(false);
   const [isGitHubUser, setIsGitHubUser] = useState(false); 
   
+   // Phone verification state
+  const [showPhoneVerification, setShowPhoneVerification] = useState(false);
+
   // Validation states
   const [touched, setTouched] = useState({
     email: false,
@@ -334,14 +338,21 @@ export default function ProfilePage() {
     setModified(prev => ({ ...prev, accountId: false }));
   };
 
-  const handleCancelPersonalInfo = () => {
+  const handleCancelEmail = () => {
     setProfileData(prev => ({ 
       ...prev, 
-      email: originalData.email,
-      phone: originalData.phone 
+      email: originalData.email
     }));
     setTouched(prev => ({ ...prev, email: false }));
-    setModified(prev => ({ ...prev, personalInfo: false }));
+    setModified(prev => ({ ...prev, personalInfo: false })); 
+  };
+
+  const handleCancelPhone = () => {
+    setProfileData(prev => ({ 
+      ...prev, 
+      phone: originalData.phone
+    }));
+    setModified(prev => ({ ...prev, personalInfo: false })); 
   };
 
   const handleCancelPassword = () => {
@@ -436,7 +447,7 @@ export default function ProfilePage() {
         }
       });
       
-      return; // 🔥 QUAN TRỌNG: Dừng tại đây, không chạy phần save bên dưới
+      return; // Dừng tại đây, không chạy phần save bên dưới
       
     } catch (error) {
       console.error("Request email change error:", error);
@@ -453,6 +464,15 @@ export default function ProfilePage() {
     
     return; // Dừng tại đây
   }
+    } else if (section === 'phone') {
+      // Show phone verification modal
+      if (!profileData.phone || !profileData.phone.trim()) {
+        toast.error("Please enter a phone number.");
+        return;
+      }
+      
+      setShowPhoneVerification(true);
+      return;
     } else if (section === 'password') {
       setTouched({
         email: touched.email,
@@ -819,7 +839,7 @@ export default function ProfilePage() {
           </form>
 
           {/* PERSONAL INFORMATION SECTION */}
-          <form className="settings-form" onSubmit={(e) => handleSaveProfile(e, 'personalInfo')}>
+          <div className="settings-form">
             <div ref={personalInfoSectionRef} className="form-section" id="section-personal-info">
               <div className="section-header">
                 <h2 className="form-section__title">
@@ -832,82 +852,104 @@ export default function ProfilePage() {
               </div>
 
               {/* Email */}
-              <label className="form-field">
-                <span className="form-field__label">
-                  <FaEnvelope className="field-icon" /> 
-                  <span>Email Address</span>
-                  <span className="field-badge">Required</span>
-                </span>
-                <div className="input-wrapper">
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={profileData.email}
-                    onChange={handleInputChange}
-                    onBlur={() => handleBlur('email')}
-                    placeholder="hellowonderai@gmail.com"
-                    className="form-input"
-                  />
-                </div>
-                {!validation.emailValid && profileData.email.length > 0 && (
-                  <div className="validation-message error">
-                    <FaTimesCircle />
-                    <span>Please enter a valid email address</span>
+              <form onSubmit={(e) => handleSaveProfile(e, 'personalInfo')}>
+                <label className="form-field">
+                  <span className="form-field__label">
+                    <FaEnvelope className="field-icon" /> 
+                    <span>Email Address</span>
+                    <span className="field-badge">Required</span>
+                  </span>
+                  <div className="input-wrapper">
+                    <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={profileData.email}
+                      onChange={handleInputChange}
+                      onBlur={() => handleBlur('email')}
+                      placeholder="hellowonderai@gmail.com"
+                      className="form-input"
+                    />
                   </div>
-                )}
-              </label>
+                  {!validation.emailValid && profileData.email.length > 0 && (
+                    <div className="validation-message error">
+                      <FaTimesCircle />
+                      <span>Please enter a valid email address</span>
+                    </div>
+                  )}
+                </label>
+
+                <div className="button-group">
+                  {modified.personalInfo && (
+                    <button
+                      type="button"
+                      onClick={handleCancelEmail}
+                      className="secondary-button"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                  <button
+                    type="submit"
+                    className="primary-button"
+                    disabled={savingProfile || !validation.emailValid || !modified.personalInfo}
+                  >
+                    {savingProfile 
+                      ? "Processing..." 
+                      : (profileData.email.toLowerCase() !== originalData.email.toLowerCase()
+                          ? "Send Verification Code" 
+                          : "Save Changes"
+                        )
+                    }
+                  </button>
+                </div>
+              </form>
 
               {/* Phone */}
-              <label className="form-field">
-                <span className="form-field__label">
-                  <FaPhone className="field-icon" /> 
-                  <span>Phone Number</span>
-                  <span className="field-badge optional">Optional</span>
-                </span>
-                <div className="input-wrapper">
-                  <input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    value={profileData.phone}
-                    onChange={handleInputChange}
-                    placeholder="+84 99999 99999"
-                    className="form-input"
-                  />
-                  <span className="input-hint">
-                    📱 Used for account recovery and notifications
+              <form onSubmit={(e) => handleSaveProfile(e, 'phone')} style={{ marginTop: '30px' }}>
+                <label className="form-field">
+                  <span className="form-field__label">
+                    <FaPhone className="field-icon" /> 
+                    <span>Phone Number</span>
+                    <span className="field-badge optional">Optional</span>
                   </span>
-                </div>
-              </label>
+                  <div className="input-wrapper">
+                    <input
+                      id="phone"
+                      name="phone"
+                      type="tel"
+                      value={profileData.phone}
+                      onChange={handleInputChange}
+                      placeholder="+84 99999 99999"
+                      className="form-input"
+                    />
+                    <span className="input-hint">
+                      📱 Format: 0987654321 or +84987654321
+                    </span>
+                  </div>
+                </label>
 
-              {/* Action buttons for Personal Info */}
-              <div className="button-group">
-                {modified.personalInfo && (
+                <div className="button-group">
+                  {modified.personalInfo && (
+                    <button
+                      type="button"
+                      onClick={handleCancelPhone}
+                      className="secondary-button"
+                    >
+                      Cancel
+                    </button>
+                  )}
                   <button
-                    type="button"
-                    onClick={handleCancelPersonalInfo}
-                    className="secondary-button"
+                    type="submit"
+                    className="primary-button"
+                    disabled={savingProfile || !modified.personalInfo}
                   >
-                    Cancel
+                    {savingProfile ? "Processing..." : "Verify Phone"}
                   </button>
-                )}
-                <button
-                  type="submit"
-                  className="primary-button"
-                  disabled={savingProfile || !validation.emailValid || !modified.personalInfo}
-                >
-                  {savingProfile 
-                    ? "Processing..." 
-                    : (profileData.email.toLowerCase() !== originalData.email.toLowerCase()
-                        ? "Send Verification Code" 
-                        : "Save Changes & Verify"
-                      )
-                  }
-                </button>
-              </div>
+                </div>
+              </form>
             </div>
-          </form>
+          </div>
 
           {/* ACCOUNT SIGN-IN (PASSWORD) SECTION */}
           <form className="settings-form" onSubmit={(e) => handleSaveProfile(e, 'password')}>
@@ -1216,6 +1258,24 @@ export default function ProfilePage() {
 
   return (
     <div className="profile-page">
+      {/* Phone Verification Modal */}
+    {showPhoneVerification && (
+      <PhoneVerification
+        currentPhone={profileData.phone}
+        onVerificationComplete={(verifiedPhone) => {
+          setProfileData(prev => ({ ...prev, phone: verifiedPhone }));
+          setOriginalData(prev => ({ ...prev, phone: verifiedPhone }));
+          setShowPhoneVerification(false);
+          setModified(prev => ({ ...prev, personalInfo: false }));
+          toast.success("Phone number verified successfully!");
+        }}
+        onCancel={() => {
+          setShowPhoneVerification(false);
+          setProfileData(prev => ({ ...prev, phone: originalData.phone }));
+        }}
+      />
+    )}
+
       {/* Header */}
       <div className="profile-header">
         <div className="profile-header__content">

@@ -6,15 +6,17 @@
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 import { initializeApp } from "firebase/app";
 import { getAuth, GithubAuthProvider } from "firebase/auth";
+import { FIREBASE, isFirebaseConfigured } from "../config";
 
+// Build firebase config from centralized FIREBASE values
 const firebaseConfig = {
-  apiKey: "AIzaSyBwH_gxQ_9SBANkCp5jtbe4wt3Bq3YPR94",
-  authDomain: "hellowonderai-d149e.firebaseapp.com",
-  projectId: "hellowonderai-d149e",
-  storageBucket: "hellowonderai-d149e.firebasestorage.app",
-  messagingSenderId: "609181336884",
-  appId: "1:609181336884:web:c52bd9cee347e20d395161",
-  measurementId: "G-6MH82W2VYC"
+  apiKey: FIREBASE.apiKey,
+  authDomain: FIREBASE.authDomain,
+  projectId: FIREBASE.projectId,
+  storageBucket: FIREBASE.storageBucket,
+  messagingSenderId: FIREBASE.messagingSenderId,
+  appId: FIREBASE.appId,
+  measurementId: FIREBASE.measurementId,
 };
 
 // Initialize Firebase
@@ -22,6 +24,7 @@ const app = initializeApp(firebaseConfig);
 
 // Initialize Firebase Authentication
 export const auth = getAuth(app);
+auth.languageCode = 'en';
 
 // Initialize GitHub Provider
 export const githubProvider = new GithubAuthProvider();
