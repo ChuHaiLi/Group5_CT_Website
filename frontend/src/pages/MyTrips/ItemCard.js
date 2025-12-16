@@ -123,7 +123,7 @@ const ItemCard = React.memo(({ item, index, onRemove, onUpdate, dayId }) => {
                                     onChange={(e) => handleFieldChange('name', e.target.value)}
                                 />
                                 <div className="time-duration-group">
-                                    <div className="input-group">
+                                    <div className="item-card-input-group">
                                         <h3>Time:</h3>
                                         <input
                                             type="time"
@@ -140,7 +140,7 @@ const ItemCard = React.memo(({ item, index, onRemove, onUpdate, dayId }) => {
                                             title="Chọn giờ bắt đầu"
                                         />
                                     </div>
-                                    <div className="input-group">
+                                    <div className="item-card-input-group">
                                         <h3>Duration:</h3>
                                         <select
                                             value={durationValue}

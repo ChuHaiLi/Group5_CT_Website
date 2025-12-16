@@ -5,6 +5,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { DragDropContext, Droppable } from "@hello-pangea/dnd";
 import { FaArrowLeft, FaSave, FaClock, FaMapMarkerAlt, FaPlus, FaRedo, FaCalendarPlus, FaTrash, FaCog, FaHotel, FaUtensils, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { toast } from 'react-toastify';
+import DestinationPickerModal from './DestinationPickerModal';
 
 // 🔑 IMPORT LOGIC VÀ AUTO-TIME TỪ FILE RIÊNG
 import { reorder, move, rebuildDay, recalculateTimeSlots } from "./dndLogic";
@@ -45,7 +46,9 @@ const devLog = {
 export default function EditTripPage() {
   const { tripId } = useParams();
   const navigate = useNavigate();
-
+  const [showOriginalOverlay, setShowOriginalOverlay] = useState(false);
+  const [showDestinationPicker, setShowDestinationPicker] = useState(null); // { dayNumber, type: 'destination' | 'food' }
+  const [allProvincePlaces, setAllProvincePlaces] = useState([]); // Danh sách địa điểm trong tỉnh
   const [tripData, setTripData] = useState(null);
   const [originalItinerary, setOriginalItinerary] = useState([]); // Lịch trình gốc
   const [itinerary, setItinerary] = useState([]); // Lịch trình đang chỉnh sửa
@@ -68,75 +71,85 @@ export default function EditTripPage() {
     budget: '',
     provinceId: null,
   });
-
   // Use ref to avoid stale closure in useEffect
   const pendingAiChangesRef = useRef(false);
-
   const [currentHotel, setCurrentHotel] = useState(null);
   const [hotelIndex, setHotelIndex] = useState(-1); // -1: chưa chọn hoặc không tìm thấy
 
-  // ... Các hàm helper (summarizeRaw, getRatingLabel, getRatingColor, normalizeAndFillSuggested, v.v...) giữ nguyên ...
-  
+  const [openDays, setOpenDays] = useState(new Set([1])); // Mặc định mở Ngày 1
+
+  const toggleDayOpen = useCallback((dayNumber) => {
+    setOpenDays(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(dayNumber)) {
+        newSet.delete(dayNumber); // Đóng lại
+      } else {
+        newSet.add(dayNumber); // Mở ra
+      }
+      return newSet;
+    });
+  }, []);
+
   const handleSelectNewHotel = useCallback(() => {
-      if (hotelOptions.length === 0) return;
+    if (hotelOptions.length === 0) return;
 
-      let newIndex = (hotelIndex + 1) % hotelOptions.length;
-      
-      setHotelIndex(newIndex);
-      setCurrentHotel(hotelOptions[newIndex]);
-      toast.success(`Đã chọn Khách sạn mới: ${hotelOptions[newIndex].name}`, { autoClose: 2000 });
-      
-  }, [hotelIndex]);
+    let newIndex = (hotelIndex + 1) % hotelOptions.length;
+
+    setHotelIndex(newIndex);
+    setCurrentHotel(hotelOptions[newIndex]);
+    toast.success(`Đã chọn Khách sạn mới: ${hotelOptions[newIndex].name}`, { autoClose: 2000 });
+
+  }, [hotelIndex]);
 
 
-  // [NEW] Xử lý việc xem chi tiết khách sạn (Đã dùng useCallback)
-  const handleViewHotelDetails = useCallback(async () => {
-      if (!currentHotel) return;
+  // [NEW] Xử lý việc xem chi tiết khách sạn (Đã dùng useCallback)
+  const handleViewHotelDetails = useCallback(async () => {
+    if (!currentHotel) return;
 
-      const placeId = currentHotel.id;
-      setIsLoading(true); // Dùng loading state chung (sửa từ setAiLoading)
-      
-      try {
-          const response = await axios.get(`/api/destinations/${placeId}`, {
-              headers: { Authorization: `Bearer ${getAuthToken()}` },
-          });
-          
-          const detailedResult = response.data;
-          
-          setAiResult({
-              score: currentHotel.rating ? currentHotel.rating * 20 : 0,
-              summary: `Chi tiết cho Khách sạn ${currentHotel.name}. Địa chỉ: ${detailedResult.address || currentHotel.address}.`,
-              suggestions: [],
-              raw: JSON.stringify(detailedResult, null, 2)
-          });
-          setShowAIModal(true); 
+    const placeId = currentHotel.id;
+    setIsLoading(true); // Dùng loading state chung (sửa từ setAiLoading)
 
-      } catch (err) {
-          toast.error("Không thể tải chi tiết khách sạn.");
-          setAiResult({
-              raw: `Lỗi tải chi tiết cho ID ${placeId}`,
-              suggestions: []
-          });
-          setShowAIModal(true);
+    try {
+      const response = await axios.get(`/api/destinations/${placeId}`, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` },
+      });
 
-      } finally {
-          setIsLoading(false);
-      }
-  }, [currentHotel]);
+      const detailedResult = response.data;
+
+      setAiResult({
+        score: currentHotel.rating ? currentHotel.rating * 20 : 0,
+        summary: `Chi tiết cho Khách sạn ${currentHotel.name}. Địa chỉ: ${detailedResult.address || currentHotel.address}.`,
+        suggestions: [],
+        raw: JSON.stringify(detailedResult, null, 2)
+      });
+      setShowAIModal(true);
+
+    } catch (err) {
+      toast.error("Không thể tải chi tiết khách sạn.");
+      setAiResult({
+        raw: `Lỗi tải chi tiết cho ID ${placeId}`,
+        suggestions: []
+      });
+      setShowAIModal(true);
+
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentHotel]);
 
   // 🔑 LOGIC CHUYỂN ĐỔI KHÁCH SẠN
   const handleHotelChange = useCallback((direction) => {
     if (hotelOptions.length === 0) return;
 
     let newIndex = hotelIndex;
-    
+
     // Nếu chưa chọn (hoặc -1), bắt đầu từ 0
     if (newIndex === -1) {
-        newIndex = 0;
+      newIndex = 0;
     } else if (direction === 'next') {
-        newIndex = (hotelIndex + 1) % hotelOptions.length;
+      newIndex = (hotelIndex + 1) % hotelOptions.length;
     } else if (direction === 'prev') {
-        newIndex = (hotelIndex - 1 + hotelOptions.length) % hotelOptions.length;
+      newIndex = (hotelIndex - 1 + hotelOptions.length) % hotelOptions.length;
     }
 
     if (newIndex !== hotelIndex) {
@@ -865,6 +878,7 @@ export default function EditTripPage() {
     const updatedItinerary = [...itinerary, newDay];
 
     setItinerary(updatedItinerary);
+    setOpenDays(prev => new Set([...prev, newDuration])); // ✅ Mở ngày mới
 
     toast.success(`Đã thêm Ngày ${newDuration}! Nhớ nhấn "Lưu Thay Đổi" để lưu vĩnh viễn.`, {
       autoClose: 4000
@@ -900,7 +914,11 @@ export default function EditTripPage() {
 
     setItinerary(newItinerary);
     setDayToDelete(null);
-
+    setOpenDays(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(dayToDelete);
+      return newSet;
+    });
     toast.success(`Đã xóa Ngày ${dayToDelete}! Nhớ nhấn "Lưu Thay Đổi" để lưu vĩnh viễn.`, {
       autoClose: 4000
     });
@@ -927,72 +945,72 @@ export default function EditTripPage() {
     setPendingAiChanges(false);
   };
 
-const flattenItinerary = (apiItinerary) => {
+  const flattenItinerary = (apiItinerary) => {
 
-    let uniqueIdCounter = 0;
-    let extractedHotel = null; // Biến tạm để lưu khách sạn
+    let uniqueIdCounter = 0;
+    let extractedHotel = null; // Biến tạm để lưu khách sạn
 
-    const flattened = apiItinerary.map((dayPlan) => {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:685', message: 'flattenItinerary processing day', data: { day: dayPlan.day, placesCount: dayPlan.places?.length }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H5' }) }).catch(() => { });
-      // #endregion
-      const placesWithoutHotel = [];
+    const flattened = apiItinerary.map((dayPlan) => {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:685', message: 'flattenItinerary processing day', data: { day: dayPlan.day, placesCount: dayPlan.places?.length }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H5' }) }).catch(() => { });
+      // #endregion
+      const placesWithoutHotel = [];
 
-      (dayPlan.places || []).forEach((item) => {
-        const isHotel = (item.category === 'Khách sạn' || item.type === 'hotel');
+      (dayPlan.places || []).forEach((item) => {
+        const isHotel = (item.category === 'Khách sạn' || item.type === 'hotel');
 
-        if (isHotel && !extractedHotel) {
-          // Nếu chưa trích xuất khách sạn, lấy cái này
-          extractedHotel = {
-            id: item.id || -1,
-            name: item.name || 'Khách sạn đã chọn',
-            address: item.address || item.place || 'Địa chỉ không rõ',
-            rating: item.rating || 0,
-            type: 'hotel',
-            // Thêm các thuộc tính khác cần thiết
-            lat: item.lat || item.latitude || null,
-            lon: item.lon || item.longitude || null,
-          };
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:705', message: 'Extracted hotel from itinerary', data: { hotelName: extractedHotel.name, day: dayPlan.day }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H5' }) }).catch(() => { });
-          // #endregion
-        } else if (isHotel && extractedHotel) {
-          // Nếu đã trích xuất, bỏ qua các mục khách sạn tiếp theo
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:712', message: 'Skipping duplicate hotel in itinerary', data: { hotelName: item.name, day: dayPlan.day }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H5' }) }).catch(() => { });
-          // #endregion
-          return;
-        } else {
-          // Nếu không phải khách sạn, thêm vào danh sách
-          placesWithoutHotel.push({
-            ...item,
-            uniqueId: `item-${item.id || item.name}-${uniqueIdCounter++}`,
-            day: dayPlan.day,
-          });
-        }
-      });
+        if (isHotel && !extractedHotel) {
+          // Nếu chưa trích xuất khách sạn, lấy cái này
+          extractedHotel = {
+            id: item.id || -1,
+            name: item.name || 'Khách sạn đã chọn',
+            address: item.address || item.place || 'Địa chỉ không rõ',
+            rating: item.rating || 0,
+            type: 'hotel',
+            // Thêm các thuộc tính khác cần thiết
+            lat: item.lat || item.latitude || null,
+            lon: item.lon || item.longitude || null,
+          };
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:705', message: 'Extracted hotel from itinerary', data: { hotelName: extractedHotel.name, day: dayPlan.day }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H5' }) }).catch(() => { });
+          // #endregion
+        } else if (isHotel && extractedHotel) {
+          // Nếu đã trích xuất, bỏ qua các mục khách sạn tiếp theo
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:712', message: 'Skipping duplicate hotel in itinerary', data: { hotelName: item.name, day: dayPlan.day }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H5' }) }).catch(() => { });
+          // #endregion
+          return;
+        } else {
+          // Nếu không phải khách sạn, thêm vào danh sách
+          placesWithoutHotel.push({
+            ...item,
+            uniqueId: `item-${item.id || item.name}-${uniqueIdCounter++}`,
+            day: dayPlan.day,
+          });
+        }
+      });
 
-      return {
-        ...dayPlan,
-        places: placesWithoutHotel,
-      };
-    });
+      return {
+        ...dayPlan,
+        places: placesWithoutHotel,
+      };
+    });
 
-    // Gắn khách sạn đã trích xuất vào đối tượng trả về (để sử dụng trong fetchTripDetails)
-    flattened.extractedHotel = extractedHotel;
+    // Gắn khách sạn đã trích xuất vào đối tượng trả về (để sử dụng trong fetchTripDetails)
+    flattened.extractedHotel = extractedHotel;
 
-    return flattened;
-  };
+    return flattened;
+  };
 
   const restoreItinerary = (flatItinerary) => {
-    return flatItinerary.map((dayPlan) => ({
-      day: dayPlan.day,
-      places: dayPlan.places.map((item) => {
-        const { uniqueId, day, ...apiItem } = item;
-        return apiItem;
-      }),
-    }));
-  };
+    return flatItinerary.map((dayPlan) => ({
+      day: dayPlan.day,
+      places: dayPlan.places.map((item) => {
+        const { uniqueId, day, ...apiItem } = item;
+        return apiItem;
+      }),
+    }));
+  };
 
   // --- FETCH DATA ---
   useEffect(() => {
@@ -1048,10 +1066,10 @@ const flattenItinerary = (apiItinerary) => {
           });
 
           const savedHotelInMetadata = fetchedTrip.metadata?.hotel;
-          const extractedHotelFromItinerary = flattened.extractedHotel;
+          const extractedHotelFromItinerary = flattened.extractedHotel;
 
-          // Ưu tiên khách sạn đã được lưu trong metadata, nếu không có thì dùng cái đã trích xuất
-          const hotelToUse = savedHotelInMetadata || extractedHotelFromItinerary;
+          // Ưu tiên khách sạn đã được lưu trong metadata, nếu không có thì dùng cái đã trích xuất
+          const hotelToUse = savedHotelInMetadata || extractedHotelFromItinerary;
 
           if (hotelToUse && hotelToUse.name) {
             // Tìm index của hotel đã lưu trong danh sách options
@@ -1062,7 +1080,7 @@ const flattenItinerary = (apiItinerary) => {
             } else {
               // Nếu hotel đã lưu không có trong options (ví dụ: hotel do người dùng tự nhập), 
               // hiển thị nó và đặt index = -1
-              setCurrentHotel(hotelToUse); 
+              setCurrentHotel(hotelToUse);
               setHotelIndex(-1);
             }
           } else {
@@ -1085,6 +1103,27 @@ const flattenItinerary = (apiItinerary) => {
     fetchTripDetails();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tripId]); // pendingAiChanges is intentionally excluded - we use pendingAiChangesRef to avoid race conditions
+
+  // Fetch all destinations in province when provinceId changes
+  useEffect(() => {
+    const fetchProvincePlaces = async () => {
+      if (!editableData.provinceId) return;
+
+      try {
+        const response = await axios.get(`/api/destinations?province_id=${editableData.provinceId}&top=100`, {
+          headers: { Authorization: `Bearer ${getAuthToken()}` }
+        });
+
+        if (Array.isArray(response.data)) {
+          setAllProvincePlaces(response.data);
+        }
+      } catch (err) {
+        devLog.error("Failed to fetch province places:", err);
+      }
+    };
+
+    fetchProvincePlaces();
+  }, [editableData.provinceId]);
 
   // Track itinerary state changes for debugging
   useEffect(() => {
@@ -1206,41 +1245,69 @@ const flattenItinerary = (apiItinerary) => {
     toast.success("Đã xóa địa điểm khỏi lịch trình"); // ✅ Toast
   }, [itinerary]);
 
-  const handleAddItem = useCallback(async (day, type) => {
-    const nextItinerary = [...itinerary];
-    const dayIndex = nextItinerary.findIndex(d => d.day === day);
-    if (dayIndex === -1) return;
+  const handleAddItem = useCallback((day, type) => {
+    // Mở form chọn địa điểm thay vì thêm trống
+    setShowDestinationPicker({ dayNumber: day, type: type });
+  }, []);
 
-    // ✅ Validation từ local
-    const limits = validateDailyLimits(nextItinerary[dayIndex].places || []);
-    if (type === 'DESTINATION' && !limits.canAddDestination) {
-      toast.warning('Mỗi ngày chỉ tối đa 4 địa điểm.');
+  // Hàm mới để xử lý khi user chọn địa điểm từ form
+  const handleSelectDestination = useCallback(async (selectedPlace) => {
+    console.log('✅ Selected place:', selectedPlace);
+    console.log('📝 Category:', selectedPlace.category); // ✅ LOG NÀY
+    if (!showDestinationPicker) return;
+
+    const { dayNumber, type } = showDestinationPicker;
+    const nextItinerary = [...itinerary];
+    const dayIndex = nextItinerary.findIndex(d => d.day === dayNumber);
+
+    if (dayIndex === -1) {
+      setShowDestinationPicker(null);
       return;
     }
-    if (type === 'LUNCH' && !limits.canAddFood) {
+
+    // Validation
+    const limits = validateDailyLimits(nextItinerary[dayIndex].places || []);
+    if (type === 'destination' && !limits.canAddDestination) {
+      toast.warning('Mỗi ngày chỉ tối đa 4 địa điểm.');
+      setShowDestinationPicker(null);
+      return;
+    }
+    if (type === 'food' && !limits.canAddFood) {
       toast.warning('Mỗi ngày chỉ tối đa 3 điểm ăn uống.');
+      setShowDestinationPicker(null);
       return;
     }
 
     const newUniqueId = `new-item-${Date.now()}-${Math.floor(Math.random() * 100)}`;
-    const base = { id: null, uniqueId: newUniqueId, day, time_slot: null };
 
-    let newItem = { ...base, name: 'Địa điểm mới', category: 'Địa điểm', duration: 60 };
-    if (type === 'LUNCH') newItem = { ...base, id: 'LUNCH', name: 'Ăn trưa', category: 'Ăn uống', duration: 45 };
-    if (type === 'TRAVEL') newItem = { ...base, id: 'TRAVEL', name: 'Di chuyển/Nghỉ ngơi', category: 'Di chuyển', duration: 30 };
+    const newItem = {
+      uniqueId: newUniqueId,
+      id: selectedPlace.id,
+      name: selectedPlace.name,
+      // ✅ LẤY CATEGORY TỪ PLACE ĐÃ CHỌN
+      category: type === 'food'
+        ? 'Ăn uống'
+        : (selectedPlace.category || 'Địa điểm'), // Mặc định là 'Địa điểm' nếu không có
+      duration: type === 'food' ? 45 : 60,
+      day: dayNumber,
+      time_slot: null,
+      lat: selectedPlace.lat || selectedPlace.latitude,
+      lon: selectedPlace.lon || selectedPlace.longitude,
+    };
 
     nextItinerary[dayIndex] = {
       ...nextItinerary[dayIndex],
       places: [...(nextItinerary[dayIndex].places || []), newItem]
     };
 
-    // ✅ Rebuild
+    // Rebuild
     const rebuilt = await rebuildDay(nextItinerary[dayIndex].places || []);
     nextItinerary[dayIndex] = { ...nextItinerary[dayIndex], places: rebuilt };
 
     setItinerary(nextItinerary);
-    toast.success(`Đã thêm ${newItem.name} vào Ngày ${day}`); // ✅ Toast
-  }, [itinerary]);
+    setShowDestinationPicker(null);
+    toast.success(`Đã thêm ${newItem.name} vào Ngày ${dayNumber}`);
+  }, [showDestinationPicker, itinerary]);
 
   const handleMetadataChange = useCallback((field, value) => {
     setEditableData(prev => ({ ...prev, [field]: value }));
@@ -1683,92 +1750,92 @@ const flattenItinerary = (apiItinerary) => {
     return <div className="edit-trip-error">Lỗi: {error}</div>;
   }
 
-const HotelCard = () => {
-    
+  const HotelCard = () => {
+
     // Nút chung để kích hoạt việc chọn/thay đổi
     const ChangeButton = ({ currentHotel }) => (
-        <button 
-            // Gọi hàm chọn khách sạn mới
-            onClick={handleSelectNewHotel} 
-            className="hotel-change-btn" 
-            title={currentHotel ? "Chọn khách sạn khác" : "Chọn Khách sạn"}
-            style={{ 
-                padding: '8px 12px', 
-                backgroundColor: currentHotel ? '#10b981' : '#f97316', 
-                color: 'white', 
-                border: 'none', 
-                borderRadius: 4, 
-                cursor: 'pointer',
-                fontSize: '0.8rem',
-                flexShrink: 0
-            }}
-        >
-            {/* Sử dụng FaRedo (reload) */}
-            <FaRedo style={{ marginRight: currentHotel ? 6 : 0 }} /> 
-            {currentHotel ? 'Thay đổi' : 'Chọn ngay'}
-        </button>
+      <button
+        // Gọi hàm chọn khách sạn mới
+        onClick={handleSelectNewHotel}
+        className="hotel-change-btn"
+        title={currentHotel ? "Chọn khách sạn khác" : "Chọn Khách sạn"}
+        style={{
+          padding: '8px 12px',
+          backgroundColor: currentHotel ? '#10b981' : '#f97316',
+          color: 'white',
+          border: 'none',
+          borderRadius: 4,
+          cursor: 'pointer',
+          fontSize: '0.8rem',
+          flexShrink: 0
+        }}
+      >
+        {/* Sử dụng FaRedo (reload) */}
+        <FaRedo style={{ marginRight: currentHotel ? 6 : 0 }} />
+        {currentHotel ? 'Thay đổi' : 'Chọn ngay'}
+      </button>
     );
 
     // Trường hợp 1: Chưa chọn khách sạn
     if (!currentHotel) {
-        return (
-            <div className="hotel-selection-container" style={{ marginBottom: 20 }}>
-                <label style={{ fontSize: '1rem', fontWeight: 600, color: '#333' }}>
-                    <FaHotel style={{ marginRight: 8, color: '#6366f1' }} />
-                    Khách sạn/Lưu trú
-                </label>
-                <div className="hotel-info-card empty-card" style={{ justifyContent: 'space-between', background: '#fef3f3' }}>
-                    <span style={{ color: '#ef4444', fontWeight: 500 }}>
-                        Chưa chọn nơi ở chính.
-                    </span>
-                    <ChangeButton currentHotel={null} />
-                </div>
-            </div>
-        );
+      return (
+        <div className="hotel-selection-container" style={{ marginBottom: 20 }}>
+          <label style={{ fontSize: '1rem', fontWeight: 600, color: '#333' }}>
+            <FaHotel style={{ marginRight: 8, color: '#6366f1' }} />
+            Khách sạn/Lưu trú
+          </label>
+          <div className="hotel-info-card empty-card" style={{ justifyContent: 'space-between', background: '#fef3f3' }}>
+            <span style={{ color: '#ef4444', fontWeight: 500 }}>
+              Chưa chọn nơi ở chính.
+            </span>
+            <ChangeButton currentHotel={null} />
+          </div>
+        </div>
+      );
     }
 
     // Trường hợp 2: Đã chọn khách sạn (Dạng thẻ nhỏ gọn)
     return (
-        <div className="hotel-selection-container" style={{ marginBottom: 20 }}>
-            <label style={{ fontSize: '1rem', fontWeight: 600, color: '#333' }}>
-                <FaHotel style={{ marginRight: 8, color: '#6366f1' }} />
-                Khách sạn/Lưu trú
-            </label>
-            <div 
-                className="hotel-info-card selected-card" 
-                // Thêm onClick để xem chi tiết
-                onClick={handleViewHotelDetails} 
-                style={{ 
-                    justifyContent: 'space-between', 
-                    padding: '12px', 
-                    border: '1px solid #10b981', 
-                    borderRadius: 8, 
-                    cursor: 'pointer',
-                    backgroundColor: '#ecfdf5',
-                }}
-            >
-                <div className="hotel-details" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <FaHotel size={24} style={{ color: '#059669', flexShrink: 0 }} />
-                    <div className="hotel-text">
-                        <span className="hotel-name" style={{ fontWeight: 600, fontSize: '1rem', color: '#047857' }}>
-                            {currentHotel.name}
-                        </span>
-                        {/* Chỉ hiện rating/thông báo click, loại bỏ địa chỉ */}
-                        <span style={{ fontSize: '0.75rem', color: '#065f46', display: 'block' }}>
-                           {currentHotel.rating ? `⭐ ${currentHotel.rating} / 5.0 | ` : ''}
-                           Click để xem chi tiết
-                        </span>
-                    </div>
-                </div>
-                
-                {/* Nút Thay đổi độc lập, ngăn chặn sự kiện click lan truyền */}
-                <div onClick={(e) => e.stopPropagation()}>
-                    <ChangeButton currentHotel={currentHotel} />
-                </div>
+      <div className="hotel-selection-container" style={{ marginBottom: 20 }}>
+        <label style={{ fontSize: '1rem', fontWeight: 600, color: '#333' }}>
+          <FaHotel style={{ marginRight: 8, color: '#6366f1' }} />
+          Khách sạn/Lưu trú
+        </label>
+        <div
+          className="hotel-info-card selected-card"
+          // Thêm onClick để xem chi tiết
+          onClick={handleViewHotelDetails}
+          style={{
+            justifyContent: 'space-between',
+            padding: '12px',
+            border: '1px solid #10b981',
+            borderRadius: 8,
+            cursor: 'pointer',
+            backgroundColor: '#ecfdf5',
+          }}
+        >
+          <div className="hotel-details" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <FaHotel size={24} style={{ color: '#059669', flexShrink: 0 }} />
+            <div className="hotel-text">
+              <span className="hotel-name" style={{ fontWeight: 600, fontSize: '1rem', color: '#047857' }}>
+                {currentHotel.name}
+              </span>
+              {/* Chỉ hiện rating/thông báo click, loại bỏ địa chỉ */}
+              <span style={{ fontSize: '0.75rem', color: '#065f46', display: 'block' }}>
+                {currentHotel.rating ? `⭐ ${currentHotel.rating} / 5.0 | ` : ''}
+                Click để xem chi tiết
+              </span>
             </div>
+          </div>
+
+          {/* Nút Thay đổi độc lập, ngăn chặn sự kiện click lan truyền */}
+          <div onClick={(e) => e.stopPropagation()}>
+            <ChangeButton currentHotel={currentHotel} />
+          </div>
         </div>
+      </div>
     );
-};
+  };
 
   return (
     <div className="edit-trip-container">
@@ -1814,11 +1881,11 @@ const HotelCard = () => {
           <FaArrowLeft /> Quay lại
         </button>
         <h1 className="trip-title">
-          ✏️ Chỉnh sửa: {tripData?.name || "Loading"}
+          ✏️ {tripData?.name || "Loading"}
         </h1>
         <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          <button onClick={handleSave} className="save-btn" disabled={isSaving}>
-            <FaSave /> {isSaving ? "Đang lưu..." : "Lưu Thay Đổi"}
+          <button onClick={() => setShowOriginalOverlay(true)} className="save-btn">
+            <FaSave /> Xác nhận & So sánh
           </button>
           <button
             type="button"
@@ -1898,7 +1965,7 @@ const HotelCard = () => {
             />
           </div>
 
-          <div className="input-group">
+          <div className="edit-trip-input-group">
             <label>Ngày xuất phát</label>
             <input
               type="date"
@@ -1907,7 +1974,7 @@ const HotelCard = () => {
             />
           </div>
 
-          <div className="input-group">
+          <div className="edit-trip-input-group">
             <label>Thời lượng (Ngày)</label>
             <input
               type="text"
@@ -1918,7 +1985,7 @@ const HotelCard = () => {
             />
           </div>
 
-          <div className="input-group">
+          <div className="edit-trip-input-group">
             <label>Số người</label>
             <select
               value={editableData.people}
@@ -1929,7 +1996,7 @@ const HotelCard = () => {
             </select>
           </div>
 
-          <div className="input-group">
+          <div className="edit-trip-input-group">
             <label>Ngân sách</label>
             <select
               value={editableData.budget}
@@ -1940,14 +2007,14 @@ const HotelCard = () => {
             </select>
           </div>
 
-          <div className="input-group">
+          <div className="edit-trip-input-group">
             <label>&nbsp;</label>
             <button onClick={handleRegenerateFull} className="regenerate-btn" disabled={isSaving}>
               <FaRedo /> TÁI TẠO LỊCH TRÌNH MỚI
             </button>
           </div>
 
-          <div className="input-group">
+          <div className="edit-trip-input-group">
             <label>&nbsp;</label>
             <button onClick={handleExtendTrip} className="extend-btn" disabled={isSaving}>
               <FaCalendarPlus /> Tăng thêm 1 Ngày
@@ -1960,132 +2027,238 @@ const HotelCard = () => {
 
       <HotelCard />
 
-      {/* Main Content: 2 Columns */}
-      <div className="edit-trip-content">
-        {/* LEFT: Original Itinerary */}
-        <div className="original-column">
+      {/* Main Content: Single Column - Editable Only */}
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        <div className="editable-column" style={{ maxHeight: 'none' }}>
           <div className="column-header">
-            <h2>📋 Lịch trình gốc</h2>
-            <p className="subtitle">Bản tham khảo ban đầu</p>
+            <h2>✏️ Chỉnh sửa lịch trình</h2>
+            <p className="subtitle">Kéo thả để sắp xếp lại, thêm/xóa địa điểm</p>
           </div>
 
-          <div className="days-list">
-            {originalItinerary.map((dayPlan) => (
-              <div
-                key={`original-${dayPlan.day}`}
-                className="day-section original"
-              >
-                {/* ⛔ LOẠI BỎ phần nút "Xóa ngày" ở đây */}
-                <h3 className="day-title">Ngày {dayPlan.day}</h3>
+          <DragDropContext onDragEnd={onDragEnd}>
+            <div className="days-list">
+              {itinerary.map((dayPlan) => {
+                const isOpen = openDays.has(dayPlan.day); // ✅ Kiểm tra ngày có đang mở không
 
-                <div className="places-list">
-                  {dayPlan.places.map((item, index) => (
-                    <div key={index} className="place-item-readonly">
-                      <div className="time-badge">
-                        <FaClock /> {item.time_slot || "N/A"}
-                      </div>
-                      <div className="place-info">
-                        <span className="place-icon">
-                          {item.category === "Ăn uống" || item.id === "LUNCH"
-                            ? "🍽️"
-                            : item.category === "Di chuyển" ||
-                              item.id === "TRAVEL"
-                              ? "✈️"
-                              : "📍"}
+                return (
+                  <div key={`edit-${dayPlan.day}`} className="day-section editable">
+                    {/* HEADER - Luôn hiển thị */}
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: isOpen ? '1rem' : 0, // ✅ Bỏ margin khi đóng
+                        cursor: 'pointer',
+                        padding: '0.75rem',
+                        background: isOpen ? 'transparent' : '#f9fafb',
+                        borderRadius: '8px',
+                        transition: 'all 0.2s'
+                      }}
+                      onClick={() => toggleDayOpen(dayPlan.day)} // ✅ Click để toggle
+                    >
+                      <h3 className="day-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {/* ✅ Icon dropdown */}
+                        <span style={{
+                          transition: 'transform 0.2s',
+                          transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)'
+                        }}>
+                          ❯
                         </span>
-                        <span className="place-name">{item.name}</span>
-                        <span className="place-category">
-                          ({item.category || item.id})
+                        Ngày {dayPlan.day}
+                        {/* ✅ Hiển thị số lượng địa điểm */}
+                        <span style={{
+                          fontSize: '0.875rem',
+                          color: '#64748b',
+                          fontWeight: 400
+                        }}>
+                          ({dayPlan.places.length} địa điểm)
                         </span>
+                      </h3>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation(); // ✅ Không trigger toggle khi xóa
+                          handleDeleteDay(dayPlan.day);
+                        }}
+                        className="delete-day-btn"
+                        disabled={isSaving || itinerary.length <= 1}
+                        title={itinerary.length <= 1 ? "Không thể xóa ngày cuối cùng" : "Xóa ngày này"}
+                      >
+                        <FaTrash /> Xóa ngày
+                      </button>
+                    </div>
+
+                    {/* CONTENT - Chỉ hiển thị khi mở */}
+                    {isOpen && (
+                      <>
+                        <Droppable droppableId={`day-${dayPlan.day}`}>
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.droppableProps}
+                              className={`droppable-area ${snapshot.isDraggingOver ? "dragging-over" : ""}`}
+                            >
+                              {dayPlan.places.map((item, index) => (
+                                <ItemCard
+                                  key={item.uniqueId}
+                                  item={item}
+                                  index={index}
+                                  onRemove={handleRemoveItem}
+                                  onUpdate={handleUpdateItem}
+                                  dayId={`day-${dayPlan.day}`}
+                                />
+                              ))}
+                              {provided.placeholder}
+                              {dayPlan.places.length === 0 && (
+                                <p className="empty-message">
+                                  Kéo thả mục vào đây hoặc thêm mục mới
+                                </p>
+                              )}
+                            </div>
+                          )}
+                        </Droppable>
+
+                        <div className="action-buttons">
+                          <button
+                            onClick={() => handleAddItem(dayPlan.day, "destination")}
+                            className="add-btn destination"
+                          >
+                            <FaPlus /> Địa điểm
+                          </button>
+                          <button
+                            onClick={() => handleAddItem(dayPlan.day, "food")}
+                            className="add-btn lunch"
+                          >
+                            <FaPlus /> Ăn uống
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </DragDropContext>
+        </div>
+      </div>
+
+      {/* Compare Original & Edited Overlay */}
+      {showOriginalOverlay && (
+        <div className="modal-overlay" style={{ zIndex: 10000 }}>
+          <div
+            className="compare-modal"
+            style={{
+              background: 'white',
+              borderRadius: '20px',
+              maxWidth: '1400px',
+              width: '95%',
+              maxHeight: '90vh',
+              overflow: 'auto',
+              padding: '2rem',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+              <h2>🔍 Lịch trình: Bản Gốc vs Bản Chỉnh sửa</h2>
+              <button onClick={() => setShowOriginalOverlay(false)} style={{ fontSize: '1.5rem', background: 'none', border: 'none', cursor: 'pointer' }}>
+                ✕
+              </button>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+              {/* LEFT: Original */}
+              <div className="original-column" style={{ maxHeight: '70vh', overflow: 'auto' }}>
+                <div className="column-header">
+                  <h2>📋 Lịch trình gốc</h2>
+                  <p className="subtitle">Bản tham khảo ban đầu</p>
+                </div>
+                <div className="days-list">
+                  {originalItinerary.map((dayPlan) => (
+                    <div key={`original-${dayPlan.day}`} className="day-section original">
+                      <h3 className="day-title">Ngày {dayPlan.day}</h3>
+                      <div className="places-list">
+                        {dayPlan.places.map((item, index) => (
+                          <div key={index} className="place-item-readonly">
+                            <div className="time-badge">
+                              <FaClock /> {item.time_slot || "N/A"}
+                            </div>
+                            <div className="place-info">
+                              <span className="place-icon">
+                                {item.category === "Ăn uống" || item.id === "LUNCH" ? "🍽️" :
+                                  item.category === "Di chuyển" || item.id === "TRAVEL" ? "✈️" : "📍"}
+                              </span>
+                              <span className="place-name">{item.name}</span>
+                              <span className="place-category">({item.category || item.id})</span>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
 
-        {/* RIGHT: Editable Itinerary */}
-        <div className="editable-column">
-          <div className="column-header">
-            <h2>✏️ Chỉnh sửa lịch trình</h2>
-            <p className="subtitle">Kéo thả để sắp xếp lại</p>
-          </div>
-
-          <DragDropContext onDragEnd={onDragEnd}>
-            <div className="days-list">
-              {itinerary.map((dayPlan) => (
-                <div
-                  key={`edit-${dayPlan.day}`}
-                  className="day-section editable"
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                    <h3 className="day-title" style={{ margin: 0 }}>Ngày {dayPlan.day}</h3>
-                    <button
-                      onClick={() => handleDeleteDay(dayPlan.day)}
-                      className="delete-day-btn"
-                      disabled={isSaving || itinerary.length <= 1}
-                      title={itinerary.length <= 1 ? "Không thể xóa ngày cuối cùng" : "Xóa ngày này"}
-                    >
-                      <FaTrash /> Xóa ngày
-                    </button>
-                  </div>
-
-                  <Droppable droppableId={`day-${dayPlan.day}`}>
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        className={`droppable-area ${snapshot.isDraggingOver ? "dragging-over" : ""
-                          }`}
-                      >
-                        {dayPlan.places.map((item, index) => (
-                          <ItemCard
-                            key={item.uniqueId}
-                            item={item}
-                            index={index}
-                            onRemove={handleRemoveItem}
-                            onUpdate={handleUpdateItem}
-                            dayId={`day-${dayPlan.day}`}
-                          />
-                        ))}
-                        {provided.placeholder}
-                        {dayPlan.places.length === 0 && (
-                          <p className="empty-message">
-                            Kéo thả mục vào đây hoặc thêm mục mới
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  </Droppable>
-
-                  <div className="action-buttons">
-                    <button
-                      onClick={() => handleAddItem(dayPlan.day, "DESTINATION")}
-                      className="add-btn destination"
-                    >
-                      + Địa điểm
-                    </button>
-                    <button
-                      onClick={() => handleAddItem(dayPlan.day, "LUNCH")}
-                      className="add-btn lunch"
-                    >
-                      + Ăn uống
-                    </button>
-                    <button
-                      onClick={() => handleAddItem(dayPlan.day, "TRAVEL")}
-                      className="add-btn travel"
-                    >
-                      + Di chuyển
-                    </button>
-                  </div>
+              {/* RIGHT: Edited */}
+              <div className="editable-column" style={{ maxHeight: '70vh', overflow: 'auto', background: '#f0fdf4' }}>
+                <div className="column-header">
+                  <h2>✅ Lịch trình đã chỉnh sửa</h2>
+                  <p className="subtitle">Phiên bản mới của bạn</p>
                 </div>
-              ))}
+                <div className="days-list">
+                  {itinerary.map((dayPlan) => (
+                    <div key={`compare-${dayPlan.day}`} className="day-section editable">
+                      <h3 className="day-title">Ngày {dayPlan.day}</h3>
+                      <div className="places-list">
+                        {dayPlan.places.map((item, index) => (
+                          <div key={index} className="place-item-readonly">
+                            <div className="time-badge">
+                              <FaClock /> {item.time_slot || "N/A"}
+                            </div>
+                            <div className="place-info">
+                              <span className="place-icon">
+                                {item.category === "Ăn uống" ? "🍽️" :
+                                  item.category === "Di chuyển" ? "✈️" : "📍"}
+                              </span>
+                              <span className="place-name">{item.name}</span>
+                              <span className="place-category">({item.category})</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-          </DragDropContext>
+
+            {/* Action buttons */}
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginTop: '2rem' }}>
+              <button
+                onClick={() => {
+                  setItinerary(originalItinerary);
+                  setShowOriginalOverlay(false);
+                  toast.info('Đã hoàn tác tất cả thay đổi');
+                }}
+                className="btn-cancel"
+                style={{ padding: '12px 24px', fontSize: '1rem' }}
+              >
+                ❌ Hủy thay đổi
+              </button>
+              <button
+                onClick={async () => {
+                  await handleSave();
+                  setShowOriginalOverlay(false);
+                }}
+                className="save-btn"
+                disabled={isSaving}
+                style={{ padding: '12px 24px', fontSize: '1rem' }}
+              >
+                <FaSave /> {isSaving ? 'Đang lưu...' : 'Lưu thay đổi'}
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
+
       {/* AI Result Modal */}
       {showAIModal && (
         <div
@@ -2638,6 +2811,18 @@ const HotelCard = () => {
             </div>
           </div>
         </div>
+      )}
+      {/* Destination Picker Modal */}
+      {showDestinationPicker && (
+        <DestinationPickerModal
+          places={allProvincePlaces}
+          type={showDestinationPicker.type}
+          onSelect={handleSelectDestination}
+          onClose={() => {
+            console.log('❌ Modal closed');
+            setShowDestinationPicker(null);
+          }}
+        />
       )}
     </div>
   );
