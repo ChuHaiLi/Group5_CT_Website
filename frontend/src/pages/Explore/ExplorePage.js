@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef, useMemo } from "react";
 import API from "../../untils/axios";
 import { TAG_CATEGORIES } from "../../data/tags.js";
 import { toast } from "react-toastify";
+import AuthRequiredModal from "../../components/AuthRequiredModal/AuthRequired.js";
 
 import {
   FaUmbrellaBeach, FaMountain, FaLandmark, FaUtensils, FaHiking, FaTree, FaCity,
@@ -230,7 +231,7 @@ const SearchAutocomplete = ({
 // ========================================
 // 🚀 MAIN COMPONENT: EXPLORE PAGE
 // ========================================
-export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) {
+export default function ExplorePage({ savedIds = new Set(), handleToggleSave, isAuthenticated }) {
   // State Data
   const [regularDestinations, setRegularDestinations] = useState([]); 
   const [popularDestinations, setPopularDestinations] = useState([]); 
@@ -254,8 +255,11 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
   const categoryRefs = useRef({});
   
   // State Pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const [popularPage, setPopularPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1); // Page cho phần 1
+  const [popularPage, setPopularPage] = useState(1); // Page cho phần 2 (MỚI)
+
+  // State Authentication
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Locations
   const [vietnamLocations, setVietnamLocations] = useState([]);
@@ -738,7 +742,14 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
                     isSaved={savedIds.has(dest.id)}
                     onToggleSave={() => handleToggleSave(dest.id)}
                     onViewDetails={() => setViewingDestination(dest)}
-                    onCreateTrip={() => { setSelectedDestination(dest); setShowForm(true); }}
+                    onCreateTrip={() => {
+                      if (!isAuthenticated) {
+                        setShowAuthModal(true); 
+                      } else {
+                        setSelectedDestination(dest);
+                        setShowForm(true);
+                      }
+                    }}
                   />
                 </div>
               ))}
@@ -802,7 +813,14 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
                     isSaved={savedIds.has(dest.id)}
                     onToggleSave={() => handleToggleSave(dest.id)}
                     onViewDetails={() => setViewingDestination(dest)}
-                    onCreateTrip={() => { setSelectedDestination(dest); setShowForm(true); }}
+                    onCreateTrip={() => {
+                      if (!isAuthenticated) {
+                        setShowAuthModal(true); 
+                      } else {
+                        setSelectedDestination(dest);
+                        setShowForm(true);
+                      }
+                    }}
                   />
               </div>
             ))}
@@ -863,18 +881,30 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
         <DestinationModal 
           destination={viewingDestination} 
           onClose={() => setViewingDestination(null)} 
-          onCreateTrip={(dest) => { 
-            setViewingDestination(null); 
-            setSelectedDestination(dest); 
-            setShowForm(true); 
+          onCreateTrip={(dest) => {
+            setViewingDestination(null);
+            if (!isAuthenticated) {
+              setShowAuthModal(true); // ← Check auth
+            } else {
+              setSelectedDestination(dest);
+              setShowForm(true);
+            }
           }} 
         />
       )}
+      
       
       {showForm && selectedDestination && (
         <CreateTripForm 
           initialDestination={selectedDestination} 
           onClose={() => setShowForm(false)} 
+        />
+      )}
+      
+      {showAuthModal && (
+        <AuthRequiredModal 
+          onClose={() => setShowAuthModal(false)}
+          message="You need to be logged in to create a trip. Please login or register to continue your journey! ✈️"
         />
       )}
 

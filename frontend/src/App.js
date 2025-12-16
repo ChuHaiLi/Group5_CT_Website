@@ -31,6 +31,7 @@ import ChatWidget from "./components/ChatWidget/ChatWidget";
 import Footer from "./components/Footer/Footer";
 import { PageContext } from "./context/PageContext";
 import HowItWorksPanel from "./components/HowItWorks/HowItWorksPanel";
+
 import "./App.css";
 import { GOOGLE_CLIENT_ID } from './config';
 
@@ -221,30 +222,28 @@ function AppContent() {
           <Route
             path="/explore"
             element={
-              <PrivateRoute isAuthenticated={isAuthenticated}>
-                <ExplorePage
-                  savedIds={savedIds}
-                  handleToggleSave={handleToggleSave}
-                />
-              </PrivateRoute>
+              <ExplorePage
+                savedIds={savedIds}
+                handleToggleSave={handleToggleSave}
+                isAuthenticated={isAuthenticated}  
+              />
             }
           />
 
           <Route
             path="/mytrips"
             element={
-              <PrivateRoute isAuthenticated={isAuthenticated}>
-                <MyTripsPage />
-              </PrivateRoute>
+              <MyTripsPage isAuthenticated={isAuthenticated} />
             }
           />
-
           <Route
-            path="/trips/:tripId"
+            path="/saved"
             element={
-              <PrivateRoute isAuthenticated={isAuthenticated}>
-                <TripDetailsPage />
-              </PrivateRoute>
+              <SavedPage
+                savedIds={savedIds}
+                handleToggleSave={handleToggleSave}
+                isAuthenticated={isAuthenticated}
+              />
             }
           />
 

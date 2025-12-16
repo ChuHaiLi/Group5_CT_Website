@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { FaEnvelope, FaKey, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { FaEnvelope, FaKey, FaCheckCircle, FaTimesCircle, FaHome } from "react-icons/fa";
 import API from "../untils/axios";
 import "../styles/AuthForm.css";
 
@@ -52,6 +52,14 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="auth-page">
+    <button 
+      onClick={() => navigate("/")}
+      className="back-to-home-btn"
+      data-page="forgot-password"
+    >
+      <FaHome size={16} />
+      <span>Back to Home</span>
+    </button>
       <div className="auth-box">
         <div className="icon-wrapper" style={{ 
           background: 'linear-gradient(135deg, #FF6B6B, #DC143C)',
