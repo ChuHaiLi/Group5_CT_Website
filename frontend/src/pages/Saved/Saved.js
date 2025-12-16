@@ -116,7 +116,9 @@ export default function SavedPage({ savedIds, handleToggleSave, isAuthenticated 
         if (!isAuthenticated) {
             setShowAuthModal(true);
             setLoading(false);
-            return;
+            setDestinations([]); 
+        } else {
+            setShowAuthModal(false);
         }
     }, [isAuthenticated]);
     

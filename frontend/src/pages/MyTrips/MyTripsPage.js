@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import CreateTripForm from '../../components/CreateTripForm';
+import AuthRequiredModal from "../../components/AuthRequiredModal/AuthRequired.js";
 import { FaEdit, FaTrash, FaEye, FaPlus} from 'react-icons/fa';
 import "./MyTripsPage.css";
 
@@ -129,13 +130,14 @@ const TripCard = ({ trip, handleDelete, handleView, handleEdit }) => {
 };
 
 // --- MAIN COMPONENT ---
-export default function MyTripsPage() {
+export default function MyTripsPage({ isAuthenticated }) {
     const [trips, setTrips] = useState([]);
     const [filteredTrips, setFilteredTrips] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [showAuthModal, setShowAuthModal] = useState(false); 
 
     // Confirmation modal state
     const [confirmModal, setConfirmModal] = useState({
@@ -162,8 +164,20 @@ export default function MyTripsPage() {
         setToast({ ...toast, isVisible: false });
     };
 
+    useEffect(() => {
+        if (!isAuthenticated) {
+            setShowAuthModal(true);
+            setIsLoading(false);
+            setTrips([]); 
+        } else {
+            setShowAuthModal(false);
+        }
+    }, [isAuthenticated]);
+
     // Fetch trips
     const fetchTrips = async () => {
+        if (!isAuthenticated) return;
+        
         setIsLoading(true);
         setError(null);
         try {
@@ -243,8 +257,37 @@ export default function MyTripsPage() {
 
     useEffect(() => {
         fetchTrips();
-    }, []);
+    }, [isAuthenticated]); 
 
+    if (!isAuthenticated) {
+        return (
+            <div className="itinerary-container">
+                <div className="trips-header">
+                    <div className="header-left">
+                        <h2>My Itineraries</h2>
+                        <p className="header-subtitle">Quản lý tất cả chuyến đi của bạn</p>
+                    </div>
+                </div>
+
+                <div className="empty-state">
+                    <div style={{ fontSize: '80px', marginBottom: '20px' }}>🔒</div>
+                    <h3>Login Required</h3>
+                    <p>Please login to view and manage your trips</p>
+                </div>
+
+                {showAuthModal && (
+                    <AuthRequiredModal 
+                        onClose={() => {
+                            setShowAuthModal(false);
+                            navigate('/');
+                        }}
+                        message="You need to be logged in to view your trips. Please login or register to continue! ✈️"
+                    />
+                )}
+            </div>
+        );
+    }
+    
     // Loading state
     if (isLoading) {
         return (

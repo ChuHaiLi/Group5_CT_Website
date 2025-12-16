@@ -237,13 +237,11 @@ function AppContent() {
             }
           />
           <Route
-            path="/saved"
+            path="/trips/:tripId"
             element={
-              <SavedPage
-                savedIds={savedIds}
-                handleToggleSave={handleToggleSave}
-                isAuthenticated={isAuthenticated}
-              />
+              <PrivateRoute isAuthenticated={isAuthenticated}>
+                <TripDetailsPage />
+              </PrivateRoute>
             }
           />
 
@@ -266,15 +264,14 @@ function AppContent() {
           />
 
           <Route
-            path="/saved"
-            element={
-              <PrivateRoute isAuthenticated={isAuthenticated}>
+              path="/saved"
+              element={
                 <SavedPage
                   savedIds={savedIds}
                   handleToggleSave={handleToggleSave}
+                  isAuthenticated={isAuthenticated}
                 />
-              </PrivateRoute>
-            }
+              }
           />
         </Routes>
       </div>
