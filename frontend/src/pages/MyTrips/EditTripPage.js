@@ -1888,7 +1888,7 @@ const HotelCard = () => {
       <div className="edit-trip-metadata-form">
         <h2>⚙️ Thiết lập kế hoạch chuyến đi</h2>
         <div className="metadata-grid">
-          <div className="input-group">
+          <div className="edit-trip-input-group">
             <label>Tên chuyến đi</label>
             <input
               type="text"
