@@ -553,7 +553,7 @@ export default function CreateTripForm({
 
           <form onSubmit={handleSubmit}>
             {/* Trip name */}
-            <div className="input-group">
+            <div className="create-trip-form-input-group">
               <input
                 type="text"
                 placeholder="Trip Name"
@@ -564,7 +564,7 @@ export default function CreateTripForm({
               />
             </div>
 
-            <div className="input-group date-select-group">
+            <div className="create-trip-form-input-group date-select-group">
               <label>
                 <FaClock /> Start Date
               </label>
@@ -579,7 +579,7 @@ export default function CreateTripForm({
             </div>
 
             {/* Province select */}
-            <div className="province-select-group input-group">
+            <div className="province-select-group create-trip-form-input-group">
               <label>
                 <FaGlobe /> Select Main Province (Trip Focus)
               </label>
@@ -606,7 +606,7 @@ export default function CreateTripForm({
             </div>
 
             {/* Must-Include Places Summary */}
-            <div className="destination-summary-group input-group">
+            <div className="destination-summary-group create-trip-form-input-group">
               <label>
                 <FaMapMarkerAlt /> Must-Include Places ({mustIncludeDetails.length})
               </label>
@@ -707,7 +707,7 @@ export default function CreateTripForm({
             </div>
             
             {/* Hotel Selection Input/Summary (Dưới cùng của form) */}
-            <div className="hotel-selection-group input-group">
+            <div className="hotel-selection-group create-trip-form-input-group">
                 <label>
                     <FaBed /> Primary Accommodation
                 </label>
