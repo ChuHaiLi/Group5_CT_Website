@@ -597,3 +597,85 @@
         font-size: 1.25rem;
     }
 }
+
+/* Container của khu vực Nơi ở */
+.primary-accommodation-section {
+    padding: 20px;
+    margin-top: 20px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    background-color: #f8fcf8; /* Màu nền nhẹ nhàng cho khu vực Hotel */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.primary-accommodation-section .section-title {
+    font-size: 1.2em;
+    color: #107c10; /* Màu xanh lá nổi bật */
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Thẻ thông tin Hotel */
+.accommodation-card {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #c8e6c9;
+    cursor: pointer;
+    transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.accommodation-card:hover {
+    background-color: #e6f7e8;
+    box-shadow: 0 2px 5px rgba(16, 124, 16, 0.2);
+}
+
+.hotel-icon-large {
+    font-size: 2em;
+    color: #107c10;
+    margin-right: 15px;
+}
+
+.accommodation-details {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.accommodation-name {
+    font-weight: bold;
+    font-size: 1.1em;
+    color: #333;
+}
+
+.accommodation-category {
+    font-size: 0.9em;
+    color: #666;
+}
+
+.view-details-btn {
+    background-color: #107c10;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-weight: 600;
+}
+
+.view-details-btn:hover {
+    background-color: #0d5f0d;
+}
+
+.no-accommodation-info {
+    padding: 15px;
+    border: 1px dashed #ccc;
+    border-radius: 8px;
+    text-align: center;
+    color: #777;
+}

@@ -1299,130 +1299,238 @@ def get_place_duration(destination_obj):
         return 2.0
     
     return 2.0 
-# -------------------------------------------------------------
-# LOGIC LỘ TRÌNH TỰ ĐỘNG (TỐI ƯU HÓA DỰA TRÊN THỜI LƯỢNG MỚI)
-# -------------------------------------------------------------
 
-def generate_itinerary_optimized(province_id, duration_days, must_include_place_ids=None, excluded_ids=None):
+from sqlalchemy import or_, func
+from models import db, Destination 
+import random # Cần import random nếu bạn đang sử dụng nó
+
+# Giả định get_place_duration và simple_distance đã được định nghĩa ở đâu đó
+
+def generate_itinerary_optimized(province_id, duration_days, must_include_place_ids=None, excluded_ids=None, primary_accommodation_id=None):
     if must_include_place_ids is None:
         must_include_place_ids = []
     if excluded_ids is None:
         excluded_ids = []
-        
-    all_excluded_ids = set(must_include_place_ids) | set(excluded_ids)
     
+    # -------------------------------------------------------------
+    # BƯỚC 0a: XÁC MINH VÀ ƯU TIÊN KHÁCH SẠN DO USER CHỌN
+    # -------------------------------------------------------------
+    validated_user_hotel_id = None
+    
+    if primary_accommodation_id:
+        user_selected_hotel = db.session.get(Destination, primary_accommodation_id)
+        
+        if user_selected_hotel:
+            place_type_lower = getattr(user_selected_hotel, 'place_type', getattr(user_selected_hotel, 'category', '')).lower()
+            
+            if 'hotel' in place_type_lower or 'accommodation' in place_type_lower or 'resort' in place_type_lower:
+                validated_user_hotel_id = user_selected_hotel.id
+                print(f"✅ [Auto-Itinerary] SỬ DỤNG KHÁCH SẠN NGƯỜI DÙNG CHỌN: {user_selected_hotel.name}")
+            else:
+                print(f"⚠️ [Auto-Itinerary] ID {primary_accommodation_id} KHÔNG phải là Khách sạn/Nơi ở hợp lệ. Tìm kiếm tự động.")
+        
+    primary_accommodation_id = validated_user_hotel_id
+
+    # -------------------------------------------------------------
+    # BƯỚC 0b: TỰ ĐỘNG CHỌN (Chỉ chạy nếu Khách sạn Chính vẫn là None/Invalid)
+    # -------------------------------------------------------------
+    if not primary_accommodation_id:
+        best_hotel = Destination.query.filter(
+            Destination.province_id == province_id,
+            or_(
+                func.lower(Destination.place_type) == 'hotel',
+                func.lower(Destination.category) == 'hotel'
+            ),
+            Destination.id.notin_(excluded_ids)
+        ).order_by(Destination.rating.desc()).first()
+
+        if best_hotel:
+            primary_accommodation_id = best_hotel.id
+            print(f"✅ [Auto-Itinerary] Tự động chọn Khách sạn: {best_hotel.name}")
+        else:
+            print("⚠️ [Auto-Itinerary] Không tìm thấy Khách sạn để tự động chọn.")
+
+    # BƯỚC BỔ SUNG HOTEL ID: Đảm bảo Khách sạn Chính luôn nằm trong danh sách must_include
+    final_must_include_ids = list(must_include_place_ids)
+    
+    if primary_accommodation_id and primary_accommodation_id not in final_must_include_ids:
+        if primary_accommodation_id not in excluded_ids:
+            final_must_include_ids.append(primary_accommodation_id)
+
+    all_excluded_ids = set(final_must_include_ids) | set(excluded_ids)
+    
+    # ... (Các hằng số giữ nguyên)
     MAX_HOURS_PER_DAY = 11.0 
     TRAVEL_BUFFER_HOURS = 0.5 
     MAX_PLACES_LIMIT = 4 
     MAX_TOTAL_PLACES_SELECTION = duration_days * MAX_PLACES_LIMIT
     
+    # Mở rộng danh sách loại trừ để tránh khách sạn khác lọt vào danh sách tham quan
+    EXCLUDED_TYPES_FOR_FILTER = ['hotel', 'restaurant', 'accommodation', 'resort', 'motel']
+    
     # -----------------------------------------------------------------
     # BƯỚC 1: TRUY VẤN VÀ CHỌN LỌC ĐỊA ĐIỂM 
     # -----------------------------------------------------------------
     
-    # Lấy các điểm bắt buộc (Priority 1)
     must_include_places = []
-    for place_id in must_include_place_ids:
+    
+    def get_place_type_value(place):
+        return getattr(place, 'place_type', getattr(place, 'category', 'Destination'))
+
+    for place_id in final_must_include_ids:
         place = db.session.get(Destination, place_id)
-        # Chỉ bao gồm điểm bắt buộc nếu nó chưa nằm trong danh sách ĐÃ ĐI
+        
+        is_primary_accommodation = (place_id == primary_accommodation_id)
+        
         if place and place.id not in excluded_ids: 
-            must_include_places.append(place)
             
+            place_type_value = get_place_type_value(place) 
+            place_type_lower = place_type_value.lower() if place_type_value else ''
+            
+            should_include = False
+            
+            if is_primary_accommodation:
+                should_include = True 
+            elif place_type_lower not in EXCLUDED_TYPES_FOR_FILTER: 
+                should_include = True
+                    
+            if should_include:
+                must_include_places.append(place)
+                    
     # Lấy các điểm còn lại (Priority 2)
-    # TRUY VẤN: Loại trừ TẤT CẢ các địa điểm (must-include + đã dùng)
+    
+    exclusion_conditions = [
+        func.lower(Destination.place_type) == type_name
+        for type_name in EXCLUDED_TYPES_FOR_FILTER
+    ]
+    
     places_in_province = Destination.query.filter(
         Destination.province_id == province_id,
-        Destination.id.notin_(all_excluded_ids) 
+        Destination.id.notin_(all_excluded_ids), 
+        ~or_(*exclusion_conditions)
     ).all()
         
+    # SỬA LỖI NAMEERROR: Đảm bảo remaining_places_sorted luôn được định nghĩa
     remaining_places_sorted = sorted(
         places_in_province, 
         key=lambda p: p.rating or 0, 
         reverse=True
     )
     
-    # Chọn lọc số lượng điểm còn lại cần thiết
-    num_to_select = MAX_TOTAL_PLACES_SELECTION - len(must_include_places)
+    # CHỈ TÍNH CÁC ĐIỂM PHẢI CÓ KHÔNG PHẢI LÀ KHÁCH SẠN VÀO GIỚI HẠN
+    must_include_non_accommod = [
+        p for p in must_include_places 
+        if p.id != primary_accommodation_id
+    ]
+
+    num_to_select = MAX_TOTAL_PLACES_SELECTION - len(must_include_non_accommod)
     selected_remaining_places = remaining_places_sorted[:max(0, num_to_select)]
 
     # CHUYỂN ĐỔI sang định dạng DICT 
     places_to_assign = []
     must_include_dicts = []
     
-    # 1. Xử lý các điểm BẮT BUỘC
+    def create_place_dict(p, is_must_include):
+        raw_lat = getattr(p, 'latitude', None)
+        raw_lon = getattr(p, 'longitude', None)
+        lat = float(raw_lat) if raw_lat is not None else 0.0
+        lon = float(raw_lon) if raw_lon is not None else 0.0
+        
+        is_accommodation = (p.id == primary_accommodation_id) 
+        
+        duration = get_place_duration(p)
+        if is_accommodation and duration < 1.0:
+            duration = 1.0 
+        
+        place_category = getattr(p, 'category', 'General') 
+        place_type_for_output = getattr(p, 'place_type', place_category)
+            
+        return {
+            "id": p.id, 
+            "name": p.name, 
+            "category": place_category, 
+            "type": place_type_for_output, 
+            "lat": lat, 
+            "lon": lon, 
+            "assigned": False, 
+            "duration_hours": duration,
+            "is_accommodation": is_accommodation, 
+            "is_must_include": is_must_include
+        }
+    
     for p in must_include_places:
-        raw_lat = getattr(p, 'latitude', None)
-        raw_lon = getattr(p, 'longitude', None)
-        lat = float(raw_lat) if raw_lat is not None else 0.0
-        lon = float(raw_lon) if raw_lon is not None else 0.0
-        place_dict = {
-            "id": p.id, "name": p.name, "category": p.category, "lat": lat, "lon": lon, 
-            "assigned": False, "duration_hours": get_place_duration(p) 
-        }
-        must_include_dicts.append(place_dict)
+        must_include_dicts.append(create_place_dict(p, True))
         
-    # 2. Xử lý các điểm TỰ CHỌN
     for p in selected_remaining_places:
-        raw_lat = getattr(p, 'latitude', None)
-        raw_lon = getattr(p, 'longitude', None)
-        lat = float(raw_lat) if raw_lat is not None else 0.0
-        lon = float(raw_lon) if raw_lon is not None else 0.0
-        place_dict = {
-            "id": p.id, "name": p.name, "category": p.category, "lat": lat, "lon": lon, 
-            "assigned": False, "duration_hours": get_place_duration(p) 
-        }
-        places_to_assign.append(place_dict)
+        places_to_assign.append(create_place_dict(p, False))
         
-    # Xáo trộn các điểm tự chọn để tăng tính đa dạng (giữ nguyên)
     random.shuffle(places_to_assign) 
 
     # -----------------------------------------------------------------
-    # BƯỚC 2: PHÂN BỔ ĐIỂM VÀ TỐI ƯU HÓA VỊ TRÍ 
+    # BƯỚC 2 (ĐÃ SỬA): PHÂN BỔ ĐIỂM VÀ THÊM KHÁCH SẠN LẶP LẠI
     # -----------------------------------------------------------------
     itinerary_draft = [{"day": day, "places": []} for day in range(1, duration_days + 1)]
     
-    # Danh sách kết hợp: BẮT BUỘC (ưu tiên) + TỰ CHỌN (sau)
-    unassigned_places = must_include_dicts + places_to_assign
+    # Tách Khách sạn Chính ra khỏi danh sách để phân bổ lặp lại
+    primary_accommodation_dict = next(
+        (p for p in must_include_dicts if p.get('is_accommodation')), None
+    )
     
-    # Lặp qua các ngày
+    # Danh sách các điểm tham quan/ăn uống cần phân bổ (KHÔNG BAO GỒM Khách sạn Chính)
+    unassigned_places_to_visit = [p for p in must_include_dicts if not p.get('is_accommodation')] + places_to_assign
+    
+    # Sắp xếp lại danh sách các địa điểm chưa được phân bổ, không bao gồm khách sạn
+    random.shuffle(unassigned_places_to_visit) 
+
     for day_index in range(duration_days):
-        
         current_daily_hours = 0.0
         current_time_slot_hour = 8.0 
+        day_itinerary = itinerary_draft[day_index]["places"]
         
-        while current_daily_hours < MAX_HOURS_PER_DAY and unassigned_places:
+        # --- 2.1 THÊM ĐIỂM XUẤT PHÁT (Nếu có Khách sạn Chính) ---
+        if day_index == 0 and primary_accommodation_dict:
+            hotel_duration_morning = 1.0 
             
-            is_first_place = not itinerary_draft[day_index]["places"]
+            start_time_hour = int(current_time_slot_hour)
+            start_time_minutes = int((current_time_slot_hour % 1) * 60)
+            end_time_float = current_time_slot_hour + hotel_duration_morning
+            end_time_hour = int(end_time_float)
+            end_time_minutes = int((end_time_float % 1) * 60)
             
-            # --- TÌM ĐIỂM TIẾP THEO (Ưu tiên Điểm BẮT BUỘNG) ---
+            time_slot = f"{start_time_hour:02d}:{start_time_minutes:02d} - {end_time_hour:02d}:{end_time_minutes:02d}"
             
+            hotel_departure_output = {
+                "id": primary_accommodation_dict['id'],
+                "name": primary_accommodation_dict['name'],
+                "category": 'HOTEL',
+                "type": 'hotel', 
+                "time_slot": time_slot,
+                "duration_hours": hotel_duration_morning,
+            }
+            day_itinerary.append(hotel_departure_output)
+            current_daily_hours += hotel_duration_morning 
+            current_time_slot_hour = end_time_float + TRAVEL_BUFFER_HOURS # Thêm buffer sau khi rời KS
+
+        # --- 2.2 PHÂN BỔ ĐIỂM THAM QUAN (Non-Accommodation) ---
+        while current_daily_hours < MAX_HOURS_PER_DAY and unassigned_places_to_visit:
+            
+            is_first_place = not day_itinerary # Kiểm tra lại sau khi thêm điểm xuất phát
             next_place_to_add = None
-            candidates = []
             
-            # must_include_place_ids là danh sách ban đầu, ta kiểm tra các điểm bắt buộc chưa được gán
-            must_include_still_unassigned = [p for p in unassigned_places if p['id'] in must_include_place_ids]
+            must_include_still_unassigned = [p for p in unassigned_places_to_visit if p['is_must_include']]
             
             if must_include_still_unassigned:
-                # Logic chọn điểm bắt buộc (giữ nguyên)
-                next_place_to_add = must_include_still_unassigned[0] 
-                if not is_first_place:
-                    last_place_info = itinerary_draft[day_index]["places"][-1]
-                    last_place_db = db.session.get(Destination, last_place_info['id'])
-                    anchor_lat = float(getattr(last_place_db, 'latitude', 0) or 0.0) 
-                    anchor_lon = float(getattr(last_place_db, 'longitude', 0) or 0.0)
-                else:
-                    anchor_lat = next_place_to_add['lat']
-                    anchor_lon = next_place_to_add['lon']
-                    
-            elif unassigned_places:
-                # Logic chọn điểm tự chọn (giữ nguyên)
+                next_place_to_add = must_include_still_unassigned[0]
+            
+            elif unassigned_places_to_visit:
                 if is_first_place:
-                    next_place_to_add = unassigned_places[0]
-                    anchor_lat = next_place_to_add['lat']
-                    anchor_lon = next_place_to_add['lon']
+                    next_place_to_add = unassigned_places_to_visit[0]
                 else:
-                    last_place_info = itinerary_draft[day_index]["places"][-1]
-                    last_place_db = db.session.get(Destination, last_place_info['id'])
+                    last_place_info = day_itinerary[-1]
+                    if last_place_info.get('type') == 'hotel' and day_index == 0:
+                        last_place_db = db.session.get(Destination, primary_accommodation_id)
+                    else:
+                        last_place_db = db.session.get(Destination, last_place_info['id'])
                     
                     if not last_place_db: break
                     
@@ -1430,7 +1538,7 @@ def generate_itinerary_optimized(province_id, duration_days, must_include_place_
                     anchor_lon = float(getattr(last_place_db, 'longitude', 0) or 0.0)
 
                     candidates = sorted(
-                        [p for p in unassigned_places], 
+                        [p for p in unassigned_places_to_visit], 
                         key=lambda p: simple_distance(anchor_lat, anchor_lon, p['lat'], p['lon'])
                     )
                     next_place_to_add = candidates[0] if candidates else None
@@ -1438,15 +1546,13 @@ def generate_itinerary_optimized(province_id, duration_days, must_include_place_
             if not next_place_to_add: break
             
             duration = next_place_to_add['duration_hours']
-            
             time_spent = duration
             if not is_first_place:
                 time_spent += TRAVEL_BUFFER_HOURS 
             
-            # 2.3. Kiểm tra Giới hạn Giờ
             if current_daily_hours + time_spent <= MAX_HOURS_PER_DAY:
                 
-                unassigned_places.remove(next_place_to_add)
+                unassigned_places_to_visit.remove(next_place_to_add)
 
                 start_time_hour = int(current_time_slot_hour)
                 start_time_minutes = int((current_time_slot_hour % 1) * 60)
@@ -1457,13 +1563,16 @@ def generate_itinerary_optimized(province_id, duration_days, must_include_place_
                 
                 time_slot = f"{start_time_hour:02d}:{start_time_minutes:02d} - {end_time_hour:02d}:{end_time_minutes:02d}"
 
-                itinerary_draft[day_index]["places"].append({
+                place_output = {
                     "id": next_place_to_add['id'], 
                     "name": next_place_to_add['name'], 
                     "category": next_place_to_add['category'],
+                    "type": next_place_to_add['type'], 
                     "time_slot": time_slot,
-                    "duration_hours": duration 
-                })
+                    "duration_hours": duration,
+                }
+                
+                day_itinerary.append(place_output)
                 
                 current_daily_hours += time_spent 
                 current_time_slot_hour = end_time_float
@@ -1473,18 +1582,47 @@ def generate_itinerary_optimized(province_id, duration_days, must_include_place_
             else:
                 break
         
-        # ... (Logic chèn Ăn trưa nếu có)
-
+        # -------------------------------------------------
+        # 2.3 GÁN KHÁCH SẠN CHÍNH VÀO CUỐI NGÀY (LẶP LẠI)
+        # -------------------------------------------------
+        if primary_accommodation_dict:
+            # Khách sạn là nơi về, đảm bảo thời gian bắt đầu sau 17:00
+            hotel_start_hour = max(current_time_slot_hour, 17.0) 
+            
+            # Giả định thời gian nghỉ ngơi/kết thúc ngày là 22:00
+            hotel_end_hour = 22.0 
+            
+            hotel_start_time = f"{int(hotel_start_hour):02d}:{int((hotel_start_hour % 1) * 60):02d}"
+            hotel_end_time = f"{int(hotel_end_hour):02d}:{int((hotel_end_hour % 1) * 60):02d}"
+            time_slot_hotel = f"{hotel_start_time} - {hotel_end_time}"
+            
+            hotel_output = {
+                "id": primary_accommodation_dict['id'],
+                "name": f"Về Khách sạn {primary_accommodation_dict['name']}", 
+                "category": 'Nghỉ ngơi',
+                "type": 'hotel', 
+                "time_slot": time_slot_hotel,
+            }
+            
+            # Thêm Khách sạn vào cuối ngày nếu ngày đó có hoạt động
+            if day_itinerary: 
+                 day_itinerary.append(hotel_output)
+                 
     # -----------------------------------------------------------------
-    # BƯỚC CUỐI: 
+    # BƯỚC 3: TRẢ VỀ LỘ TRÌNH ĐÃ ĐÓNG GÓI CHUNG (Giữ nguyên)
     # -----------------------------------------------------------------
     final_itinerary = []
+    
     for day_plan in itinerary_draft:
         clean_places = []
         for place in day_plan["places"]:
             clean_place = place.copy()
+            
             if 'duration_hours' in clean_place:
                 del clean_place['duration_hours'] 
+            if 'is_accommodation' in clean_place:
+                 del clean_place['is_accommodation']
+            
             clean_places.append(clean_place)
             
         if clean_places:
@@ -1493,8 +1631,6 @@ def generate_itinerary_optimized(province_id, duration_days, must_include_place_
                 "places": clean_places
             })
 
-    # LƯU Ý: Đã xóa phần kiểm tra must_include_assigned_ids ở cuối vì logic này đã phức tạp và không cần thiết
-    
     return final_itinerary
 
 # -------------------------------------------------------------
@@ -1513,6 +1649,16 @@ def create_trip():
     # 🔑 NHẬN METADATA (people, budget) TỪ FRONT-END
     metadata = data.get("metadata", {})      
     
+    primary_accommodation_id = metadata.get("primary_accommodation_id") 
+    
+    # Chuyển ID thành số nguyên nếu nó không phải None
+    if primary_accommodation_id is not None:
+        try:
+            primary_accommodation_id = int(primary_accommodation_id)
+        except (ValueError, TypeError):
+            # Xử lý nếu ID không phải là số (mặc dù Frontend đã gửi số)
+            primary_accommodation_id = None
+
     try:
         province_id = data.get("province_id")
         duration_days = data.get("duration")
@@ -1546,7 +1692,7 @@ def create_trip():
             return jsonify({"message": "Invalid start_date format. Use YYYY-MM-DD."}), 400
             
     try:
-        itinerary_draft = generate_itinerary_optimized(province_id, duration_days, must_include_place_ids)
+        itinerary_draft = generate_itinerary_optimized(province_id, duration_days, must_include_place_ids, primary_accommodation_id=primary_accommodation_id)
         
         if not itinerary_draft and not must_include_place_ids:
             return jsonify({"message": "No suitable destinations found in this region to create an itinerary."}), 400

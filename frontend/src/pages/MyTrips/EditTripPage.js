@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { DragDropContext, Droppable } from "@hello-pangea/dnd";
-import { FaArrowLeft, FaSave, FaClock, FaMapMarkerAlt, FaPlus, FaRedo, FaCalendarPlus, FaTrash, FaCog } from 'react-icons/fa';
+import { FaArrowLeft, FaSave, FaClock, FaMapMarkerAlt, FaPlus, FaRedo, FaCalendarPlus, FaTrash, FaCog, FaHotel, FaUtensils, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 
 // 🔑 IMPORT LOGIC VÀ AUTO-TIME TỪ FILE RIÊNG
@@ -15,6 +15,12 @@ import "./EditTripPage.css";
 const getAuthToken = () => localStorage.getItem("access_token");
 const peopleOptions = ["1 person", "2-4 people", "5-10 people", "10+ people"];
 const budgetOptions = ["< 5 triệu", "5-10 triệu", "10-20 triệu", "> 20 triệu"];
+
+const hotelOptions = [
+  { id: 101, name: "Khách Sạn Mường Thanh Luxury", address: "123 Đường XYZ, TP. Đà Lạt", rating: 4.5, type: 'hotel' },
+  { id: 102, name: "Homestay View Đồi", address: "456 Hẻm ABC, TP. Đà Lạt", rating: 4.2, type: 'hotel' },
+  { id: 103, name: "Resort Làng Thảo Nguyên", address: "789 Thôn DEF, TP. Đà Lạt", rating: 4.8, type: 'hotel' },
+];
 
 // Helper: Only log in development mode
 const devLog = {
@@ -51,9 +57,6 @@ export default function EditTripPage() {
   const [showAIModal, setShowAIModal] = useState(false);
   const [pendingAiChanges, setPendingAiChanges] = useState(false);
   const [preAiItinerary, setPreAiItinerary] = useState(null);
-  const [userFeedback, setUserFeedback] = useState(""); // User feedback for AI suggestions
-  const [feedbackLoading, setFeedbackLoading] = useState(false);
-  
   const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false);
   const [showDeleteDayConfirm, setShowDeleteDayConfirm] = useState(false);
   const [dayToDelete, setDayToDelete] = useState(null);
@@ -68,6 +71,80 @@ export default function EditTripPage() {
 
   // Use ref to avoid stale closure in useEffect
   const pendingAiChangesRef = useRef(false);
+
+  const [currentHotel, setCurrentHotel] = useState(null);
+  const [hotelIndex, setHotelIndex] = useState(-1); // -1: chưa chọn hoặc không tìm thấy
+
+  // ... Các hàm helper (summarizeRaw, getRatingLabel, getRatingColor, normalizeAndFillSuggested, v.v...) giữ nguyên ...
+  
+  const handleSelectNewHotel = useCallback(() => {
+      if (hotelOptions.length === 0) return;
+
+      let newIndex = (hotelIndex + 1) % hotelOptions.length;
+      
+      setHotelIndex(newIndex);
+      setCurrentHotel(hotelOptions[newIndex]);
+      toast.success(`Đã chọn Khách sạn mới: ${hotelOptions[newIndex].name}`, { autoClose: 2000 });
+      
+  }, [hotelIndex]);
+
+
+  // [NEW] Xử lý việc xem chi tiết khách sạn (Đã dùng useCallback)
+  const handleViewHotelDetails = useCallback(async () => {
+      if (!currentHotel) return;
+
+      const placeId = currentHotel.id;
+      setIsLoading(true); // Dùng loading state chung (sửa từ setAiLoading)
+      
+      try {
+          const response = await axios.get(`/api/destinations/${placeId}`, {
+              headers: { Authorization: `Bearer ${getAuthToken()}` },
+          });
+          
+          const detailedResult = response.data;
+          
+          setAiResult({
+              score: currentHotel.rating ? currentHotel.rating * 20 : 0,
+              summary: `Chi tiết cho Khách sạn ${currentHotel.name}. Địa chỉ: ${detailedResult.address || currentHotel.address}.`,
+              suggestions: [],
+              raw: JSON.stringify(detailedResult, null, 2)
+          });
+          setShowAIModal(true); 
+
+      } catch (err) {
+          toast.error("Không thể tải chi tiết khách sạn.");
+          setAiResult({
+              raw: `Lỗi tải chi tiết cho ID ${placeId}`,
+              suggestions: []
+          });
+          setShowAIModal(true);
+
+      } finally {
+          setIsLoading(false);
+      }
+  }, [currentHotel]);
+
+  // 🔑 LOGIC CHUYỂN ĐỔI KHÁCH SẠN
+  const handleHotelChange = useCallback((direction) => {
+    if (hotelOptions.length === 0) return;
+
+    let newIndex = hotelIndex;
+    
+    // Nếu chưa chọn (hoặc -1), bắt đầu từ 0
+    if (newIndex === -1) {
+        newIndex = 0;
+    } else if (direction === 'next') {
+        newIndex = (hotelIndex + 1) % hotelOptions.length;
+    } else if (direction === 'prev') {
+        newIndex = (hotelIndex - 1 + hotelOptions.length) % hotelOptions.length;
+    }
+
+    if (newIndex !== hotelIndex) {
+      setHotelIndex(newIndex);
+      setCurrentHotel(hotelOptions[newIndex]);
+      toast.info(`Đã đổi khách sạn sang: ${hotelOptions[newIndex].name}`, { autoClose: 2000 });
+    }
+  }, [hotelIndex]);
 
   // Summarize raw AI response for user-friendly display (English)
   const summarizeRaw = (raw) => {
@@ -354,130 +431,6 @@ export default function EditTripPage() {
     return merged.length > 0 ? merged : null;
   };
 
-  // Parse AI suggestions (string array) into itinerary format
-  const parseSuggestionsToItinerary = (suggestions, sourceItineraryForMatching = null) => {
-    if (!Array.isArray(suggestions) || suggestions.length === 0) {
-      return null;
-    }
-
-    // Build map of existing places from source itinerary for matching
-    const allPlacesMap = new Map();
-    if (sourceItineraryForMatching && Array.isArray(sourceItineraryForMatching)) {
-      sourceItineraryForMatching.forEach((dayPlan) => {
-        (dayPlan.places || []).forEach((p) => {
-          if (p && p.name) {
-            const nameKey = (p.name || "").toLowerCase().trim();
-            if (nameKey) {
-              allPlacesMap.set(nameKey, p);
-            }
-          }
-        });
-      });
-    }
-
-    // Group suggestions by day
-    const suggestionsByDay = {};
-    suggestions.forEach((s) => {
-      if (typeof s !== 'string') return;
-      
-      // Parse format: "Day X: HH:MM-HH:MM - Activity Name - Description"
-      const dayMatch = s.match(/^Day\s+(\d+):\s*(.+)/i);
-      if (dayMatch) {
-        const dayNum = parseInt(dayMatch[1], 10);
-        const suggestionText = dayMatch[2].trim();
-        
-        // Parse time and activity: "HH:MM-HH:MM - Activity Name - Description"
-        // Try multiple formats to handle variations
-        let timeMatch = suggestionText.match(/^(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})\s*-\s*(.+?)(?:\s*-\s*(.+))?$/);
-        if (!timeMatch) {
-          // Try format without description: "HH:MM-HH:MM - Activity Name"
-          timeMatch = suggestionText.match(/^(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})\s*-\s*(.+)$/);
-        }
-        if (!timeMatch) {
-          // Try format without dash separator: "HH:MM-HH:MM Activity Name"
-          timeMatch = suggestionText.match(/^(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})\s+(.+)$/);
-        }
-        
-        if (timeMatch) {
-          const [, startTime, endTime, activityName] = timeMatch;
-          
-          if (!suggestionsByDay[dayNum]) {
-            suggestionsByDay[dayNum] = [];
-          }
-          
-          suggestionsByDay[dayNum].push({
-            startTime,
-            endTime,
-            activityName: activityName.trim(),
-          });
-        }
-      }
-    });
-
-    // Convert to itinerary format
-    const itinerary = [];
-    Object.keys(suggestionsByDay).forEach((dayKey) => {
-      const dayNum = parseInt(dayKey, 10);
-      const daySuggestions = suggestionsByDay[dayNum];
-      
-      const places = daySuggestions.map((suggestion) => {
-        const activityNameLower = suggestion.activityName.toLowerCase();
-        
-        // Try to match with existing place
-        let matchedPlace = null;
-        for (const [key, place] of allPlacesMap.entries()) {
-          if (activityNameLower.includes(key) || key.includes(activityNameLower)) {
-            matchedPlace = place;
-            break;
-          }
-        }
-
-        // Infer type from name
-        const inferType = (name) => {
-          const nameLower = name.toLowerCase();
-          if (nameLower.includes('ăn') || nameLower.includes('lunch') || nameLower.includes('dinner') || nameLower.includes('breakfast') || nameLower.includes('meal')) {
-            return 'food';
-          }
-          if (nameLower.includes('di chuyển') || nameLower.includes('travel') || nameLower.includes('move') || nameLower.includes('về') || nameLower.includes('return') || nameLower.includes('chuyển về')) {
-            return 'move';
-          }
-          if (nameLower.includes('nghỉ') || nameLower.includes('rest') || nameLower.includes('break')) {
-            return 'rest';
-          }
-          return 'sightseeing';
-        };
-
-        const duration = calculateDurationMinutes(suggestion.startTime, suggestion.endTime);
-        const itemType = inferType(suggestion.activityName);
-
-        return {
-          id: matchedPlace?.id || null,
-          name: suggestion.activityName,
-          type: itemType,
-          lat: matchedPlace?.lat || matchedPlace?.latitude || null,
-          lng: matchedPlace?.lon || matchedPlace?.lng || matchedPlace?.longitude || null,
-          start_time: suggestion.startTime,
-          end_time: suggestion.endTime,
-          duration_min: duration,
-          distance_from_prev_km: 0,
-          needs_data: !!matchedPlace?.needs_data,
-        };
-      });
-
-      itinerary.push({
-        day: dayNum,
-        items: places,
-      });
-    });
-
-    if (itinerary.length === 0) {
-      return null;
-    }
-
-    // Use mapOptimizedToFrontend to convert to frontend format
-    return mapOptimizedToFrontend(itinerary, sourceItineraryForMatching);
-  };
-
   // Convert optimized_itinerary from backend into frontend flattened structure
   const mapOptimizedToFrontend = (optimized, sourceItineraryForMatching = null) => {
 
@@ -696,16 +649,6 @@ export default function EditTripPage() {
           return null;
         }
         const uid = `ai-${Date.now()}-${uniqueIdCounter++}`;
-        // Create time_slot from start_time and end_time if both are available
-        let timeSlot = it.time_slot || null;
-        if (!timeSlot && it.start_time && it.end_time) {
-          // Both start_time and end_time are available, create time_slot
-          timeSlot = `${it.start_time}-${it.end_time}`;
-        } else if (!timeSlot && it.start_time) {
-          // Only start_time is available, use it as time_slot (will be completed later)
-          timeSlot = it.start_time;
-        }
-        
         return {
           uniqueId: uid,
           id: it.id || null,
@@ -724,9 +667,7 @@ export default function EditTripPage() {
                       : it.type || "Địa điểm",
           lat: it.lat || it.latitude || null,
           lon: it.lng || it.longitude || null,
-          time_slot: timeSlot,
-          start_time: it.start_time || null,
-          end_time: it.end_time || null,
+          time_slot: it.start_time || it.time_slot || null,
           duration_hours: it.duration_min
             ? Number(it.duration_min) / 60
             : it.duration_hours || null,
@@ -966,6 +907,9 @@ export default function EditTripPage() {
   };
 
   const handleRevertAIChanges = () => {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:662', message: 'handleRevertAIChanges called', data: { hasPreAiItinerary: !!preAiItinerary }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H1' }) }).catch(() => { });
+    // #endregion
     if (preAiItinerary) {
       setItinerary(preAiItinerary);
     }
@@ -983,42 +927,92 @@ export default function EditTripPage() {
     setPendingAiChanges(false);
   };
 
-  const flattenItinerary = (apiItinerary) => {
+const flattenItinerary = (apiItinerary) => {
 
-    let uniqueIdCounter = 0;
-    const flattened = apiItinerary.map((dayPlan) => ({
-      ...dayPlan,
-      places: dayPlan.places.map((item) => ({
-        ...item,
-        uniqueId: `item-${item.id || item.name}-${uniqueIdCounter++}`,
-        day: dayPlan.day,
-      })),
-    }));
+    let uniqueIdCounter = 0;
+    let extractedHotel = null; // Biến tạm để lưu khách sạn
 
+    const flattened = apiItinerary.map((dayPlan) => {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:685', message: 'flattenItinerary processing day', data: { day: dayPlan.day, placesCount: dayPlan.places?.length }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H5' }) }).catch(() => { });
+      // #endregion
+      const placesWithoutHotel = [];
 
-    return flattened;
-  };
+      (dayPlan.places || []).forEach((item) => {
+        const isHotel = (item.category === 'Khách sạn' || item.type === 'hotel');
+
+        if (isHotel && !extractedHotel) {
+          // Nếu chưa trích xuất khách sạn, lấy cái này
+          extractedHotel = {
+            id: item.id || -1,
+            name: item.name || 'Khách sạn đã chọn',
+            address: item.address || item.place || 'Địa chỉ không rõ',
+            rating: item.rating || 0,
+            type: 'hotel',
+            // Thêm các thuộc tính khác cần thiết
+            lat: item.lat || item.latitude || null,
+            lon: item.lon || item.longitude || null,
+          };
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:705', message: 'Extracted hotel from itinerary', data: { hotelName: extractedHotel.name, day: dayPlan.day }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H5' }) }).catch(() => { });
+          // #endregion
+        } else if (isHotel && extractedHotel) {
+          // Nếu đã trích xuất, bỏ qua các mục khách sạn tiếp theo
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:712', message: 'Skipping duplicate hotel in itinerary', data: { hotelName: item.name, day: dayPlan.day }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H5' }) }).catch(() => { });
+          // #endregion
+          return;
+        } else {
+          // Nếu không phải khách sạn, thêm vào danh sách
+          placesWithoutHotel.push({
+            ...item,
+            uniqueId: `item-${item.id || item.name}-${uniqueIdCounter++}`,
+            day: dayPlan.day,
+          });
+        }
+      });
+
+      return {
+        ...dayPlan,
+        places: placesWithoutHotel,
+      };
+    });
+
+    // Gắn khách sạn đã trích xuất vào đối tượng trả về (để sử dụng trong fetchTripDetails)
+    flattened.extractedHotel = extractedHotel;
+
+    return flattened;
+  };
 
   const restoreItinerary = (flatItinerary) => {
-    return flatItinerary.map((dayPlan) => ({
-      day: dayPlan.day,
-      places: dayPlan.places.map((item) => {
-        const { uniqueId, day, ...apiItem } = item;
-        return apiItem;
-      }),
-    }));
-  };
+    return flatItinerary.map((dayPlan) => ({
+      day: dayPlan.day,
+      places: dayPlan.places.map((item) => {
+        const { uniqueId, day, ...apiItem } = item;
+        return apiItem;
+      }),
+    }));
+  };
 
   // --- FETCH DATA ---
   useEffect(() => {
     const fetchTripDetails = async () => {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:707', message: 'fetchTripDetails called', data: { tripId, pendingAiChanges, pendingAiChangesRef: pendingAiChangesRef.current }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
+      // #endregion
       if (!tripId) return;
       // Don't reset itinerary if we have pending AI changes - use ref to avoid stale closure
       if (pendingAiChangesRef.current) {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:712', message: 'fetchTripDetails skipped - pendingAiChangesRef is true', data: { pendingAiChangesRef: pendingAiChangesRef.current }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
+        // #endregion
         return;
       }
       setIsLoading(true);
       try {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:718', message: 'fetchTripDetails fetching data', data: { tripId }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
+        // #endregion
         const response = await axios.get(`/api/trips/${tripId}`, {
           headers: { Authorization: `Bearer ${getAuthToken()}` },
         });
@@ -1029,7 +1023,56 @@ export default function EditTripPage() {
         setOriginalItinerary(flattened); // Lưu bản gốc
         // Only set itinerary if we don't have pending AI changes - use ref to avoid stale closure
         if (!pendingAiChangesRef.current) {
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:729', message: 'fetchTripDetails setting itinerary', data: { flattenedLength: flattened.length }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
+          // #endregion
           setItinerary(flattened); // Bản để chỉnh sửa
+          // ✅ THÊM ĐOẠN NÀY để set editableData
+          const currentlyUsedIds = new Set();
+          fetchedTrip.itinerary.forEach(day => {
+            (day.places || []).forEach(item => {
+              if (item.id && typeof item.id === 'number') {
+                currentlyUsedIds.add(item.id);
+              }
+            });
+          });
+
+          setEditableData({
+            name: fetchedTrip.name || '',
+            startDate: fetchedTrip.start_date || '',
+            duration: fetchedTrip.duration || 1,
+            people: fetchedTrip.metadata?.people || '',
+            budget: fetchedTrip.metadata?.budget || '',
+            provinceId: fetchedTrip.province_id,
+            usedPlaceIds: Array.from(currentlyUsedIds),
+          });
+
+          const savedHotelInMetadata = fetchedTrip.metadata?.hotel;
+          const extractedHotelFromItinerary = flattened.extractedHotel;
+
+          // Ưu tiên khách sạn đã được lưu trong metadata, nếu không có thì dùng cái đã trích xuất
+          const hotelToUse = savedHotelInMetadata || extractedHotelFromItinerary;
+
+          if (hotelToUse && hotelToUse.name) {
+            // Tìm index của hotel đã lưu trong danh sách options
+            const index = hotelOptions.findIndex(h => h.id === hotelToUse.id);
+            if (index !== -1) {
+              setCurrentHotel(hotelOptions[index]);
+              setHotelIndex(index);
+            } else {
+              // Nếu hotel đã lưu không có trong options (ví dụ: hotel do người dùng tự nhập), 
+              // hiển thị nó và đặt index = -1
+              setCurrentHotel(hotelToUse); 
+              setHotelIndex(-1);
+            }
+          } else {
+            setCurrentHotel(null);
+            setHotelIndex(-1);
+          }
+        } else {
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:733', message: 'fetchTripDetails NOT setting itinerary - pendingAiChangesRef is true', data: { pendingAiChangesRef: pendingAiChangesRef.current }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
+          // #endregion
         }
       } catch (err) {
         setError("Không tìm thấy chuyến đi hoặc bạn không có quyền truy cập.");
@@ -1043,6 +1086,12 @@ export default function EditTripPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tripId]); // pendingAiChanges is intentionally excluded - we use pendingAiChangesRef to avoid race conditions
 
+  // Track itinerary state changes for debugging
+  useEffect(() => {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:740', message: 'itinerary state changed', data: { itineraryLength: itinerary.length, itineraryDays: itinerary.map(d => d.day), firstDayPlacesCount: itinerary[0]?.places?.length }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H4' }) }).catch(() => { });
+    // #endregion
+  }, [itinerary]);
 
   // --- DND LOGIC ---
   const getList = useCallback(
@@ -1228,6 +1277,7 @@ export default function EditTripPage() {
         metadata: {
           people: people,
           budget: budget,
+          hotel: currentHotel,
         },
       };
 
@@ -1266,75 +1316,12 @@ export default function EditTripPage() {
     }
   };
 
-  // --- Regenerate AI suggestions with user feedback ---
-  const handleAddFeedback = async () => {
-    if (!tripData || !userFeedback.trim()) return;
-    setFeedbackLoading(true);
-    try {
-      const baseInstructions = `You are a Professional Travel Guide with 30 years of experience. Evaluate the itinerary and provide detailed day-by-day suggestions with complete timeline (8:00-17:00). Return ONLY a single, valid JSON object with this structure:\n{ "score": 0-100, "decision": "accept|adjust|reorder|add_days|balance", "summary": "3-5 sentences like an experienced tour guide", "suggestions": ["Day 1: 08:00-10:00 - [Activity] - [Tips]", "Day 1: 12:30-13:00 - Ăn trưa - 30 phút", ...], "details_per_day": [...], "optimized_itinerary": [...] }\n- suggestions MUST be detailed day-by-day with time ranges (8:00-17:00)\n- Each suggestion format: "Day X: HH:MM-HH:MM - [Activity Name] - [Description/Tips]"\n- Provide suggestions for ALL days in the itinerary\n- Respond in English and avoid adding extra text outside the JSON.`;
-
-      const evaluationInstructions = `${baseInstructions}\n\nIMPORTANT: The user has provided additional feedback and requirements:\n"${userFeedback.trim()}"\n\nPlease incorporate these requirements into your suggestions. Adjust the itinerary based on the user's specific needs, preferences, and requests.`;
-
-      const payload = {
-        original_itinerary: restoreItinerary(originalItinerary),
-        edited_itinerary: restoreItinerary(itinerary),
-        context: { tripId: tripId, tripName: tripData?.name || null },
-        evaluation_instructions: evaluationInstructions,
-      };
-
-      const res = await axios.post("/api/ai/evaluate_itinerary", payload, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` },
-      });
-
-      if (res.data && res.data.ok && res.data.result) {
-        const result = res.data.result;
-        
-        if (!Array.isArray(result.suggestions)) {
-          devLog.warn("AI result missing suggestions array, initializing empty array");
-          result.suggestions = [];
-        }
-        
-        setAiResult(result);
-        setUserFeedback(""); // Clear feedback after successful regeneration
-      } else if (res.data && res.data.result) {
-        const result = res.data.result;
-        if (!Array.isArray(result.suggestions)) {
-          result.suggestions = [];
-        }
-        setAiResult(result);
-        setUserFeedback("");
-      } else {
-        const raw =
-          res.data && res.data.error ? res.data.error : "No response from AI";
-        setAiResult({
-          raw: typeof raw === "string" ? raw : JSON.stringify(raw, null, 2),
-          suggestions: [],
-        });
-      }
-    } catch (err) {
-      devLog.error("AI feedback error", err);
-      const respData = err?.response?.data;
-      const rawErr = respData
-        ? typeof respData === "string"
-          ? respData
-          : JSON.stringify(respData, null, 2)
-        : err.message || String(err);
-      setAiResult({ 
-        raw: rawErr,
-        suggestions: [],
-      });
-    } finally {
-      setFeedbackLoading(false);
-    }
-  };
-
   // --- AI evaluate handler ---
   const handleAIEvaluate = async () => {
     if (!tripData) return;
     setAiLoading(true);
     setAiResult(null);
     setShowAIModal(false);
-    setUserFeedback(""); // Clear feedback when starting new evaluation
     try {
 
       const evaluationInstructions = `You are a Professional Travel Guide with 30 years of experience. Evaluate the itinerary and provide detailed day-by-day suggestions with complete timeline (8:00-17:00). Return ONLY a single, valid JSON object with this structure:\n{ "score": 0-100, "decision": "accept|adjust|reorder|add_days|balance", "summary": "3-5 sentences like an experienced tour guide", "suggestions": ["Day 1: 08:00-10:00 - [Activity] - [Tips]", "Day 1: 12:30-13:00 - Ăn trưa - 30 phút", ...], "details_per_day": [...], "optimized_itinerary": [...] }\n- suggestions MUST be detailed day-by-day with time ranges (8:00-17:00)\n- Each suggestion format: "Day X: HH:MM-HH:MM - [Activity Name] - [Description/Tips]"\n- Provide suggestions for ALL days in the itinerary\n- Respond in English and avoid adding extra text outside the JSON.`;
@@ -1488,19 +1475,6 @@ export default function EditTripPage() {
           aiItineraryToApply = normalized;
         }
       }
-      // If AI evaluation provided suggestions (string array), parse them into itinerary
-      else if (
-        aiResult &&
-        aiResult.suggestions &&
-        Array.isArray(aiResult.suggestions) &&
-        aiResult.suggestions.length > 0
-      ) {
-        const parsed = parseSuggestionsToItinerary(aiResult.suggestions, backupItinerary);
-        
-        if (parsed && validateItinerary(parsed)) {
-          aiItineraryToApply = parsed;
-        }
-      }
       // Otherwise ask the reorder endpoint
       else {
 
@@ -1549,6 +1523,7 @@ export default function EditTripPage() {
       // Validate and apply AI itinerary
 
       if (!aiItineraryToApply || !validateItinerary(aiItineraryToApply)) {
+
         // Rollback: restore backup
         setItinerary(backupItinerary);
         setPreAiItinerary(null);
@@ -1557,12 +1532,53 @@ export default function EditTripPage() {
       }
 
 
-      // Apply AI suggestions directly - NO MERGE, NO SORTING, NO REMOVE DUPLICATES
-      // Just use AI suggestions as-is, preserving the exact order from AI
+      // REPLACE entire itinerary with AI optimized itinerary (not merge)
+      // This ensures the AI suggestions are applied exactly as suggested, in the correct time order
       let replacedItinerary = deepCloneItinerary(aiItineraryToApply);
-      
+
+      // Remove duplicate places: each sightseeing place should appear only once
+      const seenPlaceIds = new Set();
+      const seenPlaceNames = new Set();
+
+      replacedItinerary = replacedItinerary.map((dayPlan) => {
+        const uniquePlaces = [];
+        const places = dayPlan.places || [];
+
+        places.forEach((place) => {
+          const placeId = place.id || null;
+          const placeName = (place.name || "").toLowerCase().trim();
+          const isSightseeing = place.category !== "Ăn uống" &&
+            place.category !== "Di chuyển" &&
+            place.category !== "Nghỉ ngơi" &&
+            place.type !== "food" &&
+            place.type !== "move" &&
+            place.type !== "rest";
+
+          if (isSightseeing) {
+            // Check for duplicates by id or name
+            const isDuplicate = (placeId && seenPlaceIds.has(placeId)) ||
+              (placeName && seenPlaceNames.has(placeName));
+
+            if (!isDuplicate) {
+              if (placeId) seenPlaceIds.add(placeId);
+              if (placeName) seenPlaceNames.add(placeName);
+              uniquePlaces.push(place);
+            } else {
+              devLog.warn(`Removing duplicate place: ${place.name} (id: ${placeId})`);
+            }
+          } else {
+            // Non-sightseeing items (food/rest/move) can appear multiple times
+            uniquePlaces.push(place);
+          }
+        });
+
+        return {
+          ...dayPlan,
+          places: uniquePlaces,
+        };
+      });
+
       // Ensure we have all days from original (fill missing days if any)
-      // But don't change the order of AI suggestions
       if (replacedItinerary.length < itinerary.length) {
         devLog.warn("AI itinerary has fewer days than original. Filling missing days.");
         const aiDaysSet = new Set(replacedItinerary.map(d => d.day || 0));
@@ -1586,10 +1602,20 @@ export default function EditTripPage() {
 
 
       // Apply: flatten, recalculate time slots, then set state
-      // Note: recalculateTimeSlots will preserve AI's time if provided
+      // Note: recalculateTimeSlots will apply time slots in order, so AI's start_time will be respected
       const flattened = flattenItinerary(replacedItinerary);
+
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:1174', message: 'Before recalculateTimeSlots', data: { flattenedLength: flattened.length, firstDayPlaces: flattened[0]?.places?.map(p => ({ name: p.name, start_time: p.start_time, time_slot: p.time_slot })) }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H3' }) }).catch(() => { });
+      // #endregion
+
       const enhanced = recalculateTimeSlots(flattened);
-      
+
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:1180', message: 'After recalculateTimeSlots', data: { enhancedLength: enhanced.length, firstDayPlaces: enhanced[0]?.places?.map(p => ({ name: p.name, start_time: p.start_time, time_slot: p.time_slot })) }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H3' }) }).catch(() => { });
+      // #endregion
+
+
       // Final check: ensure enhanced is valid
       if (!validateItinerary(enhanced)) {
 
@@ -1601,15 +1627,31 @@ export default function EditTripPage() {
 
       // Success: apply the changes
       // Set pendingAiChanges FIRST to prevent fetchTripDetails from resetting
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:1190', message: 'About to apply AI suggestions', data: { enhancedLength: enhanced.length, enhancedDays: enhanced.map(d => d.day) }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H1' }) }).catch(() => { });
+      // #endregion
+
       // Update ref FIRST (synchronous) to prevent race condition
       pendingAiChangesRef.current = true;
       setPendingAiChanges(true);
-      
+
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:1196', message: 'pendingAiChangesRef set to true, about to setItinerary', data: { pendingAiChangesRef: pendingAiChangesRef.current }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H1' }) }).catch(() => { });
+      // #endregion
+
       setItinerary(enhanced);
+
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:1201', message: 'setItinerary called with enhanced', data: { enhancedLength: enhanced.length }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H4' }) }).catch(() => { });
+      // #endregion
+
       setShowAIModal(false);
 
       // Force UI update
       setTimeout(() => {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:1208', message: 'Force UI update - resize event dispatched', data: {}, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H4' }) }).catch(() => { });
+        // #endregion
         window.dispatchEvent(new Event('resize'));
       }, 100);
 
@@ -1640,6 +1682,93 @@ export default function EditTripPage() {
   if (error) {
     return <div className="edit-trip-error">Lỗi: {error}</div>;
   }
+
+const HotelCard = () => {
+    
+    // Nút chung để kích hoạt việc chọn/thay đổi
+    const ChangeButton = ({ currentHotel }) => (
+        <button 
+            // Gọi hàm chọn khách sạn mới
+            onClick={handleSelectNewHotel} 
+            className="hotel-change-btn" 
+            title={currentHotel ? "Chọn khách sạn khác" : "Chọn Khách sạn"}
+            style={{ 
+                padding: '8px 12px', 
+                backgroundColor: currentHotel ? '#10b981' : '#f97316', 
+                color: 'white', 
+                border: 'none', 
+                borderRadius: 4, 
+                cursor: 'pointer',
+                fontSize: '0.8rem',
+                flexShrink: 0
+            }}
+        >
+            {/* Sử dụng FaRedo (reload) */}
+            <FaRedo style={{ marginRight: currentHotel ? 6 : 0 }} /> 
+            {currentHotel ? 'Thay đổi' : 'Chọn ngay'}
+        </button>
+    );
+
+    // Trường hợp 1: Chưa chọn khách sạn
+    if (!currentHotel) {
+        return (
+            <div className="hotel-selection-container" style={{ marginBottom: 20 }}>
+                <label style={{ fontSize: '1rem', fontWeight: 600, color: '#333' }}>
+                    <FaHotel style={{ marginRight: 8, color: '#6366f1' }} />
+                    Khách sạn/Lưu trú
+                </label>
+                <div className="hotel-info-card empty-card" style={{ justifyContent: 'space-between', background: '#fef3f3' }}>
+                    <span style={{ color: '#ef4444', fontWeight: 500 }}>
+                        Chưa chọn nơi ở chính.
+                    </span>
+                    <ChangeButton currentHotel={null} />
+                </div>
+            </div>
+        );
+    }
+
+    // Trường hợp 2: Đã chọn khách sạn (Dạng thẻ nhỏ gọn)
+    return (
+        <div className="hotel-selection-container" style={{ marginBottom: 20 }}>
+            <label style={{ fontSize: '1rem', fontWeight: 600, color: '#333' }}>
+                <FaHotel style={{ marginRight: 8, color: '#6366f1' }} />
+                Khách sạn/Lưu trú
+            </label>
+            <div 
+                className="hotel-info-card selected-card" 
+                // Thêm onClick để xem chi tiết
+                onClick={handleViewHotelDetails} 
+                style={{ 
+                    justifyContent: 'space-between', 
+                    padding: '12px', 
+                    border: '1px solid #10b981', 
+                    borderRadius: 8, 
+                    cursor: 'pointer',
+                    backgroundColor: '#ecfdf5',
+                }}
+            >
+                <div className="hotel-details" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <FaHotel size={24} style={{ color: '#059669', flexShrink: 0 }} />
+                    <div className="hotel-text">
+                        <span className="hotel-name" style={{ fontWeight: 600, fontSize: '1rem', color: '#047857' }}>
+                            {currentHotel.name}
+                        </span>
+                        {/* Chỉ hiện rating/thông báo click, loại bỏ địa chỉ */}
+                        <span style={{ fontSize: '0.75rem', color: '#065f46', display: 'block' }}>
+                           {currentHotel.rating ? `⭐ ${currentHotel.rating} / 5.0 | ` : ''}
+                           Click để xem chi tiết
+                        </span>
+                    </div>
+                </div>
+                
+                {/* Nút Thay đổi độc lập, ngăn chặn sự kiện click lan truyền */}
+                <div onClick={(e) => e.stopPropagation()}>
+                    <ChangeButton currentHotel={currentHotel} />
+                </div>
+            </div>
+        </div>
+    );
+};
 
   return (
     <div className="edit-trip-container">
@@ -1685,7 +1814,7 @@ export default function EditTripPage() {
           <FaArrowLeft /> Quay lại
         </button>
         <h1 className="trip-title">
-          ✏️ {tripData?.name || "Loading"}
+          ✏️ Chỉnh sửa: {tripData?.name || "Loading"}
         </h1>
         <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
           <button onClick={handleSave} className="save-btn" disabled={isSaving}>
@@ -1759,7 +1888,7 @@ export default function EditTripPage() {
       <div className="edit-trip-metadata-form">
         <h2>⚙️ Thiết lập kế hoạch chuyến đi</h2>
         <div className="metadata-grid">
-          <div className="edit-page-input-group">
+          <div className="input-group">
             <label>Tên chuyến đi</label>
             <input
               type="text"
@@ -1769,7 +1898,7 @@ export default function EditTripPage() {
             />
           </div>
 
-          <div className="edit-page-input-group">
+          <div className="input-group">
             <label>Ngày xuất phát</label>
             <input
               type="date"
@@ -1778,7 +1907,7 @@ export default function EditTripPage() {
             />
           </div>
 
-          <div className="edit-page-input-group">
+          <div className="input-group">
             <label>Thời lượng (Ngày)</label>
             <input
               type="text"
@@ -1789,7 +1918,7 @@ export default function EditTripPage() {
             />
           </div>
 
-          <div className="edit-page-input-group">
+          <div className="input-group">
             <label>Số người</label>
             <select
               value={editableData.people}
@@ -1800,7 +1929,7 @@ export default function EditTripPage() {
             </select>
           </div>
 
-          <div className="edit-page-input-group">
+          <div className="input-group">
             <label>Ngân sách</label>
             <select
               value={editableData.budget}
@@ -1811,14 +1940,14 @@ export default function EditTripPage() {
             </select>
           </div>
 
-          <div className="edit-page-input-group">
+          <div className="input-group">
             <label>&nbsp;</label>
             <button onClick={handleRegenerateFull} className="regenerate-btn" disabled={isSaving}>
               <FaRedo /> TÁI TẠO LỊCH TRÌNH MỚI
             </button>
           </div>
 
-          <div className="edit-page-input-group">
+          <div className="input-group">
             <label>&nbsp;</label>
             <button onClick={handleExtendTrip} className="extend-btn" disabled={isSaving}>
               <FaCalendarPlus /> Tăng thêm 1 Ngày
@@ -1828,6 +1957,8 @@ export default function EditTripPage() {
       </div>
 
       <hr className="separator" />
+
+      <HotelCard />
 
       {/* Main Content: 2 Columns */}
       <div className="edit-trip-content">
@@ -1977,13 +2108,11 @@ export default function EditTripPage() {
               maxWidth: 940,
               width: "100%",
               maxHeight: "85vh",
-              display: "flex",
-              flexDirection: "column",
+              overflow: "auto",
               boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
             }}
             className="ai-modal"
           >
-            {/* Fixed Header */}
             <div
               style={{
                 display: "flex",
@@ -1991,60 +2120,12 @@ export default function EditTripPage() {
                 alignItems: "center",
                 padding: "12px 16px",
                 borderBottom: "1px solid #eee",
-                position: "sticky",
-                top: 0,
-                background: "#fff",
-                zIndex: 10,
-                borderRadius: "8px 8px 0 0",
               }}
             >
               <h3 style={{ margin: 0 }}>AI Evaluation</h3>
-              <button
-                onClick={() => {
-                  setShowAIModal(false);
-                  setUserFeedback("");
-                }}
-                style={{
-                  background: "rgba(239, 68, 68, 0.7)",
-                  border: "none",
-                  borderRadius: "50%",
-                  width: "28px",
-                  height: "28px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                  color: "#fff",
-                  fontSize: "18px",
-                  fontWeight: "bold",
-                  lineHeight: 1,
-                  transition: "all 0.2s ease",
-                  padding: 0,
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.background = "rgba(239, 68, 68, 0.9)";
-                  e.target.style.transform = "scale(1.1)";
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.background = "rgba(239, 68, 68, 0.7)";
-                  e.target.style.transform = "scale(1)";
-                }}
-                aria-label="Close modal"
-              >
-                ×
-              </button>
             </div>
 
-            {/* Scrollable Body */}
-            <div 
-              style={{ 
-                padding: 16, 
-                overflowY: "auto",
-                flex: 1,
-                minHeight: 0, // Important for flex scrolling
-              }} 
-              className="ai-modal-body"
-            >
+            <div style={{ padding: 16 }} className="ai-modal-body">
               {aiResult ? (
                 aiResult.raw || typeof aiResult === "string" ? (
                   <div
@@ -2481,112 +2562,36 @@ export default function EditTripPage() {
               ) : (
                 <p>No result.</p>
               )}
+            </div>
 
-              {/* Add informations chat section */}
-              <div
-                style={{
-                  padding: "14px 16px",
-                  marginTop: 16,
-                  borderTop: "1px solid #eee",
-                  backgroundColor: "#f9fafb",
-                  borderRadius: 6,
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 16,
-                    fontWeight: "bold",
-                    color: "#374151",
-                    marginBottom: 10,
-                  }}
-                >
-                  Add informations
-                </div>
-                <textarea
-                  value={userFeedback}
-                  onChange={(e) => setUserFeedback(e.target.value)}
-                  placeholder="Enter your request, adjustments, or additional details so the AI can create a more suitable itinerary..."
-                  style={{
-                    width: "100%",
-                    minHeight: 70,
-                    maxHeight: 120,
-                    padding: "10px 12px",
-                    border: "1px solid #d1d5db",
-                    borderRadius: 6,
-                    fontSize: 13,
-                    fontFamily: "inherit",
-                    resize: "vertical",
-                    boxSizing: "border-box",
-                    lineHeight: 1.5,
-                  }}
-                  disabled={feedbackLoading || aiLoading}
-                />
-              </div>
-
-              {/* Footer with buttons */}
-              <div
-                style={{
-                  padding: "14px 16px",
-                  marginTop: 16,
-                  borderTop: "1px solid #eee",
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  alignItems: "center",
-                  gap: "10px",
-                }}
-                className="ai-modal-footer"
-              >
+            <div
+              style={{
+                padding: 12,
+                borderTop: "1px solid #eee",
+                textAlign: "right",
+              }}
+              className="ai-modal-footer"
+            >
               <button
                 onClick={handleApplyAISuggestions}
                 className="apply-btn"
-                disabled={aiLoading || feedbackLoading}
+                disabled={aiLoading}
                 style={{
-                  padding: "10px 20px",
-                  minWidth: "160px",
-                  cursor: aiLoading || feedbackLoading ? "not-allowed" : "pointer",
-                  opacity: aiLoading || feedbackLoading ? 0.6 : 1,
+                  padding: "8px 14px",
+                  cursor: "pointer",
+                  marginRight: 8,
                 }}
               >
                 {aiLoading ? "Applying..." : "Apply AI Suggestions"}
               </button>
 
               <button
-                onClick={handleAddFeedback}
-                className="add-btn"
-                disabled={feedbackLoading || aiLoading || !userFeedback.trim()}
-                style={{
-                  padding: "10px 16px",
-                  minWidth: "80px",
-                  cursor: feedbackLoading || aiLoading || !userFeedback.trim() ? "not-allowed" : "pointer",
-                  background: feedbackLoading || aiLoading || !userFeedback.trim() 
-                    ? "#9ca3af" 
-                    : "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-                  border: "none",
-                  borderRadius: 10,
-                  color: "white",
-                  fontWeight: 600,
-                  fontSize: 14,
-                  transition: "all 0.3s ease",
-                }}
-              >
-                {feedbackLoading ? "Processing..." : "Add"}
-              </button>
-
-              <button
-                onClick={() => {
-                  setShowAIModal(false);
-                  setUserFeedback("");
-                }}
+                onClick={() => setShowAIModal(false)}
                 className="close-btn"
-                style={{ 
-                  padding: "10px 20px",
-                  minWidth: "100px",
-                  cursor: "pointer",
-                }}
+                style={{ padding: "8px 14px", cursor: "pointer" }}
               >
                 Close
               </button>
-              </div>
             </div>
           </div>
         </div>
