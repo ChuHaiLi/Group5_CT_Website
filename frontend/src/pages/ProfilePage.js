@@ -50,6 +50,7 @@ export default function ProfilePage() {
   const accountSectionRef = useRef(null);
   const personalInfoSectionRef = useRef(null);
   const passwordSectionRef = useRef(null);
+  const [hasExistingPassword, setHasExistingPassword] = useState(false);
 
   const [userId, setUserId] = useState(null);
   const [profileData, setProfileData] = useState(defaultProfile);
@@ -89,6 +90,7 @@ export default function ProfilePage() {
   const [validation, setValidation] = useState({
     emailValid: true,
     usernameValid: true, 
+    currentPasswordValid: true,
     newPasswordValid: true,   
     passwordsMatch: true,
   });
@@ -103,16 +105,18 @@ export default function ProfilePage() {
 
     const usernameValid = profileData.username.length === 0 || (usernameRegex.test(profileData.username) && profileData.username.length >= 3);
     const emailValid = profileData.email.length === 0 || emailRegex.test(profileData.email);
+    const currentPasswordValid = profileData.currentPassword.length === 0 || profileData.currentPassword.length >= 6;
     const newPasswordValid = profileData.newPassword.length === 0 || profileData.newPassword.length >= 6;
     const passwordsMatch = profileData.newPassword.length === 0 || profileData.newPassword === profileData.confirmPassword;
-
+    
     setValidation({
     usernameValid,   
     emailValid,
+    currentPasswordValid,
     newPasswordValid,
     passwordsMatch,
   });
-}, [profileData.email, profileData.username, profileData.newPassword, profileData.confirmPassword]); 
+}, [profileData.email, profileData.username, profileData.currentPassword, profileData.newPassword, profileData.confirmPassword]); 
 
   // Scroll spy effect
   useEffect(() => {
@@ -152,6 +156,7 @@ export default function ProfilePage() {
       email: payload.email ?? "",
       phone: payload.phone ?? "",
       avatar: payload.avatar ?? payload.avatarUrl ?? FALLBACK_AVATAR,
+      tagline: payload.tagline ?? "#VN",
     };
     window.dispatchEvent(
       new CustomEvent("wonder-profile-updated", { detail: normalized })
@@ -171,6 +176,9 @@ export default function ProfilePage() {
       setIsGoogleUser(isGoogle);
       setIsGitHubUser(isGitHub);
 
+      const hasPassword = Boolean(data.has_password);
+      setHasExistingPassword(hasPassword);
+    
       let taglineSuffix = "";
       if (data.tagline) {
       taglineSuffix = data.tagline.replace(/^#VN/, "");
@@ -197,6 +205,7 @@ export default function ProfilePage() {
           email: nextProfile.email,
           phone: nextProfile.phone,
           avatar: nextProfile.avatarUrl,
+          tagline: data.tagline || "#VN",
         },
         true
       );
@@ -436,7 +445,7 @@ export default function ProfilePage() {
         }
       });
       
-      return; // 🔥 QUAN TRỌNG: Dừng tại đây, không chạy phần save bên dưới
+      return; //  Dừng tại đây, không chạy phần save bên dưới
       
     } catch (error) {
       console.error("Request email change error:", error);
@@ -464,27 +473,27 @@ export default function ProfilePage() {
       const wantsPasswordChange = profileData.newPassword && profileData.newPassword.trim();
       
       if (wantsPasswordChange) {
-        if (!isGoogleUser && !isGitHubUser) {
-          if (!profileData.currentPassword || !profileData.currentPassword.trim()) {
-            toast.error("Please enter your current password to change pase if (section === 'password') {sword.");
-            return;
-          }
-        }
-        
-        if (!validation.newPasswordValid) {
-          toast.error("New password must be at least 6 characters.");
-          return;
-        }
-        
-        if (!validation.passwordsMatch) {
-          toast.error("New passwords do not match.");
-          return;
-        }
-      } else {
-        toast.error("Please enter a new password to change your password.");
-        return;
-      }
+    const needsCurrentPassword = (!isGoogleUser && !isGitHubUser) || hasExistingPassword;
+    
+    if (needsCurrentPassword && (!profileData.currentPassword || !profileData.currentPassword.trim())) {
+      toast.error("Please enter your current password to change password.");
+      return;
     }
+    
+    if (!validation.newPasswordValid) {
+      toast.error("New password must be at least 6 characters.");
+      return;
+    }
+    
+    if (!validation.passwordsMatch) {
+      toast.error("New passwords do not match.");
+      return;
+    }
+  } else {
+    toast.error("Please enter a new password to change your password.");
+    return;
+  }
+}
 
     setSavingProfile(true);
     try {
@@ -509,15 +518,16 @@ export default function ProfilePage() {
         payload = {
           newPassword: profileData.newPassword.trim(),  
         };
-
-        if (!isGoogleUser && !isGitHubUser) {
-          payload.currentPassword = profileData.currentPassword.trim();
-        }
+          const needsCurrentPassword = (!isGoogleUser && !isGitHubUser) || hasExistingPassword;
+            
+          if (needsCurrentPassword) {
+              payload.currentPassword = profileData.currentPassword.trim();
+          }
       }
 
       const { data } = await API.put("/profile", payload);
 
-      // 🔥 QUAN TRỌNG: CHỈ CẬP NHẬT FIELDS ĐÃ SAVE, GIỮ NGUYÊN CÁC FIELDS KHÁC
+      // CHỈ CẬP NHẬT FIELDS ĐÃ SAVE, GIỮ NGUYÊN CÁC FIELDS KHÁC
       setProfileData(prev => {
         const updated = { ...prev };
         
@@ -572,6 +582,7 @@ export default function ProfilePage() {
             email: profileData.email,
             phone: profileData.phone,
             avatar: profileData.avatarUrl,
+            tagline: data.tagline || "#VN",
           },
           true
         );
@@ -580,26 +591,55 @@ export default function ProfilePage() {
       // Reset states based on section
       if (section === 'accountId') {
         setModified(prev => ({ ...prev, accountId: false }));
+        
+        // 🔥 LẤY tagline từ response hoặc từ profileData
+        const savedTagline = data.user?.tagline || data.tagline || `#VN${profileData.taglineSuffix}`;
+        
+        // 🔥 CHỈ BROADCAST 1 LẦN DUY NHẤT với đầy đủ thông tin
+        broadcastProfile(
+          {
+            id: userId,
+            username: data.user?.username || data.username || profileData.username,
+            email: profileData.email,
+            phone: profileData.phone,
+            avatar: profileData.avatarUrl,
+            tagline: savedTagline, // 🔥 TAGLINE
+          },
+          true
+        );
+        
         toast.success("Account ID updated successfully!");
-      } else if (section === 'personalInfo') {
-        setTouched(prev => ({ ...prev, email: false }));
-        setModified(prev => ({ ...prev, personalInfo: false }));
-        toast.success("Personal information updated successfully!");  
-      } else if (section === 'password') {
-        setTouched({
-          email: false,
-          currentPassword: false,
-          newPassword: false,
-          confirmPassword: false,
-        });
-        setModified(prev => ({ ...prev, password: false }));
+        } else if (section === 'personalInfo') {
+                setTouched(prev => ({ ...prev, email: false }));
+                setModified(prev => ({ ...prev, personalInfo: false }));
+                broadcastProfile(
+                  {
+                    id: userId,
+                    username: profileData.username,
+                    email: profileData.email,
+                    phone: profileData.phone,
+                    avatar: profileData.avatarUrl,
+                    tagline: `#VN${profileData.taglineSuffix}`,
+                  },
+                  true
+                );
+                toast.success("Personal information updated successfully!");  
+              } else if (section === 'password') {
+                setTouched({
+                  email: false,
+                  currentPassword: false,
+                  newPassword: false,
+                  confirmPassword: false,
+                });
+                setModified(prev => ({ ...prev, password: false }));
 
-        if (isGoogleUser || isGitHubUser) { // 🔥 UPDATED
-        toast.success("Password set successfully! You can now use it to sign in.");
-      } else {
-        toast.success("Password updated successfully!");
-      }
-      }
+                if ((isGoogleUser || isGitHubUser) && !hasExistingPassword) {
+                  toast.success("Password set successfully! You can now use it to sign in.");
+                  setHasExistingPassword(true);
+                } else {
+                  toast.success("Password updated successfully!");
+                }
+              }
       
     } catch (error) {
       console.error("Update profile error:", error);
@@ -923,7 +963,7 @@ export default function ProfilePage() {
               </div>
 
               {/* Current Password */}
-              {!isGoogleUser && !isGitHubUser && (
+              {(!isGoogleUser && !isGitHubUser) || (hasExistingPassword && (isGoogleUser || isGitHubUser)) ? (
                 <label className="form-field">
                   <span className="form-field__label">
                     <FaLock className="field-icon" /> 
@@ -950,7 +990,33 @@ export default function ProfilePage() {
                     </button>
                   </div>
                 </label>
+              ) : null}
+
+              {/*Helper text cho OAuth users lần đầu set password */}
+              {(isGoogleUser || isGitHubUser) && !hasExistingPassword && (
+                <div className="info-box" style={{
+                  backgroundColor: '#e3f2fd',
+                  border: '1px solid #2196F3',
+                  borderRadius: '8px',
+                  padding: '12px 16px',
+                  marginBottom: '20px',
+                  display: 'flex',
+                  alignItems: 'start',
+                  gap: '10px'
+                }}>
+                  <span style={{ fontSize: '18px' }}>ℹ️</span>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ margin: 0, fontSize: '14px', color: '#1976D2', fontWeight: '500' }}>
+                      Set up password for traditional sign-in
+                    </p>
+                    <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#555' }}>
+                      You signed up with {isGoogleUser ? 'Google' : 'GitHub'}. 
+                      Set a password to enable traditional email/password login.
+                    </p>
+                  </div>
+                </div>
               )}
+
 
               {/* New Password */}
               <label className="form-field">
@@ -1019,19 +1085,37 @@ export default function ProfilePage() {
               </label>
 
               {/* Password Strength */}
-              {profileData.newPassword.length > 0 && (
+              {(profileData.currentPassword.length > 0 || profileData.newPassword.length > 0 || profileData.confirmPassword.length > 0) && (
                 <div className="password-strength-box">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                    {validation.newPasswordValid ? (
-                      <FaCheckCircle style={{ color: '#4CAF50' }} />
-                    ) : (
-                      <FaTimesCircle style={{ color: '#f44336' }} />
-                    )}
-                    <span style={{ color: validation.newPasswordValid ? '#4CAF50' : '#666' }}>
-                      At least 6 characters
-                    </span>
-                  </div>
+                  {/* Current Password Validation */}
+                  {((!isGoogleUser && !isGitHubUser) || (hasExistingPassword && (isGoogleUser || isGitHubUser))) && profileData.currentPassword.length > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                      {validation.currentPasswordValid ? (
+                        <FaCheckCircle style={{ color: '#4CAF50' }} />
+                      ) : (
+                        <FaTimesCircle style={{ color: '#f44336' }} />
+                      )}
+                      <span style={{ color: validation.currentPasswordValid ? '#4CAF50' : '#666' }}>
+                        Current password: at least 6 characters
+                      </span>
+                    </div>
+                  )}
                   
+                  {/* New Password Validation */}
+                  {profileData.newPassword.length > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                      {validation.newPasswordValid ? (
+                        <FaCheckCircle style={{ color: '#4CAF50' }} />
+                      ) : (
+                        <FaTimesCircle style={{ color: '#f44336' }} />
+                      )}
+                      <span style={{ color: validation.newPasswordValid ? '#4CAF50' : '#666' }}>
+                        New password: at least 6 characters
+                      </span>
+                    </div>
+                  )}
+                  
+                  {/* Confirm Password Validation */}
                   {profileData.confirmPassword.length > 0 && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       {validation.passwordsMatch ? (

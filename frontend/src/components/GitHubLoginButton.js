@@ -1,17 +1,36 @@
 import React, { useState } from "react";
 import { signInWithPopup } from "firebase/auth";
-import { auth, githubProvider } from "../firebase/config";
+import * as firebaseConfig from "../firebase/config";
 import { toast } from "react-toastify";
 import { FaGithub } from "react-icons/fa";
 import API from "../untils/axios";
 import { useNavigate } from "react-router-dom";
+import { isFirebaseConfigured } from "../config";
+
+const { auth, githubProvider } = firebaseConfig;
 
 export default function GitHubLoginButton({ setIsAuthenticated }) {
   const [loading, setLoading] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigate();
 
+  // Kiểm tra xem Firebase có được cấu hình không
+  const isGitHubLoginAvailable = isFirebaseConfigured() && auth && githubProvider;
+
   const handleGitHubLogin = async () => {
+    // Nếu không có cấu hình, hiển thị thông báo lỗi
+    if (!isGitHubLoginAvailable) {
+      toast.error("GitHub login is not configured. Please contact the administrator.", {
+        position: "top-right",
+        autoClose: 4000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -78,7 +97,7 @@ export default function GitHubLoginButton({ setIsAuthenticated }) {
         width: "100%",
         padding: "14px 20px",
         background: "#ffffff",
-        color: "#2d3748",
+        color: isGitHubLoginAvailable ? "#2d3748" : "#a0aec0",
         border: "1.5px solid #e2e8f0",
         borderRadius: "8px",
         fontSize: "15px",
@@ -92,8 +111,13 @@ export default function GitHubLoginButton({ setIsAuthenticated }) {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <FaGithub style={{ fontSize: "20px", color: "#333333" }} />
-      {loading ? "Signing in..." : "Continue with GitHub"}
+      <FaGithub 
+        style={{ 
+          fontSize: "20px", 
+          color: isGitHubLoginAvailable ? "#333333" : "#cbd5e0" 
+        }} 
+      />
+      {loading ? "Signing in..." : isGitHubLoginAvailable ? "Continue with GitHub" : "GitHub Login Unavailable"}
     </button>
   );
 }
