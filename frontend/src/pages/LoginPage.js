@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaPlane, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaPlane, FaCheckCircle, FaTimesCircle, FaHome } from "react-icons/fa";
 import API from "../untils/axios";
 import GoogleLoginButton from "../components/GoogleLoginButton";
 import GitHubLoginButton from "../components/GitHubLoginButton";
@@ -115,6 +115,15 @@ export default function LoginPage({ setIsAuthenticated }) {
 
    return (
     <div className="auth-page">
+      <button 
+      onClick={() => navigate("/")}
+      className="back-to-home-btn"
+      data-page="login" 
+    >
+      <FaHome size={16} />
+      <span>Back to Home</span>
+    </button>
+
       <div className="auth-box">
         <div className="icon-wrapper" style={{ 
           background: 'linear-gradient(135deg, #0074D9, #39CCCC)',
