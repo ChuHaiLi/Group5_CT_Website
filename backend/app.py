@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, url_for
+from flask import Flask, request, jsonify, url_for, current_app
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import (
     JWTManager, create_access_token, create_refresh_token,
@@ -29,6 +29,10 @@ from utils.env_loader import load_backend_env
 from utils.openai_client import OpenAIChatClient
 from sqlalchemy.orm import joinedload
 from flask_migrate import Migrate
+import flask_migrate
+from pathlib import Path
+import click
+from flask.cli import with_appcontext
 from unidecode import unidecode
 from dotenv import load_dotenv
 
@@ -61,6 +65,34 @@ app.config['JWT_HEADER_TYPE'] = "Bearer"
 db.init_app(app)
 jwt = JWTManager(app)
 migrate = Migrate(app, db)
+
+
+@app.cli.command("db-migrate")
+@click.option("-m", "--message", default="Auto migration", help="Migration message")
+@with_appcontext
+def db_migrate_safe(message):
+    """Ensure migrations/versions exists and run flask-migrate migrate safely."""
+    p = Path(current_app.root_path) / "migrations" / "versions"
+    p.mkdir(parents=True, exist_ok=True)
+    (p / "__init__.py").touch(exist_ok=True)
+    try:
+        flask_migrate.migrate(message=message)
+        click.echo("Done: ensured versions folder and ran migrate (if any changes).")
+    except Exception as e:
+        click.echo(f"Error running migrate: {e}")
+        raise
+
+
+@app.cli.command("db-upgrade")
+@with_appcontext
+def db_upgrade_safe():
+    """Run flask-migrate upgrade."""
+    try:
+        flask_migrate.upgrade()
+        click.echo("Done: database upgraded.")
+    except Exception as e:
+        click.echo(f"Error running upgrade: {e}")
+        raise
 
 # Register blueprints
 app.register_blueprint(chat_bp, url_prefix="/api/chat")
