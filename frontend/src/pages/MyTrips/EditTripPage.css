@@ -151,26 +151,26 @@
 }
 
 .edit-trip-input-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
 .edit-trip-input-group label {
-  font-weight: 600;
-  color: #475569;
-  font-size: 0.875rem;
-  letter-spacing: 0.5px;
+    font-weight: 600;
+    color: #475569;
+    font-size: 0.875rem;
+    letter-spacing: 0.5px;
 }
 
 .edit-trip-input-group input,
 .edit-trip-input-group select {
-  padding: 0.875rem;
-  border: 2px solid #e2e8f0;
-  border-radius: 10px;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  background: #f8fafc;
+    padding: 0.875rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #f8fafc;
 }
 
 .edit-trip-input-group input:focus,
@@ -352,7 +352,7 @@
 .day-title {
     font-size: 1.25rem;
     font-weight: 700;
-    color: #667eea;
+    color: #111827;
     margin: 0 0 1rem 0;
     display: flex;
     align-items: center;
@@ -360,9 +360,8 @@
 }
 
 .day-title::before {
-    content: '📅';
     font-size: 1.5rem;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
 /* ============ PLACES LIST ============ */
@@ -412,7 +411,7 @@
 
 .place-icon {
     font-size: 1.5rem;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
 .place-name {
@@ -574,14 +573,27 @@
     font-size: 5rem;
     margin-bottom: 20px;
     animation: bounce 0.6s ease-out;
-    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
 }
 
 @keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    25% { transform: translateY(-15px); }
-    50% { transform: translateY(-7px); }
-    75% { transform: translateY(-12px); }
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    25% {
+        transform: translateY(-15px);
+    }
+
+    50% {
+        transform: translateY(-7px);
+    }
+
+    75% {
+        transform: translateY(-12px);
+    }
 }
 
 .confirm-modal h3 {
@@ -755,7 +767,9 @@
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .edit-trip-error {
@@ -793,10 +807,60 @@
     background: linear-gradient(180deg, #764ba2 0%, #667eea 100%);
 }
 
+/* Dropdown header hover effect */
+/* Fix drag offset issue */
+.day-section.editable {
+    transform: none !important;
+    /* Vô hiệu hóa mọi transform */
+}
+
+.droppable-area {
+    transform: none !important;
+    will-change: auto !important;
+}
+
+/* Khi đang drag, bỏ transform của item */
+.day-section [data-rbd-draggable-context-id] {
+    transform-origin: center !important;
+}
+
+.day-section .day-title {
+    user-select: none;
+    /* Không cho select text khi click */
+}
+
+.day-section:hover {
+    background: #f9fafb;
+}
+
+/* Animation cho dropdown */
+.droppable-area {
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        max-height: 2000px;
+        transform: translateY(0);
+    }
+}
+
 /* ============ ANIMATIONS ============ */
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes slideUp {
@@ -804,6 +868,7 @@
         opacity: 0;
         transform: translateY(50px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -823,7 +888,7 @@
     .editable-column {
         max-height: none;
     }
-    
+
     .metadata-grid {
         grid-template-columns: repeat(2, 1fr);
     }
