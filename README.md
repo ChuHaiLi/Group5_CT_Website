@@ -29,7 +29,7 @@ Navigate to the frontend directory:
 ```bash
 cd frontend
 npm install
-npm install --legacy-peer-deps (optional)
+npm install --legacy-peer-deps (if the version is not compatible)
 ```
 
 ### Available Scripts
