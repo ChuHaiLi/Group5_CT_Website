@@ -150,21 +150,21 @@
     gap: 1.5rem;
 }
 
-.input-group {
+.edit-trip-input-group {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
 }
 
-.input-group label {
+.edit-trip-input-group label {
     font-weight: 600;
     color: #475569;
     font-size: 0.875rem;
     letter-spacing: 0.5px;
 }
 
-.input-group input,
-.input-group select {
+.edit-trip-input-group input,
+.edit-trip-input-group select {
     padding: 0.875rem;
     border: 2px solid #e2e8f0;
     border-radius: 10px;
@@ -173,8 +173,8 @@
     background: #f8fafc;
 }
 
-.input-group input:focus,
-.input-group select:focus {
+.edit-trip-input-group input:focus,
+.edit-trip-input-group select:focus {
     outline: none;
     border-color: #667eea;
     box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
@@ -182,7 +182,7 @@
     transform: translateY(-1px);
 }
 
-.input-group input.disabled-input {
+.edit-trip-input-group input.disabled-input {
     background: #f1f5f9;
     color: #94a3b8;
     cursor: not-allowed;
@@ -901,49 +901,4 @@
         width: 100%;
         justify-content: center;
     }
-}
-
-/* ============================================
-   CRITICAL FIX: Modal Overlay Issues
-   Thêm vào cuối file EditTripPage.css
-   ============================================ */
-
-/* 🔥 FIX: Loại bỏ overflow restriction để modal hiển thị toàn trang */
-.original-column,
-.editable-column {
-    overflow-y: auto;
-    overflow-x: visible !important; /* Cho phép modal vượt ra ngoài */
-}
-
-/* 🔥 FIX: Đảm bảo modal overlay không bị giới hạn */
-.modal-overlay,
-.confirm-modal-overlay {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    z-index: 15000 !important;
-    margin: 0 !important;
-    padding: 20px !important;
-    box-sizing: border-box !important;
-}
-
-/* 🔥 FIX: Container không làm giới hạn modal */
-.edit-trip-container,
-.edit-trip-content {
-    position: relative;
-    overflow: visible !important;
-}
-
-/* 🔥 FIX: Ẩn nút "Xóa ngày" TRONG cột "Lịch trình gốc" */
-.original-column .delete-day-btn {
-    display: none !important;
-}
-
-/* ✅ Chỉ hiển thị nút "Xóa ngày" trong cột "Chỉnh sửa lịch trình" */
-.editable-column .delete-day-btn {
-    display: flex !important;
 }

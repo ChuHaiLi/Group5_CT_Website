@@ -1888,7 +1888,7 @@ const HotelCard = () => {
       <div className="edit-trip-metadata-form">
         <h2>⚙️ Thiết lập kế hoạch chuyến đi</h2>
         <div className="metadata-grid">
-          <div className="input-group">
+          <div className="edit-trip-input-group">
             <label>Tên chuyến đi</label>
             <input
               type="text"
@@ -1898,7 +1898,7 @@ const HotelCard = () => {
             />
           </div>
 
-          <div className="input-group">
+          <div className="edit-trip-input-group">
             <label>Ngày xuất phát</label>
             <input
               type="date"
@@ -1907,7 +1907,7 @@ const HotelCard = () => {
             />
           </div>
 
-          <div className="input-group">
+          <div className="edit-trip-input-group">
             <label>Thời lượng (Ngày)</label>
             <input
               type="text"
@@ -1918,7 +1918,7 @@ const HotelCard = () => {
             />
           </div>
 
-          <div className="input-group">
+          <div className="edit-trip-input-group">
             <label>Số người</label>
             <select
               value={editableData.people}
@@ -1929,7 +1929,7 @@ const HotelCard = () => {
             </select>
           </div>
 
-          <div className="input-group">
+          <div className="edit-trip-input-group">
             <label>Ngân sách</label>
             <select
               value={editableData.budget}
@@ -1940,14 +1940,14 @@ const HotelCard = () => {
             </select>
           </div>
 
-          <div className="input-group">
+          <div className="edit-trip-input-group">
             <label>&nbsp;</label>
             <button onClick={handleRegenerateFull} className="regenerate-btn" disabled={isSaving}>
               <FaRedo /> TÁI TẠO LỊCH TRÌNH MỚI
             </button>
           </div>
 
-          <div className="input-group">
+          <div className="edit-trip-input-group">
             <label>&nbsp;</label>
             <button onClick={handleExtendTrip} className="extend-btn" disabled={isSaving}>
               <FaCalendarPlus /> Tăng thêm 1 Ngày
