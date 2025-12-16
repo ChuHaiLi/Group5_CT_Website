@@ -1,4 +1,3 @@
-// CreateTripForm.js - With 2-column layout and preview destinations
 import React, { useEffect, useRef, useState } from "react";
 import {
   FaClock,
@@ -8,6 +7,8 @@ import {
   FaSearch,
   FaGlobe,
   FaTimes,
+  FaHotel, // Icon Hotel
+  FaBed, // Icon cho Nơi ở
 } from "react-icons/fa";
 import RecommendCard from "../pages/Home/Recommendations/RecommendCard";
 import API from "../untils/axios";
@@ -71,15 +72,24 @@ export default function CreateTripForm({
   const [isProvinceLoading, setIsProvinceLoading] = useState(false);
   const [selectedProvince, setSelectedProvince] = useState(null);
 
-  // --- Must-include places ---
+  // --- Must-include places (Destinations) ---
   const [mustIncludeDetails, setMustIncludeDetails] = useState([]);
+  const [selectedHotel, setSelectedHotel] = useState(null);
 
   // --- Search logic (now only used for filtering preview) ---
   const [searchTerm, setSearchTerm] = useState("");
 
-  // --- Preview destinations (right column) ---
-  const [previewDestinations, setPreviewDestinations] = useState([]);
+  // --- Preview locations (right column) ---
+  const [isViewingHotels, setIsViewingHotels] = useState(false);
+
+  // [NEW] Central store for ALL destinations in the province
+  const [allDestinationsInProvince, setAllDestinationsInProvince] = useState([]);
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+
+  // [NEW] Filtered lists derived from allDestinationsInProvince
+  const [previewDestinations, setPreviewDestinations] = useState([]);
+  const [hotelPreviewList, setHotelPreviewList] = useState([]);
+
 
   // --- Modal details ---
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
@@ -89,35 +99,29 @@ export default function CreateTripForm({
   // --- Init guard ---
   const initialLoaded = useRef(false);
 
-  // Options
+
+  // Options (Giữ nguyên)
   const durationOptions = ["1-3 days", "4-7 days", "8-14 days", "15+ days"];
   const peopleOptions = ["1 person", "2-4 people", "5-10 people", "10+ people"];
   const budgetOptions = [
-    "< 5 triệu",
-    "5-10 triệu",
-    "10-20 triệu",
-    "> 20 triệu",
+    "< 500k VND",
+    "500K - 1 milions VND",
+    "1 - 2 milions VND",
+    "> 2 milions VND",
   ];
 
   // =============================================
-  // Disable body scroll + custom scroll routing
+  // Scroll Logic (Giữ nguyên)
   // =============================================
   useEffect(() => {
-    // Khi mở form → khóa scroll nền
     document.body.style.overflow = "hidden";
-
     const container = document.querySelector(".create-trip-container");
     const left = document.querySelector(".create-trip-form");
     const right = document.querySelector(".destinations-preview");
-
-    // Xử lý scroll theo vị trí chuột
     const handleWheel = (e) => {
       if (!container || !left || !right) return;
-
       const containerRect = container.getBoundingClientRect();
       const rightRect = right.getBoundingClientRect();
-
-      // Nếu chuột nằm trong modal -> chặn scroll trang
       if (
         e.clientY > containerRect.top &&
         e.clientY < containerRect.bottom &&
@@ -125,11 +129,9 @@ export default function CreateTripForm({
         e.clientX < containerRect.right
       ) {
         e.preventDefault();
-
-        // Nếu chuột đang nằm trong vùng right preview
         if (
           e.clientX > rightRect.left &&
-          e.clientX < rightRect.right && // BỔ SUNG QUAN TRỌNG
+          e.clientX < rightRect.right &&
           e.clientY > rightRect.top &&
           e.clientY < rightRect.bottom
         ) {
@@ -139,11 +141,7 @@ export default function CreateTripForm({
         }
       }
     };
-
-    // Lắng nghe wheel
     window.addEventListener("wheel", handleWheel, { passive: false });
-
-    // Cleanup khi đóng form
     return () => {
       document.body.style.overflow = "auto";
       window.removeEventListener("wheel", handleWheel);
@@ -151,7 +149,7 @@ export default function CreateTripForm({
   }, []);
 
   // ---------------------------------------------------------
-  // Close form when clicking outside
+  // Close form when clicking outside (Giữ nguyên)
   // ---------------------------------------------------------
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -159,13 +157,12 @@ export default function CreateTripForm({
         onClose();
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [onClose]);
 
   // ---------------------------------------------------------
-  // Fetch provinces on mount
+  // Fetch provinces on mount (Giữ nguyên)
   // ---------------------------------------------------------
   useEffect(() => {
     setIsProvinceLoading(true);
@@ -201,35 +198,42 @@ export default function CreateTripForm({
   }, []);
 
   // ---------------------------------------------------------
-  // Initialize from initialDestination
+  // Initialize from initialDestination (Giữ nguyên)
   // ---------------------------------------------------------
   useEffect(() => {
     if (!initialDestination || vietnamLocations.length === 0) return;
     if (initialLoaded.current) return;
 
-    const {
-      id: destId,
-      name: destName,
-      province_id,
-      province_name,
-    } = initialDestination;
+    const { id: destId, name: destName, province_id, province_name } = initialDestination;
 
+    const matchAndSet = (matchProv, isHotel = false) => {
+      setSelectedProvince({ id: matchProv.id, name: matchProv.name });
+      const placeDetail = {
+        id: destId,
+        name: destName,
+        province_id: initialDestination.province_id || matchProv.id,
+        province_name: matchProv.name,
+        type: initialDestination.type || "Destination",
+      };
+
+      if (isHotel || placeDetail.type === "Hotel") {
+        setSelectedHotel(placeDetail);
+      } else {
+        setMustIncludeDetails([placeDetail]);
+      }
+
+      if (!tripName && destName) setTripName(`Khám phá ${destName}`);
+      initialLoaded.current = true;
+    };
+
+    // ... (Logic matching province by ID or name) ...
+    
     // Try match by id
     if (province_id != null) {
       const provIdStr = String(province_id);
       const match = vietnamLocations.find((p) => String(p.id) === provIdStr);
       if (match) {
-        setSelectedProvince({ id: match.id, name: match.name });
-        setMustIncludeDetails([
-          {
-            id: destId,
-            name: destName,
-            province_id: province_id,
-            province_name: match.name,
-          },
-        ]);
-        if (!tripName) setTripName(`Khám phá ${destName}`);
-        initialLoaded.current = true;
+        matchAndSet(match, initialDestination.type === "Hotel");
         return;
       }
     }
@@ -237,23 +241,12 @@ export default function CreateTripForm({
     // Try match by numeric id
     const numericTry = Number(province_id);
     if (Number.isFinite(numericTry)) {
-      // <-- fix: numericTry, not numericId
       const matchNum = vietnamLocations.find((p) => {
         const pid = Number(p.id);
         return Number.isFinite(pid) && pid === numericTry;
       });
       if (matchNum) {
-        setSelectedProvince({ id: matchNum.id, name: matchNum.name });
-        setMustIncludeDetails([
-          {
-            id: destId,
-            name: destName,
-            province_id: numericTry,
-            province_name: matchNum.name,
-          },
-        ]);
-        if (!tripName) setTripName(`Khám phá ${destName}`);
-        initialLoaded.current = true;
+        matchAndSet(matchNum, initialDestination.type === "Hotel");
         return;
       }
     }
@@ -262,18 +255,7 @@ export default function CreateTripForm({
     if (province_name) {
       const matchByName = normalizeProvince(province_name, vietnamLocations);
       if (matchByName) {
-        setSelectedProvince({ id: matchByName.id, name: matchByName.name });
-        const pid = Number(matchByName.id);
-        setMustIncludeDetails([
-          {
-            id: destId,
-            name: destName,
-            province_id: Number.isFinite(pid) ? pid : matchByName.id,
-            province_name: matchByName.name,
-          },
-        ]);
-        if (!tripName) setTripName(`Khám phá ${destName}`);
-        initialLoaded.current = true;
+        matchAndSet(matchByName, initialDestination.type === "Hotel");
         return;
       }
     }
@@ -283,63 +265,87 @@ export default function CreateTripForm({
   }, [initialDestination, vietnamLocations, tripName]);
 
   // ---------------------------------------------------------
-  // Load preview destinations when province changes
+  // [CẬP NHẬT] Load ALL destinations when province changes
   // ---------------------------------------------------------
   useEffect(() => {
     if (!selectedProvince) {
-      setPreviewDestinations([]);
+      setAllDestinationsInProvince([]);
       return;
     }
 
     setIsLoadingPreview(true);
 
-    // ⭐ Sử dụng thuật toán search của ExplorePage
     const provinceName = selectedProvince.name.trim();
+    // GỌI API ĐỂ LẤY TẤT CẢ DESTINATIONS, KỂ CẢ HOTEL
     const queryUrl = `/destinations?search=${encodeURIComponent(
       provinceName
-    )}&top=20`;
+    )}&top=100`; // Tăng top để đảm bảo lấy đủ
 
-    console.log(">>> Fetching destinations with:", queryUrl);
+    console.log(">>> Fetching ALL destinations with:", queryUrl);
 
     API.get(queryUrl)
       .then((res) => {
         if (Array.isArray(res.data)) {
-          const onlySameProvince = res.data.filter(
-            (p) =>
-              normalize(p.province_name) === normalize(selectedProvince.name)
-          );
+          const onlySameProvince = res.data
+            .filter(
+              (p) =>
+                normalize(p.province_name) === normalize(selectedProvince.name)
+            )
+            .map((p) => ({
+              ...p,
+              type: p.type || "Destination", // Đảm bảo có type
+            }));
 
-          setPreviewDestinations(onlySameProvince);
+          setAllDestinationsInProvince(onlySameProvince);
         } else {
-          setPreviewDestinations([]);
+          setAllDestinationsInProvince([]);
         }
       })
       .catch(() => {
-        setPreviewDestinations([]);
+        setAllDestinationsInProvince([]);
       })
       .finally(() => setIsLoadingPreview(false));
   }, [selectedProvince]);
 
   // ---------------------------------------------------------
-  // When selectedProvince changes: load preview destinations
-  // (Removed auto-suggest search results logic as search is now in preview)
+  // [NEW] Client-side filtering effect
   // ---------------------------------------------------------
+  useEffect(() => {
+    const hotels = allDestinationsInProvince.filter(
+      (p) => p.type === "Hotel"
+    );
+    const regularDestinations = allDestinationsInProvince.filter(
+      (p) => p.type !== "Hotel"
+    );
+
+    setHotelPreviewList(hotels);
+    setPreviewDestinations(regularDestinations);
+  }, [allDestinationsInProvince]);
 
   // ---------------------------------------------------------
-  // Clear search when province changes
+  // Clear search when province changes (Giữ nguyên)
   // ---------------------------------------------------------
   useEffect(() => {
     setSearchTerm("");
+    setIsViewingHotels(false);
   }, [selectedProvince]);
 
   // ---------------------------------------------------------
-  // Handlers
+  // Handlers (Tối ưu hóa)
   // ---------------------------------------------------------
+  const handleToggleHotels = () => {
+    // Không cần fetch Hotels nữa, chỉ cần chuyển đổi view state
+    setIsViewingHotels((prev) => !prev);
+    setSearchTerm("");
+  };
+
   const handleProvinceChange = (e) => {
+    // ... (Logic province change giữ nguyên) ...
     const val = e.target.value;
     if (!val) {
       setSelectedProvince(null);
       setMustIncludeDetails([]);
+      setSelectedHotel(null);
       return;
     }
     const found = vietnamLocations.find((p) => p.id === val);
@@ -348,20 +354,36 @@ export default function CreateTripForm({
       return;
     }
 
-    setMustIncludeDetails((prev) =>
-      prev.filter((d) => {
+    const filterMustInclude = (list) =>
+      list.filter((d) => {
         const dPid = d.province_id != null ? String(d.province_id) : "";
         const foundId = String(found.id);
         const pnameMatch = d.province_name
           ? normalize(d.province_name) === normalize(found.name)
           : false;
         return dPid === foundId || pnameMatch;
-      })
-    );
+      });
+
+    setMustIncludeDetails((prev) => filterMustInclude(prev));
+
+    if (selectedHotel) {
+      const hotelPid =
+        selectedHotel.province_id != null ? String(selectedHotel.province_id) : "";
+      const selectedPid = String(found.id);
+      const nameMatch = selectedHotel.province_name
+        ? normalize(selectedHotel.province_name) === normalize(found.name)
+        : false;
+
+      if (!(hotelPid === selectedPid || nameMatch)) {
+        setSelectedHotel(null);
+        toast.info("Nơi ở đã chọn bị xóa vì không thuộc tỉnh/thành mới.");
+      }
+    }
 
     setSelectedProvince({ id: found.id, name: found.name });
   };
-
+  
+  // Logic addPlaceToMustInclude, removePlace, handleViewDetails, handleSelectFromDetails (Giữ nguyên)
   const addPlaceToMustInclude = (place) => {
     if (!selectedProvince) {
       toast.error("Chọn tỉnh chính trước.");
@@ -380,8 +402,27 @@ export default function CreateTripForm({
       return;
     }
 
+    const isHotel = place.type === "Hotel";
+
+    if (isHotel) {
+      if (selectedHotel && String(selectedHotel.id) === String(place.id)) {
+        toast.info(`${place.name} đã được chọn làm Nơi ở.`);
+        return;
+      }
+
+      setSelectedHotel({
+        id: place.id,
+        name: place.name,
+        province_id: place.province_id,
+        province_name: place.province_name,
+        type: "Hotel",
+      });
+      toast.success(`Đã chọn ${place.name} làm Nơi ở chính.`);
+      return;
+    }
+
     if (mustIncludeDetails.some((d) => String(d.id) === String(place.id))) {
-      toast.info(`${place.name} đã tồn tại trong danh sách.`);
+      toast.info(`${place.name} đã tồn tại trong danh sách Địa điểm.`);
       return;
     }
 
@@ -392,17 +433,25 @@ export default function CreateTripForm({
         name: place.name,
         province_id: place.province_id,
         province_name: place.province_name,
+        type: place.type || "Destination",
       },
     ]);
-    toast.success(`Đã thêm ${place.name}`);
-    // setSearchTerm("");
-    // setSearchResults([]);
+    toast.success(`Đã thêm ${place.name} vào danh sách Địa điểm.`);
   };
 
-  const removePlace = (placeId) => {
-    setMustIncludeDetails((prev) =>
-      prev.filter((d) => String(d.id) !== String(placeId))
-    );
+  const removePlace = (placeId, isHotel = false) => {
+    if (isHotel) {
+      if (selectedHotel && String(selectedHotel.id) === String(placeId)) {
+        setSelectedHotel(null);
+        toast.info("Đã xóa Nơi ở đã chọn.");
+      }
+    } else {
+      setMustIncludeDetails((prev) => {
+        const list = prev.filter((d) => String(d.id) !== String(placeId));
+        toast.info("Đã xóa địa điểm.");
+        return list;
+      });
+    }
   };
 
   const handleViewDetails = (place) => {
@@ -414,29 +463,14 @@ export default function CreateTripForm({
     addPlaceToMustInclude(place);
     setIsDetailsModalOpen(false);
   };
-
-  // ---------------------------------------------------------
-  // Submit trip (FIXED - always send province_id or province_name)
-  // ---------------------------------------------------------
+  
+  // handleSubmit (Giữ nguyên)
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!tripName?.trim()) {
-      toast.error("Vui lòng nhập tên chuyến đi.");
+    if (!tripName?.trim() || !selectedProvince || !duration || !startDate) {
+      toast.error("Vui lòng điền đầy đủ các trường bắt buộc.");
       return;
-    }
-    if (!selectedProvince) {
-      toast.error("Vui lòng chọn tỉnh/thành chính cho chuyến đi.");
-      return;
-    }
-    if (!duration) {
-      toast.error("Vui lòng chọn thời lượng chuyến đi.");
-      return;
-    }
-
-    if (!startDate) {
-    toast.error("Vui lòng chọn ngày xuất phát.");
-    return;
     }
 
     const durationDays = extractDurationDays(duration);
@@ -449,7 +483,6 @@ export default function CreateTripForm({
       autoClose: false,
     });
 
-    // FIXED: Always send province_id or province_name
     let provinceData = {};
     const provinceIdNum = Number(selectedProvince.id);
     if (
@@ -466,15 +499,24 @@ export default function CreateTripForm({
       return;
     }
 
+    const mustIncludeDestinationIds = mustIncludeDetails.map((d) => d.id);
+    const mustIncludeHotelId = selectedHotel ? [selectedHotel.id] : [];
+    
+    const allMustIncludePlaceIds = [
+      ...mustIncludeDestinationIds,
+      ...mustIncludeHotelId,
+    ];
+
     const payload = {
       name: tripName.trim(),
       ...provinceData,
       duration: durationDays,
       start_date: startDate,
-      must_include_place_ids: mustIncludeDetails.map((d) => d.id),
+      must_include_place_ids: allMustIncludePlaceIds,
       metadata: {
         people: peopleCount || null,
         budget: budget || null,
+        primary_accommodation_id: selectedHotel?.id || null, 
       },
     };
 
@@ -505,13 +547,13 @@ export default function CreateTripForm({
   return (
     <div className="modal-overlay">
       <div className="create-trip-container" ref={formRef}>
-        {/* LEFT COLUMN: FORM */}
+        {/* LEFT COLUMN: FORM (Giữ nguyên) */}
         <div className="create-trip-form">
           <h2 className="form-header">Create a Trip</h2>
 
           <form onSubmit={handleSubmit}>
             {/* Trip name */}
-            <div className="create-trip-form-input-group">
+            <div className="input-group">
               <input
                 type="text"
                 placeholder="Trip Name"
@@ -522,22 +564,22 @@ export default function CreateTripForm({
               />
             </div>
 
-            <div className="create-trip-form-input-group date-select-group">
-            <label>
-              <FaClock /> Start Date
-            </label>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="start-date-input"
-              required
-            />
-            <p className="hint-text">Chọn ngày bạn dự định bắt đầu chuyến đi.</p>
-          </div>
+            <div className="input-group date-select-group">
+              <label>
+                <FaClock /> Start Date
+              </label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="start-date-input"
+                required
+              />
+              <p className="hint-text">Chọn ngày bạn dự định bắt đầu chuyến đi.</p>
+            </div>
 
             {/* Province select */}
-            <div className="province-select-group create-trip-form-input-group">
+            <div className="province-select-group input-group">
               <label>
                 <FaGlobe /> Select Main Province (Trip Focus)
               </label>
@@ -563,10 +605,10 @@ export default function CreateTripForm({
               </p>
             </div>
 
-            {/* Summary */}
-            <div className="destination-summary-group create-trip-form-input-group">
+            {/* Must-Include Places Summary */}
+            <div className="destination-summary-group input-group">
               <label>
-                <FaMapMarkerAlt /> Trip Summary
+                <FaMapMarkerAlt /> Must-Include Places ({mustIncludeDetails.length})
               </label>
               <div className="summary-box">
                 <div className="main-province-info">
@@ -582,7 +624,7 @@ export default function CreateTripForm({
 
                 <div className="must-include-list">
                   <span className="must-include-label">
-                    Must-Include Places ({mustIncludeDetails.length}):
+                    Priority Destinations:
                   </span>
                   <div className="destination-list">
                     {mustIncludeDetails.map((dest) => (
@@ -590,7 +632,7 @@ export default function CreateTripForm({
                         {dest.name}
                         <button
                           type="button"
-                          onClick={() => removePlace(dest.id)}
+                          onClick={() => removePlace(dest.id, false)}
                         >
                           ×
                         </button>
@@ -606,6 +648,7 @@ export default function CreateTripForm({
 
             {/* Options */}
             <div className="options-group">
+              {/* Duration */}
               <div className="option-card">
                 <label>
                   <FaClock /> Duration (Sets Trip Days)
@@ -624,6 +667,7 @@ export default function CreateTripForm({
                 </div>
               </div>
 
+              {/* People */}
               <div className="option-card">
                 <label>
                   <FaUser /> People
@@ -642,6 +686,7 @@ export default function CreateTripForm({
                 </div>
               </div>
 
+              {/* Budget */}
               <div className="option-card">
                 <label>
                   <FaMoneyBillWave /> Budget
@@ -660,6 +705,40 @@ export default function CreateTripForm({
                 </div>
               </div>
             </div>
+            
+            {/* Hotel Selection Input/Summary (Dưới cùng của form) */}
+            <div className="hotel-selection-group input-group">
+                <label>
+                    <FaBed /> Primary Accommodation
+                </label>
+                <div className="summary-box hotel-summary-box">
+                    {selectedHotel ? (
+                        <div className="selected-hotel-info">
+                            <span className="hotel-name-tag">
+                                <FaHotel style={{ marginRight: '5px', color: '#107c10' }} />
+                                {selectedHotel.name}
+                            </span>
+                            <p className="hint-text">
+                                Selected in {selectedHotel.province_name}
+                            </p>
+                            <button
+                                type="button"
+                                className="remove-hotel-btn"
+                                onClick={() => removePlace(selectedHotel.id, true)}
+                            >
+                                <FaTimes /> Remove
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="empty-preview hotel-empty">
+                            <p className="hint-text">
+                                No hotel selected. Use the "Hotels" tab on the right to choose your primary stay.
+                            </p>
+                        </div>
+                    )}
+                </div>
+            </div>
+
 
             {/* Submit */}
             <div className="form-buttons">
@@ -682,23 +761,39 @@ export default function CreateTripForm({
           <h3 className="dark">
             <FaMapMarkerAlt />
             {selectedProvince
-              ? `Destinations in ${selectedProvince.name}`
+              ? isViewingHotels
+                ? `Accommodation in ${selectedProvince.name}`
+                : `Destinations in ${selectedProvince.name}`
               : "Select a Province"}
           </h3>
 
-          {/* Search box in right column */}
+          {/* Search box and Hotel Toggle in right column */}
           {selectedProvince && (
-            <div className="preview-search-group">
+            <div className="preview-controls-group">
               <div className="preview-search-wrapper">
                 <FaSearch className="search-icon" />
                 <input
                   type="text"
-                  placeholder={`Search places in ${selectedProvince.name}...`}
+                  placeholder={`Search ${
+                    isViewingHotels ? "hotels" : "places"
+                  } in ${selectedProvince.name}...`}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="preview-search-input"
                 />
               </div>
+
+              {/* Hotel Toggle Button */}
+              <button
+                type="button"
+                className={`hotel-toggle-btn ${isViewingHotels ? "selected" : ""}`}
+                onClick={handleToggleHotels}
+                // [CẬP NHẬT] Disabled chỉ dựa trên isLoadingPreview
+                disabled={!selectedProvince || isLoadingPreview}
+              >
+                <FaHotel style={{ marginRight: '5px' }} />
+                {isViewingHotels ? 'Back to Places' : 'Hotels'}
+              </button>
             </div>
           )}
 
@@ -713,47 +808,57 @@ export default function CreateTripForm({
 
           {selectedProvince && isLoadingPreview && (
             <div className="empty-preview">
-              <p>Loading destinations...</p>
+              <p>Loading all destinations...</p>
             </div>
           )}
 
           {selectedProvince &&
             !isLoadingPreview &&
-            previewDestinations.length === 0 && (
-              <div className="empty-preview">
-                <p>No destinations found in {selectedProvince.name}</p>
-              </div>
-            )}
-
-          {selectedProvince &&
-            !isLoadingPreview &&
-            previewDestinations.length > 0 &&
             (() => {
-              // Filter destinations based on search term
-              const filteredDestinations =
+              // 1. CHỌN DANH SÁCH GỐC DỰA TRÊN TAB
+              const listToFilter = isViewingHotels
+                ? hotelPreviewList // Chứa tất cả Hotels
+                : previewDestinations; // Chứa tất cả Destinations (không phải Hotel)
+
+              if (!Array.isArray(listToFilter) || listToFilter.length === 0) {
+                 return (
+                    <div className="empty-preview">
+                        <p>
+                            No {isViewingHotels ? 'hotels' : 'destinations'} found in{" "}
+                            {selectedProvince.name}
+                        </p>
+                    </div>
+                 );
+             }
+
+              // 2. LỌC THEO SEARCH TERM (Áp dụng cho cả 2 danh sách)
+              const filteredList =
                 searchTerm.trim().length > 0
-                  ? previewDestinations.filter((dest) =>
-                      normalize(dest.name).includes(
+                  ? listToFilter.filter((item) =>
+                      normalize(item.name).includes(
                         normalize(searchTerm.trim())
                       )
                     )
-                  : previewDestinations;
+                  : listToFilter;
 
-              return filteredDestinations.length > 0 ? (
+              return filteredList.length > 0 ? (
                 <div className="preview-grid">
-                  {filteredDestinations.map((dest) => (
+                  {filteredList.map((item) => (
                     <RecommendCard
-                      key={dest.id}
-                      destination={dest}
+                      key={item.id}
+                      destination={item}
                       mode="select"
-                      onSelectPlace={() => addPlaceToMustInclude(dest)}
-                      onViewDetails={() => handleViewDetails(dest)}
+                      onSelectPlace={() => addPlaceToMustInclude(item)}
+                      onViewDetails={() => handleViewDetails(item)}
                     />
                   ))}
                 </div>
               ) : (
                 <div className="empty-preview">
-                  <p>No destinations match "{searchTerm}"</p>
+                  <p>
+                    No {isViewingHotels ? 'hotels' : 'destinations'} match "
+                    {searchTerm}"
+                  </p>
                 </div>
               );
             })()}

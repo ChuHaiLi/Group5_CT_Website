@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaClock, FaCalendarAlt, FaRoute, FaUtensils, FaArrowLeft, FaGlobe, FaEdit, FaUsers, FaMoneyBillWave } from 'react-icons/fa';
+import { FaClock, FaCalendarAlt, FaRoute, FaUtensils, FaArrowLeft, FaGlobe, FaEdit, FaUsers, FaMoneyBillWave, FaHotel, FaBed } from 'react-icons/fa';
 import DestinationModal from '../../components/DestinationModal';
 import './TripDetailsPage.css';
 
 const getAuthToken = () => localStorage.getItem("access_token");
 
-// ✅ formatPrice helper
+// formatPrice helper (Giữ nguyên)
 const formatPrice = (value) => {
     if (value === null || value === undefined) {
         return "Đang cập nhật";
@@ -56,35 +56,61 @@ export default function TripDetailsPage() {
     const [isLoadingDestination, setIsLoadingDestination] = useState(false);
     const [showDestinationModal, setShowDestinationModal] = useState(false);
 
-    // ✅ Force re-fetch mỗi khi component mount
+    // State cho Khách sạn
+    const [primaryAccommodation, setPrimaryAccommodation] = useState(null);
+
+    // Force re-fetch mỗi khi component mount
     useEffect(() => {
         const fetchTripDetails = async () => {
-            console.log('🔄 [TripDetailsPage] Fetching trip details for tripId:', tripId);
             setIsLoading(true);
             setError(null);
+            setPrimaryAccommodation(null); 
             try {
-                // ✅ Thêm timestamp để tránh cache
                 const timestamp = new Date().getTime();
                 const response = await axios.get(`/api/trips/${tripId}?_t=${timestamp}`, {
                     headers: { Authorization: `Bearer ${getAuthToken()}` },
                 });
 
-                console.log('✅ [TripDetailsPage] API Response:', response.data);
-                console.log('📊 [TripDetailsPage] Duration từ API:', response.data.duration);
-                console.log('📊 [TripDetailsPage] Số ngày trong itinerary:', response.data.itinerary?.length);
-
-                // ✅ FIX: Sync duration với itinerary.length nếu không khớp
                 const fetchedTrip = response.data;
                 const actualDays = fetchedTrip.itinerary?.length || 0;
                 
                 if (fetchedTrip.duration !== actualDays && actualDays > 0) {
-                    console.warn('⚠️ [TripDetailsPage] Duration mismatch detected. Syncing...');
-                    console.warn('   - trip.duration:', fetchedTrip.duration);
-                    console.warn('   - itinerary.length:', actualDays);
-                    
-                    // ✅ Sử dụng itinerary.length làm source of truth
                     fetchedTrip.duration = actualDays;
                 }
+
+                // --- [LOGIC TÁCH KHÁCH SẠN] ---
+                let hotelFound = null;
+                const processedItinerary = fetchedTrip.itinerary ? fetchedTrip.itinerary.map(dayPlan => {
+                    const nonHotelPlaces = [];
+                    
+                    dayPlan.places.forEach(item => {
+                        
+                        const isHotel = 
+                            item.is_accommodation === true || 
+                            (item.type && item.type.toLowerCase() === 'hotel') || 
+                            (item.category && item.category.toLowerCase() === 'hotel');
+
+                        if (isHotel) {
+                            if (!hotelFound) {
+                                hotelFound = item; 
+                            }
+                        } else {
+                            nonHotelPlaces.push(item);
+                        }
+                    });
+
+                    return {
+                        ...dayPlan,
+                        places: nonHotelPlaces, // Lịch trình đã lọc
+                    };
+                }) : [];
+                
+                fetchedTrip.itinerary = processedItinerary;
+
+                if (hotelFound) {
+                    setPrimaryAccommodation(hotelFound);
+                }
+                // ---------------------------------------------------
 
                 setTrip(fetchedTrip);
             } catch (err) {
@@ -98,27 +124,41 @@ export default function TripDetailsPage() {
         if (tripId) {
             fetchTripDetails();
         }
-    }, [tripId]); // ✅ QUAN TRỌNG: Chỉ depend vào tripId, sẽ re-run khi tripId thay đổi
+    }, [tripId]);
     
-    // Fetch destination details when clicking on a place
+    // Fetch destination details when clicking on a place (Cho cả địa điểm và Khách sạn)
     const handleViewDestinationDetails = async (destinationId) => {
-        // Skip for special items
-        if (destinationId === 'LUNCH' || destinationId === 'TRAVEL') return;
-        
+        // Skip for special items (LUNCH/TRAVEL)
+        if (destinationId === 'LUNCH' || destinationId === 'TRAVEL') {
+            setSelectedDestination(null); // Đảm bảo preview trống
+            return;
+        }
+
         setIsLoadingDestination(true);
         setSelectedDestination(null);
         
         try {
+            // ✅ Fetch thông tin chi tiết
             const response = await axios.get(`/api/destinations/${destinationId}`, {
                 headers: { Authorization: `Bearer ${getAuthToken()}` },
             });
-            setSelectedDestination(response.data);
+            const fetchedDetails = response.data;
+            
+            // Cập nhật preview
+            setSelectedDestination(fetchedDetails);
+            
+            // Chỉ mở modal nếu được gọi từ nút Xem Chi tiết (hoặc click vào list item)
+            // Hiện tại chúng ta không cần mở modal ngay ở đây nếu chỉ dùng cho preview.
+            // Nhưng để giữ hành vi cũ:
+             setShowDestinationModal(true); 
+
         } catch (err) {
             console.error("Error fetching destination:", err);
             setSelectedDestination({
                 error: true,
                 message: "Không thể tải thông tin địa điểm"
             });
+             setShowDestinationModal(true); // Hiển thị lỗi trong modal (nếu có)
         } finally {
             setIsLoadingDestination(false);
         }
@@ -131,6 +171,16 @@ export default function TripDetailsPage() {
     const handleBackToMyTrips = () => {
         navigate('/mytrips');
     };
+
+    // Hàm gọi khi click vào khách sạn ở khu vực nổi bật
+    const handleViewHotelDetails = async () => {
+        if (primaryAccommodation) {
+            // ✅ Bắt đầu quá trình tải chi tiết và mở Modal
+            await handleViewDestinationDetails(primaryAccommodation.id);
+            // Modal sẽ tự mở trong handleViewDestinationDetails
+        }
+    }
+
 
     if (isLoading) {
         return (
@@ -163,7 +213,7 @@ export default function TripDetailsPage() {
             {/* Trip Header with Title */}
             <div className="trip-header-new">
                 <h2>{trip.name}
-                    {/* ✅ Status badge */}
+                    {/* Status badge */}
                     {trip.status && (
                         <span className={`status-badge status-${trip.status}`}>
                             {trip.status}
@@ -195,7 +245,7 @@ export default function TripDetailsPage() {
                     </div>
                 </div>
 
-                {/* ✅ End date */}
+                {/* End date */}
                 <div className="info-bar-item date-info">
                     <FaCalendarAlt className="info-bar-icon" />
                     <div className="info-bar-content">
@@ -211,7 +261,6 @@ export default function TripDetailsPage() {
                     <div className="info-bar-content">
                         <span className="info-bar-label">Thời lượng</span>
                         <span className="info-bar-value">
-                            {/* ✅ FIX: Hiển thị đúng duration đã sync */}
                             {trip.duration} ngày
                         </span>
                     </div>
@@ -233,6 +282,33 @@ export default function TripDetailsPage() {
                     </div>
                 </div>
             </div>
+            
+            {/* [NEW] Khu vực hiển thị Nơi ở Chính (Primary Accommodation) */}
+            <div className="primary-accommodation-section">
+                <h3 className="section-title"><FaBed /> Nơi ở Chính</h3>
+                {primaryAccommodation ? (
+                    // Thêm class 'loading-pulse' nếu đang tải chi tiết
+                    <div className="accommodation-card" onClick={handleViewHotelDetails}>
+                        <FaHotel className="hotel-icon-large" />
+                        <div className="accommodation-details">
+                            <span className="accommodation-name">{primaryAccommodation.name}</span>
+                            <span className="accommodation-category">
+                                ({primaryAccommodation.category || primaryAccommodation.type || 'Chỗ ở'})
+                            </span>
+                        </div>
+                        <button 
+                            className="view-details-btn"
+                            disabled={isLoadingDestination}
+                        >
+                            {isLoadingDestination ? 'Đang tải...' : 'Xem Chi tiết'}
+                        </button>
+                    </div>
+                ) : (
+                    <div className="no-accommodation-info">
+                        <p>Chưa có nơi ở chính được chọn cho chuyến đi này.</p>
+                    </div>
+                )}
+            </div>
 
             {/* 2-Column Layout */}
             <div className="trip-content-layout">
@@ -244,9 +320,10 @@ export default function TripDetailsPage() {
                         {trip.itinerary.map((dayPlan) => (
                             <div key={dayPlan.day} className="day-card-vertical">
                                 <h4 className="day-header-vertical">Ngày {dayPlan.day}</h4>
+                                {/* Chỉ render các địa điểm đã lọc (không có khách sạn) */}
                                 <ul className="place-list-vertical">
                                     {dayPlan.places.map((item, index) => {
-                                        // LUNCH
+                                        // LUNCH & TRAVEL (Giữ nguyên)
                                         if (item.id === 'LUNCH') {
                                             return (
                                                 <li key={index} className="item-lunch-vertical">
@@ -258,7 +335,6 @@ export default function TripDetailsPage() {
                                             );
                                         }
                                         
-                                        // TRAVEL
                                         if (item.id === 'TRAVEL') {
                                             return (
                                                 <li key={index} className="item-travel-vertical">
@@ -270,7 +346,7 @@ export default function TripDetailsPage() {
                                             );
                                         }
                                         
-                                        // DESTINATION
+                                        // DESTINATION (Đã lọc Hotel)
                                         return (
                                             <li 
                                                 key={index} 
@@ -293,14 +369,14 @@ export default function TripDetailsPage() {
                     </div>
                 </div>
 
-                {/* RIGHT: Destination Preview */}
+                {/* RIGHT: Destination Preview (Giữ nguyên) */}
                 <div className="trip-preview-column">
                     <h3 className="column-title">🔍 Thông tin Địa điểm</h3>
                     
                     {!selectedDestination && !isLoadingDestination && (
                         <div className="preview-placeholder">
                             <div className="placeholder-icon">🗺️</div>
-                            <p>Click vào tên địa điểm bên trái để xem thông tin chi tiết</p>
+                            <p>Click vào tên địa điểm bên trái hoặc Nơi ở để xem thông tin chi tiết</p>
                         </div>
                     )}
 
@@ -341,7 +417,7 @@ export default function TripDetailsPage() {
                                         </div>
                                     )}
 
-                                    {/* ✅ Improved price formatting */}
+                                    {/* Improved price formatting */}
                                     {(selectedDestination.entry_fee !== null &&
                                         selectedDestination.entry_fee !== undefined) && (
                                         <div className="preview-info-item">
@@ -389,11 +465,14 @@ export default function TripDetailsPage() {
                 </div>
             </div>
 
-            {/* ✅ Destination Modal với hideCreateButton */}
+            {/* Destination Modal */}
             {showDestinationModal && selectedDestination && (
                 <DestinationModal
                     destination={selectedDestination}
-                    onClose={() => setShowDestinationModal(false)}
+                    onClose={() => {
+                        setShowDestinationModal(false);
+                        setSelectedDestination(null);
+                    }}
                     hideCreateButton={true}
                 />
             )}
