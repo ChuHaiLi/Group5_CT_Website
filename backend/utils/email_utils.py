@@ -11,6 +11,9 @@ def send_email(to_email, subject, html_content):
     Cần cấu hình trong .env:
     EMAIL_USER=your-email@gmail.com
     EMAIL_PASSWORD=your-app-password
+    
+    Returns:
+        dict: {"success": bool, "email_configured": bool, "message": str}
     """
     try:
         email_user = os.getenv("EMAIL_USER")
@@ -21,7 +24,12 @@ def send_email(to_email, subject, html_content):
             print(f"📧 Email would be sent to: {to_email}")
             print(f"📧 Subject: {subject}")
             print(f"📧 Content preview: {html_content[:200]}...")
-            return True
+            
+            return {
+                "success": True,
+                "email_configured": False,
+                "message": "Email service not configured. Please check your console for the verification code."
+            }
         
         msg = MIMEMultipart('alternative')
         msg['From'] = email_user
@@ -37,11 +45,21 @@ def send_email(to_email, subject, html_content):
             server.send_message(msg)
         
         print(f"✅ Email sent successfully to {to_email}")
-        return True
+        
+        return {
+            "success": True,
+            "email_configured": True,
+            "message": f"Verification code has been sent to {to_email}"
+        }
         
     except Exception as e:
         print(f"❌ Error sending email: {str(e)}")
-        return False
+        
+        return {
+            "success": False,
+            "email_configured": True,
+            "message": f"Failed to send email: {str(e)}"
+        }
 
 def generate_otp(length=6):
     """Tạo mã OTP ngẫu nhiên gồm 6 chữ số"""

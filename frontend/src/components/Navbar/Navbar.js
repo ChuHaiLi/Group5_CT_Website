@@ -30,7 +30,17 @@ export default function Navbar() {
 
   useEffect(() => {
     const stored = localStorage.getItem("user");
-    if (stored) setUser(JSON.parse(stored));
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        setUser({
+          ...parsed,
+          tagline: parsed.tagline || "#VN" 
+        });
+      } catch (error) {
+        console.error("Error parsing stored user:", error);
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -45,6 +55,7 @@ export default function Navbar() {
           email: data.email,
           phone: data.phone,
           avatar: data.avatar,
+          tagline: data.tagline || "#VN", 
         };
         setUser(normalized);
         localStorage.setItem("user", JSON.stringify(normalized));
@@ -58,7 +69,11 @@ export default function Navbar() {
   useEffect(() => {
     const handleProfileUpdate = (event) => {
       if (!event.detail) return;
-      setUser((prev) => ({ ...prev, ...event.detail }));
+      setUser((prev) => ({ 
+        ...prev, 
+        ...event.detail,
+        tagline: event.detail.tagline || prev?.tagline || "#VN" 
+      }));
     };
     window.addEventListener("wonder-profile-updated", handleProfileUpdate);
     return () => {

@@ -99,28 +99,42 @@ def update_profile():
             profile_changed = True
     
     # 5. Cập nhật Password
-    if "currentPassword" in fields_to_update and "newPassword" in fields_to_update:
+    if "newPassword" in fields_to_update:
         current_password = data.get("currentPassword", "").strip()
         new_password = data.get("newPassword", "").strip()
         
+        # Chỉ xử lý nếu có newPassword
         if new_password:
-            is_google_user = bool(user.google_id)
-            is_github_user = bool(user.github_id)
-            
-            if is_google_user or is_github_user:
-                # Google/GitHub user - cho phép đặt mật khẩu mới
-                if len(new_password) < 6:
-                    errors["newPassword"] = "New password must be at least 6 characters"
-                else:
-                    user.password = generate_password_hash(new_password)
-                    profile_changed = True
+            # Kiểm tra độ dài password mới
+            if len(new_password) < 6:
+                errors["newPassword"] = "New password must be at least 6 characters"
             else:
-                if not check_password_hash(user.password, current_password):
-                    errors["currentPassword"] = "Current password is incorrect"
-                else:
-                    if len(new_password) < 6:
-                        errors["newPassword"] = "New password must be at least 6 characters"
+                is_google_user = bool(user.google_id)
+                is_github_user = bool(user.github_id)
+                if is_google_user or is_github_user:
+                    # Nếu không có currentPassword → đây là lần đầu set password
+                    if not current_password:
+                        # Lần đầu set password - KHÔNG CẦN currentPassword
+                        user.password = generate_password_hash(new_password)
+                        profile_changed = True
                     else:
+                        # Có currentPassword → user đang muốn đổi password đã set
+                        if not check_password_hash(user.password, current_password):
+                            errors["currentPassword"] = "Current password is incorrect"
+                        else:
+                            # ✅ Hash và lưu password mới
+                            user.password = generate_password_hash(new_password)
+                            profile_changed = True
+                else:
+                    # User đăng ký thông thường - LUÔN BẮT BUỘC currentPassword
+                    if not current_password:
+                        errors["currentPassword"] = "Current password is required"
+                    elif not user.password:
+                        errors["currentPassword"] = "No password set for this account"
+                    elif not check_password_hash(user.password, current_password):
+                        errors["currentPassword"] = "Current password is incorrect"
+                    else:
+                        # ✅ Hash và lưu password mới
                         user.password = generate_password_hash(new_password)
                         profile_changed = True
     

@@ -50,6 +50,9 @@ def google_login():
                 user.picture = picture
                 user.avatar_url = picture
                 db.session.commit()
+            elif picture and not user.avatar_url:
+                user.avatar_url = picture
+                db.session.commit()
             
             # Lấy avatar (ưu tiên avatar_url, fallback sang picture)
             avatar = user.avatar_url or user.picture or ""
@@ -89,7 +92,7 @@ def google_login():
                 google_id=google_id,
                 picture=picture,
                 avatar_url=picture,
-                password=generate_password_hash(secrets.token_urlsafe(32)),
+                password=None,
                 is_email_verified=True,
             )
             

@@ -4,8 +4,33 @@ import "./ProfileDropdown.css";
 
 const ProfileDropdown = ({ user, onLogout }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [localUser, setLocalUser] = useState(user); 
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
+
+  // Listen cho profile updates
+  useEffect(() => {
+    const handleProfileUpdate = (event) => {
+      const updatedUser = event.detail;
+      setLocalUser(prevUser => ({
+        ...prevUser,
+        ...updatedUser
+      }));
+    };
+
+    window.addEventListener('wonder-profile-updated', handleProfileUpdate);
+
+    return () => {
+      window.removeEventListener('wonder-profile-updated', handleProfileUpdate);
+    };
+  }, []);
+
+  // Sync với prop user khi thay đổi
+  useEffect(() => {
+    if (user) {
+      setLocalUser(user);
+    }
+  }, [user]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -48,10 +73,19 @@ const ProfileDropdown = ({ user, onLogout }) => {
     }
   };
 
+   const getUserInitials = () => {
+    if (!localUser?.username) return 'U';
+    return localUser.username.charAt(0).toUpperCase();
+  };
+  
   // Get user initials for fallback avatar
-  const getUserInitials = () => {
-    if (!user?.username) return 'U';
-    return user.username.charAt(0).toUpperCase();
+  const getUserTagline = () => {
+    // Ưu tiên tagline từ localUser
+    if (localUser?.tagline) {
+      return localUser.tagline;
+    }
+    // Fallback về #VN
+    return '#VN';
   };
 
   return (
@@ -102,7 +136,7 @@ const ProfileDropdown = ({ user, onLogout }) => {
                   {user?.username || 'User'}
                 </h3>
                 <p className="profile-dropdown-tagline">
-                  {user?.tagline || '#VN'}
+                  {getUserTagline()}
                 </p>
               </div>
             </div>

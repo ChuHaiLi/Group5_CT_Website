@@ -95,12 +95,17 @@ def register():
     </html>
     """
     
-    send_email(email, "Email Verification Code", email_html)
-    
+    email_result = send_email(email, "Email Verification Code", email_html)
+
     return jsonify({
-        "message": "Registration successful! Please check your email for verification code.",
+        "message": "Registration successful! " + (
+            f"Verification code has been sent to {email}." 
+            if email_result["email_configured"] 
+            else "Email service is not configured. Please contact administrator."
+        ),
         "email": email,
         "requires_verification": True,
+        "email_configured": email_result["email_configured"],
         "user": {  
             "id": new_user.id,
             "username": new_user.username,
@@ -223,11 +228,15 @@ def resend_verification():
     </html>
     """
     
-    send_email(user.email, "New Verification Code", email_html)
-    
+    email_result = send_email(user.email, "New Verification Code", email_html)
+
     return jsonify({
-        "message": "A new verification code has been sent to your email.",
-        "success": True
+        "message": (
+            "A new verification code has been sent to your email." 
+            if email_result["email_configured"] 
+            else "Email service is not configured. Please contact administrator."
+        ),
+        "success": email_result["email_configured"]
     }), 200
 
 # -------- Email change verify --------
@@ -308,12 +317,17 @@ def request_email_change():
     </html>
     """
     
-    send_email(new_email, "Verify Your New Email Address", email_html)
-    
+    email_result = send_email(new_email, "Verify Your New Email Address", email_html)
+
     return jsonify({
-        "message": "A verification code has been sent to your new email address.",
+        "message": (
+            f"A verification code has been sent to {new_email}." 
+            if email_result["email_configured"] 
+            else "Email service is not configured. Please contact administrator."
+        ),
         "new_email": new_email,
-        "requires_verification": True
+        "requires_verification": True,
+        "email_configured": email_result["email_configured"]
     }), 200
 
     """
@@ -505,7 +519,28 @@ def login():
         )
     ).first()
     
-    if not user or not check_password_hash(user.password, password):
+    if not user:
+        return jsonify({"message": "Invalid email or password"}), 401
+    
+    if not user.password:
+        # Nếu là OAuth user
+        if user.google_id:
+            return jsonify({
+                "message": "This account uses Google Sign-In. Please login with Google or set a password first.",
+                "error_type": "oauth_account",
+                "oauth_provider": "google"
+            }), 401
+        elif user.github_id:
+            return jsonify({
+                "message": "This account uses GitHub Sign-In. Please login with GitHub or set a password first.",
+                "error_type": "oauth_account",
+                "oauth_provider": "github"
+            }), 401
+        else:
+            return jsonify({"message": "Invalid email or password"}), 401
+    
+    # Kiểm tra password
+    if not check_password_hash(user.password, password):
         return jsonify({"message": "Invalid email or password"}), 401
 
     # Kiểm tra email đã verify chưa
@@ -539,13 +574,17 @@ def login():
         </html>
         """
         
-        send_email(user.email, "Email Verification Code", email_html)
-        
+        email_result = send_email(user.email, "Email Verification Code", email_html)
+
         return jsonify({
-            "message": "Please verify your email before logging in. A verification code has been sent to your email.",
+            "message": (
+                "Please verify your email. A verification code has been sent to your email." 
+                if email_result["email_configured"] 
+                else "Please verify your email. Email service is not configured - contact administrator."
+            ),
             "error_type": "email_not_verified",
             "email": user.email,
-            "otp_sent": True
+            "email_configured": email_result["email_configured"]
         }), 403
 
     access_token = create_access_token(identity=str(user.id))
@@ -595,6 +634,7 @@ def me():
         "avatar": avatar,
         "google_id": user.google_id,
         "github_id": user.github_id,
+        "has_password": bool(user.password), 
     }), 200
 
 # -------- FORGOT PASSWORD --------
@@ -639,12 +679,17 @@ def forgot_password():
     </html>
     """
 
-    send_email(user.email, "Password Reset Code", email_html)
+    email_result = send_email(user.email, "Password Reset Code", email_html)
 
     return jsonify({
-        "message": "An OTP has been sent to your email.",
+        "message": (
+            "An OTP has been sent to your email." 
+            if email_result["email_configured"] 
+            else "Email service is not configured. Please contact administrator."
+        ),
         "email": email,
-        "requires_verification": True
+        "requires_verification": True,
+        "email_configured": email_result["email_configured"]
     }), 200
 
 # -------- VERIFY OTP --------

@@ -19,17 +19,34 @@ const firebaseConfig = {
   measurementId: FIREBASE.measurementId,
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Chỉ khởi tạo Firebase nếu có đầy đủ cấu hình
+let app = null;
+let auth = null;
+let githubProvider = null;
 
-// Initialize Firebase Authentication
-export const auth = getAuth(app);
-auth.languageCode = 'en';
+if (isFirebaseConfigured()) {
+  try {
+    // Initialize Firebase
+    app = initializeApp(firebaseConfig);
 
-// Initialize GitHub Provider
-export const githubProvider = new GithubAuthProvider();
+    // Initialize Firebase Authentication
+    auth = getAuth(app);
+    auth.languageCode = 'en';
 
-// Optional: Request additional scopes
-githubProvider.addScope('user:email');
+    // Initialize GitHub Provider
+    githubProvider = new GithubAuthProvider();
+    githubProvider.addScope('user:email');
+    
+    console.log('Firebase initialized successfully');
+  } catch (error) {
+    console.warn('Firebase initialization failed:', error);
+  }
+} else {
+  console.warn('Firebase not configured. GitHub login will be disabled.');
+}
 
+// Export với named exports
+export { auth, githubProvider };
+
+// Export default
 export default app;

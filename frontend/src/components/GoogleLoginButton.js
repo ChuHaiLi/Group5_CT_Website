@@ -10,10 +10,15 @@ import { FaGoogle } from "react-icons/fa";
 
 export default function GoogleLoginButton({ setIsAuthenticated }) {
   const navigate = useNavigate();
-  const [loading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
+  // Kiểm tra xem Google OAuth có được cấu hình không
+  const isGoogleLoginAvailable = Boolean(GOOGLE_CLIENT_ID);
+
   const handleGoogleSuccess = async (credentialResponse) => {
+    setLoading(true);
+    
     try {
       // Decode JWT token từ Google
       const decoded = jwtDecode(credentialResponse.credential);
@@ -29,78 +34,110 @@ export default function GoogleLoginButton({ setIsAuthenticated }) {
       });
 
       if (res.data && res.data.access_token) {
+        // Đảm bảo avatar được set đúng
+        const userData = {
+          ...res.data.user,
+          avatar: res.data.user.avatar || res.data.user.picture || decoded.picture || ""
+        };
+        
         // Lưu token vào localStorage
         localStorage.setItem("access_token", res.data.access_token);
         localStorage.setItem("refresh_token", res.data.refresh_token);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
+        localStorage.setItem("user", JSON.stringify(userData));
 
         if (typeof setIsAuthenticated === "function") {
           setIsAuthenticated(true);
         }
 
-        toast.success(res.data.message || "Login successful");
+        window.dispatchEvent(new Event("authChange"));
+
+        toast.success(res.data.message || "Welcome! 🎉");
         navigate("/home");
       }
     } catch (err) {
       console.error("Google login error:", err);
       const errorMessage = err.response?.data?.message || "Google login failed";
       toast.error(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleGoogleError = () => {
     toast.error("Google login failed. Please try again.");
+    setLoading(false);
+  };
+
+  const handleClick = () => {
+    if (!isGoogleLoginAvailable) {
+      return; // Không làm gì cả, để handleUnavailableClick xử lý
+    }
+    
+    // Trigger Google Login programmatically
+    const googleButton = document.querySelector('[aria-labelledby="button-label"]');
+    if (googleButton) {
+      googleButton.click();
+    }
+  };
+
+  // Xử lý click khi Google login không available
+  const handleUnavailableClick = () => {
+    if (!isGoogleLoginAvailable) {
+      toast.error("Google login is not configured. Please contact the administrator.", {
+        position: "top-right",
+        autoClose: 4000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    }
   };
 
   return (
-    <button
-      onClick={() => {
-        // Trigger Google Login programmatically (only if configured)
-        if (!GOOGLE_CLIENT_ID) {
-          toast.error("Google OAuth is not configured.");
-          return;
-        }
-        document.querySelector('[aria-labelledby="button-label"]')?.click();
-      }}
-      disabled={loading}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: "12px",
-        width: "100%",
-        padding: "14px 20px",
-        background: "#ffffff",
-        color: "#2d3748",
-        border: "1.5px solid #e2e8f0",
-        borderRadius: "8px",
-        fontSize: "15px",
-        fontWeight: "600",
-        cursor: loading ? "not-allowed" : "pointer",
-        opacity: loading ? 0.6 : 1,
-        transition: "all 0.3s ease",
-        boxShadow:
-          isHovered && !loading
-            ? "0 4px 12px rgba(0, 0, 0, 0.1)"
-            : "0 2px 4px rgba(0, 0, 0, 0.05)",
-        transform: isHovered && !loading ? "translateY(-2px)" : "translateY(0)",
-      }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <FaGoogle style={{ fontSize: "20px", color: "#DB4437" }} />
-      {loading ? "Signing in..." : "Continue with Google"}
+    <>
+      <button
+        onClick={isGoogleLoginAvailable ? handleClick : handleUnavailableClick}
+        disabled={loading}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "12px",
+          width: "100%",
+          padding: "14px 20px",
+          background: "#ffffff",
+          color: isGoogleLoginAvailable ? "#2d3748" : "#a0aec0",
+          border: "1.5px solid #e2e8f0",
+          borderRadius: "8px",
+          fontSize: "15px",
+          fontWeight: "600",
+          cursor: loading ? "not-allowed" : "pointer",
+          opacity: loading ? 0.6 : 1,
+          transition: "all 0.3s ease",
+          boxShadow:
+            isHovered && !loading
+              ? "0 4px 12px rgba(0, 0, 0, 0.1)"
+              : "0 2px 4px rgba(0, 0, 0, 0.05)",
+          transform: isHovered && !loading ? "translateY(-2px)" : "translateY(0)",
+        }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <FaGoogle style={{ fontSize: "20px", color: isGoogleLoginAvailable ? "#DB4437" : "#cbd5e0" }} />
+        {loading ? "Signing in..." : isGoogleLoginAvailable ? "Continue with Google" : "Google Login Unavailable"}
+      </button>
 
       {/* Hidden Google Login - triggered programmatically */}
-      <div style={{ display: "none" }}>
-        {GOOGLE_CLIENT_ID && (
+      {isGoogleLoginAvailable && (
+        <div style={{ display: "none" }}>
           <GoogleLogin
             onSuccess={handleGoogleSuccess}
             onError={handleGoogleError}
             useOneTap={false}
           />
-        )}
-      </div>
-    </button>
+        </div>
+      )}
+    </>
   );
 }
