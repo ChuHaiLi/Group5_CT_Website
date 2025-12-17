@@ -16,16 +16,16 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, tripName }) => {
         <div className="modal-overlay confirm-modal-overlay">
             <div className="confirm-modal">
                 <div className="confirm-modal-icon">⚠️</div>
-                <h3>Xác nhận xóa chuyến đi</h3>
-                <p>Bạn có chắc chắn muốn xóa chuyến đi <strong>"{tripName}"</strong>?</p>
-                <p className="warning-text">Hành động này không thể hoàn tác!</p>
+                <h3>Confirm Delete Trip</h3>
+                <p>Are you sure you want to delete the trip <strong>"{tripName}"</strong>?</p>
+                <p className="warning-text">This action cannot be undone!</p>
 
                 <div className="confirm-modal-actions">
                     <button onClick={onClose} className="btn-cancel">
-                        Hủy
+                        Cancel
                     </button>
                     <button onClick={onConfirm} className="btn-confirm-delete">
-                        Xóa chuyến đi
+                        Delete Trip
                     </button>
                 </div>
             </div>
@@ -65,7 +65,7 @@ const TripCard = ({ trip, handleDelete, handleView, handleEdit }) => {
 
     const dateDisplay = trip.start_date
         ? `${trip.start_date}${trip.end_date ? ' - ' + trip.end_date : ''}`
-        : `Ngày tạo: ${trip.created_at}`;
+        : `Created: ${trip.created_at}`;
 
     return (
         <div className="trip-card">
@@ -87,7 +87,7 @@ const TripCard = ({ trip, handleDelete, handleView, handleEdit }) => {
 
                 <div className="trip-info-row">
                     <span className="info-icon">⏱️</span>
-                    <span className="info-text">{trip.duration} ngày</span>
+                    <span className="info-text">{trip.duration} days</span>
                 </div>
 
                 <div className="trip-metadata-grid">
@@ -235,7 +235,7 @@ export default function MyTripsPage() {
                 setTrips(response.data);
                 setFilteredTrips(response.data);
             } catch (err) {
-                setError("Không thể tải danh sách chuyến đi. Vui lòng kiểm tra kết nối.");
+                setError("Unable to load trip list. Please check your connection.");
                 console.error("Error fetching trips:", err);
             } finally {
                 setIsLoading(false);
@@ -291,9 +291,9 @@ export default function MyTripsPage() {
                 headers: { Authorization: `Bearer ${getAuthToken()}` },
             });
             setTrips(prevTrips => prevTrips.filter(trip => trip.id !== tripId));
-            showToast("Đã xóa chuyến đi thành công!", "success");
+            showToast("Trip deleted successfully!", "success");
         } catch (err) {
-            showToast("Lỗi khi xóa chuyến đi.", "error");
+            showToast("Error deleting trip.", "error");
             console.error("Error deleting trip:", err);
         } finally {
             setConfirmModal({ isOpen: false, tripId: null, tripName: '' });
@@ -315,7 +315,7 @@ export default function MyTripsPage() {
         };
         fetchTrips();
         setShowCreateForm(false);
-        showToast(`Chuyến đi "${newTrip?.name}" đã được tạo thành công!`, "success");
+        showToast(`Trip "${newTrip?.name}" created successfully!`, "success");
     };
 
     // ✅ SAU KHI ĐẶT TẤT CẢ HOOKS, MỚI CHECK ĐIỀU KIỆN
@@ -355,7 +355,7 @@ export default function MyTripsPage() {
             <div className="itinerary-container">
                 <div className="loading-state">
                     <div className="loading-spinner"></div>
-                    <p>Đang tải dữ liệu chuyến đi...</p>
+                    <p>Loading trip data...</p>
                 </div>
             </div>
         );

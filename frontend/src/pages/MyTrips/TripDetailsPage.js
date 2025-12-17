@@ -10,7 +10,7 @@ const getAuthToken = () => localStorage.getItem("access_token");
 // formatPrice helper (Giữ nguyên)
 const formatPrice = (value) => {
     if (value === null || value === undefined) {
-        return "Đang cập nhật";
+        return "Updating...";
     }
 
     const stringVal = String(value).toLowerCase().trim();
@@ -22,7 +22,7 @@ const formatPrice = (value) => {
         stringVal.includes("mien phi") ||
         Number(value) === 0
     ) {
-        return "Miễn phí";
+        return "Free";
     }
 
     if (typeof value === 'number' && value > 0) {
@@ -119,7 +119,7 @@ export default function TripDetailsPage() {
                 setTrip(fetchedTrip);
             } catch (err) {
                 console.error('❌ [TripDetailsPage] Error:', err);
-                setError("Không tìm thấy chuyến đi hoặc bạn không có quyền truy cập.");
+                setError("No trip found or you don't have access.");
             } finally {
                 setIsLoading(false);
             }

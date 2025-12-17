@@ -2631,7 +2631,7 @@ export default function EditTripPage() {
                                                             {provided.placeholder}
                                                             {dayPlan.places.length === 0 && (
                                                                 <p className="empty-message">
-                                                                    Kéo thả mục vào đây hoặc thêm mục mới
+                                                                    Drag and drop items here or add a new item
                                                                 </p>
                                                             )}
                                                         </div>
@@ -3036,7 +3036,7 @@ export default function EditTripPage() {
                                                                 if (displaySuggestions.length === 0) {
                                                                     return (
                                                                         <div style={{ color: "#9ca3af", fontStyle: "italic", padding: "12px" }}>
-                                                                            Chưa có gợi ý. Vui lòng thử lại sau.
+                                                                            No suggestions yet. Please try again later.
                                                                         </div>
                                                                     );
                                                                 }
@@ -3077,7 +3077,7 @@ export default function EditTripPage() {
                                                             if (sortedDays.length === 0) {
                                                                 return (
                                                                     <div style={{ color: "#9ca3af", fontStyle: "italic", padding: "12px" }}>
-                                                                        Không thể phân tích gợi ý. Vui lòng thử lại.
+                                                                        Could not parse hint. Please try again.
                                                                     </div>
                                                                 );
                                                             }
@@ -3108,7 +3108,7 @@ export default function EditTripPage() {
                                                                                         gap: 8,
                                                                                     }}
                                                                                 >
-                                                                                    📅 Ngày {dayNum} - Lịch trình 08:00-17:00
+                                                                                    📅 Day {dayNum} - Schedule 08:00-17:00
                                                                                 </div>
                                                                                 <div style={{ padding: 12 }}>
                                                                                     <div
