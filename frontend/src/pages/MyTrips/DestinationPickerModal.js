@@ -1,12 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { FaSearch, FaTimes, FaMapMarkerAlt, FaUtensils } from 'react-icons/fa';
+import { FaSearch, FaTimes, FaMapMarkerAlt, FaUtensils, FaHotel } from 'react-icons/fa';
 import RecommendCard from '../Home/Recommendations/RecommendCard';
 
 /**
  * Modal để chọn địa điểm khi thêm vào lịch trình
  * Props:
  * - places: Array of destination objects
- * - type: 'destination' | 'food'
+ * - type: 'destination' | 'food' | 'hotel'
  * - onSelect: (place) => void
  * - onClose: () => void
  */
@@ -28,26 +28,30 @@ export default function DestinationPickerModal({ places = [], type = 'destinatio
   const filteredPlaces = useMemo(() => {
     let filtered = places;
 
-    // Filter by type (food vs destination)
-    if (type === 'food') {
+    // ✅ FILTER BY TYPE (from JSON)
+    if (type === 'hotel') {
+      // Lọc khách sạn theo type === "Hotel"
       filtered = filtered.filter(p => {
-        const category = (p.category || '').toLowerCase();
-        const tags = Array.isArray(p.tags) ? p.tags.join(' ').toLowerCase() : '';
-        return category.includes('ăn') || 
-               category.includes('food') || 
-               category.includes('restaurant') ||
-               tags.includes('gastronomy') ||
-               tags.includes('gastro');
+        const placeType = (p.type || '').toLowerCase();
+        const placeTypeFull = (p.place_type || '').toLowerCase();
+        return placeType === 'hotel' || placeTypeFull === 'hotel';
+      });
+    } else if (type === 'food') {
+      // Lọc ăn uống theo type === "Restaurant"
+      filtered = filtered.filter(p => {
+        const placeType = (p.type || '').toLowerCase();
+        const placeTypeFull = (p.place_type || '').toLowerCase();
+        return placeType === 'restaurant' || placeTypeFull === 'restaurant';
       });
     } else {
-      // Exclude food places for destination type
+      // Lọc địa điểm: Loại trừ Hotel và Restaurant
       filtered = filtered.filter(p => {
-        const category = (p.category || '').toLowerCase();
-        const tags = Array.isArray(p.tags) ? p.tags.join(' ').toLowerCase() : '';
-        return !category.includes('ăn') && 
-               !category.includes('food') && 
-               !category.includes('restaurant') &&
-               !tags.includes('gastronomy');
+        const placeType = (p.type || '').toLowerCase();
+        const placeTypeFull = (p.place_type || '').toLowerCase();
+        return placeType !== 'hotel' && 
+               placeType !== 'restaurant' && 
+               placeTypeFull !== 'hotel' && 
+               placeTypeFull !== 'restaurant';
       });
     }
 
@@ -71,6 +75,31 @@ export default function DestinationPickerModal({ places = [], type = 'destinatio
 
   const handleViewDetails = (place) => {
     setViewingPlace(place);
+  };
+
+  // Get icon and title based on type
+  const getModalIcon = () => {
+    if (type === 'hotel') return <FaHotel />;
+    if (type === 'food') return <FaUtensils />;
+    return <FaMapMarkerAlt />;
+  };
+
+  const getModalTitle = () => {
+    if (type === 'hotel') return 'Chọn Khách sạn';
+    if (type === 'food') return 'Chọn điểm Ăn uống';
+    return 'Chọn Địa điểm';
+  };
+
+  const getPlaceholder = () => {
+    if (type === 'hotel') return 'Tìm khách sạn, resort...';
+    if (type === 'food') return 'Tìm nhà hàng, quán ăn...';
+    return 'Tìm địa điểm, điểm tham quan...';
+  };
+
+  const getEmptyIcon = () => {
+    if (type === 'hotel') return '🏨';
+    if (type === 'food') return '🍽️';
+    return '📍';
   };
 
   return (
@@ -112,8 +141,8 @@ export default function DestinationPickerModal({ places = [], type = 'destinatio
             justifyContent: 'space-between'
           }}>
             <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
-              {type === 'food' ? <FaUtensils /> : <FaMapMarkerAlt />}
-              {type === 'food' ? 'Chọn điểm Ăn uống' : 'Chọn Địa điểm'}
+              {getModalIcon()}
+              {getModalTitle()}
             </h2>
             <button 
               onClick={onClose}
@@ -143,7 +172,7 @@ export default function DestinationPickerModal({ places = [], type = 'destinatio
               />
               <input
                 type="text"
-                placeholder={`Tìm ${type === 'food' ? 'nhà hàng, quán ăn' : 'địa điểm, điểm tham quan'}...`}
+                placeholder={getPlaceholder()}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={{
@@ -205,7 +234,7 @@ export default function DestinationPickerModal({ places = [], type = 'destinatio
                 color: '#6b7280'
               }}>
                 <div style={{ fontSize: '4rem', marginBottom: '16px', opacity: 0.3 }}>
-                  {type === 'food' ? '🍽️' : '📍'}
+                  {getEmptyIcon()}
                 </div>
                 <h3>Không tìm thấy kết quả</h3>
                 <p>Thử thay đổi từ khóa tìm kiếm hoặc chọn tỉnh/thành khác</p>

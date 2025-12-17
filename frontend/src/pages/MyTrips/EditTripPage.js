@@ -132,33 +132,46 @@ const calculateTotalCost = (
 const extractPlacesForCostCalculation = (itinerary, currentHotel) => {
     const places = [];
     const seenIds = new Set();
-    const seenNames = new Set(); 
+    const seenNames = new Set();
 
     // Duyệt qua tất cả các ngày và địa điểm
     itinerary.forEach(dayPlan => {
         (dayPlan.places || []).forEach(item => {
-            const isSightseeing = item.category === 'Địa điểm' || item.type === 'sightseeing';
-            const hasFee = (item.entry_fee || 0) > 0;
+            // ✅ DEBUG: Log từng item
+            console.log('🔍 Checking item:', {
+                name: item.name,
+                category: item.category,
+                entry_fee: item.entry_fee,
+                hasId: !!(item.id && typeof item.id === 'number')
+            });
+
+            // Loại trừ: Ăn uống, Di chuyển, Nghỉ ngơi
+            const isExcludedType =
+                item.category === 'Ăn uống' ||
+                item.category === 'Di chuyển' ||
+                item.category === 'Nghỉ ngơi' ||
+                item.type === 'food' ||
+                item.type === 'move' ||
+                item.type === 'rest';
+
+            // Chỉ tính địa điểm có phí
+            const hasFee = (Number(item.entry_fee) || 0) > 0;
             const hasId = item.id && typeof item.id === 'number' && item.id > 0;
 
-            // Điều kiện: Phải là địa điểm tham quan/hoạt động VÀ có phí VÀ chưa được tính (theo ID hoặc Tên)
-            if (isSightseeing && hasFee) {
+            if (!isExcludedType && hasFee) {
                 if (hasId && seenIds.has(item.id)) return;
                 if (!hasId && seenNames.has(item.name)) return;
-                
+
                 places.push(item);
                 if (hasId) seenIds.add(item.id);
                 if (!hasId) seenNames.add(item.name);
+
+                console.log('✅ ADDED TO COST:', item.name, 'Fee:', item.entry_fee);
             }
         });
     });
 
-    // Thêm khách sạn (nếu có và có phí)
-    // NOTE: Khách sạn được tính riêng trong calculateTotalCost, không cần thêm vào places này
-    // if (currentHotel && (currentHotel.entry_fee || 0) > 0) {
-    //     // places.push(currentHotel);
-    // }
-
+    console.log('💰 TOTAL PLACES WITH COST:', places.length);
     return places;
 };
 
@@ -199,6 +212,9 @@ export default function EditTripPage() {
     const [hotelIndex, setHotelIndex] = useState(-1); // -1: chưa chọn hoặc không tìm thấy
 
     const [openDays, setOpenDays] = useState(new Set([1])); // Mặc định mở Ngày 1
+
+    console.log('🔍 ITINERARY:', itinerary);
+    console.log('💰 PLACES WITH COST:', extractPlacesForCostCalculation(itinerary, currentHotel));
 
     const toggleDayOpen = useCallback((dayNumber) => {
         setOpenDays(prev => {
@@ -658,7 +674,7 @@ export default function EditTripPage() {
                             distance_from_prev_km: 0,
                             needs_data: !!matchedPlace?.needs_data,
                             // [NEW] Thêm entry_fee từ matchedPlace (để tính cost)
-                            entry_fee: matchedPlace?.entry_fee || 0, 
+                            entry_fee: matchedPlace?.entry_fee || 0,
                         };
                     }).filter(Boolean);
                 } else {
@@ -813,7 +829,7 @@ export default function EditTripPage() {
                     distance_from_prev_km: it.distance_from_prev_km || 0,
                     needs_data: !!it.needs_data,
                     // [NEW] Thêm entry_fee
-                    entry_fee: it.entry_fee || 0, 
+                    entry_fee: it.entry_fee || 0,
                 };
             }).filter(Boolean); // Remove null entries
 
@@ -1078,51 +1094,50 @@ export default function EditTripPage() {
     };
 
     const flattenItinerary = (apiItinerary) => {
+        console.log('🔄 flattenItinerary called with:', apiItinerary); // DEBUG
 
         let uniqueIdCounter = 0;
-        let extractedHotel = null; // Biến tạm để lưu khách sạn
+        let extractedHotel = null;
 
         const flattened = apiItinerary.map((dayPlan) => {
-            // #region agent log
-            fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:685', message: 'flattenItinerary processing day', data: { day: dayPlan.day, placesCount: dayPlan.places?.length }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H5' }) }).catch(() => { });
-            // #endregion
             const placesWithoutHotel = [];
 
             (dayPlan.places || []).forEach((item) => {
+                // ✅ DEBUG: Log từng item
+                console.log('📍 Processing item:', {
+                    name: item.name,
+                    entry_fee: item.entry_fee,
+                    category: item.category,
+                    type: item.type
+                });
+
                 const isHotel = (item.category === 'Khách sạn' || item.type === 'hotel');
 
                 if (isHotel && !extractedHotel) {
-                    // Nếu chưa trích xuất khách sạn, lấy cái này
                     extractedHotel = {
                         id: item.id || -1,
                         name: item.name || 'Khách sạn đã chọn',
                         address: item.address || item.place || 'Địa chỉ không rõ',
                         rating: item.rating || 0,
                         type: 'hotel',
-                        // Thêm các thuộc tính khác cần thiết
                         lat: item.lat || item.latitude || null,
                         lon: item.lon || item.longitude || null,
-                        // [NEW] Thêm entry_fee
-                        entry_fee: item.entry_fee || 0,
+                        // ✅ QUAN TRỌNG: Parse entry_fee sang số
+                        entry_fee: Number(item.entry_fee) || 0,
                     };
-                    // #region agent log
-                    fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:705', message: 'Extracted hotel from itinerary', data: { hotelName: extractedHotel.name, day: dayPlan.day }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H5' }) }).catch(() => { });
-                    // #endregion
+                    console.log('🏨 Extracted hotel:', extractedHotel);
                 } else if (isHotel && extractedHotel) {
-                    // Nếu đã trích xuất, bỏ qua các mục khách sạn tiếp theo
-                    // #region agent log
-                    fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:712', message: 'Skipping duplicate hotel in itinerary', data: { hotelName: item.name, day: dayPlan.day }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H5' }) }).catch(() => { });
-                    // #endregion
                     return;
                 } else {
-                    // Nếu không phải khách sạn, thêm vào danh sách
-                    placesWithoutHotel.push({
+                    const newItem = {
                         ...item,
                         uniqueId: `item-${item.id || item.name}-${uniqueIdCounter++}`,
                         day: dayPlan.day,
-                        // [NEW] Đảm bảo entry_fee được giữ lại
-                        entry_fee: item.entry_fee || 0,
-                    });
+                        // ✅ QUAN TRỌNG: Parse entry_fee sang số
+                        entry_fee: Number(item.entry_fee) || 0,
+                    };
+                    placesWithoutHotel.push(newItem);
+                    console.log('✅ Added place:', newItem.name, 'Fee:', newItem.entry_fee);
                 }
             });
 
@@ -1132,9 +1147,8 @@ export default function EditTripPage() {
             };
         });
 
-        // Gắn khách sạn đã trích xuất vào đối tượng trả về (để sử dụng trong fetchTripDetails)
         flattened.extractedHotel = extractedHotel;
-
+        console.log('🎯 Flattened result:', flattened);
         return flattened;
     };
 
@@ -1185,37 +1199,94 @@ export default function EditTripPage() {
     // --- FETCH DATA ---
     useEffect(() => {
         const fetchTripDetails = async () => {
-            // #region agent log
-            fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:707', message: 'fetchTripDetails called', data: { tripId, pendingAiChanges, pendingAiChangesRef: pendingAiChangesRef.current }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
-            // #endregion
             if (!tripId) return;
-            // Don't reset itinerary if we have pending AI changes - use ref to avoid stale closure
+
+            // Không reset itinerary nếu đang có pending AI changes
             if (pendingAiChangesRef.current) {
-                // #region agent log
-                fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:712', message: 'fetchTripDetails skipped - pendingAiChangesRef is true', data: { pendingAiChangesRef: pendingAiChangesRef.current }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
-                // #endregion
+                console.log('⏭️ Skipping fetch - pending AI changes');
                 return;
             }
+
             setIsLoading(true);
+
             try {
-                // #region agent log
-                fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:718', message: 'fetchTripDetails fetching data', data: { tripId }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
-                // #endregion
+                // ✅ BƯỚC 1: Fetch trip details
+                console.log('📥 Fetching trip details for ID:', tripId);
                 const response = await axios.get(`/api/trips/${tripId}`, {
                     headers: { Authorization: `Bearer ${getAuthToken()}` },
                 });
                 const fetchedTrip = response.data;
+                console.log('✅ Fetched Trip:', fetchedTrip);
+
                 setTripData(fetchedTrip);
 
-                const flattened = flattenItinerary(fetchedTrip.itinerary || []);
-                setOriginalItinerary(flattened); // Lưu bản gốc
-                // Only set itinerary if we don't have pending AI changes - use ref to avoid stale closure
+                // ✅ BƯỚC 2: Fetch ALL destinations để lấy entry_fee
+                console.log('📥 Fetching all destinations for entry_fee mapping...');
+                const destResponse = await axios.get('/api/destinations', {
+                    headers: { Authorization: `Bearer ${getAuthToken()}` }
+                });
+                const allDestinations = destResponse.data;
+                console.log('✅ Fetched destinations count:', allDestinations.length);
+
+                // ✅ BƯỚC 3: Tạo Map để tra cứu nhanh entry_fee theo ID
+                const feeMap = new Map();
+                allDestinations.forEach(dest => {
+                    if (dest.id) {
+                        const fee = Number(dest.entry_fee) || 0;
+                        feeMap.set(dest.id, fee);
+                        if (fee > 0) {
+                            console.log(`💰 Mapped ID ${dest.id} (${dest.name}): ${fee} VND`);
+                        }
+                    }
+                });
+                console.log(`✅ Fee map created with ${feeMap.size} entries`);
+
+                // ✅ BƯỚC 4: Enrich itinerary với entry_fee
+                const enrichedItinerary = (fetchedTrip.itinerary || []).map(dayPlan => ({
+                    ...dayPlan,
+                    places: (dayPlan.places || []).map(place => {
+                        const placeId = place.id;
+                        let entryFee = 0;
+
+                        // Ưu tiên entry_fee có sẵn trong place
+                        if (place.entry_fee && Number(place.entry_fee) > 0) {
+                            entryFee = Number(place.entry_fee);
+                        }
+                        // Nếu không có, tra cứu từ feeMap
+                        else if (placeId && typeof placeId === 'number' && feeMap.has(placeId)) {
+                            entryFee = feeMap.get(placeId);
+                        }
+
+                        return {
+                            ...place,
+                            entry_fee: entryFee
+                        };
+                    })
+                }));
+
+                console.log('✅ Enriched itinerary with entry_fee');
+
+                // ✅ BƯỚC 5: Flatten với entry_fee đã có
+                const flattened = flattenItinerary(enrichedItinerary);
+
+                console.log('📋 Flattened Itinerary:', flattened);
+                console.log('💰 Entry Fees Summary:', flattened.map(d => ({
+                    day: d.day,
+                    places: d.places.map(p => ({
+                        name: p.name,
+                        id: p.id,
+                        fee: p.entry_fee,
+                        category: p.category
+                    }))
+                })));
+
+                setOriginalItinerary(flattened);
+
+                // Chỉ set itinerary nếu không có pending AI changes
                 if (!pendingAiChangesRef.current) {
-                    // #region agent log
-                    fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:729', message: 'fetchTripDetails setting itinerary', data: { flattenedLength: flattened.length }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
-                    // #endregion
-                    setItinerary(flattened); // Bản để chỉnh sửa
-                    // ✅ THÊM ĐOẠN NÀY để set editableData
+                    setItinerary(flattened);
+
+                    // ✅ Thu thập các place_id đã sử dụng
                     const currentlyUsedIds = new Set();
                     fetchedTrip.itinerary.forEach(day => {
                         (day.places || []).forEach(item => {
@@ -1225,6 +1296,7 @@ export default function EditTripPage() {
                         });
                     });
 
+                    // ✅ Set editableData
                     setEditableData({
                         name: fetchedTrip.name || '',
                         startDate: fetchedTrip.start_date || '',
@@ -1235,34 +1307,34 @@ export default function EditTripPage() {
                         usedPlaceIds: Array.from(currentlyUsedIds),
                     });
 
+                    // ✅ Xử lý khách sạn
                     const savedHotelInMetadata = fetchedTrip.metadata?.hotel;
                     const extractedHotelFromItinerary = flattened.extractedHotel;
 
-                    // Ưu tiên khách sạn đã được lưu trong metadata, nếu không có thì dùng cái đã trích xuất
                     const hotelToUse = savedHotelInMetadata || extractedHotelFromItinerary;
 
                     if (hotelToUse && hotelToUse.name) {
-                        // Tìm index của hotel đã lưu trong danh sách options
                         const index = hotelOptions.findIndex(h => h.id === hotelToUse.id);
                         if (index !== -1) {
                             setCurrentHotel(hotelOptions[index]);
                             setHotelIndex(index);
+                            console.log('🏨 Hotel loaded:', hotelOptions[index].name);
                         } else {
-                            // Nếu hotel đã lưu không có trong options (ví dụ: hotel do người dùng tự nhập), 
-                            // hiển thị nó và đặt index = -1
                             setCurrentHotel(hotelToUse);
                             setHotelIndex(-1);
+                            console.log('🏨 Custom hotel loaded:', hotelToUse.name);
                         }
                     } else {
                         setCurrentHotel(null);
                         setHotelIndex(-1);
+                        console.log('⚠️ No hotel selected');
                     }
                 } else {
-                    // #region agent log
-                    fetch('http://127.0.0.1:7242/ingest/b6d4146b-fa7c-455f-bcf9-38806ee96596', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'EditTripPage.js:733', message: 'fetchTripDetails NOT setting itinerary - pendingAiChangesRef is true', data: { pendingAiChangesRef: pendingAiChangesRef.current }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
-                    // #endregion
+                    console.log('⏭️ Skipped setting itinerary - pending AI changes');
                 }
+
             } catch (err) {
+                console.error('❌ Error fetching trip details:', err);
                 setError("Không tìm thấy chuyến đi hoặc bạn không có quyền truy cập.");
                 toast.error("Không thể tải dữ liệu chuyến đi!");
             } finally {
@@ -1272,7 +1344,7 @@ export default function EditTripPage() {
 
         fetchTripDetails();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [tripId]); // pendingAiChanges is intentionally excluded - we use pendingAiChangesRef to avoid race conditions
+    }, [tripId]);
 
     // Fetch all destinations in province when provinceId changes
     useEffect(() => {
@@ -1431,6 +1503,20 @@ export default function EditTripPage() {
         if (!showDestinationPicker) return;
 
         const { dayNumber, type } = showDestinationPicker;
+
+        // ✅ XỬ LÝ CHỌN KHÁCH SẠN (type === "hotel")
+        if (type === "hotel") {
+            setCurrentHotel(selectedPlace);
+            // Tìm index trong hotelOptions nếu có
+            const index = hotelOptions.findIndex(h => h.id === selectedPlace.id);
+            setHotelIndex(index !== -1 ? index : -1);
+
+            toast.success(`Đã chọn khách sạn: ${selectedPlace.name}`, { autoClose: 3000 });
+            setShowDestinationPicker(null);
+            return; // ✅ DỪNG LẠI - KHÔNG THÊM VÀO ITINERARY
+        }
+
+        // ✅ TIẾP TỤC XỬ LÝ DESTINATION/FOOD
         const nextItinerary = [...itinerary];
         const dayIndex = nextItinerary.findIndex(d => d.day === dayNumber);
 
@@ -1479,17 +1565,18 @@ export default function EditTripPage() {
             uniqueId: newUniqueId,
             id: selectedPlace.id,
             name: selectedPlace.name,
-            // ✅ LẤY CATEGORY TỪ PLACE ĐÃ CHỌN
             category: type === 'food'
                 ? 'Ăn uống'
-                : (selectedPlace.category || 'Địa điểm'), // Mặc định là 'Địa điểm' nếu không có
+                : (selectedPlace.category || 'Địa điểm'),
             duration: type === 'food' ? 45 : 60,
             day: dayNumber,
             time_slot: null,
             lat: selectedPlace.lat || selectedPlace.latitude,
             lon: selectedPlace.lon || selectedPlace.longitude,
-            // [NEW] Thêm entry_fee
-            entry_fee: selectedPlace.entry_fee || 0,
+            // ✅ QUAN TRỌNG: Phải có entry_fee
+            entry_fee: Number(selectedPlace.entry_fee) || 0,
+            // ✅ THÊM: Lưu cả type để dễ phân loại
+            type: selectedPlace.type || selectedPlace.place_type || 'sightseeing',
         };
 
         // --- BỔ SUNG LOGIC KIỂM TRA CHI PHÍ NGAY TẠI ĐÂY ---
@@ -1995,12 +2082,10 @@ export default function EditTripPage() {
     }
 
     const HotelCard = () => {
-
         // Nút chung để kích hoạt việc chọn/thay đổi
         const ChangeButton = ({ currentHotel }) => (
             <button
-                // Gọi hàm chọn khách sạn mới
-                onClick={handleSelectNewHotel}
+                onClick={() => setShowDestinationPicker({ dayNumber: null, type: "hotel" })}
                 className="hotel-change-btn"
                 title={currentHotel ? "Chọn khách sạn khác" : "Chọn Khách sạn"}
                 style={{
@@ -2014,9 +2099,37 @@ export default function EditTripPage() {
                     flexShrink: 0
                 }}
             >
-                {/* Sử dụng FaRedo (reload) */}
                 <FaRedo style={{ marginRight: currentHotel ? 6 : 0 }} />
                 {currentHotel ? 'Thay đổi' : 'Chọn ngay'}
+            </button>
+        );
+
+        // ✅ NÚT MỚI: Xóa khách sạn
+        const RemoveHotelButton = () => (
+            <button
+                onClick={() => {
+                    setCurrentHotel(null);
+                    setHotelIndex(-1);
+                    toast.success('✅ Đã gỡ khách sạn khỏi kế hoạch', { autoClose: 2000 });
+                }}
+                className="hotel-remove-btn"
+                title="Gỡ khách sạn để giảm chi phí"
+                style={{
+                    padding: '8px 12px',
+                    backgroundColor: '#ef4444',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: 4,
+                    cursor: 'pointer',
+                    fontSize: '0.8rem',
+                    flexShrink: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                }}
+            >
+                <FaTrash size={12} />
+                Xóa
             </button>
         );
 
@@ -2047,7 +2160,6 @@ export default function EditTripPage() {
                 </label>
                 <div
                     className="hotel-info-card selected-card"
-                    // Thêm onClick để xem chi tiết
                     onClick={handleViewHotelDetails}
                     style={{
                         justifyContent: 'space-between',
@@ -2064,7 +2176,6 @@ export default function EditTripPage() {
                             <span className="hotel-name" style={{ fontWeight: 600, fontSize: '1rem', color: '#047857' }}>
                                 {currentHotel.name}
                             </span>
-                            {/* Chỉ hiện rating/thông báo click, loại bỏ địa chỉ */}
                             <span style={{ fontSize: '0.75rem', color: '#065f46', display: 'block' }}>
                                 {currentHotel.rating ? `⭐ ${currentHotel.rating} / 5.0 | ` : ''}
                                 {currentHotel.entry_fee ? `Giá/Đêm: ${new Intl.NumberFormat('vi-VN').format(currentHotel.entry_fee)} VND | ` : ''}
@@ -2073,9 +2184,13 @@ export default function EditTripPage() {
                         </div>
                     </div>
 
-                    {/* Nút Thay đổi độc lập, ngăn chặn sự kiện click lan truyền */}
-                    <div onClick={(e) => e.stopPropagation()}>
+                    {/* ✅ THÊM CẢ 2 NÚT: Thay đổi + Xóa */}
+                    <div
+                        onClick={(e) => e.stopPropagation()}
+                        style={{ display: 'flex', gap: '8px' }}
+                    >
                         <ChangeButton currentHotel={currentHotel} />
+                        <RemoveHotelButton />
                     </div>
                 </div>
             </div>

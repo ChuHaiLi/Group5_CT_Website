@@ -872,6 +872,65 @@
     }
 }
 
+/* ============ HOTEL REMOVE BUTTON ============ */
+.hotel-remove-btn {
+    padding: 8px 12px;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.hotel-remove-btn:hover {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.5);
+}
+
+.hotel-remove-btn:active {
+    transform: translateY(0);
+}
+
+/* ============ HOTEL ACTIONS GROUP ============ */
+.hotel-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.hotel-change-btn {
+    padding: 8px 12px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.hotel-change-btn:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.5);
+}
+
+.hotel-change-btn:active {
+    transform: translateY(0);
+}
+
 /* ============ RESPONSIVE DESIGN ============ */
 @media (max-width: 1200px) {
     .edit-trip-content {
