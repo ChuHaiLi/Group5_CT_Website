@@ -1211,7 +1211,7 @@ export default function EditTripPage() {
         setItinerary(updatedItinerary);
         setOpenDays(prev => new Set([...prev, newDuration])); // ✅ Mở ngày mới
 
-        toast.success(`Đã thêm Ngày ${newDuration}! Nhớ nhấn "Lưu Thay Đổi" để lưu vĩnh viễn.`, {
+        toast.success(`Added Date ${newDuration}! Remember to click "Save Changes" to save it permanently.`, {
             autoClose: 4000
         });
     };
@@ -1219,7 +1219,7 @@ export default function EditTripPage() {
     // 3. Delete Day
     const handleDeleteDay = async (dayNumber) => {
         if (itinerary.length <= 1) {
-            toast.error('Không thể xóa ngày cuối cùng! Chuyến đi phải có ít nhất 1 ngày.');
+            toast.error('Cannot delete the last day! A trip must have at least 1 day.');
             return;
         }
 
@@ -1250,7 +1250,7 @@ export default function EditTripPage() {
             newSet.delete(dayToDelete);
             return newSet;
         });
-        toast.success(`Đã xóa Ngày ${dayToDelete}! Nhớ nhấn "Lưu Thay Đổi" để lưu vĩnh viễn.`, {
+        toast.success(`Deleted Day ${dayToDelete}! Remember to click "Save Changes" to save it permanently.`, {
             autoClose: 4000
         });
     };
@@ -1274,47 +1274,52 @@ export default function EditTripPage() {
     };
 
     const flattenItinerary = (apiItinerary) => {
-        let uniqueIdCounter = 0;
-        let extractedHotel = null;
+    let uniqueIdCounter = 0;
+    let extractedHotel = null;
 
-        const flattened = apiItinerary.map((dayPlan) => {
-            const placesWithoutHotel = [];
+    const flattened = apiItinerary.map((dayPlan) => {
+        const nonHotelPlaces = [];
 
-            (dayPlan.places || []).forEach((item) => {
-                const isHotel = (item.category === 'Khách sạn' || item.type === 'hotel');
+        (dayPlan.places || []).forEach((item) => {
+            // Logic nhận diện khách sạn (Đồng bộ với TripDetailsPage)
+            const isHotel =
+                item.is_accommodation === true ||
+                (item.type && item.type.toLowerCase() === 'hotel') ||
+                (item.category && (
+                    item.category.toLowerCase() === 'hotel' || 
+                    item.category.toLowerCase() === 'khách sạn' || 
+                    item.category.toLowerCase() === 'accommodation'
+                ));
 
-                if (isHotel && !extractedHotel) {
+            if (isHotel) {
+                // Chỉ lấy khách sạn đầu tiên tìm thấy để hiển thị ở khung phía trên
+                if (!extractedHotel) {
                     extractedHotel = {
-                        id: item.id || -1,
-                        name: item.name || 'Khách sạn đã chọn',
-                        address: item.address || item.place || 'Địa chỉ không rõ',
-                        rating: item.rating || 0,
-                        type: 'hotel',
-                        lat: item.lat || item.latitude || null,
-                        lon: item.lon || item.longitude || null,
-                        entry_fee: Number(item.entry_fee) || 0,
-                    };
-                } else if (isHotel && extractedHotel) {
-                    return;
-                } else {
-                    placesWithoutHotel.push({
                         ...item,
-                        uniqueId: `item-${item.id || item.name}-${uniqueIdCounter++}`,
-                        day: dayPlan.day,
-                        entry_fee: Number(item.entry_fee) || 0,
-                    });
+                        type: 'hotel',
+                        entry_fee: Number(item.entry_fee) || 0
+                    };
                 }
-            });
-
-            return {
-                ...dayPlan,
-                places: placesWithoutHotel,
-            };
+            } else {
+                // Chỉ thêm vào danh sách CHỈNH SỬA nếu KHÔNG PHẢI là khách sạn
+                nonHotelPlaces.push({
+                    ...item,
+                    uniqueId: item.uniqueId || `item-${item.id || item.name}-${uniqueIdCounter++}`,
+                    day: dayPlan.day,
+                    entry_fee: Number(item.entry_fee) || 0
+                });
+            }
         });
 
-        flattened.extractedHotel = extractedHotel;
-        return flattened;
-    };
+        return {
+            ...dayPlan,
+            places: nonHotelPlaces,
+        };
+    });
+
+    flattened.extractedHotel = extractedHotel;
+    return flattened;
+};
 
     const restoreItinerary = (flatItinerary) => {
         return flatItinerary.map((dayPlan) => ({
@@ -1353,7 +1358,7 @@ export default function EditTripPage() {
         const maxBudget = extractMaxBudget(editableData.budget);
         if (maxBudget > 0 && totalCost > maxBudget) {
             toast.warn(
-                `CẢNH BÁO: Chi phí ước tính (${new Intl.NumberFormat('vi-VN').format(totalCost)} VND) đã vượt quá ngân sách đã chọn (${new Intl.NumberFormat('vi-VN').format(maxBudget)} VND).`,
+                `WARNING: Estimated cost (${new Intl.NumberFormat('vi-VN').format(totalCost)} VND) exceeds the selected budget (${new Intl.NumberFormat('vi-VN').format(maxBudget)} VND).`,
                 { toastId: "edit-budget-warning", autoClose: 8000 }
             );
         }
@@ -1441,9 +1446,13 @@ export default function EditTripPage() {
                         usedPlaceIds: Array.from(currentlyUsedIds),
                     });
 
-                    // Xử lý khách sạn
+                    // ✅ Xử lý khách sạn
+                    const savedHotelInMetadata = fetchedTrip.metadata?.hotel;
+                    const extractedHotelFromItinerary = flattened.extractedHotel;
+
                     const hotelToUse = fetchedTrip.metadata?.hotel || flattened.extractedHotel;
-                    if (hotelToUse?.name) {
+
+                    if (hotelToUse && hotelToUse.name) {
                         const index = hotelOptions.findIndex(h => h.id === hotelToUse.id);
                         if (index !== -1) {
                             setCurrentHotel(hotelOptions[index]);
@@ -1460,8 +1469,8 @@ export default function EditTripPage() {
 
             } catch (err) {
                 devLog.error('Error fetching trip details:', err);
-                setError("Không tìm thấy chuyến đi hoặc bạn không có quyền truy cập.");
-                toast.error("Không thể tải dữ liệu chuyến đi!");
+                setError("No trip found or you don't have access.");
+                toast.error("Unable to load trip data!");
             } finally {
                 setIsLoading(false);
             }
@@ -1605,7 +1614,7 @@ export default function EditTripPage() {
         );
 
         setItinerary(rebuiltDays);
-        toast.success("Đã xóa địa điểm khỏi lịch trình"); // ✅ Toast
+        toast.success("Location removed from itinerary"); // ✅ Toast
     }, [itinerary]);
 
     const handleAddItem = useCallback((day, type) => {
@@ -1626,7 +1635,7 @@ export default function EditTripPage() {
             const index = hotelOptions.findIndex(h => h.id === selectedPlace.id);
             setHotelIndex(index !== -1 ? index : -1);
 
-            toast.success(`Đã chọn khách sạn: ${selectedPlace.name}`, { autoClose: 3000 });
+            toast.success(`Selected hotel: ${selectedPlace.name}`, { autoClose: 3000 });
             setShowDestinationPicker(null);
             return; // ✅ DỪNG LẠI - KHÔNG THÊM VÀO ITINERARY
         }
@@ -1643,12 +1652,12 @@ export default function EditTripPage() {
         // Validation
         const limits = validateDailyLimits(nextItinerary[dayIndex].places || []);
         if (type === 'destination' && !limits.canAddDestination) {
-            toast.warning('Mỗi ngày chỉ tối đa 4 địa điểm.');
+            toast.warning('Each day can have a maximum of 4 destinations.');
             setShowDestinationPicker(null);
             return;
         }
         if (type === 'food' && !limits.canAddFood) {
-            toast.warning('Mỗi ngày chỉ tối đa 3 điểm ăn uống.');
+            toast.warning('Each day can have a maximum of 3 food spots.');
             setShowDestinationPicker(null);
             return;
         }
@@ -1668,7 +1677,7 @@ export default function EditTripPage() {
             );
 
             if (isDuplicate) {
-                toast.error(`❌ Địa điểm "${selectedPlace.name}" đã có trong lịch trình! Vui lòng chọn địa điểm khác.`, { autoClose: 5000 });
+                toast.error(`❌ Location "${selectedPlace.name}" already exists in the itinerary! Please choose a different location.`, { autoClose: 5000 });
                 setShowDestinationPicker(null);
                 return; // DỪNG LẠI, KHÔNG THÊM ĐỊA ĐIỂM
             }
@@ -1722,7 +1731,7 @@ export default function EditTripPage() {
                 const costMsg = new Intl.NumberFormat('vi-VN').format(totalCostAfterAdd);
 
                 toast.error(
-                    `❌ ĐỊA ĐIỂM NÀY VƯỢT QUÁ NGÂN SÁCH! Chi phí ước tính sau khi thêm (${costMsg} VND) vượt quá ngân sách (${budgetMsg} VND). Vui lòng điều chỉnh ngân sách hoặc chọn địa điểm khác.`,
+                    `❌ THIS DESTINATION EXCEEDS THE BUDGET! Estimated cost after adding (${costMsg} VND) exceeds the budget (${budgetMsg} VND). Please adjust the budget or choose a different destination.`,
                     { autoClose: 10000, toastId: "add-place-over-budget" }
                 );
                 setShowDestinationPicker(null);
@@ -1742,7 +1751,7 @@ export default function EditTripPage() {
 
         setItinerary(nextItinerary);
         setShowDestinationPicker(null);
-        toast.success(`Đã thêm ${newItem.name} vào Ngày ${dayNumber}`);
+        toast.success(`Added ${newItem.name} to Day ${dayNumber}`);
     }, [showDestinationPicker, itinerary, editableData, currentHotel]);
 
     const handleMetadataChange = useCallback((field, value) => {
@@ -1751,76 +1760,96 @@ export default function EditTripPage() {
 
     // --- HÀM LƯU DỮ LIỆU CHÍNH ---
     const handleSave = async () => {
-        if (!tripData) return;
-        const maxBudget = extractMaxBudget(editableData.budget);
-        if (maxBudget > 0 && currentTotalCost > maxBudget) {
-            toast.error(`Không thể LƯU: Tổng chi phí ước tính (${new Intl.NumberFormat('vi-VN').format(currentTotalCost)} VND) vượt quá Ngân sách tối đa (${new Intl.NumberFormat('vi-VN').format(maxBudget)} VND). Vui lòng điều chỉnh Ngân sách hoặc xóa bớt địa điểm.`, { autoClose: 8000 });
-            setIsSaving(false);
-            return; // NGĂN CHẶN LƯU
-        }
-        const { name, startDate, people, budget } = editableData;
-        // ✅ Lấy duration từ itinerary.length thực tế
-        const actualDuration = itinerary.length;
+    if (!tripData) return;
+    
+    const maxBudget = extractMaxBudget(editableData.budget);
+    if (maxBudget > 0 && currentTotalCost > maxBudget) {
+        toast.error(`Cannot SAVE: Estimated total cost (${new Intl.NumberFormat('vi-VN').format(currentTotalCost)} VND) exceeds the maximum budget (${new Intl.NumberFormat('vi-VN').format(maxBudget)} VND). Please adjust the budget or remove some destinations.`, { autoClose: 8000 });
+        setIsSaving(false);
+        return; 
+    }
 
-        console.log('💾 [EditTripPage] Saving with:');
-        console.log('   - Actual Duration:', actualDuration);
-        console.log('   - Itinerary days:', itinerary.length);
+    const { name, startDate, people, budget } = editableData;
+    const actualDuration = itinerary.length;
 
-        if (!name?.trim() || !startDate || actualDuration <= 0) {
-            toast.error('Vui lòng đảm bảo các trường Tên, Ngày, Thời lượng hợp lệ.');
-            return;
-        }
+    if (!name?.trim() || !startDate || actualDuration <= 0) {
+        toast.error('Please ensure all fields (Name, Start Date, Duration) are valid.');
+        return;
+    }
 
-        setIsSaving(true);
-        setError(null);
+    setIsSaving(true);
+    setError(null);
+    const loadingToast = toast.info('Saving changes...', { autoClose: false });
 
-        const loadingToast = toast.info('Đang lưu thay đổi...', { autoClose: false });
+    try {
+        // 1. Chuẩn bị Itinerary payload
+        let updatedItinerary = restoreItinerary(itinerary);
 
-        try {
-            // 1. Lưu Metadata với ACTUAL duration
-            const metadataPayload = {
-                name: name,
-                duration: actualDuration,
-                start_date: startDate,
-                metadata: {
-                    people: people,
-                    budget: budget,
-                    hotel: currentHotel,
-                },
+        // ✅ QUAN TRỌNG: Chèn khách sạn trở lại vào Itinerary để trang Chi tiết nhận diện được
+        if (currentHotel) {
+            const hotelItem = {
+                ...currentHotel,
+                is_accommodation: true, // Flag quan trọng để logic lọc nhận diện được
+                category: 'Khách sạn',
+                type: 'hotel',
+                day: 1, // Mặc định gán vào ngày 1
+                time_slot: '21:00' // Giờ nghỉ ngơi giả định
             };
 
-            const metadataResult = await apiCall('put', `/api/trips/${tripId}`, metadataPayload);
-            if (!metadataResult.success) {
-                throw new Error(metadataResult.error?.message || 'Failed to update trip metadata');
+            // Tìm ngày 1 trong mảng đã restore và đẩy hotel vào
+            const day1 = updatedItinerary.find(d => d.day === 1);
+            if (day1) {
+                day1.places.push(hotelItem);
+            } else if (updatedItinerary.length > 0) {
+                // Nếu không tìm thấy ngày 1, đẩy vào ngày đầu tiên hiện có
+                updatedItinerary[0].places.push(hotelItem);
             }
-
-            // 2. Lưu Itinerary
-            const updatedItinerary = restoreItinerary(itinerary);
-            const itineraryResult = await apiCall('put', `/api/trips/${tripId}/itinerary`, { itinerary: updatedItinerary });
-            if (!itineraryResult.success) {
-                throw new Error(itineraryResult.error?.message || 'Failed to update itinerary');
-            }
-
-            toast.dismiss(loadingToast);
-            toast.success("Đã lưu TẤT CẢ thay đổi thành công!", { autoClose: 3000 });
-
-            // ✅ Cập nhật editableData.duration
-            setEditableData(prev => ({ ...prev, duration: actualDuration }));
-
-            // ✅ Navigate với force reload
-            setTimeout(() => {
-                window.location.href = `/trips/${tripId}`;
-            }, 1000);
-
-        } catch (err) {
-            toast.dismiss(loadingToast);
-            setError("Lỗi khi lưu dữ liệu chuyến đi.");
-            toast.error("Không thể lưu thay đổi. Vui lòng thử lại.");
-            console.error("Error saving:", err.response?.data || err);
-        } finally {
-            setIsSaving(false);
         }
-    };
+
+        // 2. Lưu Metadata (Bao gồm cả thông tin hotel trong metadata để backup)
+        const metadataPayload = {
+            name: name,
+            duration: actualDuration,
+            start_date: startDate,
+            metadata: {
+                people: people,
+                budget: budget,
+                hotel: currentHotel,
+            },
+        };
+
+        console.log('📤 Sending metadata payload:', metadataPayload);
+        await axios.put(`/api/trips/${tripId}`, metadataPayload, {
+            headers: { Authorization: `Bearer ${getAuthToken()}` },
+        });
+
+        // 3. Lưu Itinerary (Lúc này đã chứa Hotel bên trong places)
+        const itineraryPayload = { itinerary: updatedItinerary };
+        console.log('📤 Sending itinerary payload (with hotel):', itineraryPayload);
+        
+        await axios.put(`/api/trips/${tripId}/itinerary`, itineraryPayload, {
+            headers: { Authorization: `Bearer ${getAuthToken()}` },
+        });
+
+        toast.dismiss(loadingToast);
+        toast.success("Đã lưu TẤT CẢ thay đổi thành công!", { autoClose: 3000 });
+
+        setEditableData(prev => ({ ...prev, duration: actualDuration }));
+
+        // Điều hướng về trang chi tiết
+        setTimeout(() => {
+            window.location.href = `/trips/${tripId}`;
+        }, 1000);
+
+    } catch (err) {
+        toast.dismiss(loadingToast);
+        setError("Error saving trip data.");
+        toast.error("Unable to save changes. Please try again.");
+        console.error("Error saving:", err.response?.data || err);
+    } finally {
+        setIsSaving(false);
+    }
+};
 
     // --- Regenerate AI suggestions with user feedback ---
     const handleAddFeedback = async () => {
@@ -2158,7 +2187,7 @@ export default function EditTripPage() {
         return (
             <div className="edit-trip-loading">
                 <div className="loading-spinner"></div>
-                <p>Đang tải dữ liệu chuyến đi...</p>
+                <p>Loading trip data...</p>
             </div>
         );
     }
@@ -2186,7 +2215,7 @@ export default function EditTripPage() {
                 }}
             >
                 <FaRedo style={{ marginRight: currentHotel ? 6 : 0 }} />
-                {currentHotel ? 'Thay đổi' : 'Chọn ngay'}
+                {currentHotel ? 'Change' : 'Choose'}
             </button>
         );
 
@@ -2225,11 +2254,11 @@ export default function EditTripPage() {
                 <div className="hotel-selection-container" style={{ marginBottom: 20 }}>
                     <label style={{ fontSize: '1rem', fontWeight: 600, color: '#333' }}>
                         <FaHotel style={{ marginRight: 8, color: '#6366f1' }} />
-                        Khách sạn/Lưu trú
+                        Hotels/Accommodation
                     </label>
                     <div className="hotel-info-card empty-card" style={{ justifyContent: 'space-between', background: '#fef3f3' }}>
                         <span style={{ color: '#ef4444', fontWeight: 500 }}>
-                            Chưa chọn nơi ở chính.
+                            Haven't chosen a main residence yet.
                         </span>
                         <ChangeButton currentHotel={null} />
                     </div>
@@ -2324,7 +2353,7 @@ export default function EditTripPage() {
             {/* Header */}
             <div className="edit-trip-header">
                 <button onClick={() => navigate(-1)} className="back-btn">
-                    <FaArrowLeft /> Quay lại
+                    <FaArrowLeft /> Back
                 </button>
                 <h1 className="trip-title">
                     ✏️ {tripData?.name || "Loading"}
@@ -2399,10 +2428,10 @@ export default function EditTripPage() {
 
             {/* ========== METADATA FORM ========== */}
             <div className="edit-trip-metadata-form">
-                <h2>⚙️ Thiết lập kế hoạch chuyến đi</h2>
+                <h2>⚙️ Set up a trip plan</h2>
                 <div className="metadata-grid">
                     <div className="edit-trip-input-group">
-                        <label>Tên chuyến đi</label>
+                        <label>Trip Name</label>
                         <input
                             type="text"
                             value={editableData.name}
@@ -2412,7 +2441,7 @@ export default function EditTripPage() {
                     </div>
 
                     <div className="edit-trip-input-group">
-                        <label>Ngày xuất phát</label>
+                        <label>Start Date</label>
                         <input
                             type="date"
                             value={editableData.startDate}
@@ -2421,7 +2450,7 @@ export default function EditTripPage() {
                     </div>
 
                     <div className="edit-trip-input-group">
-                        <label>Thời lượng (Ngày)</label>
+                        <label>Duration (Days)</label>
                         <input
                             type="text"
                             value={itinerary.length}
@@ -2432,23 +2461,23 @@ export default function EditTripPage() {
                     </div>
 
                     <div className="edit-trip-input-group">
-                        <label>Số người</label>
+                        <label>People</label>
                         <select
                             value={editableData.people}
                             onChange={(e) => handleMetadataChange('people', e.target.value)}
                         >
-                            <option value="">Chọn số lượng</option>
+                            <option value="">Choose the number of people</option>
                             {peopleOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                         </select>
                     </div>
 
                     <div className="edit-trip-input-group">
-                        <label>Ngân sách</label>
+                        <label>Budget</label>
                         <select
                             value={editableData.budget}
                             onChange={(e) => handleMetadataChange('budget', e.target.value)}
                         >
-                            <option value="">Chọn ngân sách</option>
+                            <option value="">Select budget</option>
                             {budgetOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                         </select>
                     </div>
@@ -2456,14 +2485,14 @@ export default function EditTripPage() {
                     <div className="edit-trip-input-group">
                         <label>&nbsp;</label>
                         <button onClick={handleRegenerateFull} className="regenerate-btn" disabled={isSaving || (extractMaxBudget(editableData.budget) > 0 && currentTotalCost > extractMaxBudget(editableData.budget))}>
-                            <FaRedo /> TÁI TẠO LỊCH TRÌNH MỚI
+                            <FaRedo /> Regenerate Full Itinerary
                         </button>
                     </div>
 
                     <div className="edit-trip-input-group">
                         <label>&nbsp;</label>
                         <button onClick={handleExtendTrip} className="extend-btn" disabled={isSaving}>
-                            <FaCalendarPlus /> Tăng thêm 1 Ngày
+                            <FaCalendarPlus /> Add 1 Day
                         </button>
                     </div>
                 </div>
@@ -2471,11 +2500,11 @@ export default function EditTripPage() {
 
             {/* [NEW] Ngân sách & Chi phí ước tính */}
             <div className="edit-trip-metadata-form" style={{ marginTop: '1rem' }}>
-                <h2 style={{ marginBottom: '1rem' }}>💰 Ngân sách & Chi phí ước tính</h2>
+                <h2 style={{ marginBottom: '1rem' }}>💰 Budget & Estimated Cost</h2>
                 {editableData.people && editableData.budget && currentTotalCost >= 0 ? (
                     <div style={{ padding: '12px', borderRadius: '8px', border: '1px solid #ddd', background: '#fcfcfc' }}>
                         <p style={{ margin: 0, fontWeight: 600, color: '#333' }}>
-                            Chi phí ước tính:
+                            Estimated Cost:
                             <span
                                 style={{ marginLeft: '10px', fontSize: '1.1rem' }}
                                 className={
@@ -2488,7 +2517,7 @@ export default function EditTripPage() {
                             </span>
                         </p>
                         <p style={{ margin: '8px 0 0', fontSize: '0.9rem', color: '#666' }}>
-                            (Ngân sách tối đa:&nbsp;
+                            (Maximum budget:&nbsp;
                             {extractMaxBudget(editableData.budget) != 1000000000
                                 ? `${new Intl.NumberFormat('vi-VN').format(extractMaxBudget(editableData.budget))} VND`
                                 : 'Không có'}
@@ -2501,10 +2530,10 @@ export default function EditTripPage() {
                             </p>
                         )}
                         <p style={{ margin: '8px 0 0', fontSize: '0.75rem', color: '#999' }}>
-                            *Chi phí gồm 2 phần:<br />
-                            (1) Chi phí tham quan/hoạt động (giá × số người).<br />
-                            (2) Khách sạn (giá phòng × số đêm, số đêm = số ngày − 1).<br />
-                            Không bao gồm chi phí ăn uống.
+                            *The cost includes 2 parts:<br />
+                            (1) Cost of sightseeing/activities (price × number of people).<br />
+                            (2) Accommodation (room price × number of nights, number of nights = number of days − 1).<br />
+                            Does not include food expenses.
                         </p>
 
                     </div>
@@ -2522,8 +2551,8 @@ export default function EditTripPage() {
             <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                 <div className="editable-column" style={{ maxHeight: 'none' }}>
                     <div className="column-header">
-                        <h2>✏️ Chỉnh sửa lịch trình</h2>
-                        <p className="subtitle">Kéo thả để sắp xếp lại, thêm/xóa địa điểm</p>
+                        <h2>✏️ Edit Itinerary</h2>
+                        <p className="subtitle">Drag and drop to rearrange, add/remove locations</p>
                     </div>
 
                     <DragDropContext onDragEnd={onDragEnd}>
@@ -2556,14 +2585,14 @@ export default function EditTripPage() {
                                                 }}>
                                                     ❯
                                                 </span>
-                                                Ngày {dayPlan.day}
+                                                Day {dayPlan.day}
                                                 {/* ✅ Hiển thị số lượng địa điểm */}
                                                 <span style={{
                                                     fontSize: '0.875rem',
                                                     color: '#64748b',
                                                     fontWeight: 400
                                                 }}>
-                                                    ({dayPlan.places.length} địa điểm)
+                                                    ({dayPlan.places.length} locations)
                                                 </span>
                                             </h3>
                                             <button
@@ -2575,7 +2604,7 @@ export default function EditTripPage() {
                                                 disabled={isSaving || itinerary.length <= 1}
                                                 title={itinerary.length <= 1 ? "Không thể xóa ngày cuối cùng" : "Xóa ngày này"}
                                             >
-                                                <FaTrash /> Xóa ngày
+                                                <FaTrash /> Delete Day
                                             </button>
                                         </div>
 
@@ -2602,7 +2631,7 @@ export default function EditTripPage() {
                                                             {provided.placeholder}
                                                             {dayPlan.places.length === 0 && (
                                                                 <p className="empty-message">
-                                                                    Kéo thả mục vào đây hoặc thêm mục mới
+                                                                    Drag and drop items here or add a new item
                                                                 </p>
                                                             )}
                                                         </div>
@@ -2614,13 +2643,13 @@ export default function EditTripPage() {
                                                         onClick={() => handleAddItem(dayPlan.day, "destination")}
                                                         className="add-btn destination"
                                                     >
-                                                        <FaPlus /> Địa điểm
+                                                        <FaPlus /> Location
                                                     </button>
                                                     <button
                                                         onClick={() => handleAddItem(dayPlan.day, "food")}
                                                         className="add-btn lunch"
                                                     >
-                                                        <FaPlus /> Ăn uống
+                                                        <FaPlus /> Food/Bevarage
                                                     </button>
                                                 </div>
                                             </>
@@ -2649,7 +2678,7 @@ export default function EditTripPage() {
                         }}
                     >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                            <h2>🔍 Lịch trình: Bản Gốc vs Bản Chỉnh sửa</h2>
+                            <h2>🔍 Itinerary: Original vs Edited</h2>
                             <button onClick={() => setShowOriginalOverlay(false)} style={{ fontSize: '1.5rem', background: 'none', border: 'none', cursor: 'pointer' }}>
                                 ✕
                             </button>
@@ -2659,13 +2688,13 @@ export default function EditTripPage() {
                             {/* LEFT: Original */}
                             <div className="original-column" style={{ maxHeight: '70vh', overflow: 'auto' }}>
                                 <div className="column-header">
-                                    <h2>📋 Lịch trình gốc</h2>
-                                    <p className="subtitle">Bản tham khảo ban đầu</p>
+                                    <h2>📋 Original Itinerary</h2>
+                                    <p className="subtitle">Original reference version</p>
                                 </div>
                                 <div className="days-list">
                                     {originalItinerary.map((dayPlan) => (
                                         <div key={`original-${dayPlan.day}`} className="day-section original">
-                                            <h3 className="day-title">Ngày {dayPlan.day}</h3>
+                                            <h3 className="day-title">Day {dayPlan.day}</h3>
                                             <div className="places-list">
                                                 {dayPlan.places.map((item, index) => (
                                                     <div key={index} className="place-item-readonly">
@@ -2691,13 +2720,13 @@ export default function EditTripPage() {
                             {/* RIGHT: Edited */}
                             <div className="editable-column" style={{ maxHeight: '70vh', overflow: 'auto', background: '#f0fdf4' }}>
                                 <div className="column-header">
-                                    <h2>✅ Lịch trình đã chỉnh sửa</h2>
-                                    <p className="subtitle">Phiên bản mới của bạn</p>
+                                    <h2>✅ Edited Itinerary</h2>
+                                    <p className="subtitle">Your new version</p>
                                 </div>
                                 <div className="days-list">
                                     {itinerary.map((dayPlan) => (
                                         <div key={`compare-${dayPlan.day}`} className="day-section editable">
-                                            <h3 className="day-title">Ngày {dayPlan.day}</h3>
+                                            <h3 className="day-title">Day {dayPlan.day}</h3>
                                             <div className="places-list">
                                                 {dayPlan.places.map((item, index) => (
                                                     <div key={index} className="place-item-readonly">
@@ -2732,7 +2761,7 @@ export default function EditTripPage() {
                                 className="btn-cancel"
                                 style={{ padding: '12px 24px', fontSize: '1rem' }}
                             >
-                                ❌ Hủy thay đổi
+                                ❌ Cancel changes
                             </button>
                             <button
                                 onClick={async () => {
@@ -2743,7 +2772,7 @@ export default function EditTripPage() {
                                 disabled={isSaving || (extractMaxBudget(editableData.budget) > 0 && currentTotalCost > extractMaxBudget(editableData.budget))}
                                 style={{ padding: '12px 24px', fontSize: '1rem' }}
                             >
-                                <FaSave /> {isSaving ? 'Đang lưu...' : 'Lưu thay đổi'}
+                                <FaSave /> {isSaving ? 'Saving...' : 'Saving changes'}
                             </button>
                         </div>
                     </div>
@@ -3007,7 +3036,7 @@ export default function EditTripPage() {
                                                                 if (displaySuggestions.length === 0) {
                                                                     return (
                                                                         <div style={{ color: "#9ca3af", fontStyle: "italic", padding: "12px" }}>
-                                                                            Chưa có gợi ý. Vui lòng thử lại sau.
+                                                                            No suggestions yet. Please try again later.
                                                                         </div>
                                                                     );
                                                                 }
@@ -3048,7 +3077,7 @@ export default function EditTripPage() {
                                                             if (sortedDays.length === 0) {
                                                                 return (
                                                                     <div style={{ color: "#9ca3af", fontStyle: "italic", padding: "12px" }}>
-                                                                        Không thể phân tích gợi ý. Vui lòng thử lại.
+                                                                        Could not parse hint. Please try again.
                                                                     </div>
                                                                 );
                                                             }
@@ -3079,7 +3108,7 @@ export default function EditTripPage() {
                                                                                         gap: 8,
                                                                                     }}
                                                                                 >
-                                                                                    📅 Ngày {dayNum} - Lịch trình 08:00-17:00
+                                                                                    📅 Day {dayNum} - Schedule 08:00-17:00
                                                                                 </div>
                                                                                 <div style={{ padding: 12 }}>
                                                                                     <div
@@ -3392,7 +3421,7 @@ export default function EditTripPage() {
                     <div className="confirm-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="confirm-modal-icon">🗑️</div>
                         <h3>Xác nhận xóa ngày</h3>
-                        <p>Bạn có chắc chắn muốn xóa <strong>Ngày {dayToDelete}</strong> khỏi lịch trình?</p>
+                        <p>Are you sure you want to <strong>Ngày {dayToDelete}</strong> khỏi lịch trình?</p>
                         <p className="warning-text">Tất cả địa điểm trong ngày này sẽ bị xóa vĩnh viễn!</p>
                         <p className="warning-text">Hành động này không thể hoàn tác!</p>
 
@@ -3413,10 +3442,10 @@ export default function EditTripPage() {
                 <div className="modal-overlay confirm-modal-overlay" onClick={() => setShowRegenerateConfirm(false)}>
                     <div className="confirm-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="confirm-modal-icon">🔄</div>
-                        <h3>Xác nhận tái tạo lịch trình</h3>
-                        <p>Bạn có chắc chắn muốn <strong>TÁI TẠO LỊCH TRÌNH MỚI</strong> không?</p>
-                        <p className="warning-text">Lịch trình hiện tại sẽ bị ghi đè!</p>
-                        <p className="warning-text">Hành động này không thể hoàn tác!</p>
+                        <h3>Confirm Regenerate Itinerary</h3>
+                        <p>Are you sure you want to <strong>recreate the itinerary</strong>?</p>
+                        <p className="warning-text">The current schedule will be overwritten!</p>
+                        <p className="warning-text">This action cannot be undone!</p>
 
                         <div className="confirm-modal-actions">
                             <button onClick={() => setShowRegenerateConfirm(false)} className="btn-cancel">

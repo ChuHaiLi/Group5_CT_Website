@@ -3,7 +3,7 @@ import { FaSearch, FaTimes, FaMapMarkerAlt, FaUtensils, FaHotel } from 'react-ic
 import RecommendCard from '../Home/Recommendations/RecommendCard';
 
 /**
- * Modal để chọn địa điểm khi thêm vào lịch trình
+ * Modal to select a place when adding to itinerary
  * Props:
  * - places: Array of destination objects
  * - type: 'destination' | 'food' | 'hotel'
@@ -30,21 +30,21 @@ export default function DestinationPickerModal({ places = [], type = 'destinatio
 
     // ✅ FILTER BY TYPE (from JSON)
     if (type === 'hotel') {
-      // Lọc khách sạn theo type === "Hotel"
+      // Filter hotels by type === "Hotel"
       filtered = filtered.filter(p => {
         const placeType = (p.type || '').toLowerCase();
         const placeTypeFull = (p.place_type || '').toLowerCase();
         return placeType === 'hotel' || placeTypeFull === 'hotel';
       });
     } else if (type === 'food') {
-      // Lọc ăn uống theo type === "Restaurant"
+      // Filter food places by type === "Restaurant"
       filtered = filtered.filter(p => {
         const placeType = (p.type || '').toLowerCase();
         const placeTypeFull = (p.place_type || '').toLowerCase();
         return placeType === 'restaurant' || placeTypeFull === 'restaurant';
       });
     } else {
-      // Lọc địa điểm: Loại trừ Hotel và Restaurant
+      // Filter destinations: Exclude Hotel and Restaurant
       filtered = filtered.filter(p => {
         const placeType = (p.type || '').toLowerCase();
         const placeTypeFull = (p.place_type || '').toLowerCase();
@@ -85,15 +85,15 @@ export default function DestinationPickerModal({ places = [], type = 'destinatio
   };
 
   const getModalTitle = () => {
-    if (type === 'hotel') return 'Chọn Khách sạn';
-    if (type === 'food') return 'Chọn điểm Ăn uống';
-    return 'Chọn Địa điểm';
+    if (type === 'hotel') return 'Choose Hotel';
+    if (type === 'food') return 'Choose Food Place';
+    return 'Choose Location';
   };
 
   const getPlaceholder = () => {
-    if (type === 'hotel') return 'Tìm khách sạn, resort...';
-    if (type === 'food') return 'Tìm nhà hàng, quán ăn...';
-    return 'Tìm địa điểm, điểm tham quan...';
+    if (type === 'hotel') return 'Find hotel, resort...';
+    if (type === 'food') return 'Find restaurant, cafe...';
+    return 'Find location, attraction...';
   };
 
   const getEmptyIcon = () => {
@@ -199,7 +199,7 @@ export default function DestinationPickerModal({ places = [], type = 'destinatio
               color: '#64748b',
               textAlign: 'center'
             }}>
-              Tìm thấy {filteredPlaces.length} kết quả
+              Found {filteredPlaces.length} result{filteredPlaces.length !== 1 ? 's' : ''}
             </p>
           </div>
 
@@ -236,8 +236,8 @@ export default function DestinationPickerModal({ places = [], type = 'destinatio
                 <div style={{ fontSize: '4rem', marginBottom: '16px', opacity: 0.3 }}>
                   {getEmptyIcon()}
                 </div>
-                <h3>Không tìm thấy kết quả</h3>
-                <p>Thử thay đổi từ khóa tìm kiếm hoặc chọn tỉnh/thành khác</p>
+                <h3>No results found</h3>
+                <p>Try changing your search keywords or select another province/city</p>
               </div>
             )}
           </div>
@@ -261,7 +261,7 @@ export default function DestinationPickerModal({ places = [], type = 'destinatio
                 fontWeight: 600
               }}
             >
-              Đóng
+              Close
             </button>
           </div>
         </div>
@@ -338,7 +338,7 @@ export default function DestinationPickerModal({ places = [], type = 'destinatio
                   fontSize: '1rem'
                 }}
               >
-                ✓ Chọn địa điểm này
+                ✓ Select this place
               </button>
               <button
                 onClick={() => setViewingPlace(null)}
@@ -351,7 +351,7 @@ export default function DestinationPickerModal({ places = [], type = 'destinatio
                   fontWeight: 600
                 }}
               >
-                Đóng
+                Close
               </button>
             </div>
           </div>
