@@ -540,6 +540,42 @@
     background: #e5e7eb;
 }
 
+/* ===== HOTEL TOGGLE BUTTON - SIMPLE UI ===== */
+
+/* Container for search and toggle button */
+.preview-controls-group {
+    margin-bottom: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Hotel Toggle Button */
+.hotel-toggle-btn {
+    width: 100%;
+    padding: 14px 20px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    background: white;
+    color: #4b5563;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* Disabled State */
+.hotel-toggle-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #f3f4f6;
+    color: #9ca3af;
+    border-color: #e5e7eb;
+}
+
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 1200px) {
     .create-trip-container {
