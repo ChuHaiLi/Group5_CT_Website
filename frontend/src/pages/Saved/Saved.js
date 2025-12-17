@@ -13,9 +13,13 @@ import {
 import CollectionsTab from "./CollectionsTab";
 import "./Saved.css";
 
-export default function SavedPage({ savedIds, handleToggleSave, isAuthenticated }) {
+export default function SavedPage({ savedIds, handleToggleSave }) {
   const navigate = useNavigate();
   
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return !!localStorage.getItem("access_token");
+  });
+
   const [destinations, setDestinations] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
@@ -113,35 +117,72 @@ export default function SavedPage({ savedIds, handleToggleSave, isAuthenticated 
   };
 
   useEffect(() => {
-        if (!isAuthenticated) {
-            setShowAuthModal(true);
-            setLoading(false);
-            setDestinations([]); 
-        } else {
-            setShowAuthModal(false);
-        }
-    }, [isAuthenticated]);
+  const checkAuth = () => {
+    const token = localStorage.getItem("access_token");
+    const isAuth = !!token;
+    
+    // Cập nhật state nếu có thay đổi
+    setIsAuthenticated(isAuth);
+    
+    if (!isAuth) {
+      setShowAuthModal(true);
+      setLoading(false);
+      setDestinations([]);
+    } else {
+      setShowAuthModal(false);
+    }
+  };
+
+  // Check immediately on mount
+  checkAuth();
+
+  // Listen for storage changes (từ các tabs khác)
+  const handleStorageChange = (e) => {
+    if (e.key === 'access_token' || e.key === null) {
+      checkAuth();
+    }
+  };
+  window.addEventListener('storage', handleStorageChange);
+  
+  // Listen for focus events (khi user quay lại tab)
+  window.addEventListener('focus', checkAuth);
+  
+  // Custom event cho logout trong cùng tab
+  window.addEventListener('authChange', checkAuth);
+  
+  // Polling backup (check mỗi 1 giây)
+  const interval = setInterval(checkAuth, 1000);
+
+  return () => {
+    window.removeEventListener('storage', handleStorageChange);
+    window.removeEventListener('focus', checkAuth);
+    window.removeEventListener('authChange', checkAuth);
+    clearInterval(interval);
+  };
+}, []);
     
   useEffect(() => {
-    const fetchData = async () => {
-        if (!token || !isAuthenticated) { 
-            setDestinations([]);
-            setLoading(false);
-            return;
-        }
-        setLoading(true);
-        try {
-            const res = await API.get("/saved/list");
-            setDestinations(Array.isArray(res.data) ? res.data : []);
-        } catch (error) {
-            console.error("Failed to fetch saved list:", error);
-            setDestinations([]);
-        } finally {
-            setLoading(false);
-        }
-    };
-    fetchData();
-}, [token, savedIds, isAuthenticated]);
+  const fetchData = async () => {
+    if (!isAuthenticated) { 
+      setDestinations([]);
+      setLoading(false);
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const res = await API.get("/saved/list");
+      setDestinations(Array.isArray(res.data) ? res.data : []);
+    } catch (error) {
+      console.error("Failed to fetch saved list:", error);
+      setDestinations([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  fetchData();
+}, [isAuthenticated]);
 
   const handleUnsave = async (id) => {
       await handleToggleSave(id);

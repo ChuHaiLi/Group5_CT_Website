@@ -141,80 +141,146 @@ export const rebuildDay = async (places, opts = {}) => {
     return result;
 };
 
-// --- RECALCULATE TIME SLOTS (Giữ lại từ remote - hỗ trợ AI time calculation) ---
+// --- HÀM TỰ ĐỘNG TÍNH TOÁN GIỜ (AUTO-TIME) ---
 const getDuration = (item) => {
-    if (item.id === 'LUNCH' || item.category === 'Ăn uống') return 60;
-    if (item.id === 'TRAVEL' || item.category === 'Di chuyển') return 45;
+    // Thời lượng mặc định cho các loại hoạt động
+    if (item.id === 'LUNCH' || item.category === 'Ăn uống') return 60; // 60 phút
+    if (item.id === 'TRAVEL' || item.category === 'Di chuyển') return 45; // 45 phút
     // Chuyển duration_hours sang phút nếu tồn tại
     if (item.duration_hours) return item.duration_hours * 60;
-    return 90;
+    return 90; // Địa điểm (DEFAULT): 90 phút (1.5 giờ)
 };
 
 const formatTime = (ms) => {
+    // ✅ Hỗ trợ thời gian > 24h (không wrap về 0-23h)
+    // Ví dụ: 25:30, 26:00, 30:15 (cho phép lịch trình kéo dài qua đêm)
     const totalMinutes = Math.floor(ms / (60 * 1000));
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
+    // Không giới hạn hours - có thể > 24 để hỗ trợ lịch trình dài
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 };
 
 /**
  * Tái tính toán khung giờ cho toàn bộ lịch trình.
+ * ✅ CRITICAL: Preserve EXACT order and time from AI - no sorting, no time limits.
+ * Nếu item có start_time/end_time từ AI, sử dụng chúng trực tiếp.
  * @param {Array} itinerary - Dữ liệu lịch trình (mảng các dayPlan)
  * @returns {Array} Lịch trình đã cập nhật khung giờ
  */
 export const recalculateTimeSlots = (itinerary) => {
-    const DEFAULT_START_TIME_MS = 8 * 60 * 60 * 1000; // Bắt đầu lúc 8:00 AM
+    const DEFAULT_START_TIME_MS = 8 * 60 * 60 * 1000; // Bắt đầu lúc 8:00 AM (chỉ dùng khi không có thời gian từ AI)
 
     return itinerary.map(dayPlan => {
-        let currentTimeMs = DEFAULT_START_TIME_MS; // Reset giờ cho mỗi ngày
+        // ✅ CRITICAL: DO NOT SORT - preserve the EXACT order from AI
+        // Just use places as-is to maintain AI's intended order
+        const places = dayPlan.places || [];
         
-        const newPlaces = dayPlan.places.map((item, index) => {
-            
-            let startTimeMs = currentTimeMs;
-            
-            // Cố gắng sử dụng thời gian đã có trong time_slot hoặc start_time (từ AI/swap)
+        // ✅ Initialize currentTimeMs - if first item has start_time from AI, use it
+        let currentTimeMs = DEFAULT_START_TIME_MS;
+        if (places.length > 0 && places[0].start_time) {
+            const firstTimeMatch = places[0].start_time.match(/(\d{1,2}):(\d{2})/);
+            if (firstTimeMatch) {
+                const hours = parseInt(firstTimeMatch[1], 10);
+                const minutes = parseInt(firstTimeMatch[2], 10);
+                currentTimeMs = (hours * 60 + minutes) * 60 * 1000;
+            }
+        }
+        
+        const newPlaces = places.map((item, index) => {
+            // ✅ PRIORITY 1: PRESERVE COMPLETE time_slot from AI if exists
             if (item.time_slot && typeof item.time_slot === 'string') {
-                const timeMatch = item.time_slot.match(/(\d{1,2}):(\d{2})/);
-                if (timeMatch) {
-                    const hours = parseInt(timeMatch[1], 10);
-                    const minutes = parseInt(timeMatch[2], 10);
-                    const parsedTimeMs = (hours * 60 + minutes) * 60 * 1000;
+                // Check if time_slot is complete (format: "HH:MM-HH:MM" or "H:MM-H:MM")
+                const timeSlotMatch = item.time_slot.match(/^(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})$/);
+                if (timeSlotMatch) {
+                    // Time slot is complete, keep it EXACTLY as-is
+                    const startTimeStr = `${timeSlotMatch[1].padStart(2, '0')}:${timeSlotMatch[2]}`;
+                    const endTimeStr = `${timeSlotMatch[3].padStart(2, '0')}:${timeSlotMatch[4]}`;
                     
-                    // Nếu thời gian đã có lớn hơn thời gian hiện tại, sử dụng nó
-                    if (parsedTimeMs > currentTimeMs) {
-                        startTimeMs = parsedTimeMs;
-                    }
+                    // Update currentTimeMs to the end time (for next items without explicit time)
+                    const endHours = parseInt(timeSlotMatch[3], 10);
+                    const endMinutes = parseInt(timeSlotMatch[4], 10);
+                    const endTimeMs = (endHours * 60 + endMinutes) * 60 * 1000;
+                    currentTimeMs = Math.max(currentTimeMs, endTimeMs);
+                    
+                    return {
+                        ...item,
+                        time_slot: item.time_slot, // Keep original time_slot EXACTLY
+                        start_time: startTimeStr, // Preserve start_time
+                        end_time: endTimeStr, // Preserve end_time
+                    };
                 }
-            } else if (item.start_time && typeof item.start_time === 'string') {
-                 // Parse AI's start_time (format: "HH:MM")
+            }
+            
+            // ✅ PRIORITY 2: If time_slot is not complete, check for start_time and end_time from AI
+            let startTimeMs = currentTimeMs;
+            let endTimeMs = null;
+            let hasExplicitTime = false;
+            
+            if (item.start_time && typeof item.start_time === 'string') {
+                // ✅ Parse AI's start_time (format: "HH:MM" or "H:MM")
                 const timeMatch = item.start_time.match(/(\d{1,2}):(\d{2})/);
                 if (timeMatch) {
                     const hours = parseInt(timeMatch[1], 10);
                     const minutes = parseInt(timeMatch[2], 10);
-                    const parsedTimeMs = (hours * 60 + minutes) * 60 * 1000;
-
-                    if (parsedTimeMs > currentTimeMs) {
-                        startTimeMs = parsedTimeMs;
-                    }
+                    startTimeMs = (hours * 60 + minutes) * 60 * 1000;
+                    hasExplicitTime = true;
                 }
             }
             
-            // Lấy duration (ưu tiên duration_hours/duration_min, sau đó là default)
-            let durationMinutes = getDuration(item);
-            const durationMs = durationMinutes * 60 * 1000;
-            const endTimeMs = startTimeMs + durationMs;
+            // Check if AI provided end_time
+            if (item.end_time && typeof item.end_time === 'string') {
+                const endTimeMatch = item.end_time.match(/(\d{1,2}):(\d{2})/);
+                if (endTimeMatch) {
+                    const hours = parseInt(endTimeMatch[1], 10);
+                    const minutes = parseInt(endTimeMatch[2], 10);
+                    endTimeMs = (hours * 60 + minutes) * 60 * 1000;
+                }
+            }
             
-            // Định dạng slot giờ: "HH:MM-HH:MM"
+            // ✅ If both start_time and end_time are provided by AI, use them DIRECTLY (no limits)
+            if (hasExplicitTime && endTimeMs !== null) {
+                const newTimeSlot = `${formatTime(startTimeMs)}-${formatTime(endTimeMs)}`;
+                // Update currentTimeMs for next items (no time limit - can exceed 24:00)
+                currentTimeMs = Math.max(currentTimeMs, endTimeMs);
+                return {
+                    ...item,
+                    time_slot: newTimeSlot,
+                    start_time: formatTime(startTimeMs), // Preserve AI's start_time
+                    end_time: formatTime(endTimeMs), // Preserve AI's end_time
+                };
+            }
+            
+            // ✅ Get duration from item or calculate default
+            let durationMinutes;
+            if (item.duration_hours) {
+                durationMinutes = item.duration_hours * 60;
+            } else if (item.duration_min) {
+                durationMinutes = item.duration_min;
+            } else {
+                durationMinutes = getDuration(item);
+            }
+            
+            // If only start_time is provided by AI, calculate end_time from duration
+            if (hasExplicitTime) {
+                const durationMs = durationMinutes * 60 * 1000;
+                endTimeMs = startTimeMs + durationMs;
+                // Update currentTimeMs (no time limit - can exceed 24:00)
+                currentTimeMs = Math.max(currentTimeMs, endTimeMs);
+            } else {
+                // No explicit time from AI, calculate sequentially from currentTimeMs
+                const durationMs = durationMinutes * 60 * 1000;
+                endTimeMs = startTimeMs + durationMs;
+                currentTimeMs = endTimeMs; // Continue from end time (no limit)
+            }
+            
             const newTimeSlot = `${formatTime(startTimeMs)}-${formatTime(endTimeMs)}`;
             
-            // Update currentTimeMs cho item tiếp theo
-            currentTimeMs = endTimeMs;
-
             return {
                 ...item,
                 time_slot: newTimeSlot,
-                start_time: formatTime(startTimeMs), // Store normalized start_time
-                duration_hours: durationMinutes / 60, // Cập nhật duration_hours
+                start_time: formatTime(startTimeMs),
+                end_time: formatTime(endTimeMs),
             };
         });
 

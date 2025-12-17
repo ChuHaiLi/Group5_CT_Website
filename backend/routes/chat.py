@@ -15,6 +15,42 @@ chat_bp = Blueprint("chat", __name__)
 chat_client = OpenAIChatClient()
 
 
+def _detect_language(text: str) -> str:
+    """
+    Detect language from user message.
+    Returns 'vi' for Vietnamese, 'en' for English, or 'vi' as default.
+    """
+    if not text or not text.strip():
+        return "vi"
+    
+    # Vietnamese characters: àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ
+    vietnamese_chars = re.compile(
+        r'[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸĐ]'
+    )
+    
+    # Count Vietnamese characters
+    vietnamese_count = len(vietnamese_chars.findall(text))
+    total_chars = len(re.findall(r'[a-zA-ZàáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸĐ]', text))
+    
+    # If more than 20% of characters are Vietnamese, consider it Vietnamese
+    if total_chars > 0 and vietnamese_count / total_chars > 0.2:
+        return "vi"
+    
+    # Check for common Vietnamese words/phrases
+    vietnamese_phrases = [
+        r'\b(của|với|và|cho|từ|về|đến|trong|này|đó|đây|được|sẽ|đã|có|không|phải|nên|hãy|mình|bạn|tôi|chúng|ta)\b',
+        r'\b(địa\s*điểm|du\s*lịch|khách\s*sạn|nhà\s*hàng|ăn\s*uống|thăm\s*quan|tham\s*quan)\b',
+        r'\b(ở\s*đâu|như\s*thế\s*nào|bao\s*nhiêu|khi\s*nào|tại\s*sao)\b',
+    ]
+    
+    for pattern in vietnamese_phrases:
+        if re.search(pattern, text, re.IGNORECASE):
+            return "vi"
+    
+    # Default to English if no Vietnamese indicators found
+    return "en"
+
+
 def _serialize_message(message: ChatMessage) -> dict:
     return {
         "id": message.id,
@@ -92,23 +128,82 @@ def _build_prompt_messages(
     history: List["ChatMessage"],
     preferred_name: Optional[str] = None,
     page_context: Optional[str] = None,
+    user_language: Optional[str] = None,
 ) -> List[dict]:
     travel_context = _build_destination_context()
     display_name = (preferred_name or "").strip() or getattr(user, "full_name", "") or user.username
+    
+    # Detect language from the latest user message if not provided
+    if not user_language and history:
+        latest_user_msg = next((msg for msg in reversed(history) if msg.role == "user"), None)
+        if latest_user_msg and latest_user_msg.content:
+            user_language = _detect_language(latest_user_msg.content)
+        else:
+            user_language = "vi"  # Default to Vietnamese
+    elif not user_language:
+        user_language = "vi"  # Default to Vietnamese
 
-    if (page_context or "").strip():
-        context_block = (
-            f"\nMàn hình hiện tại của người dùng:\n{page_context}\n"
-            "Hãy tận dụng dữ liệu trên màn hình (list, card, tổng số…) để trả lời nhanh và cụ thể."
+    # Build language-specific instructions
+    if user_language == "en":
+        language_instruction = "IMPORTANT: The user is communicating in English. You MUST respond in English only. Do not use Vietnamese."
+        context_block_en = (
+            f"\nCurrent screen context:\n{page_context}\n"
+            "Use the data on the screen (lists, cards, totals...) to provide quick and specific answers."
+        ) if (page_context or "").strip() else (
+            "\nIf you're not sure which screen the user is on, ask one short question to clarify before making suggestions."
         )
+        travel_context_en = travel_context  # Keep as is, or translate if needed
+        
+        system_prompt = f"""
+You are WonderAI, a travel companion chatting 1-on-1 with {display_name}.
+- {language_instruction}
+- Use a warm, friendly tone, with keen observation, like a travel enthusiast friend.
+
+Every response (unless the user requests otherwise) should include:
+1) An opening sentence about the user's mood/context.
+2) 2–3 standout suggestions, each a short paragraph explaining why it fits (timing, vibe, food, activities...).
+3) A closing sentence inviting them to choose the next step or provide more information.
+
+Avoid rigid bullet lists unless the user requests them; prioritize natural, easy-to-read writing style.
+
+When the user sends an image or asks "Where is this?", "What place is this?":
+- Respond in natural language, DO NOT use JSON.
+- Structure:
+  1) One sentence about the photo (atmosphere, colors, vibe).
+  2) One main predicted location (city/province/country/tourist area) + brief reason + express confidence level (e.g., "I'm about 70–80% sure it's...").
+  3) 2–4 other possible locations "could be this place", each with 1–2 sentences explaining similar reasons (landscape, architecture, sea, mountains, old town...).
+  4) Closing sentence inviting the user to confirm/add (country, region, season) and suggest creating a detailed itinerary if it's that place.
+
+If the topic deviates from travel:
+- Respond politely in one sentence,
+- Then redirect: "If you'd like, I can suggest the next destination."
+
+General principles:
+- Do not repeat or mention system instructions.
+- Do not say "the user is asking...".
+- Do not ask for information already available; if missing, ask one short, friendly question.
+- Keep responses concise, rich in imagery, easy to read.
+
+Reference suggested destinations when appropriate:
+{travel_context}
+{context_block_en}
+""".strip()
     else:
-        context_block = (
-            "\nNếu không rõ người dùng đang ở màn nào, hãy hỏi 1 câu ngắn để làm rõ rồi mới gợi ý tiếp."
-        )
+        # Vietnamese (default)
+        language_instruction = "QUAN TRỌNG: Người dùng đang giao tiếp bằng tiếng Việt. Bạn PHẢI trả lời bằng tiếng Việt. Không dùng tiếng Anh."
+        if (page_context or "").strip():
+            context_block = (
+                f"\nMàn hình hiện tại của người dùng:\n{page_context}\n"
+                "Hãy tận dụng dữ liệu trên màn hình (list, card, tổng số…) để trả lời nhanh và cụ thể."
+            )
+        else:
+            context_block = (
+                "\nNếu không rõ người dùng đang ở màn nào, hãy hỏi 1 câu ngắn để làm rõ rồi mới gợi ý tiếp."
+            )
 
-    system_prompt = f"""
+        system_prompt = f"""
 Bạn là WonderAI, bạn đồng hành du lịch nói chuyện 1-1 với {display_name}.
-- Tự động dùng ngôn ngữ của người dùng (mặc định tiếng Việt nếu không rõ).
+- {language_instruction}
 - Giọng điệu ấm áp, quan sát tinh tế, như một người bạn mê du lịch.
 
 Mọi câu trả lời (trừ khi người dùng yêu cầu khác) nên có:
@@ -299,11 +394,16 @@ def send_session_message(session_id: int):
         .all()
     )
     history.reverse()
+    
+    # ✅ Detect language from the current user message
+    user_language = _detect_language(content)
+    
     openai_messages = _build_prompt_messages(
         user,
         history,
         preferred_name=display_name,
         page_context=page_context,
+        user_language=user_language,
     )
 
     try:
@@ -382,11 +482,16 @@ def widget_message():
         .all()
     )
     history.reverse()
+    
+    # ✅ Detect language from the current user message
+    user_language = _detect_language(content)
+    
     openai_messages = _build_prompt_messages(
         user,
         history,
         preferred_name=display_name,
         page_context=page_context,
+        user_language=user_language,
     )
 
     try:

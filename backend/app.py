@@ -513,16 +513,22 @@ def apply_heuristic_fallback(existing_result, compact_edited, raw_reply=None):
 @app.route("/api/ai/evaluate_itinerary", methods=["POST"])
 def evaluate_itinerary():
     """
-    Accepts JSON: { original_itinerary: [...], edited_itinerary: [...], context?: {...} }
+    Accepts JSON: { edited_itinerary: [...], original_itinerary?: [...], context?: {...} }
     Returns AI evaluation as structured JSON or a text summary.
+    Note: Only edited_itinerary is required. original_itinerary is optional.
     """
     payload = request.get_json() or {}
-    original = payload.get("original_itinerary")
     edited = payload.get("edited_itinerary")
+    original = payload.get("original_itinerary")  # Optional - only used for comparison if provided
     context = payload.get("context") or {}
 
-    if original is None or edited is None:
-        return jsonify({"error": "original_itinerary and edited_itinerary are required"}), 400
+    # ✅ CHỈ YÊU CẦU edited_itinerary (phần chỉnh sửa)
+    if edited is None:
+        return jsonify({"error": "edited_itinerary is required"}), 400
+    
+    # If original_itinerary is not provided, use edited_itinerary as both (for backward compatibility)
+    if original is None:
+        original = edited
 
     # If frontend provided specific evaluation instructions, use them (token-efficient)
     eval_instructions = payload.get("evaluation_instructions")
@@ -934,16 +940,22 @@ def evaluate_itinerary():
 @app.route("/api/ai/reorder_itinerary", methods=["POST"])
 def reorder_itinerary():
     """
-    Accepts JSON: { original_itinerary: [...], edited_itinerary: [...], context?: {...} }
+    Accepts JSON: { edited_itinerary: [...], original_itinerary?: [...], context?: {...} }
     Returns suggested_itinerary as structured JSON where only ordering of places may be changed.
+    Note: Only edited_itinerary is required. original_itinerary is optional.
     """
     payload = request.get_json() or {}
-    original = payload.get("original_itinerary")
     edited = payload.get("edited_itinerary")
+    original = payload.get("original_itinerary")  # Optional - only used for comparison if provided
     context = payload.get("context") or {}
 
-    if original is None or edited is None:
-        return jsonify({"error": "original_itinerary and edited_itinerary are required"}), 400
+    # ✅ CHỈ YÊU CẦU edited_itinerary (phần chỉnh sửa)
+    if edited is None:
+        return jsonify({"error": "edited_itinerary is required"}), 400
+    
+    # If original_itinerary is not provided, use edited_itinerary as both (for backward compatibility)
+    if original is None:
+        original = edited
 
     system_prompt = (
         "You are a Professional Travel Guide with 30 years of experience optimizing travel itineraries.\n"
@@ -1349,7 +1361,6 @@ def get_cost_from_entry_fee(destination_obj):
         return float(cost) if cost is not None else 0.0
     except (ValueError, TypeError):
         return 0.0
-
 
 def generate_itinerary_optimized(
     province_id, 
@@ -1902,8 +1913,9 @@ def regenerate_trip_itinerary(trip_id):
 
     province_id = data.get("province_id", trip.province_id)
     duration_days = data.get("duration", trip.duration)
-    must_include_place_ids = data.get("must_include_place_ids", []) 
-    
+    must_include_place_ids = data.get("must_include_place_ids", [])
+
+    # ✅ FIX 1: Luôn resolve max_budget rõ ràng
     max_budget = data.get("max_budget")
     if max_budget is None:
         max_budget = old_metadata.get("max_budget", 0)
@@ -1912,34 +1924,41 @@ def regenerate_trip_itinerary(trip_id):
         return jsonify({"message": "Province ID and duration are required for regeneration."}), 400
 
     try:
-        # Gọi hàm logic tối ưu
         itinerary_result = generate_itinerary_optimized(
-            province_id, 
-            duration_days, 
-            max_budget, 
+            province_id=province_id,
+            duration_days=duration_days,
+            max_budget=max_budget,
             must_include_place_ids=must_include_place_ids,
             primary_accommodation_id=old_metadata.get("primary_accommodation_id")
         )
-        
-        # ✅ SỬA: Lấy dữ liệu từ Dictionary trả về
+
         itinerary_draft = itinerary_result.get("itinerary", [])
         total_estimated_cost = itinerary_result.get("total_estimated_cost", 0)
-        
+        has_hotel = itinerary_result.get("has_hotel", False)
+
         if not itinerary_draft and not must_include_place_ids:
             return jsonify({"message": "No suitable destinations found to create an itinerary."}), 400
-            
+
+        # ✅ FIX 2: Lưu itinerary
         trip.itinerary_json = json.dumps(itinerary_draft, ensure_ascii=False)
-        
-        # Cập nhật metadata mới
-        old_metadata['max_budget'] = max_budget
-        old_metadata['total_estimated_cost'] = total_estimated_cost
-            
-        trip.metadata_json = json.dumps(old_metadata, ensure_ascii=False)
+
+        # ✅ FIX 3: Update metadata ĐẦY ĐỦ & ĐỒNG BỘ
+        new_metadata = old_metadata.copy()
+        new_metadata.update({
+            "max_budget": max_budget,
+            "total_estimated_cost": total_estimated_cost,
+            "primary_accommodation_id": (
+                old_metadata.get("primary_accommodation_id") if has_hotel else None
+            )
+        })
+
+        trip.metadata_json = json.dumps(new_metadata, ensure_ascii=False)
         trip.updated_at = datetime.now()
+
         db.session.commit()
-        
+
         province_name = trip.province.name if trip.province else "Unknown Province"
-        
+
         return jsonify({
             "message": "Itinerary successfully regenerated.",
             "trip": {
@@ -1948,7 +1967,7 @@ def regenerate_trip_itinerary(trip_id):
                 "province_name": province_name,
                 "itinerary": itinerary_draft,
                 "duration": trip.duration,
-                "metadata": old_metadata
+                "metadata": new_metadata
             }
         }), 200
 
@@ -1956,8 +1975,10 @@ def regenerate_trip_itinerary(trip_id):
         db.session.rollback()
         import traceback
         traceback.print_exc()
-        return jsonify({"message": f"An error occurred during itinerary regeneration: {str(e)}"}), 500
-    
+        return jsonify({
+            "message": f"An error occurred during itinerary regeneration: {str(e)}"
+        }), 500
+
 # API: MỞ RỘNG CHUYẾN ĐI (THÊM 1 NGÀY VÀO LỊCH TRÌNH)
 @app.route("/api/trips/<int:trip_id>/extend", methods=["POST"])
 @jwt_required()
