@@ -611,7 +611,7 @@ pip install pytest pytest-cov
 pytest -v --cov=backend --cov-report=term-missing --cov-report=html tests/backend
 
 # View HTML coverage report
-# Open htmlcov/index.html in browser
+start ..\htmlcov\index.html
 ```
 
 ### Frontend Tests
@@ -624,6 +624,9 @@ npm test -- --coverage --watchAll=false
 
 # Run tests in watch mode
 npm test
+
+# View HTML coverage report
+start .\coverage\lcov-report\index.html
 ```
 
 ### Test Coverage
