@@ -30,7 +30,6 @@ import API from "./untils/axios";
 import ChatWidget from "./components/ChatWidget/ChatWidget";
 import Footer from "./components/Footer/Footer";
 import { PageContext } from "./context/PageContext";
-import HowItWorksPanel from "./components/HowItWorks/HowItWorksPanel";
 import "./App.css";
 import { GOOGLE_CLIENT_ID } from './config';
 
@@ -176,7 +175,6 @@ function AppContent() {
   return (
     <PageContext.Provider value={{ pageContext, setPageContext }}>
       {!hideNavbar && <Navbar />}
-      {!hideNavbar && <HowItWorksPanel />}
       <div className={`page-wrapper ${!hideNavbar ? "with-navbar" : ""}`}>
         <Routes>
           {/* Public routes */}

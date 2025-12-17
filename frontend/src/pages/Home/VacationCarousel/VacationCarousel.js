@@ -3,21 +3,21 @@ import { useNavigate } from "react-router-dom";
 import "./VacationCarousel.css";
 
 // Import ảnh
-import adventureImg from "./adventure.png";
-import coupleImg from "./couple.png";
-import elderImg from "./elder.png";
-import familyImg from "./family.png";
-import friendsImg from "./friends.png";
-import kidsImg from "./kids.png";
-import petImg from "./pet.png";
-import soloImg from "./solo.png";
+import adventureImg from "../assets/adventure.png";
+import coupleImg from "../assets/couple.png";
+import elderImg from "../assets/elder.png";
+import familyImg from "../assets/family.png";
+import friendsImg from "../assets/friends.png";
+import kidsImg from "../assets/kids.png";
+import petImg from "../assets/pet.png";
+import soloImg from "../assets/solo.png";
 
 const vacationData = [
-  { id: 0, image: familyImg, tag: "Family", label: "Family Journey" },
+  { id: 0, image: familyImg, tag: "Family", label: "Family Getaways" },
   { id: 1, image: coupleImg, tag: "Couples", label: "Love Vacation 💕" },
   { id: 2, image: friendsImg, tag: "Friends", label: "Squad Adventure" },
-  { id: 3, image: soloImg, tag: "Solo Traveler", label: "Solo Traveler" },
-  { id: 4, image: kidsImg, tag: "Kids Friendly", label: "Kids Trip" },
+  { id: 3, image: soloImg, tag: "Solo Traveler", label: "Journey of One" },
+  { id: 4, image: kidsImg, tag: "Kids Friendly", label: "✨ Kids Trip 🎈" },
   { id: 5, image: elderImg, tag: "Elderly Friendly", label: "Senior Travel" },
   { id: 6, image: petImg, tag: "Pet Friendly", label: "Paw Holiday 🐾" },
   { id: 7, image: adventureImg, tag: "Adventure Seekers", label: "Risk Taker ⚡" },
@@ -125,7 +125,7 @@ export default function VacationCarousel() {
     <section className="vacation-carousel-section">
       <div className="vacation-header">
         <h2 className="vacation-title">Find Your Perfect Escape</h2>
-        <p className="vacation-subtitle">Destinations designed for everyone you love – Kids, Seniors, and Pets</p>
+        <p className="vacation-subtitle">Destinations designed for everyone you love – Your Friends, Your Family, and Your Pets</p>
       </div>
 
       <div className={`carousel-track ${isTransitioning ? "no-hover" : ""}`}>

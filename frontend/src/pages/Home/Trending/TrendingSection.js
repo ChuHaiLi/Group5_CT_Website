@@ -3,11 +3,11 @@ import { useNavigate } from "react-router-dom";
 import "./TrendingSection.css";
 
 // Import ảnh
-import beachImg from "./beach.png";
-import natureParkImg from "./naturepark.png";
-import gastronomyImg from "./gastronomy.png";
-import culturalSiteImg from "./culturalsite.png";
-import mountainImg from "./mountain.png";
+import beachImg from "../assets/beach.png";
+import natureParkImg from "../assets/naturepark.png";
+import gastronomyImg from "../assets/gastronomy.png";
+import culturalSiteImg from "../assets/culturalsite.png";
+import mountainImg from "../assets/mountain.png";
 
 export default function TrendingSection() {
   const navigate = useNavigate();
