@@ -162,7 +162,7 @@ Manually planning travel itineraries is time-consuming, often inefficient, and r
 ┌─────────────────────────────────────────────────────────────┐
 │                        Frontend (React)                     │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐     │
-│  │   Home   │  │ Explore │  │ My Trips  │  │  Profile │     │
+│  │   Home   │  │ Explore  │  │ My Trips │  │  Profile │     │
 │  └──────────┘  └──────────┘  └──────────┘  └──────────┘     │
 │                                                             │
 │  ┌──────────────────────────────────────────────────────┐   │
