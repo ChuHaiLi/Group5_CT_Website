@@ -106,3 +106,54 @@
   margin: 0 8px;
   color: rgba(255, 255, 255, 0.4);
 }
+
+.footer-contact .address-with-map {
+  flex-direction: column;
+  gap: 8px;
+}
+
+.address-text {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.view-map-btn {
+  background: rgba(115, 181, 255, 0.1);
+  border: 1px solid rgba(115, 181, 255, 0.3);
+  color: #73b5ff;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+  margin-left: 26px;
+  font-family: inherit;
+}
+
+.view-map-btn:hover {
+  background: rgba(115, 181, 255, 0.2);
+  border-color: #73b5ff;
+}
+
+.map-container {
+  margin-left: 26px;
+  margin-top: 12px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.map-container iframe {
+  width: 100%;
+  height: 300px;
+  border: none;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .map-container iframe {
+    height: 250px;
+  }
+}
