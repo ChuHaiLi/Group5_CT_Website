@@ -288,11 +288,15 @@ const isServiceLocation = (dest) => {
 // ========================================
 // 🚀 MAIN COMPONENT: EXPLORE PAGE
 // ========================================
-export default function ExplorePage({ savedIds = new Set(), handleToggleSave, isAuthenticated }) {
+export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) {
   // State Data
   const [regularDestinations, setRegularDestinations] = useState([]); 
   const [popularDestinations, setPopularDestinations] = useState([]); 
   
+   const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return !!localStorage.getItem("access_token");
+  });
+
   // State Filter
   const [search, setSearch] = useState("");
   const [selectedTags, setSelectedTags] = useState([]);
@@ -346,6 +350,46 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave, is
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [openCategory]);
+
+  useEffect(() => {
+  const checkAuth = () => {
+    const token = localStorage.getItem("access_token");
+    const isAuth = !!token;
+    
+    // Cập nhật state nếu có thay đổi
+    setIsAuthenticated(isAuth);
+    
+    // KHÔNG tự động hiển thị modal ở đây
+    // Modal chỉ hiện khi user click Create Trip
+  };
+
+  // Check immediately on mount
+  checkAuth();
+
+  // Listen for storage changes (từ các tabs khác)
+  const handleStorageChange = (e) => {
+    if (e.key === 'access_token' || e.key === null) {
+      checkAuth();
+    }
+  };
+  window.addEventListener('storage', handleStorageChange);
+  
+  // Listen for focus events (khi user quay lại tab)
+  window.addEventListener('focus', checkAuth);
+  
+  // Custom event cho logout trong cùng tab
+  window.addEventListener('authChange', checkAuth);
+  
+  // Polling backup (check mỗi 1 giây)
+  const interval = setInterval(checkAuth, 1000);
+
+  return () => {
+    window.removeEventListener('storage', handleStorageChange);
+    window.removeEventListener('focus', checkAuth);
+    window.removeEventListener('authChange', checkAuth);
+    clearInterval(interval);
+  };
+}, []);
 
   // Xử lý preSelectedTags từ navigation và URL params
   useEffect(() => {
