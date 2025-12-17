@@ -30,13 +30,16 @@
 **WonderAI** is a comprehensive travel planning platform designed specifically for exploring Vietnam. The application leverages artificial intelligence to generate personalized, optimized itineraries based on user preferences, duration, and destination images. It solves the time-consuming problem of manually planning trips by providing intelligent route optimization, geographic clustering, and real-time AI assistance.
 
 ### Target Users
+
 - Travelers planning trips to Vietnam
 - Students and backpackers seeking budget-friendly itineraries
 - Tourists looking for personalized travel experiences
 - Travel enthusiasts who want AI-powered recommendations
 
 ### Main Problem It Solves
+
 Manually planning travel itineraries is time-consuming, often inefficient, and requires extensive research. WonderAI automates this process by:
+
 - Generating day-by-day itineraries optimized for geographic proximity
 - Recognizing destinations from uploaded images
 - Providing real-time AI chat assistance
@@ -47,30 +50,35 @@ Manually planning travel itineraries is time-consuming, often inefficient, and r
 ## ✨ Features
 
 ### 🤖 AI-Powered Itinerary Generation
+
 - **Smart Route Optimization**: Automatically groups nearby destinations to minimize travel time using Haversine distance calculations
 - **Time Management**: Realistic scheduling with automatic meal breaks, rest periods, and travel time allocation
 - **Geographic Clustering**: Places within 5km are grouped together for efficient day planning
 - **Duration-Based Planning**: Generates itineraries based on trip duration (1-30+ days)
 
 ### 🖼️ Image-Based Destination Recognition
+
 - Upload photos of places you want to visit
 - AI recognizes destinations using Google Gemini Vision API
 - Automatically adds recognized locations to your itinerary
 - Seamless integration with the planning workflow
 
 ### 💬 AI Travel Assistant (WonderAI BOT)
+
 - 24/7 conversational AI assistant for travel advice
 - Context-aware recommendations based on your trip plans
 - Multi-turn conversations with session management
 - Image attachments support for visual queries
 
 ### 🗺️ Intelligent Destination Search
+
 - Search by name, province, or region
 - Filter by tags (beach, mountain, cultural, etc.)
 - Unaccented search support for Vietnamese text
 - Hierarchical location browsing (Region → Province → Destination)
 
 ### 📅 Trip Management
+
 - Create, edit, and delete trips
 - Extend trips by adding new days
 - Regenerate itineraries with different preferences
@@ -78,6 +86,7 @@ Manually planning travel itineraries is time-consuming, often inefficient, and r
 - Save and manage multiple trips
 
 ### ⭐ Destination Features
+
 - Comprehensive destination database with 1000+ locations across Vietnam
 - Ratings, reviews, and detailed descriptions
 - Multiple images per destination
@@ -86,6 +95,7 @@ Manually planning travel itineraries is time-consuming, often inefficient, and r
 - Weather information by region
 
 ### 🔐 User Authentication & Profile
+
 - Email/password authentication with JWT tokens
 - Google OAuth integration
 - Email verification system
@@ -94,6 +104,7 @@ Manually planning travel itineraries is time-consuming, often inefficient, and r
 - Saved destinations collection
 
 ### 🎨 Modern User Interface
+
 - Responsive React-based frontend
 - Drag-and-drop itinerary editing
 - Interactive maps integration
@@ -105,6 +116,7 @@ Manually planning travel itineraries is time-consuming, often inefficient, and r
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **React 19.2.0** - Modern UI library with hooks and context API
 - **React Router DOM 7.10.1** - Client-side routing
 - **Axios 1.13.2** - HTTP client for API communication
@@ -115,6 +127,7 @@ Manually planning travel itineraries is time-consuming, often inefficient, and r
 - **Recharts** - Data visualization for trip analytics
 
 ### Backend
+
 - **Flask 3.0.0** - Lightweight Python web framework
 - **Flask-SQLAlchemy** - ORM for database operations
 - **Flask-JWT-Extended** - Secure token-based authentication
@@ -123,16 +136,19 @@ Manually planning travel itineraries is time-consuming, often inefficient, and r
 - **SQLAlchemy** - SQL toolkit and ORM
 
 ### Database
+
 - **SQLite** - Lightweight relational database (development)
 - **Flask-Migrate** - Database schema versioning
 
 ### AI & External Services
+
 - **OpenAI API** - GPT models for itinerary generation and chat assistance
 - **Google Gemini Vision API** - Image recognition and analysis
 - **Gmail SMTP** - Email verification and notifications
 - **Google OAuth 2.0** - Social authentication
 
 ### Development Tools
+
 - **Python 3.8+** - Backend runtime
 - **Node.js & npm** - Frontend package management
 - **pytest** - Backend testing framework
@@ -144,40 +160,40 @@ Manually planning travel itineraries is time-consuming, often inefficient, and r
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                        Frontend (React)                      │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐    │
-│  │   Home   │  │ Explore │  │ My Trips │  │  Profile │    │
-│  └──────────┘  └──────────┘  └──────────┘  └──────────┘    │
-│                                                              │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │         Chat Widget (WonderAI BOT)                    │  │
-│  └──────────────────────────────────────────────────────┘  │
-└──────────────────────┬─────────────────────────────────────┘
+│                        Frontend (React)                     │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐     │
+│  │   Home   │  │ Explore │  │ My Trips  │  │  Profile │     │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘     │
+│                                                             │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │         Chat Widget (WonderAI BOT)                   │   │
+│  └──────────────────────────────────────────────────────┘   │
+└───────────────────────┬─────────────────────────────────────┘
                         │ HTTP/REST API
                         │ (JWT Authentication)
 ┌───────────────────────┴─────────────────────────────────────┐
-│                    Backend (Flask API)                       │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐    │
-│  │   Auth API    │  │  Chat API    │  │ Itinerary API │    │
-│  └──────────────┘  └──────────────┘  └──────────────┘    │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐    │
-│  │  Search API  │  │  Profile API │  │  Saved API   │    │
-│  └──────────────┘  └──────────────┘  └──────────────┘    │
-│                                                              │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │         AI Services Layer                             │  │
-│  │  • OpenAI Client (Itinerary Generation)             │  │
-│  │  • Gemini Vision (Image Recognition)                 │  │
-│  │  • Rate Limiting & Error Handling                    │  │
-│  └──────────────────────────────────────────────────────┘  │
-└──────────────────────┬─────────────────────────────────────┘
+│                    Backend (Flask API)                      │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐       │
+│  │   Auth API   │  │  Chat API    │  │ Itinerary API│       │
+│  └──────────────┘  └──────────────┘  └──────────────┘       │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐       │
+│  │  Search API  │  │  Profile API │  │  Saved API   │       │
+│  └──────────────┘  └──────────────┘  └──────────────┘       │
+│                                                             │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │         AI Services Layer                            │   │
+│  │  • OpenAI Client (Itinerary Generation)              │   │
+│  │  • Gemini Vision (Image Recognition)                 │   │
+│  │  • Rate Limiting & Error Handling                    │   │
+│  └──────────────────────────────────────────────────────┘   │
+└───────────────────────┬─────────────────────────────────────┘
                         │
 ┌───────────────────────┴─────────────────────────────────────┐
-│                    Database (SQLite)                          │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐    │
-│  │  Users   │  │Trips/    │  │Destinations│ │  Chat   │    │
-│  │          │  │Itineraries│ │          │ │ Sessions │    │
-│  └──────────┘  └──────────┘  └──────────┘  └──────────┘    │
+│                    Database (SQLite)                        │
+│  ┌─────────┐  ┌───────────┐  ┌────────────┐  ┌──────────┐   │
+│  │  Users  │  │Trips/     │  │Destinations│  │  Chat    │   │
+│  │         │  │Itineraries│  │            │  │ Sessions │   │
+│  └─────────┘  └───────────┘  └────────────┘  └──────────┘   │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -216,6 +232,7 @@ Manually planning travel itineraries is time-consuming, often inefficient, and r
 **The fastest way to get started!** Use the automated setup script:
 
 #### Option 1: Double-click (Easiest)
+
 1. Navigate to the project root folder
 2. Double-click `StartApp.bat`
 3. Wait for the setup to complete (~2-5 minutes on first run)
@@ -226,6 +243,7 @@ Manually planning travel itineraries is time-consuming, often inefficient, and r
 6. Your browser will open to `http://localhost:3000`
 
 #### Option 2: Command Line
+
 ```bash
 # Navigate to project root
 cd Group5_CT_Website
@@ -239,16 +257,19 @@ StartApp.bat
 The script automates the entire setup process:
 
 1. **Backend Setup** (`[1/4]`)
+
    - Creates Python virtual environment (if not exists)
    - Activates virtual environment
    - Installs all Python dependencies from `requirements.txt`
    - Seeds database with Vietnam location data (provinces, destinations)
 
 2. **Frontend Setup** (`[2/4]`)
+
    - Installs all Node.js dependencies via `npm install`
    - Sets up React development environment
 
 3. **Start Servers** (`[3/4]`)
+
    - Launches backend server in a new terminal window
    - Waits 3 seconds for backend to initialize
    - Launches frontend server in a new terminal window
@@ -258,6 +279,7 @@ The script automates the entire setup process:
    - Automatically opens `http://localhost:3000` in your default browser
 
 #### Notes:
+
 - ✅ **First Run**: Takes longer as it installs all dependencies
 - ✅ **Subsequent Runs**: Faster as dependencies are already installed
 - ✅ **Auto-Close**: The setup window closes after 10 seconds (servers keep running)
@@ -267,6 +289,7 @@ The script automates the entire setup process:
 #### Troubleshooting:
 
 If the script fails:
+
 - Ensure Python and Node.js are installed and in your PATH
 - Check that ports 3000 and 5000 are not in use
 - Review error messages in the terminal window
@@ -332,19 +355,23 @@ npm install --legacy-peer-deps
 #### 4. Run the Application
 
 **Terminal 1 - Backend:**
+
 ```bash
 cd backend
 venv\Scripts\activate  # Windows
 # or: source venv/bin/activate  # macOS/Linux
 python app.py
 ```
+
 Backend runs at: `http://localhost:5000`
 
 **Terminal 2 - Frontend:**
+
 ```bash
 cd frontend
 npm start
 ```
+
 Frontend runs at: `http://localhost:3000`
 
 The React app will automatically proxy API requests to the Flask backend.
@@ -352,18 +379,21 @@ The React app will automatically proxy API requests to the Flask backend.
 #### 5. Stop the Application
 
 To stop the servers:
+
 - **Windows**: Close the two terminal windows (BACKEND Server and FRONTEND Server)
 - **macOS/Linux**: Press `Ctrl+C` in each terminal window
 
 #### 6. Restart the Application
 
 **Using StartApp.bat (Windows):**
+
 ```bash
 # Simply run the script again
 StartApp.bat
 ```
 
 **Manual Restart:**
+
 1. Stop both servers (see step 5)
 2. Follow steps in section 4 above to start them again
 
@@ -423,73 +453,73 @@ GOOGLE_CLIENT_ID=your-google-oauth-client-id
 
 ### Authentication Endpoints
 
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|----------------|
-| POST | `/api/auth/register` | Register new user | No |
-| POST | `/api/auth/login` | User login | No |
-| POST | `/api/auth/logout` | User logout | Yes |
-| POST | `/api/auth/refresh` | Refresh JWT token | Yes |
-| POST | `/api/auth/forgot-password` | Request password reset | No |
-| POST | `/api/auth/reset-password` | Reset password with token | No |
-| POST | `/api/auth/verify-email` | Verify email address | No |
-| POST | `/api/auth/google` | Google OAuth login | No |
+| Method | Endpoint                    | Description               | Auth Required |
+| ------ | --------------------------- | ------------------------- | ------------- |
+| POST   | `/api/auth/register`        | Register new user         | No            |
+| POST   | `/api/auth/login`           | User login                | No            |
+| POST   | `/api/auth/logout`          | User logout               | Yes           |
+| POST   | `/api/auth/refresh`         | Refresh JWT token         | Yes           |
+| POST   | `/api/auth/forgot-password` | Request password reset    | No            |
+| POST   | `/api/auth/reset-password`  | Reset password with token | No            |
+| POST   | `/api/auth/verify-email`    | Verify email address      | No            |
+| POST   | `/api/auth/google`          | Google OAuth login        | No            |
 
 ### Trip Management Endpoints
 
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|----------------|
-| POST | `/api/trips` | Create new trip | Yes |
-| GET | `/api/trips` | Get user's trips | Yes |
-| GET | `/api/trips/<id>` | Get trip details | Yes |
-| PUT | `/api/trips/<id>` | Update trip metadata | Yes |
-| PUT | `/api/trips/<id>/itinerary` | Update trip itinerary | Yes |
-| POST | `/api/trips/<id>/regenerate` | Regenerate itinerary | Yes |
-| POST | `/api/trips/<id>/extend` | Extend trip duration | Yes |
-| POST | `/api/trips/<id>/add-place` | Add place to trip | Yes |
-| DELETE | `/api/trips/<id>` | Delete trip | Yes |
+| Method | Endpoint                     | Description           | Auth Required |
+| ------ | ---------------------------- | --------------------- | ------------- |
+| POST   | `/api/trips`                 | Create new trip       | Yes           |
+| GET    | `/api/trips`                 | Get user's trips      | Yes           |
+| GET    | `/api/trips/<id>`            | Get trip details      | Yes           |
+| PUT    | `/api/trips/<id>`            | Update trip metadata  | Yes           |
+| PUT    | `/api/trips/<id>/itinerary`  | Update trip itinerary | Yes           |
+| POST   | `/api/trips/<id>/regenerate` | Regenerate itinerary  | Yes           |
+| POST   | `/api/trips/<id>/extend`     | Extend trip duration  | Yes           |
+| POST   | `/api/trips/<id>/add-place`  | Add place to trip     | Yes           |
+| DELETE | `/api/trips/<id>`            | Delete trip           | Yes           |
 
 ### Destination Endpoints
 
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|----------------|
-| GET | `/api/destinations` | Search destinations | No |
-| GET | `/api/destinations/<id>` | Get destination details | Yes |
-| GET | `/api/destinations/by-province/<id>` | Get destinations by province | Yes |
-| GET | `/api/locations/vietnam` | Get hierarchical locations | No |
+| Method | Endpoint                             | Description                  | Auth Required |
+| ------ | ------------------------------------ | ---------------------------- | ------------- |
+| GET    | `/api/destinations`                  | Search destinations          | No            |
+| GET    | `/api/destinations/<id>`             | Get destination details      | Yes           |
+| GET    | `/api/destinations/by-province/<id>` | Get destinations by province | Yes           |
+| GET    | `/api/locations/vietnam`             | Get hierarchical locations   | No            |
 
 ### AI Endpoints
 
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|----------------|
-| POST | `/api/ai/evaluate_itinerary` | Evaluate itinerary quality | No |
-| POST | `/api/ai/reorder_itinerary` | Optimize itinerary order | No |
-| POST | `/api/chat/sessions` | Create chat session | Yes |
-| POST | `/api/chat/sessions/<id>/messages` | Send chat message | Yes |
-| GET | `/api/chat/sessions` | Get user's chat sessions | Yes |
+| Method | Endpoint                           | Description                | Auth Required |
+| ------ | ---------------------------------- | -------------------------- | ------------- |
+| POST   | `/api/ai/evaluate_itinerary`       | Evaluate itinerary quality | No            |
+| POST   | `/api/ai/reorder_itinerary`        | Optimize itinerary order   | No            |
+| POST   | `/api/chat/sessions`               | Create chat session        | Yes           |
+| POST   | `/api/chat/sessions/<id>/messages` | Send chat message          | Yes           |
+| GET    | `/api/chat/sessions`               | Get user's chat sessions   | Yes           |
 
 ### Search Endpoints
 
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|----------------|
-| POST | `/api/search/image-recognition` | Recognize destination from image | Yes |
-| GET | `/api/search` | Search destinations with filters | No |
+| Method | Endpoint                        | Description                      | Auth Required |
+| ------ | ------------------------------- | -------------------------------- | ------------- |
+| POST   | `/api/search/image-recognition` | Recognize destination from image | Yes           |
+| GET    | `/api/search`                   | Search destinations with filters | No            |
 
 ### Profile Endpoints
 
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|----------------|
-| GET | `/api/profile` | Get user profile | Yes |
-| PUT | `/api/profile` | Update user profile | Yes |
-| POST | `/api/profile/change-email` | Request email change | Yes |
-| POST | `/api/profile/change-password` | Change password | Yes |
+| Method | Endpoint                       | Description          | Auth Required |
+| ------ | ------------------------------ | -------------------- | ------------- |
+| GET    | `/api/profile`                 | Get user profile     | Yes           |
+| PUT    | `/api/profile`                 | Update user profile  | Yes           |
+| POST   | `/api/profile/change-email`    | Request email change | Yes           |
+| POST   | `/api/profile/change-password` | Change password      | Yes           |
 
 ### Saved Destinations Endpoints
 
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|----------------|
-| GET | `/api/saved` | Get saved destinations | Yes |
-| POST | `/api/saved` | Save destination | Yes |
-| DELETE | `/api/saved/<id>` | Unsave destination | Yes |
+| Method | Endpoint          | Description            | Auth Required |
+| ------ | ----------------- | ---------------------- | ------------- |
+| GET    | `/api/saved`      | Get saved destinations | Yes           |
+| POST   | `/api/saved`      | Save destination       | Yes           |
+| DELETE | `/api/saved/<id>` | Unsave destination     | Yes           |
 
 ---
 
@@ -607,6 +637,7 @@ npm test
 ## 🔮 Future Improvements
 
 ### Short-term Enhancements
+
 - [ ] **Real-time Collaboration**: Share trips with friends and collaborate in real-time
 - [ ] **Mobile App**: React Native mobile application for iOS and Android
 - [ ] [ ] **Offline Mode**: Cache itineraries and destinations for offline access
@@ -614,6 +645,7 @@ npm test
 - [ ] **Multi-language Support**: Support for English, Vietnamese, and other languages
 
 ### Medium-term Features
+
 - [ ] **Advanced Route Optimization**: Integration with Google Maps API for real-time traffic
 - [ ] **Budget Tracking**: Track expenses and compare against budget estimates
 - [ ] **Social Features**: Share trips publicly, follow other travelers, discover popular routes
@@ -621,6 +653,7 @@ npm test
 - [ ] **Hotel Integration**: Book hotels directly through the platform
 
 ### Long-term Vision
+
 - [ ] **Machine Learning**: Personalized recommendations based on user travel history
 - [ ] **AR Features**: Augmented reality destination previews
 - [ ] **Blockchain Integration**: Decentralized trip verification and reviews
@@ -628,6 +661,7 @@ npm test
 - [ ] **Enterprise Features**: Travel agency dashboard and bulk trip management
 
 ### Technical Improvements
+
 - [ ] **Database Migration**: Upgrade from SQLite to PostgreSQL for production
 - [ ] **Caching Layer**: Redis integration for improved performance
 - [ ] **Microservices Architecture**: Split backend into specialized services
@@ -665,6 +699,7 @@ This project is part of an academic course project. All rights reserved.
 ## 📞 Support
 
 For issues, questions, or contributions, please contact:
+
 - **Email**: hellowonderai@gmail.com
 - **GitHub Issues**: [Create an issue](https://github.com/your-repo/issues)
 
