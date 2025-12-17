@@ -383,20 +383,6 @@ To stop the servers:
 - **Windows**: Close the two terminal windows (BACKEND Server and FRONTEND Server)
 - **macOS/Linux**: Press `Ctrl+C` in each terminal window
 
-#### 6. Restart the Application
-
-**Using StartApp.bat (Windows):**
-
-```bash
-# Simply run the script again
-StartApp.bat
-```
-
-**Manual Restart:**
-
-1. Stop both servers (see step 5)
-2. Follow steps in section 4 above to start them again
-
 ---
 
 ## 🔐 Environment Variables
