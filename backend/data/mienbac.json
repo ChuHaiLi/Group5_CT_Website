@@ -1435,7 +1435,7 @@
               "lng": 105.846991904887
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "180000",
             "rating": null,
             "tags": [
               "Breakfast",
@@ -1464,7 +1464,7 @@
               "lng": 105.853381769233
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "200000",
             "rating": null,
             "tags": [
               "Affordable",
@@ -1493,7 +1493,7 @@
               "lng": 105.857109172862
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "230000",
             "rating": null,
             "tags": [
               "Dinner",
@@ -1522,7 +1522,7 @@
               "lng": 105.856888176165
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "360000",
             "rating": null,
             "tags": [
               "Breakfast",
@@ -1551,7 +1551,7 @@
               "lng": 105.854999885732
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "370000",
             "rating": null,
             "tags": [
               "Breakfast",
@@ -1580,7 +1580,7 @@
               "lng": 105.848975297611
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "490000",
             "rating": null,
             "tags": [
               "Cozy",
@@ -1609,7 +1609,7 @@
               "lng": 105.851807706573
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "180000",
             "rating": null,
             "tags": [
               "Affordable",
@@ -1638,7 +1638,7 @@
               "lng": 105.852922443422
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "180000",
             "rating": null,
             "tags": [
               "Asian",
@@ -1667,7 +1667,7 @@
               "lng": 105.843547679608
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "300000",
             "rating": null,
             "tags": [
               "Affordable",
@@ -1696,7 +1696,7 @@
               "lng": 105.847653256859
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "360000",
             "rating": null,
             "tags": [
               "Breakfast",
@@ -1725,7 +1725,7 @@
               "lng": 105.848387626167
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "370000",
             "rating": 4,
             "tags": [
               "24-hour Front Desk",
@@ -1756,7 +1756,7 @@
               "lng": 105.850266233066
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "1410000",
             "rating": 4,
             "tags": [
               "24-hour Front Desk",
@@ -1787,7 +1787,7 @@
               "lng": 105.785674479612
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "840000",
             "rating": 3,
             "tags": [
               "24-hour Front Desk",
@@ -1817,7 +1817,7 @@
               "lng": 105.847220133066
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "1300000",
             "rating": 5,
             "tags": [
               "24-hour Front Desk",
@@ -1848,7 +1848,7 @@
               "lng": 105.846626334095
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "740000",
             "rating": 3,
             "tags": [
               "24-hour Front Desk",
@@ -1878,7 +1878,7 @@
               "lng": 105.84780967165
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "1490000",
             "rating": 3,
             "tags": [
               "24-hour Front Desk",
@@ -1908,7 +1908,7 @@
               "lng": 105.852687833072
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "860000",
             "rating": 4,
             "tags": [
               "24-hour Front Desk",
@@ -1939,7 +1939,7 @@
               "lng": 106.679189014187
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "710000",
             "rating": 3,
             "tags": [
               "24-hour Front Desk",
@@ -1969,7 +1969,7 @@
               "lng": 105.841711448919
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "460000",
             "rating": 4,
             "tags": [
               "24-hour Front Desk",
@@ -2000,7 +2000,7 @@
               "lng": 105.847945825135
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "760000",
             "rating": 4,
             "tags": [
               "24-hour Front Desk",
@@ -3029,7 +3029,7 @@
               "lng": 103.896375081752
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "1430000",
             "rating": 3,
             "tags": [
               "24-hour Front Desk",
@@ -3059,7 +3059,7 @@
               "lng": 103.880635866935
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "1220000",
             "rating": 5,
             "tags": [
               "24-hour Front Desk",
@@ -3090,7 +3090,7 @@
               "lng": 103.839336117867
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "1330000",
             "rating": 3,
             "tags": [
               "24-hour Front Desk",
@@ -3120,7 +3120,7 @@
               "lng": 103.834495497655
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "1490000",
             "rating": 4,
             "tags": [
               "24-hour Front Desk",
@@ -3151,7 +3151,7 @@
               "lng": 103.840341282827
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "330000",
             "rating": 3,
             "tags": [
               "24-hour Front Desk",
@@ -3181,7 +3181,7 @@
               "lng": 103.843963612495
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "1330000",
             "rating": 3,
             "tags": [
               "24-hour Front Desk",
@@ -3211,7 +3211,7 @@
               "lng": 103.835182143176
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "1450000",
             "rating": 4,
             "tags": [
               "24-hour Front Desk",
@@ -3242,7 +3242,7 @@
               "lng": 103.840684605587
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "1130000",
             "rating": 4,
             "tags": [
               "24-hour Front Desk",
@@ -3273,7 +3273,7 @@
               "lng": 103.84173671249
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "560000",
             "rating": 3,
             "tags": [
               "24-hour Front Desk",
@@ -3303,7 +3303,7 @@
               "lng": 103.840904151107
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "560000",
             "rating": 5,
             "tags": [
               "24-hour Front Desk",
@@ -3868,7 +3868,7 @@
               "lng": 105.976409722248
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "940000",
             "rating": 5,
             "tags": [
               "24-hour Front Desk",
@@ -3899,7 +3899,7 @@
               "lng": 105.977896487578
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "860000",
             "rating": 3,
             "tags": [
               "24-hour Front Desk",
@@ -3929,7 +3929,7 @@
               "lng": 105.969754677439
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "1310000",
             "rating": 4,
             "tags": [
               "24-hour Front Desk",
@@ -3960,7 +3960,7 @@
               "lng": 105.974002578381
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "870000",
             "rating": 3,
             "tags": [
               "24-hour Front Desk",
@@ -3990,7 +3990,7 @@
               "lng": 105.94868681617
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "250000",
             "rating": 4,
             "tags": [
               "24-hour Front Desk",
@@ -4021,7 +4021,7 @@
               "lng": 105.944351390254
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "1020000",
             "rating": 5,
             "tags": [
               "24-hour Front Desk",
@@ -4052,7 +4052,7 @@
               "lng": 105.952937233875
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "420000",
             "rating": 5,
             "tags": [
               "24-hour Front Desk",
@@ -4083,7 +4083,7 @@
               "lng": 105.814109499915
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "630000",
             "rating": 5,
             "tags": [
               "24-hour Front Desk",
@@ -4114,7 +4114,7 @@
               "lng": 105.856515443432
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "810000",
             "rating": 5,
             "tags": [
               "24-hour Front Desk",
@@ -4145,7 +4145,7 @@
               "lng": 105.853511689052
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "1130000",
             "rating": 3,
             "tags": [
               "24-hour Front Desk",
@@ -4175,7 +4175,7 @@
               "lng": 105.892783913238
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "880000",
             "rating": 4,
             "tags": [
               "24-hour Front Desk",
@@ -4896,7 +4896,7 @@
               "lng": 105.360999276247
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "490000",
             "rating": null,
             "tags": [
               "Affordable",
@@ -4925,7 +4925,7 @@
               "lng": 105.361128784498
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "90000",
             "rating": null,
             "tags": [
               "Affordable",
@@ -4954,7 +4954,7 @@
               "lng": 105.358699770301
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "250000",
             "rating": null,
             "tags": [
               "Foodies",
@@ -4983,7 +4983,7 @@
               "lng": 105.14405773419
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "80000",
             "rating": null,
             "tags": [
               "European",
@@ -5012,7 +5012,7 @@
               "lng": 104.982858857179
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "420000",
             "rating": null,
             "tags": [
               "Foodies",
@@ -5041,7 +5041,7 @@
               "lng": 105.36054
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "710000",
             "rating": 3,
             "tags": [
               "24-hour Front Desk",
@@ -5071,7 +5071,7 @@
               "lng": 105.36012
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "1050000",
             "rating": 4,
             "tags": [
               "24-hour Front Desk",
@@ -5102,7 +5102,7 @@
               "lng": 105.36121
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "1160000",
             "rating": 4,
             "tags": [
               "24-hour Front Desk",
@@ -5133,7 +5133,7 @@
               "lng": 105.30289
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "560000",
             "rating": 4,
             "tags": [
               "24-hour Front Desk",
@@ -5164,7 +5164,7 @@
               "lng": 105.345474
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "940000",
             "rating": 4,
             "tags": [
               "24-hour Front Desk",
@@ -5195,7 +5195,7 @@
               "lng": 105.35944
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "1260000",
             "rating": 4,
             "tags": [
               "24-hour Front Desk",
@@ -5226,7 +5226,7 @@
               "lng": 105.303986
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "1160000",
             "rating": 5,
             "tags": [
               "24-hour Front Desk",
@@ -7178,7 +7178,7 @@
               "lng": 106.256557370996
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "240000",
             "rating": null,
             "tags": [
               "Asian",
@@ -7207,7 +7207,7 @@
               "lng": 106.253553281767
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "370000",
             "rating": null,
             "tags": [
               "Cozy",
@@ -7236,7 +7236,7 @@
               "lng": 106.260333891213
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "410000",
             "rating": null,
             "tags": [
               "Breakfast",
@@ -7265,7 +7265,7 @@
               "lng": 106.257072309914
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "260000",
             "rating": null,
             "tags": [
               "Affordable",
@@ -7294,7 +7294,7 @@
               "lng": 106.253861259618
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "440000",
             "rating": null,
             "tags": [
               "Affordable",
@@ -7747,7 +7747,7 @@
               "lng": 106.690270002434
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "440000",
             "rating": null,
             "tags": [
               "Asian",
@@ -7776,7 +7776,7 @@
               "lng": 106.692513230474
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "130000",
             "rating": null,
             "tags": [
               "Affordable",
@@ -7805,7 +7805,7 @@
               "lng": 106.693280498674
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "410000",
             "rating": null,
             "tags": [
               "Foodies",
@@ -7834,7 +7834,7 @@
               "lng": 106.684499735202
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "50000",
             "rating": null,
             "tags": [
               "Dinner",
@@ -7863,7 +7863,7 @@
               "lng": 106.687524266033
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "370000",
             "rating": null,
             "tags": [
               "Affordable",
@@ -7892,7 +7892,7 @@
               "lng": 106.683056394287
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "250000",
             "rating": null,
             "tags": [
               "Affordable",
@@ -7921,7 +7921,7 @@
               "lng": 106.699477675897
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "150000",
             "rating": null,
             "tags": [
               "Affordable",
@@ -7950,7 +7950,7 @@
               "lng": 106.676501041831
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "440000",
             "rating": null,
             "tags": [
               "Family Friendly",
@@ -7979,7 +7979,7 @@
               "lng": 106.635081189652
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "120000",
             "rating": null,
             "tags": [
               "European",
@@ -8008,7 +8008,7 @@
               "lng": 106.697646652821
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "170000",
             "rating": null,
             "tags": [
               "Foodies",
@@ -8337,7 +8337,7 @@
               "lng": 106.992888686624
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "480000",
             "rating": 4,
             "tags": [
               "24-hour Front Desk",
@@ -8367,7 +8367,7 @@
               "lng": 106.988766344306
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "600000",
             "rating": 5,
             "tags": [
               "24-hour Front Desk",
@@ -8398,7 +8398,7 @@
               "lng": 106.988817873227
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "520000",
             "rating": 3,
             "tags": [
               "24-hour Front Desk",
@@ -8428,7 +8428,7 @@
               "lng": 106.984645372807
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "400000",
             "rating": 5,
             "tags": [
               "24-hour Front Desk",
@@ -8459,7 +8459,7 @@
               "lng": 106.98555808159
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "310000",
             "rating": 5,
             "tags": [
               "24-hour Front Desk",
@@ -8490,7 +8490,7 @@
               "lng": 106.987884360285
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "620000",
             "rating": 3,
             "tags": [
               "24-hour Front Desk",
@@ -8520,7 +8520,7 @@
               "lng": 107.269306576207
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "760000",
             "rating": 4,
             "tags": [
               "24-hour Front Desk",
@@ -8551,7 +8551,7 @@
               "lng": 107.283849304564
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "920000",
             "rating": 4,
             "tags": [
               "24-hour Front Desk",
@@ -8582,7 +8582,7 @@
               "lng": 107.043388157716
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "1040000",
             "rating": 4,
             "tags": [
               "24-hour Front Desk",
@@ -8613,7 +8613,7 @@
               "lng": 107.027723364852
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "400000",
             "rating": 3,
             "tags": [
               "24-hour Front Desk",
@@ -9157,7 +9157,7 @@
               "lng": 106.757974962341
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "450000",
             "rating": null,
             "tags": [
               "Breakfast",
@@ -9186,7 +9186,7 @@
               "lng": 106.74891480891
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "250000",
             "rating": null,
             "tags": [
               "Foodies",
@@ -9215,7 +9215,7 @@
               "lng": 106.76664220094
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "500000",
             "rating": null,
             "tags": [
               "Asian",
@@ -9244,7 +9244,7 @@
               "lng": 106.767522293029
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "170000",
             "rating": null,
             "tags": [
               "Dinner",
@@ -9273,7 +9273,7 @@
               "lng": 106.763633385106
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "80000",
             "rating": null,
             "tags": [
               "Dinner",
@@ -9783,7 +9783,7 @@
               "lng": 106.003221004923
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "90000",
             "rating": null,
             "tags": [
               "Asian",
@@ -9812,7 +9812,7 @@
               "lng": 105.953647111562
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "110000",
             "rating": null,
             "tags": [
               "Asian",
@@ -9841,7 +9841,7 @@
               "lng": 106.104710118479
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "290000",
             "rating": null,
             "tags": [
               "Breakfast",
@@ -9870,7 +9870,7 @@
               "lng": 106.062292644783
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "190000",
             "rating": null,
             "tags": [
               "Affordable",
@@ -9899,7 +9899,7 @@
               "lng": 106.111076920684
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "140000",
             "rating": null,
             "tags": [
               "Asian",
@@ -10254,7 +10254,7 @@
               "lng": 105.837086437742
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "410000",
             "rating": null,
             "tags": [
               "Dinner",
@@ -10283,7 +10283,7 @@
               "lng": 105.850224109524
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "50000",
             "rating": null,
             "tags": [
               "Affordable",
@@ -10312,7 +10312,7 @@
               "lng": 105.868477543562
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "450000",
             "rating": null,
             "tags": [
               "Affordable",
@@ -10341,7 +10341,7 @@
               "lng": 105.834257151993
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "100000",
             "rating": null,
             "tags": [
               "Dinner",
@@ -13690,7 +13690,7 @@
               "lng": 106.149467662901
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "160000",
             "rating": null,
             "tags": [
               "Dinner",
@@ -13719,7 +13719,7 @@
               "lng": 105.991937181351
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "430000",
             "rating": null,
             "tags": [
               "European",
@@ -13748,7 +13748,7 @@
               "lng": 105.916344921319
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "420000",
             "rating": null,
             "tags": [
               "Breakfast",
@@ -14367,7 +14367,7 @@
               "lng": 106.196526341001
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "110000",
             "rating": null,
             "tags": [
               "Breakfast",
@@ -14396,7 +14396,7 @@
               "lng": 106.14851421032
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "370000",
             "rating": null,
             "tags": [
               "Affordable",
@@ -14425,7 +14425,7 @@
               "lng": 106.192615535074
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "430000",
             "rating": null,
             "tags": [
               "Family Friendly",
@@ -14454,7 +14454,7 @@
               "lng": 106.118125011362
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "410000",
             "rating": null,
             "tags": [
               "Breakfast",
@@ -14483,7 +14483,7 @@
               "lng": 106.007524928271
             },
             "opening_hours": null,
-            "entry_fee": null,
+            "entry_fee": "310000",
             "rating": null,
             "tags": [
               "Asian",
