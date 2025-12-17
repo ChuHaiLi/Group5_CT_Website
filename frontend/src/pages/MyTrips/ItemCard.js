@@ -169,7 +169,7 @@ const ItemCard = React.memo(({ item, index, onRemove, onUpdate, dayId }) => {
                                     className="view-link-btn"
                                     title="Xem thông tin chi tiết địa điểm"
                                 >
-                                    <FaInfoCircle /> Xem chi tiết
+                                    <FaInfoCircle /> View Details
                                 </button>
                             )}
                             <button
@@ -177,7 +177,7 @@ const ItemCard = React.memo(({ item, index, onRemove, onUpdate, dayId }) => {
                                 className="delete-btn"
                                 title="Xóa địa điểm khỏi lịch trình"
                             >
-                                <FaTrash /> Xóa địa điểm
+                                <FaTrash /> Delete location
                             </button>
                         </div>
                     </div>

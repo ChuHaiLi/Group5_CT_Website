@@ -106,21 +106,21 @@ const TripCard = ({ trip, handleDelete, handleView, handleEdit }) => {
                 <button
                     onClick={() => handleView(trip.id)}
                     className="action-btn action-view"
-                    title="Xem chi tiết"
+                    title="View details"
                 >
-                    <FaEye /> Chi tiết
+                    <FaEye /> Details
                 </button>
                 <button
                     onClick={() => handleEdit(trip.id)}
                     className="action-btn action-edit"
-                    title="Chỉnh sửa"
+                    title="Edit"
                 >
-                    <FaEdit /> Sửa
+                    <FaEdit /> Edit
                 </button>
                 <button
                     onClick={() => handleDelete(trip.id, trip.name)}
                     className="action-btn action-delete"
-                    title="Xóa"
+                    title="Delete"
                 >
                     <FaTrash />
                 </button>
@@ -326,7 +326,7 @@ export default function MyTripsPage() {
                 <div className="trips-header">
                     <div className="header-left">
                         <h2>My Itineraries</h2>
-                        <p className="header-subtitle">Quản lý tất cả chuyến đi của bạn</p>
+                        <p className="header-subtitle">Manage all your trips</p>
                     </div>
                 </div>
 
@@ -367,7 +367,7 @@ export default function MyTripsPage() {
             <div className="trips-header">
                 <div className="header-left">
                     <h2>My Itineraries</h2>
-                    <p className="header-subtitle">Quản lý tất cả chuyến đi của bạn</p>
+                    <p className="header-subtitle">Manage all your trips</p>
                 </div>
                 <button
                     onClick={() => setShowCreateForm(true)}
@@ -382,7 +382,7 @@ export default function MyTripsPage() {
                 <div className="search-box">
                     <input
                         type="text"
-                        placeholder="Tìm kiếm theo tên chuyến đi..."
+                        placeholder="Search trips by name..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="search-input"
@@ -417,16 +417,16 @@ export default function MyTripsPage() {
                         </div>
                     ) : trips.length > 0 ? (
                         <div className="empty-state">
-                            <p>Không tìm thấy chuyến đi phù hợp với tìm kiếm.</p>
+                            <p>No trips found matching your search.</p>
                         </div>
                     ) : (
                         <div className="empty-state">
-                            <p>Bạn chưa có chuyến đi nào. Hãy tạo một chuyến ngay!</p>
+                            <p>You don't have any trips yet. Create one now!</p>
                             <button
                                 onClick={() => setShowCreateForm(true)}
                                 className="empty-state-btn"
                             >
-                                <FaPlus /> Tạo chuyến đi đầu tiên
+                                <FaPlus /> Create your first trip
                             </button>
                         </div>
                     )}

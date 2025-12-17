@@ -185,7 +185,7 @@ export default function TripDetailsPage() {
             <div className="details-container">
                 <div className="loading-state">
                     <div className="loading-spinner"></div>
-                    <p>Đang tải chi tiết chuyến đi...</p>
+                    <p>Loading trip details...</p>
                 </div>
             </div>
         );
@@ -196,7 +196,7 @@ export default function TripDetailsPage() {
     }
 
     if (!trip) {
-        return <div className="details-container">Không có dữ liệu chuyến đi.</div>;
+        return <div className="details-container">No trip data available.</div>;
     }
 
     const metadata = trip.metadata || {};
@@ -205,7 +205,7 @@ export default function TripDetailsPage() {
         <div className="details-container">
             {/* Back Button */}
             <button onClick={handleBackToMyTrips} className="back-button">
-                <FaArrowLeft /> Quay lại My Trips
+                <FaArrowLeft /> Return to My Trips
             </button>
 
             {/* Trip Header with Title */}
@@ -219,7 +219,7 @@ export default function TripDetailsPage() {
                     )}
                 </h2>
                 <button onClick={handleEditTrip} className="edit-btn-header">
-                    <FaEdit /> Chỉnh sửa
+                    <FaEdit /> Edit Trip
                 </button>
             </div>
 
@@ -228,7 +228,7 @@ export default function TripDetailsPage() {
                 <div className="info-bar-item">
                     <FaGlobe className="info-bar-icon" />
                     <div className="info-bar-content">
-                        <span className="info-bar-label">Địa điểm</span>
+                        <span className="info-bar-label">Location</span>
                         <span className="info-bar-value">{trip.province_name}</span>
                     </div>
                 </div>
@@ -236,9 +236,9 @@ export default function TripDetailsPage() {
                 <div className="info-bar-item">
                     <FaCalendarAlt className="info-bar-icon" />
                     <div className="info-bar-content">
-                        <span className="info-bar-label">Ngày đi</span>
+                        <span className="info-bar-label">Start Date</span>
                         <span className="info-bar-value">
-                            {trip.start_date || 'Chưa xác định'}
+                            {trip.start_date || 'Not specified'}
                         </span>
                     </div>
                 </div>
@@ -247,9 +247,9 @@ export default function TripDetailsPage() {
                 <div className="info-bar-item date-info">
                     <FaCalendarAlt className="info-bar-icon" />
                     <div className="info-bar-content">
-                        <span className="info-bar-label">Ngày về</span>
+                        <span className="info-bar-label">End Date</span>
                         <span className="info-bar-value">
-                            {trip.end_date || 'Chưa xác định'}
+                            {trip.end_date || 'Not specified'}
                         </span>
                     </div>
                 </div>
@@ -257,9 +257,9 @@ export default function TripDetailsPage() {
                 <div className="info-bar-item">
                     <FaClock className="info-bar-icon" />
                     <div className="info-bar-content">
-                        <span className="info-bar-label">Thời lượng</span>
+                        <span className="info-bar-label">Duration</span>
                         <span className="info-bar-value">
-                            {trip.duration} ngày
+                            {trip.duration} days
                         </span>
                     </div>
                 </div>
@@ -267,7 +267,7 @@ export default function TripDetailsPage() {
                 <div className="info-bar-item">
                     <FaUsers className="info-bar-icon" />
                     <div className="info-bar-content">
-                        <span className="info-bar-label">Số người</span>
+                        <span className="info-bar-label">Number of People</span>
                         <span className="info-bar-value">{metadata.people || '—'}</span>
                     </div>
                 </div>
@@ -275,7 +275,7 @@ export default function TripDetailsPage() {
                 <div className="info-bar-item">
                     <FaMoneyBillWave className="info-bar-icon" />
                     <div className="info-bar-content">
-                        <span className="info-bar-label">Ngân sách</span>
+                        <span className="info-bar-label">Budget</span>
                         <span className="info-bar-value">{metadata.budget || '—'}</span>
                     </div>
                 </div>
@@ -283,7 +283,7 @@ export default function TripDetailsPage() {
 
             {/* [NEW] Khu vực hiển thị Nơi ở Chính (Primary Accommodation) */}
             <div className="primary-accommodation-section">
-                <h3 className="section-title"><FaBed /> Nơi ở Chính</h3>
+                <h3 className="section-title"><FaBed />Primary Residence</h3>
                 {primaryAccommodation ? (
                     // Thêm class 'loading-pulse' nếu đang tải chi tiết
                     <div className="accommodation-card" onClick={handleViewHotelDetails}>
@@ -298,12 +298,12 @@ export default function TripDetailsPage() {
                             className="view-details-btn"
                             disabled={isLoadingDestination}
                         >
-                            {isLoadingDestination ? 'Đang tải...' : 'Xem Chi tiết'}
+                            {isLoadingDestination ? 'Loading...' : 'View Details'}
                         </button>
                     </div>
                 ) : (
                     <div className="no-accommodation-info">
-                        <p>Chưa có nơi ở chính được chọn cho chuyến đi này.</p>
+                        <p>No primary residence has been selected for this trip.</p>
                     </div>
                 )}
             </div>
@@ -312,12 +312,12 @@ export default function TripDetailsPage() {
             <div className="trip-content-layout">
                 {/* LEFT: Itinerary */}
                 <div className="trip-itinerary-column">
-                    <h3 className="column-title">📅 Lịch trình Chi tiết</h3>
+                    <h3 className="column-title">📅 Details schedule</h3>
 
                     <div className="itinerary-schedule-vertical">
                         {trip.itinerary.map((dayPlan) => (
                             <div key={dayPlan.day} className="day-card-vertical">
-                                <h4 className="day-header-vertical">Ngày {dayPlan.day}</h4>
+                                <h4 className="day-header-vertical">Day {dayPlan.day}</h4>
                                 {/* Chỉ render các địa điểm đã lọc (không có khách sạn) */}
                                 <ul className="place-list-vertical">
                                     {dayPlan.places.map((item, index) => {
@@ -369,19 +369,20 @@ export default function TripDetailsPage() {
 
                 {/* RIGHT: Destination Preview (Giữ nguyên) */}
                 <div className="trip-preview-column">
-                    <h3 className="column-title">🔍 Thông tin Địa điểm</h3>
+                    <h3 className="column-title">🔍 Location Information</h3>
 
                     {!selectedDestination && !isLoadingDestination && (
                         <div className="preview-placeholder">
                             <div className="placeholder-icon">🗺️</div>
-                            <p>Click vào tên địa điểm bên trái hoặc Nơi ở để xem thông tin chi tiết</p>
+                            <p>Click on the location name on the left or Location to see detailed information
+</p>
                         </div>
                     )}
 
                     {isLoadingDestination && (
                         <div className="preview-loading">
                             <div className="loading-spinner-small"></div>
-                            <p>Đang tải thông tin...</p>
+                            <p>Loading information...</p>
                         </div>
                     )}
 
@@ -449,7 +450,7 @@ export default function TripDetailsPage() {
                                     className="preview-view-full-btn"
                                     onClick={() => setShowDestinationModal(true)}
                                 >
-                                    Xem chi tiết đầy đủ
+                                    See full details
                                 </button>
                             </div>
                         </div>

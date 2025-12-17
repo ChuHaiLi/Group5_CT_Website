@@ -280,7 +280,7 @@ export default function DestinationModal({
 
           {/* 🔥 FOOTER - ẨN NÚT "Tạo chuyến đi" KHI hideCreateButton = true (từ local) */}
           <div className="modal-footer">
-            <button className="modal-btn secondary" onClick={onClose}>Đóng</button>
+            <button className="modal-btn secondary" onClick={onClose}>Close</button>
             
             {/* 🔥 CHỈ HIỂN THỊ KHI hideCreateButton = false */}
             {!hideCreateButton && (
@@ -290,7 +290,7 @@ export default function DestinationModal({
                   if(onCreateTrip) onCreateTrip(destination);
                 }}
               >
-                Tạo chuyến đi
+                Create a trip
               </button>
             )}
           </div>
