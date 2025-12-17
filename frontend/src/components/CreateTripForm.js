@@ -21,14 +21,25 @@ const extractDurationDays = (durationStr) => {
     case "1-3 days":
       return 3;
     case "4-7 days":
+    case "5 days": // Handle case where API might send 7 days
       return 7;
     case "8-14 days":
-      return 14;
+      return 10;
     case "15+ days":
       return 15;
     default:
       return 0;
   }
+};
+
+/** Helper: map budget label -> max VND amount */
+const extractMaxBudget = (budgetStr) => {
+  if (!budgetStr) return 0;
+  if (budgetStr.includes("500k VND")) return 500000;
+  if (budgetStr.includes("1 milions VND")) return 1000000;
+  if (budgetStr.includes("2 milions VND")) return 2000000;
+  if (budgetStr.includes(">")) return 1000000000; // 1 tỷ VND cho trường hợp lớn hơn
+  return 0;
 };
 
 /** Normalize utility for fuzzy matching (strip accents, lower, trim) */
@@ -53,6 +64,48 @@ const normalizeProvince = (input, provinceList) => {
   return null;
 };
 
+/** * [UPDATED] Central Cost Calculation Function 
+ * Uses 'entry_fee' for destinations and assumes 'entry_fee' for hotels is the nightly rate.
+*/
+const calculateTotalCost = (
+  mustIncludeDetails,
+  selectedHotel,
+  durationStr,
+  peopleCount
+) => {
+  const durationDays = extractDurationDays(durationStr);
+  const numPeople = peopleCount.includes("1 person")
+    ? 1
+    : peopleCount.includes("2-4 people")
+    ? 4
+    : peopleCount.includes("5-10 people")
+    ? 10
+    : peopleCount.includes("10+ people")
+    ? 10
+    : 1; // Ước tính số người tối đa cho tính toán chi phí
+
+  let destinationsCost = 0;
+  // Cost của các địa điểm tham quan (Entry fees)
+  mustIncludeDetails.forEach((d) => {
+    // [CHANGE] Use d.entry_fee. The entry_fee for destinations is assumed to be per-person.
+    const cost = Number(d.entry_fee) || 0;
+    destinationsCost += cost;
+  });
+
+  let hotelCost = 0;
+  if (selectedHotel && durationDays > 0) {
+    const numNights = Math.max(1, durationDays - 1); // Số đêm = Số ngày - 1
+    // [CHANGE] Use selectedHotel.entry_fee. Assumed to be the nightly rate (per room/group).
+    const costPerNight = Number(selectedHotel.entry_fee) || 0;
+    hotelCost = costPerNight * numNights;
+  }
+
+  // Tổng chi phí (Địa điểm * số người) + Chi phí khách sạn
+  // NOTE: Chỉ nhân cost địa điểm với số người, giữ nguyên cost khách sạn.
+  const totalCost = destinationsCost * numPeople + hotelCost;
+  return totalCost;
+};
+
 export default function CreateTripForm({
   initialDestination = null,
   onClose,
@@ -61,7 +114,7 @@ export default function CreateTripForm({
   // --- Form state ---
   const [tripName, setTripName] = useState("");
   const [duration, setDuration] = useState("");
-  const [peopleCount, setPeopleCount] = useState("");
+  const [peopleCount, setPeopleCount] = useState("1 person"); // Set default
   const [budget, setBudget] = useState("");
 
   // --- Form ref ---
@@ -74,7 +127,9 @@ export default function CreateTripForm({
 
   // --- Must-include places (Destinations) ---
   const [mustIncludeDetails, setMustIncludeDetails] = useState([]);
-  const [selectedHotel, setSelectedHotel] = useState(null);
+  // [UPDATED] selectedHotel now stores entry_fee as cost field
+  const [selectedHotel, setSelectedHotel] = useState(null); 
+  const [currentTotalCost, setCurrentTotalCost] = useState(0);
 
   // --- Search logic (now only used for filtering preview) ---
   const [searchTerm, setSearchTerm] = useState("");
@@ -82,14 +137,13 @@ export default function CreateTripForm({
   // --- Preview locations (right column) ---
   const [isViewingHotels, setIsViewingHotels] = useState(false);
 
-  // [NEW] Central store for ALL destinations in the province
+  // Central store for ALL destinations in the province
   const [allDestinationsInProvince, setAllDestinationsInProvince] = useState([]);
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
 
-  // [NEW] Filtered lists derived from allDestinationsInProvince
+  // Filtered lists derived from allDestinationsInProvince
   const [previewDestinations, setPreviewDestinations] = useState([]);
   const [hotelPreviewList, setHotelPreviewList] = useState([]);
-
 
   // --- Modal details ---
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
@@ -98,7 +152,6 @@ export default function CreateTripForm({
 
   // --- Init guard ---
   const initialLoaded = useRef(false);
-
 
   // Options (Giữ nguyên)
   const durationOptions = ["1-3 days", "4-7 days", "8-14 days", "15+ days"];
@@ -198,13 +251,19 @@ export default function CreateTripForm({
   }, []);
 
   // ---------------------------------------------------------
-  // Initialize from initialDestination (Giữ nguyên)
+  // Initialize from initialDestination (Cập nhật để lấy entry_fee)
   // ---------------------------------------------------------
   useEffect(() => {
     if (!initialDestination || vietnamLocations.length === 0) return;
     if (initialLoaded.current) return;
 
-    const { id: destId, name: destName, province_id, province_name } = initialDestination;
+    const {
+      id: destId,
+      name: destName,
+      province_id,
+      province_name,
+      entry_fee, // [CHANGE] Lấy entry_fee
+    } = initialDestination;
 
     const matchAndSet = (matchProv, isHotel = false) => {
       setSelectedProvince({ id: matchProv.id, name: matchProv.name });
@@ -214,6 +273,7 @@ export default function CreateTripForm({
         province_id: initialDestination.province_id || matchProv.id,
         province_name: matchProv.name,
         type: initialDestination.type || "Destination",
+        entry_fee: entry_fee || 0, // [CHANGE] Lưu entry_fee
       };
 
       if (isHotel || placeDetail.type === "Hotel") {
@@ -227,7 +287,7 @@ export default function CreateTripForm({
     };
 
     // ... (Logic matching province by ID or name) ...
-    
+
     // Try match by id
     if (province_id != null) {
       const provIdStr = String(province_id);
@@ -265,7 +325,49 @@ export default function CreateTripForm({
   }, [initialDestination, vietnamLocations, tripName]);
 
   // ---------------------------------------------------------
-  // [CẬP NHẬT] Load ALL destinations when province changes
+  // [NEW] Check Budget compatibility when Budget/People change (Kiểm tra ngược)
+  // ---------------------------------------------------------
+  useEffect(() => {
+    const maxBudget = extractMaxBudget(budget);
+    const people = peopleCount;
+    const dur = duration;
+    
+    // Chỉ kiểm tra khi có budget được chọn và đã có địa điểm/khách sạn
+    if (maxBudget > 0 && (mustIncludeDetails.length > 0 || selectedHotel)) {
+      const calculatedCost = calculateTotalCost(
+        mustIncludeDetails,
+        selectedHotel,
+        dur,
+        people
+      );
+
+      if (calculatedCost > maxBudget) {
+        toast.warn(
+          `CẢNH BÁO: Ngân sách "${budget}" đã chọn (${new Intl.NumberFormat('vi-VN').format(maxBudget)} VND) không đủ cho các địa điểm/nơi ở bắt buộc đã chọn (${new Intl.NumberFormat('vi-VN').format(calculatedCost)} VND). Vui lòng điều chỉnh ngân sách hoặc xóa bớt địa điểm.`,
+          {
+            toastId: "budget-mismatch-warning",
+            autoClose: 8000,
+          }
+        );
+      }
+    }
+  }, [budget, peopleCount, mustIncludeDetails, selectedHotel, duration]);
+
+  // ---------------------------------------------------------
+  // [NEW] Calculate Total Cost
+  // ---------------------------------------------------------
+  useEffect(() => {
+    const totalCost = calculateTotalCost(
+      mustIncludeDetails,
+      selectedHotel,
+      duration,
+      peopleCount
+    );
+    setCurrentTotalCost(totalCost);
+  }, [mustIncludeDetails, selectedHotel, peopleCount, duration]);
+
+  // ---------------------------------------------------------
+  // Load ALL destinations when province changes (Cập nhật để lấy entry_fee)
   // ---------------------------------------------------------
   useEffect(() => {
     if (!selectedProvince) {
@@ -276,12 +378,9 @@ export default function CreateTripForm({
     setIsLoadingPreview(true);
 
     const provinceName = selectedProvince.name.trim();
-    // GỌI API ĐỂ LẤY TẤT CẢ DESTINATIONS, KỂ CẢ HOTEL
     const queryUrl = `/destinations?search=${encodeURIComponent(
       provinceName
-    )}&top=100`; // Tăng top để đảm bảo lấy đủ
-
-    console.log(">>> Fetching ALL destinations with:", queryUrl);
+    )}&top=100`;
 
     API.get(queryUrl)
       .then((res) => {
@@ -293,7 +392,8 @@ export default function CreateTripForm({
             )
             .map((p) => ({
               ...p,
-              type: p.type || "Destination", // Đảm bảo có type
+              type: p.type || "Destination",
+              entry_fee: p.entry_fee || 0, // [CHANGE] Ensure entry_fee is saved
             }));
 
           setAllDestinationsInProvince(onlySameProvince);
@@ -308,7 +408,7 @@ export default function CreateTripForm({
   }, [selectedProvince]);
 
   // ---------------------------------------------------------
-  // [NEW] Client-side filtering effect
+  // Client-side filtering effect (Giữ nguyên)
   // ---------------------------------------------------------
   useEffect(() => {
     const hotels = allDestinationsInProvince.filter(
@@ -331,16 +431,21 @@ export default function CreateTripForm({
   }, [selectedProvince]);
 
   // ---------------------------------------------------------
-  // Handlers (Tối ưu hóa)
+  // Handlers
   // ---------------------------------------------------------
   const handleToggleHotels = () => {
-    // Không cần fetch Hotels nữa, chỉ cần chuyển đổi view state
     setIsViewingHotels((prev) => !prev);
     setSearchTerm("");
   };
 
+  // [NEW] Check required fields before Province Change is allowed
+  const isPrerequisiteMet = duration && peopleCount && budget;
+
   const handleProvinceChange = (e) => {
-    // ... (Logic province change giữ nguyên) ...
+    if (!isPrerequisiteMet) {
+      toast.error("Vui lòng chọn Thời lượng, Số người và Ngân sách trước.");
+      return;
+    }
     const val = e.target.value;
     if (!val) {
       setSelectedProvince(null);
@@ -354,6 +459,7 @@ export default function CreateTripForm({
       return;
     }
 
+    // Logic filter must-include (giữ nguyên, nhưng không cần check budget ở đây)
     const filterMustInclude = (list) =>
       list.filter((d) => {
         const dPid = d.province_id != null ? String(d.province_id) : "";
@@ -382,11 +488,15 @@ export default function CreateTripForm({
 
     setSelectedProvince({ id: found.id, name: found.name });
   };
-  
-  // Logic addPlaceToMustInclude, removePlace, handleViewDetails, handleSelectFromDetails (Giữ nguyên)
+
+  // [UPDATED] Add place with Budget Check (using entry_fee)
   const addPlaceToMustInclude = (place) => {
     if (!selectedProvince) {
       toast.error("Chọn tỉnh chính trước.");
+      return;
+    }
+    if (!isPrerequisiteMet) {
+      toast.error("Vui lòng chọn đầy đủ Thời lượng, Số người và Ngân sách.");
       return;
     }
 
@@ -403,29 +513,61 @@ export default function CreateTripForm({
     }
 
     const isHotel = place.type === "Hotel";
-
-    if (isHotel) {
-      if (selectedHotel && String(selectedHotel.id) === String(place.id)) {
-        toast.info(`${place.name} đã được chọn làm Nơi ở.`);
-        return;
+    // [CHANGE] Use entry_fee
+    const placeCost = Number(place.entry_fee) || 0; 
+    const maxBudget = extractMaxBudget(budget);
+    
+    // --- TÍNH TOÁN CHI PHÍ TIỀM NĂNG ---
+    let tempMustIncludeDetails = isHotel 
+      ? mustIncludeDetails 
+      : mustIncludeDetails.some((d) => String(d.id) === String(place.id)) 
+        ? mustIncludeDetails // Duplicate check
+        // [CHANGE] Add entry_fee to temp object
+        : [...mustIncludeDetails, { ...place, entry_fee: placeCost }];
+    
+    let tempSelectedHotel = isHotel
+      // [CHANGE] Add entry_fee to temp object
+      ? { ...place, entry_fee: placeCost }
+      : selectedHotel;
+      
+    if (!isHotel && selectedHotel) {
+      // Nếu là Destination mới, không làm thay đổi selectedHotel, chỉ kiểm tra trùng lặp trước
+      if (mustIncludeDetails.some((d) => String(d.id) === String(place.id))) {
+        toast.info(`${place.name} đã tồn tại trong danh sách Địa điểm.`);
+        return; // Early exit if duplicate
       }
+    }
 
+    const potentialCost = calculateTotalCost(
+      tempMustIncludeDetails,
+      tempSelectedHotel,
+      duration,
+      peopleCount
+    );
+
+    // --- KIỂM TRA NGÂN SÁCH ---
+    if (maxBudget > 0 && potentialCost > maxBudget) {
+      toast.error(
+        `Không thể thêm "${place.name}". Tổng chi phí ước tính mới (${new Intl.NumberFormat('vi-VN').format(potentialCost)} VND) vượt quá Ngân sách tối đa (${new Intl.NumberFormat('vi-VN').format(maxBudget)} VND).`
+      );
+      return;
+    }
+
+    // --- THÊM THỰC TẾ (Nếu vượt qua kiểm tra) ---
+    if (isHotel) {
       setSelectedHotel({
         id: place.id,
         name: place.name,
         province_id: place.province_id,
         province_name: place.province_name,
         type: "Hotel",
+        entry_fee: placeCost, // [CHANGE] LƯU entry_fee
       });
       toast.success(`Đã chọn ${place.name} làm Nơi ở chính.`);
       return;
     }
 
-    if (mustIncludeDetails.some((d) => String(d.id) === String(place.id))) {
-      toast.info(`${place.name} đã tồn tại trong danh sách Địa điểm.`);
-      return;
-    }
-
+    // Nếu là Destination (đã kiểm tra trùng lặp ở trên)
     setMustIncludeDetails((prev) => [
       ...prev,
       {
@@ -434,11 +576,13 @@ export default function CreateTripForm({
         province_id: place.province_id,
         province_name: place.province_name,
         type: place.type || "Destination",
+        entry_fee: placeCost, // [CHANGE] LƯU entry_fee
       },
     ]);
     toast.success(`Đã thêm ${place.name} vào danh sách Địa điểm.`);
   };
 
+  // [UPDATED] Remove place (still need to update cost state via useEffect)
   const removePlace = (placeId, isHotel = false) => {
     if (isHotel) {
       if (selectedHotel && String(selectedHotel.id) === String(placeId)) {
@@ -463,12 +607,12 @@ export default function CreateTripForm({
     addPlaceToMustInclude(place);
     setIsDetailsModalOpen(false);
   };
-  
-  // handleSubmit (Giữ nguyên)
+
+  // handleSubmit (Giữ nguyên logic API)
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!tripName?.trim() || !selectedProvince || !duration || !startDate) {
+    if (!tripName?.trim() || !selectedProvince || !duration || !startDate || !peopleCount || !budget) {
       toast.error("Vui lòng điền đầy đủ các trường bắt buộc.");
       return;
     }
@@ -478,6 +622,14 @@ export default function CreateTripForm({
       toast.error("Thời lượng không hợp lệ.");
       return;
     }
+    
+    // Kiểm tra budget lần cuối trước khi submit
+    const maxBudget = extractMaxBudget(budget);
+    if (maxBudget > 0 && currentTotalCost > maxBudget) {
+        toast.error(`Tổng chi phí ước tính (${new Intl.NumberFormat('vi-VN').format(currentTotalCost)} VND) vượt quá Ngân sách tối đa (${new Intl.NumberFormat('vi-VN').format(maxBudget)} VND). Vui lòng điều chỉnh trước khi tạo chuyến đi.`);
+        return;
+    }
+
 
     const loadingToast = toast.info("Đang tạo lộ trình...", {
       autoClose: false,
@@ -501,7 +653,7 @@ export default function CreateTripForm({
 
     const mustIncludeDestinationIds = mustIncludeDetails.map((d) => d.id);
     const mustIncludeHotelId = selectedHotel ? [selectedHotel.id] : [];
-    
+
     const allMustIncludePlaceIds = [
       ...mustIncludeDestinationIds,
       ...mustIncludeHotelId,
@@ -513,10 +665,11 @@ export default function CreateTripForm({
       duration: durationDays,
       start_date: startDate,
       must_include_place_ids: allMustIncludePlaceIds,
+      max_budget: maxBudget,
       metadata: {
         people: peopleCount || null,
         budget: budget || null,
-        primary_accommodation_id: selectedHotel?.id || null, 
+        primary_accommodation_id: selectedHotel?.id || null,
       },
     };
 
@@ -547,13 +700,13 @@ export default function CreateTripForm({
   return (
     <div className="modal-overlay">
       <div className="create-trip-container" ref={formRef}>
-        {/* LEFT COLUMN: FORM (Giữ nguyên) */}
+        {/* LEFT COLUMN: FORM */}
         <div className="create-trip-form">
           <h2 className="form-header">Create a Trip</h2>
 
           <form onSubmit={handleSubmit}>
             {/* Trip name */}
-            <div className="input-group">
+            <div className="create-trip-form-input-group">
               <input
                 type="text"
                 placeholder="Trip Name"
@@ -564,7 +717,8 @@ export default function CreateTripForm({
               />
             </div>
 
-            <div className="input-group date-select-group">
+            {/* Start Date (Moved Up) */}
+            <div className="create-trip-form-input-group date-select-group">
               <label>
                 <FaClock /> Start Date
               </label>
@@ -577,76 +731,8 @@ export default function CreateTripForm({
               />
               <p className="hint-text">Chọn ngày bạn dự định bắt đầu chuyến đi.</p>
             </div>
-
-            {/* Province select */}
-            <div className="province-select-group input-group">
-              <label>
-                <FaGlobe /> Select Main Province (Trip Focus)
-              </label>
-              {isProvinceLoading ? (
-                <p className="loading-text">Loading provinces...</p>
-              ) : (
-                <select
-                  className="province-select"
-                  value={selectedProvince ? String(selectedProvince.id) : ""}
-                  onChange={handleProvinceChange}
-                  required
-                >
-                  <option value="">--- Select a Province/City ---</option>
-                  {vietnamLocations.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name} {p.regionName ? `(${p.regionName})` : ""}
-                    </option>
-                  ))}
-                </select>
-              )}
-              <p className="hint-text">
-                Chọn tỉnh/thành chính để hệ thống gợi ý lịch trình tự động.
-              </p>
-            </div>
-
-            {/* Must-Include Places Summary */}
-            <div className="destination-summary-group input-group">
-              <label>
-                <FaMapMarkerAlt /> Must-Include Places ({mustIncludeDetails.length})
-              </label>
-              <div className="summary-box">
-                <div className="main-province-info">
-                  <strong>Main Destination:</strong>{" "}
-                  {selectedProvince ? (
-                    <span className="main-province-tag">
-                      {selectedProvince.name}
-                    </span>
-                  ) : (
-                    <span className="warning-text">Province not yet set.</span>
-                  )}
-                </div>
-
-                <div className="must-include-list">
-                  <span className="must-include-label">
-                    Priority Destinations:
-                  </span>
-                  <div className="destination-list">
-                    {mustIncludeDetails.map((dest) => (
-                      <span key={dest.id} className="destination-item">
-                        {dest.name}
-                        <button
-                          type="button"
-                          onClick={() => removePlace(dest.id, false)}
-                        >
-                          ×
-                        </button>
-                      </span>
-                    ))}
-                    {mustIncludeDetails.length === 0 && (
-                      <p className="hint-text">No priority places selected.</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Options */}
+            
+            {/* Options Group (Duration, People, Budget - Moved Up) */}
             <div className="options-group">
               {/* Duration */}
               <div className="option-card">
@@ -689,7 +775,7 @@ export default function CreateTripForm({
               {/* Budget */}
               <div className="option-card">
                 <label>
-                  <FaMoneyBillWave /> Budget
+                  <FaMoneyBillWave /> Budget / Person
                 </label>
                 <div className="option-pills">
                   {budgetOptions.map((opt) => (
@@ -698,6 +784,7 @@ export default function CreateTripForm({
                       type="button"
                       className={budget === opt ? "pill selected" : "pill"}
                       onClick={() => setBudget(opt)}
+                      required // Mark as required for validation
                     >
                       {opt}
                     </button>
@@ -706,43 +793,141 @@ export default function CreateTripForm({
               </div>
             </div>
             
-            {/* Hotel Selection Input/Summary (Dưới cùng của form) */}
-            <div className="hotel-selection-group input-group">
-                <label>
-                    <FaBed /> Primary Accommodation
-                </label>
-                <div className="summary-box hotel-summary-box">
-                    {selectedHotel ? (
-                        <div className="selected-hotel-info">
-                            <span className="hotel-name-tag">
-                                <FaHotel style={{ marginRight: '5px', color: '#107c10' }} />
-                                {selectedHotel.name}
-                            </span>
-                            <p className="hint-text">
-                                Selected in {selectedHotel.province_name}
-                            </p>
-                            <button
-                                type="button"
-                                className="remove-hotel-btn"
-                                onClick={() => removePlace(selectedHotel.id, true)}
-                            >
-                                <FaTimes /> Remove
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="empty-preview hotel-empty">
-                            <p className="hint-text">
-                                No hotel selected. Use the "Hotels" tab on the right to choose your primary stay.
-                            </p>
-                        </div>
-                    )}
-                </div>
+            {/* Province select (Conditional Render) */}
+            <div className="province-select-group create-trip-form-input-group">
+              <label>
+                <FaGlobe /> Select Main Province (Trip Focus)
+              </label>
+              {isProvinceLoading ? (
+                <p className="loading-text">Loading provinces...</p>
+              ) : (
+                <select
+                  className="province-select"
+                  value={selectedProvince ? String(selectedProvince.id) : ""}
+                  onChange={handleProvinceChange}
+                  required
+                  disabled={!isPrerequisiteMet} // [NEW] Disable until prerequisites are met
+                >
+                  <option value="">--- Select a Province/City ---</option>
+                  {vietnamLocations.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} {p.regionName ? `(${p.regionName})` : ""}
+                    </option>
+                  ))}
+                </select>
+              )}
+              {!isPrerequisiteMet && (
+                <p className="warning-text">
+                  **Vui lòng chọn Thời lượng, Số người & Ngân sách trước.**
+                </p>
+              )}
             </div>
 
+            {/* Must-Include Places Summary */}
+            <div className="destination-summary-group create-trip-form-input-group">
+              <label>
+                <FaMapMarkerAlt /> Must-Include Places ({mustIncludeDetails.length})
+              </label>
+              <div className="summary-box">
+                <div className="main-province-info">
+                  <strong>Main Destination:</strong>{" "}
+                  {selectedProvince ? (
+                    <span className="main-province-tag">
+                      {selectedProvince.name}
+                    </span>
+                  ) : (
+                    <span className="warning-text">Province not yet set.</span>
+                  )}
+                </div>
+                
+                {/* [NEW] Total Cost Display */}
+                {isPrerequisiteMet && (
+                    <div className="total-cost-info">
+                        <strong>Estimated Total Cost:</strong>
+                        <span className={
+                            extractMaxBudget(budget) > 0 && currentTotalCost > extractMaxBudget(budget) 
+                            ? "cost-warning" 
+                            : "cost-normal"
+                        }>
+                            {new Intl.NumberFormat('vi-VN').format(currentTotalCost)} VND
+                            {extractMaxBudget(budget) > 0 && ` (Max Budget: ${new Intl.NumberFormat('vi-VN').format(extractMaxBudget(budget))} VND)`}
+                        </span>
+                    </div>
+                )}
+                
+                <div className="must-include-list">
+                  <span className="must-include-label">
+                    Priority Destinations:
+                  </span>
+                  <div className="destination-list">
+                    {mustIncludeDetails.map((dest) => (
+                      <span key={dest.id} className="destination-item">
+                        {dest.name}
+                        {/* [NEW] Show fee if available */}
+                        {dest.entry_fee > 0 && (
+                            <span className="destination-fee">
+                                ({new Intl.NumberFormat('vi-VN').format(dest.entry_fee)} VND)
+                            </span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => removePlace(dest.id, false)}
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                    {mustIncludeDetails.length === 0 && (
+                      <p className="hint-text">No priority places selected.</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Hotel Selection Input/Summary (Dưới cùng của form) */}
+            <div className="hotel-selection-group create-trip-form-input-group">
+              <label>
+                <FaBed /> Primary Accommodation
+              </label>
+              <div className="summary-box hotel-summary-box">
+                {selectedHotel ? (
+                  <div className="selected-hotel-info">
+                    <span className="hotel-name-tag">
+                      <FaHotel style={{ marginRight: '5px', color: '#107c10' }} />
+                      {selectedHotel.name}
+                    </span>
+                    <p className="hint-text">
+                      Selected in {selectedHotel.province_name}
+                      {/* [NEW] Show hotel nightly fee if available */}
+                      {selectedHotel.entry_fee > 0 && (
+                          ` (${new Intl.NumberFormat('vi-VN').format(selectedHotel.entry_fee)} VND/night)`
+                      )}
+                    </p>
+                    <button
+                      type="button"
+                      className="remove-hotel-btn"
+                      onClick={() => removePlace(selectedHotel.id, true)}
+                    >
+                      <FaTimes /> Remove
+                    </button>
+                  </div>
+                ) : (
+                  <div className="empty-preview hotel-empty">
+                    <p className="hint-text">
+                      No hotel selected. Use the "Hotels" tab on the right to choose your primary stay.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
 
             {/* Submit */}
             <div className="form-buttons">
-              <button type="submit" disabled={!selectedProvince || !duration}>
+              <button 
+                type="submit" 
+                disabled={!selectedProvince || !duration || !peopleCount || !budget || (extractMaxBudget(budget) > 0 && currentTotalCost > extractMaxBudget(budget))} // Disable if budget exceeded
+              >
                 Generate & Create Trip
               </button>
               <button
@@ -767,8 +952,8 @@ export default function CreateTripForm({
               : "Select a Province"}
           </h3>
 
-          {/* Search box and Hotel Toggle in right column */}
-          {selectedProvince && (
+          {/* Search box and Hotel Toggle in right column (Conditional Render) */}
+          {selectedProvince && isPrerequisiteMet && (
             <div className="preview-controls-group">
               <div className="preview-search-wrapper">
                 <FaSearch className="search-icon" />
@@ -788,7 +973,6 @@ export default function CreateTripForm({
                 type="button"
                 className={`hotel-toggle-btn ${isViewingHotels ? "selected" : ""}`}
                 onClick={handleToggleHotels}
-                // [CẬP NHẬT] Disabled chỉ dựa trên isLoadingPreview
                 disabled={!selectedProvince || isLoadingPreview}
               >
                 <FaHotel style={{ marginRight: '5px' }} />
@@ -797,28 +981,35 @@ export default function CreateTripForm({
             </div>
           )}
 
-          {!selectedProvince && (
+          {!isPrerequisiteMet && (
             <div className="empty-preview">
-              <div className="empty-preview-icon">
-                <FaMapMarkerAlt />
-              </div>
-              <p>Select a province to see available destinations</p>
+                <div className="empty-preview-icon">
+                    <FaMoneyBillWave /> <FaUser /> <FaClock />
+                </div>
+                <p>Complete the Duration, People, and Budget fields first.</p>
             </div>
           )}
+          
+          {selectedProvince && !isPrerequisiteMet && (
+              <div className="empty-preview">
+                <p>Now select the main province/city above.</p>
+              </div>
+          )}
 
-          {selectedProvince && isLoadingPreview && (
+          {selectedProvince && isPrerequisiteMet && isLoadingPreview && (
             <div className="empty-preview">
               <p>Loading all destinations...</p>
             </div>
           )}
 
           {selectedProvince &&
+            isPrerequisiteMet &&
             !isLoadingPreview &&
             (() => {
               // 1. CHỌN DANH SÁCH GỐC DỰA TRÊN TAB
               const listToFilter = isViewingHotels
-                ? hotelPreviewList // Chứa tất cả Hotels
-                : previewDestinations; // Chứa tất cả Destinations (không phải Hotel)
+                ? hotelPreviewList 
+                : previewDestinations;
 
               if (!Array.isArray(listToFilter) || listToFilter.length === 0) {
                  return (
@@ -829,9 +1020,9 @@ export default function CreateTripForm({
                         </p>
                     </div>
                  );
-             }
+              }
 
-              // 2. LỌC THEO SEARCH TERM (Áp dụng cho cả 2 danh sách)
+              // 2. LỌC THEO SEARCH TERM
               const filteredList =
                 searchTerm.trim().length > 0
                   ? listToFilter.filter((item) =>

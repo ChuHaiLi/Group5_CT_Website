@@ -22,7 +22,7 @@
 
 /* ===== MAIN CONTAINER ===== */
 .details-container {
-    max-width: 1600px;
+    width: 80%;
     margin: 0 auto;
     padding: 40px 24px;
     min-height: 100vh;
@@ -44,7 +44,7 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .back-button:hover {
@@ -82,12 +82,12 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .edit-btn-header:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* ===== INFO BAR - PROMINENT ===== */
@@ -99,7 +99,7 @@
     background: white;
     padding: 24px;
     border-radius: 16px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     border: 2px solid var(--gray-200);
 }
 
@@ -178,7 +178,7 @@
     background: white;
     padding: 32px;
     border-radius: 16px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     border: 1px solid var(--gray-200);
     max-height: calc(100vh - 400px);
     overflow-y: auto;
@@ -234,7 +234,7 @@
     margin: 0;
 }
 
-.place-list-vertical > li {
+.place-list-vertical>li {
     padding: 16px 20px;
     border-bottom: 1px solid var(--gray-200);
     display: flex;
@@ -244,7 +244,7 @@
     cursor: pointer;
 }
 
-.place-list-vertical > li:last-child {
+.place-list-vertical>li:last-child {
     border-bottom: none;
 }
 
@@ -332,7 +332,7 @@
     background: white;
     padding: 32px;
     border-radius: 16px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     border: 1px solid var(--gray-200);
     position: sticky;
     top: 24px;
@@ -389,7 +389,9 @@
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* Preview Card */
@@ -516,7 +518,7 @@
 
 .preview-view-full-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* Error State */
@@ -549,6 +551,53 @@
     border-radius: 8px;
     color: #991b1b;
     font-weight: 500;
+}
+
+/* ===== STATUS BADGE STYLES ===== */
+.status-badge {
+    display: inline-block;
+    margin-left: 16px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    vertical-align: middle;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+}
+
+.status-badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* UPCOMING - Sắp diễn ra (Xanh dương) */
+.status-badge.status-upcoming,
+.status-badge.status-UPCOMING {
+    background-color: #3b82f6;
+    color: white;
+}
+
+/* ONGOING - Đang diễn ra (Xanh lá) */
+.status-badge.status-ongoing,
+.status-badge.status-ONGOING {
+    background-color: #10b981;
+    color: white;
+}
+
+/* COMPLETED - Đã hoàn thành (Xám) */
+.status-badge.status-completed,
+.status-badge.status-COMPLETED {
+    background-color: #6b7280;
+    color: white;
+}
+
+/* Default - Nếu không có status cụ thể */
+.status-badge:not([class*="status-"]) {
+    background-color: var(--gray-400);
+    color: white;
 }
 
 /* ===== RESPONSIVE DESIGN ===== */
@@ -596,6 +645,15 @@
     .column-title {
         font-size: 1.25rem;
     }
+
+    .status-badge {
+        margin-left: 0;
+        margin-top: 8px;
+        display: block;
+        width: fit-content;
+        font-size: 0.75rem;
+        padding: 4px 10px;
+    }
 }
 
 /* Container của khu vực Nơi ở */
@@ -604,13 +662,15 @@
     margin-top: 20px;
     border: 1px solid #ddd;
     border-radius: 12px;
-    background-color: #f8fcf8; /* Màu nền nhẹ nhàng cho khu vực Hotel */
+    background-color: #f8fcf8;
+    /* Màu nền nhẹ nhàng cho khu vực Hotel */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
 }
 
 .primary-accommodation-section .section-title {
     font-size: 1.2em;
-    color: #107c10; /* Màu xanh lá nổi bật */
+    color: #107c10;
+    /* Màu xanh lá nổi bật */
     margin-bottom: 15px;
     display: flex;
     align-items: center;

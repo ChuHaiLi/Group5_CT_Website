@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import RecommendCard from "../Home/Recommendations/RecommendCard";
 import CreateTripForm from "../../components/CreateTripForm";
+import AuthRequiredModal from "../../components/AuthRequiredModal/AuthRequired.js";
 import API from "../../untils/axios";
 import {
   FaSearch,
@@ -11,10 +13,13 @@ import {
 import CollectionsTab from "./CollectionsTab";
 import "./Saved.css";
 
-export default function SavedPage({ savedIds, handleToggleSave }) {
+export default function SavedPage({ savedIds, handleToggleSave, isAuthenticated }) {
+  const navigate = useNavigate();
+  
   const [destinations, setDestinations] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const token = localStorage.getItem("access_token");
 
   const [activeTab, setActiveTab] = useState("saved");
@@ -108,25 +113,35 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
   };
 
   useEffect(() => {
+        if (!isAuthenticated) {
+            setShowAuthModal(true);
+            setLoading(false);
+            setDestinations([]); 
+        } else {
+            setShowAuthModal(false);
+        }
+    }, [isAuthenticated]);
+    
+  useEffect(() => {
     const fetchData = async () => {
-      if (!token) {
-        setDestinations([]);
-        setLoading(false);
-        return;
-      }
-      setLoading(true);
-      try {
-        const res = await API.get("/saved/list");
-        setDestinations(Array.isArray(res.data) ? res.data : []);
-      } catch (error) {
-        console.error("Failed to fetch saved list:", error);
-        setDestinations([]);
-      } finally {
-        setLoading(false);
-      }
+        if (!token || !isAuthenticated) { 
+            setDestinations([]);
+            setLoading(false);
+            return;
+        }
+        setLoading(true);
+        try {
+            const res = await API.get("/saved/list");
+            setDestinations(Array.isArray(res.data) ? res.data : []);
+        } catch (error) {
+            console.error("Failed to fetch saved list:", error);
+            setDestinations([]);
+        } finally {
+            setLoading(false);
+        }
     };
     fetchData();
-  }, [token, savedIds]);
+}, [token, savedIds, isAuthenticated]);
 
   const handleUnsave = async (id) => {
       await handleToggleSave(id);
@@ -226,6 +241,38 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
       items: groups[key],
     }));
   }, [filteredDestinations, groupBy, sortOrder]);
+
+  if (!isAuthenticated) {
+        return (
+            <div className="saved-wrapper">
+                <div className="saved-header">
+                    <h1>Places You're Keeping</h1>
+                    <p>
+                        Keep all your dream destinations in one place — a personalized space
+                        where every spot you save becomes a trip waiting to happen. ✨
+                    </p>
+                </div>
+
+                <div className="saved-content">
+                    <div className="saved-empty">
+                        <div style={{ fontSize: '80px', marginBottom: '20px' }}>🔒</div>
+                        <h3>Login Required</h3>
+                        <p>Please login to view your saved destinations</p>
+                    </div>
+                </div>
+
+                {showAuthModal && (
+                    <AuthRequiredModal 
+                        onClose={() => {
+                            setShowAuthModal(false);
+                            navigate('/');
+                        }}
+                        message="You need to be logged in to view saved destinations. Please login or register to continue! 💾"
+                    />
+                )}
+            </div>
+        );
+    }
 
   return (
     <div className="saved-wrapper">

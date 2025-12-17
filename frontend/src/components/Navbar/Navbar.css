@@ -1,5 +1,5 @@
 .navbar {
-  position: fixed; /* luôn nằm trên */
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
@@ -10,7 +10,7 @@
   justify-content: space-between;
   align-items: center;
 
-  background-color: rgba(0, 0, 0, 0.9); /* lớp đen mờ */
+  background-color: rgba(0, 0, 0, 0.9);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 
@@ -19,7 +19,7 @@
   font-weight: 400;
   font-size: 20px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
-  z-index: 9999; /* đảm bảo luôn trên cùng */
+  z-index: 9999;
 }
 
 /* Logo trái */
@@ -31,7 +31,6 @@
 .navbar-logo {
   height: 130px;
   width: auto;
-
   position: relative;
   left: -25px;
   top: 5px;
@@ -42,8 +41,7 @@
   display: flex;
   list-style: none;
   gap: 80px;
-
-  position: relative; /* thêm dòng này */
+  position: relative;
   left: -90px;
 }
 
@@ -53,18 +51,51 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.2s ease-in-out;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: inherit;
   font-weight: inherit;
   font-size: inherit;
   user-select: none;
   cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 8px;
+  position: relative;
 }
 
-.navbar-menu li a.active,
+/* Hiệu ứng underline vàng khi hover */
+.navbar-menu li a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #FFD700, #FFA500);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.navbar-menu li a:hover::after,
+.navbar-menu li a.active::after {
+  width: 80%;
+}
+
 .navbar-menu li a:hover {
-  color: #ffd700;
-  transform: scale(1.05);
+  color: #FFD700;
+  transform: translateY(-2px);
+  text-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+}
+
+.navbar-menu li a.active {
+  color: #FFD700;
+  font-weight: 600;
+  text-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+}
+
+/* Icon glow effect khi hover */
+.navbar-menu li a:hover svg,
+.navbar-menu li a.active svg {
+  filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.6));
 }
 
 /* Phần phải */
@@ -75,10 +106,10 @@
 }
 
 .profile-dropdown-wrapper {
-  position: relative; /* dropdown tính theo wrapper */
+  position: relative;
   display: flex;
   align-items: center;
-  min-width: 44px; /* cập nhật cho avatar 44px */
+  min-width: 44px;
   min-height: 44px;
 }
 
@@ -89,101 +120,175 @@
   margin-left: -30px;
   border-radius: 999px;
   padding: 2px;
-  border: 1px solid transparent;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  border: 2px solid transparent;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .navbar-avatar {
-  width: 44px; /* cập nhật để khớp với ProfileDropdown */
+  width: 44px;
   height: 44px;
   border-radius: 50%;
   object-fit: cover;
   display: block;
-  border: 2px solid rgba(147, 51, 234, 0.6);
-  box-shadow: 0 0 20px rgba(34, 211, 238, 0.35);
-  flex-shrink: 0; /* ngăn bị co lại */
+  border: 2px solid rgba(255, 215, 0, 0.4);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
 }
 
 .navbar-avatar-icon {
-  font-size: 44px; /* cập nhật cho đồng bộ */
+  font-size: 44px;
   color: #aaaaaa;
   display: block;
   width: 44px;
   height: 44px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Hover effect cho avatar */
+.profile-trigger:hover,
+.profile-trigger:focus-visible {
+  border-color: rgba(255, 215, 0, 0.6);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+  transform: scale(1.05);
+}
+
+.profile-trigger:hover .navbar-avatar {
+  border-color: rgba(255, 215, 0, 0.8);
+  box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
+}
+
+.profile-trigger:hover .navbar-avatar-icon {
+  color: #FFD700;
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
+}
+
+/* Dropdown menu */
 .dropdown-menu {
   position: absolute;
-  top: 45px;
-  right: 30px; /* luôn theo avatar wrapper */
-  background: radial-gradient(circle at top, #1b1f3a, #0b1125 70%);
-  border: 1px solid rgba(148, 163, 184, 0.4);
-  padding: 10px 0;
-  border-radius: 14px;
-  box-shadow: 0 20px 45px rgba(2, 6, 23, 0.7);
+  top: 55px;
+  right: 30px;
+  background: linear-gradient(145deg, #1a1a1a, #0a0a0a);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  padding: 8px 0;
+  border-radius: 12px;
+  box-shadow: 
+    0 20px 45px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgba(255, 215, 0, 0.2);
   display: flex;
   flex-direction: column;
-  min-width: 150px;
+  min-width: 180px;
   z-index: 1000;
+  animation: dropdownFadeIn 0.2s ease;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .dropdown-menu button {
   background: transparent;
   border: none;
-  padding: 12px 18px;
+  padding: 12px 20px;
   text-align: left;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 500;
   color: #e2e8f0;
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .dropdown-menu button:hover {
-  background: rgba(147, 51, 234, 0.35);
-  color: #f8fafc;
+  background: rgba(255, 215, 0, 0.15);
+  color: #FFD700;
+  padding-left: 24px;
 }
 
+/* Login / Register buttons */
 .navbar-right a {
   font-family: inherit;
-  font-weight: inherit;
+  font-weight: 600;
   font-size: 16px;
-  color: #e2e8f0;
+  color: #fff;
   text-decoration: none;
-  border: 1px solid rgba(148, 163, 184, 0.4);
-  padding: 8px 18px;
+  border: 2px solid rgba(255, 215, 0, 0.4);
+  padding: 10px 24px;
   border-radius: 999px;
-  background: rgba(15, 23, 42, 0.6);
-  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease,
-    transform 0.2s ease;
+  background: transparent;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Gradient fill effect on hover */
+.navbar-right a::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: -1;
+}
+
+.navbar-right a:hover::before {
+  left: 0;
 }
 
 .navbar-right a:hover {
-  color: #fff;
-  border-color: rgba(34, 211, 238, 0.6);
-  background: linear-gradient(135deg, #9333ea, #22d3ee);
-  transform: translateY(-1px);
+  color: #000;
+  border-color: #FFD700;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+  transform: translateY(-2px);
 }
 
-.profile-trigger:hover,
-.profile-trigger:focus-visible {
-  border-color: rgba(34, 211, 238, 0.6);
-  box-shadow: 0 0 12px rgba(34, 211, 238, 0.35);
+/* Special styling for Login button */
+.navbar-right a:first-of-type {
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  border-color: transparent;
+  color: #000;
+  font-weight: 700;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+}
+
+.navbar-right a:first-of-type:hover {
+  background: linear-gradient(135deg, #FFA500, #FF8C00);
+  box-shadow: 0 6px 25px rgba(255, 215, 0, 0.5);
+  transform: translateY(-3px);
 }
 
 /* Responsive */
 @media (max-width: 1024px) {
   .navbar-menu {
-    gap: 30px;
+    gap: 40px;
   }
-  .logout-btn {
-    padding: 5px 10px;
-    font-size: 16px;
+  .navbar-right a {
+    padding: 8px 18px;
+    font-size: 15px;
   }
 }
 
 @media (max-width: 768px) {
   .navbar-menu {
     display: none;
+  }
+  .navbar-right {
+    gap: 10px;
+  }
+  .navbar-right a {
+    padding: 8px 16px;
+    font-size: 14px;
   }
 }

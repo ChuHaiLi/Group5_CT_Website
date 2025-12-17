@@ -9,7 +9,8 @@ import {
   FaEyeSlash,
   FaMapMarkedAlt,
   FaCheckCircle,
-  FaTimesCircle
+  FaTimesCircle,
+  FaHome
 } from "react-icons/fa";
 import API from "../untils/axios";
 import GoogleLoginButton from "../components/GoogleLoginButton";
@@ -159,6 +160,14 @@ export default function RegisterPage({ setIsAuthenticated }) {
 
   return (
     <div className="auth-page">
+    <button 
+      onClick={() => navigate("/")}
+      className="back-to-home-btn"
+      data-page="register" 
+    >
+      <FaHome size={16} />
+      <span>Back to Home</span>
+    </button>
       <div className="auth-box">
         <div className="icon-wrapper" style={{ 
           background: 'linear-gradient(135deg, #FF6B6B, #FFB347)',

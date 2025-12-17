@@ -36,9 +36,12 @@
    2. SEARCH BAR & LOCATION FILTER
    ========================================================================== */
 .search-bar-container {
+  position: relative;
   width: 100%;
   display: flex;
+  flex-direction: column;
   justify-content: center;
+  align-items: center;
   margin-bottom: 1.5rem;
 }
 
@@ -86,19 +89,20 @@
   font-weight: 500;
   outline: none;
   height: 100%;
-  border-radius: inherit; /* match the pill container */
-  box-shadow: none !important; /* remove any browser-added inner shadow */
+  border-radius: inherit;
+  box-shadow: none !important;
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
 }
 
-.search-bar input:focus {
-  outline: none;
+.search-bar input:focus,
+.search-bar select:focus,
+.location-select:focus {
+  outline: none !important;
   box-shadow: none !important;
 }
 
-/* remove inner clear/search decorations on some browsers */
 .search-bar input::-webkit-search-decoration,
 .search-bar input::-webkit-search-cancel-button,
 .search-bar input::-webkit-search-results-button,
@@ -140,6 +144,7 @@
   color: #4f46e5;
   font-size: 1.2rem;
 }
+
 .search-location-wrapper:hover .globe-icon {
   transform: rotate(15deg);
 }
@@ -165,6 +170,7 @@
   appearance: none;
   -webkit-appearance: none;
   padding-right: 25px;
+  padding-left: 20px;
   z-index: 2;
 }
 
@@ -205,6 +211,7 @@
   position: relative;
   z-index: 10;
 }
+
 .category-btn {
   padding: 8px 16px;
   border-radius: 30px;
@@ -219,21 +226,25 @@
   gap: 8px;
   transition: all 0.2s ease;
 }
+
 .category-btn:hover {
   background: #f8fafc;
   border-color: #cbd5e1;
   color: #1e293b;
 }
+
 .category-btn.active {
   background: #e0e7ff;
   color: #4f46e5;
   border-color: #c7d2fe;
 }
+
 .category-left {
   display: flex;
   align-items: center;
   gap: 6px;
 }
+
 .active-count {
   font-size: 0.75rem;
   background: #4338ca;
@@ -257,15 +268,17 @@
   padding: 8px;
   box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.15);
   z-index: 99999;
-  min-width: 220px;
+  width: max-content;
   max-height: 320px;
   overflow-y: auto;
   border: 1px solid #f1f5f9;
 }
+
 .tag-list-vertical.open {
   display: flex !important;
   animation: dropdownFadeIn 0.2s ease forwards;
 }
+
 .tag-btn {
   padding: 10px 12px;
   border-radius: 8px;
@@ -280,28 +293,32 @@
   width: 100%;
   text-align: left;
 }
+
 .tag-btn:hover {
   background: #f9fafb;
   color: #111827;
 }
+
 .tag-btn.active {
   background: #eef2ff;
   color: #4f46e5;
   font-weight: 600;
 }
+
 .checkbox-circle {
   width: 16px;
   height: 16px;
   border-radius: 4px;
   border: 2px solid #d1d5db;
 }
+
 .tag-btn.active .checkbox-circle {
   background: #4f46e5;
   border-color: #4f46e5;
 }
 
 /* ==========================================================================
-   4. QUICK QUESTIONS BAR (CẬP NHẬT: THANH CUỘN NGANG)
+   4. QUICK QUESTIONS BAR
    ========================================================================== */
 .quick-categories-container {
   width: 100%;
@@ -314,32 +331,29 @@
 .quick-categories-scroll {
   display: flex;
   gap: 12px;
-
-  /* --- THANH CUỘN --- */
   width: 100%;
-  max-width: 1200px; /* Giới hạn chiều rộng để thanh cuộn đẹp */
-  overflow-x: auto; /* Bật tính năng cuộn ngang */
-
-  justify-content: flex-start; /* Nội dung bắt đầu từ trái sang */
-  padding: 5px 5px 15px 5px; /* Padding dưới để chứa thanh cuộn */
-
-  /* Tùy chỉnh thanh cuộn cho đẹp */
-  scrollbar-width: thin; /* Firefox: thanh cuộn mỏng */
+  max-width: 1200px;
+  overflow-x: auto;
+  justify-content: flex-start;
+  padding: 5px 5px 15px 5px;
+  scrollbar-width: thin;
   scrollbar-color: #cbd5e1 transparent;
 }
 
-/* Style thanh cuộn cho Chrome/Safari */
 .quick-categories-scroll::-webkit-scrollbar {
-  height: 6px; /* Chiều cao thanh ngang */
+  height: 6px;
 }
+
 .quick-categories-scroll::-webkit-scrollbar-track {
   background: #f1f5f9;
   border-radius: 10px;
 }
+
 .quick-categories-scroll::-webkit-scrollbar-thumb {
   background-color: #cbd5e1;
   border-radius: 10px;
 }
+
 .quick-categories-scroll::-webkit-scrollbar-thumb:hover {
   background-color: #94a3b8;
 }
@@ -352,11 +366,11 @@
   font-size: 0.95rem;
   color: #475569;
   cursor: pointer;
-  white-space: nowrap; /* Không xuống dòng */
+  white-space: nowrap;
   font-weight: 500;
   transition: all 0.2s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
-  flex-shrink: 0; /* Không bị co nhỏ khi hết chỗ */
+  flex-shrink: 0;
 }
 
 .question-pill:hover {
@@ -374,7 +388,7 @@
 }
 
 /* ==========================================================================
-   5. RESULTS GRID (CẬP NHẬT: 3 CỘT/HÀNG)
+   5. RESULTS GRID
    ========================================================================== */
 .recommend-header {
   font-size: 1.8rem;
@@ -388,47 +402,17 @@
 
 .explore-grid-container {
   display: grid;
-  /* --- FIX CỐ ĐỊNH 3 CỘT --- */
   grid-template-columns: repeat(3, 1fr);
-
   gap: 32px;
   justify-content: center;
   width: 100%;
-  max-width: 1200px; /* Chiều rộng tối đa vừa phải để 3 cột đẹp */
+  max-width: 1200px;
   margin-bottom: 3rem;
 }
 
 .explore-grid-item {
   display: flex;
   justify-content: center;
-}
-
-/* Responsive Grid cho màn hình nhỏ */
-@media (max-width: 1024px) {
-  .explore-grid-container {
-    grid-template-columns: repeat(2, 1fr); /* Tablet: 2 cột */
-  }
-}
-
-@media (max-width: 768px) {
-  .explore-grid-container {
-    grid-template-columns: 1fr; /* Mobile: 1 cột */
-  }
-
-  .search-bar {
-    height: auto;
-    flex-direction: column;
-    border-radius: 20px;
-    padding: 10px;
-  }
-  .search-divider {
-    display: none;
-  }
-  .search-input-wrapper,
-  .search-location-wrapper {
-    width: 100%;
-    padding: 10px;
-  }
 }
 
 /* ==========================================================================
@@ -438,33 +422,81 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: 0.75rem;
   margin-bottom: 2rem;
   width: 100%;
+  flex-wrap: wrap;
 }
+
+.selected-label {
+  font-weight: 600;
+  color: #4b5563;
+  font-size: 0.95rem;
+}
+
+.selected-tags-list {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
 .selected-tag-chip {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 14px;
+  padding: 8px 14px;
   background: #e0e7ff;
   color: #4338ca;
   border-radius: 20px;
   font-size: 0.85rem;
   font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.2s ease;
 }
+
+.selected-tag-chip:hover {
+  background: #c7d2fe;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(67, 56, 202, 0.15);
+}
+
+.tag-text {
+  display: inline-block;
+}
+
 .remove-tag-btn,
 .clear-all-btn {
   background: transparent;
   border: none;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
+
 .remove-tag-btn {
   color: #4338ca;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  padding: 2px;
 }
+
+.remove-tag-btn:hover {
+  color: #3730a3;
+  transform: scale(1.15);
+}
+
 .clear-all-btn {
   color: #6b7280;
   text-decoration: underline;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 8px 12px;
+}
+
+.clear-all-btn:hover {
+  color: #374151;
+  text-decoration-color: #374151;
 }
 
 .pagination-wrapper {
@@ -480,23 +512,16 @@
 .pagination-scroll {
   display: flex;
   gap: 8px;
-
-  /* --- CẤU HÌNH THANH TRƯỢT (SCROLLBAR) --- */
-  overflow-x: auto; /* Cho phép cuộn ngang */
-  max-width: 350px; /* Giới hạn chiều rộng để thanh cuộn xuất hiện nếu nhiều trang */
-  padding: 5px 5px 12px 5px; /* Thêm padding dưới để chứa thanh cuộn */
-
-  /* Style cho Firefox */
+  overflow-x: auto;
+  max-width: 350px;
+  padding: 5px 5px 12px 5px;
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 transparent;
-
-  /* Căn giữa các số */
   align-items: center;
 }
 
-/* Style thanh cuộn cho Chrome/Safari/Edge */
 .pagination-scroll::-webkit-scrollbar {
-  height: 6px; /* Chiều cao thanh ngang */
+  height: 6px;
 }
 
 .pagination-scroll::-webkit-scrollbar-track {
@@ -505,16 +530,15 @@
 }
 
 .pagination-scroll::-webkit-scrollbar-thumb {
-  background-color: #cbd5e1; /* Màu thanh trượt */
+  background-color: #cbd5e1;
   border-radius: 10px;
   cursor: pointer;
 }
 
 .pagination-scroll::-webkit-scrollbar-thumb:hover {
-  background-color: #94a3b8; /* Màu khi di chuột vào */
+  background-color: #94a3b8;
 }
 
-/* Style nút Prev/Next và Số trang */
 .pagination-btn,
 .pagination-number {
   min-width: 40px;
@@ -529,8 +553,6 @@
   font-weight: 600;
   color: #374151;
   transition: all 0.2s;
-
-  /* Đảm bảo nút không bị co méo khi nằm trong flex */
   flex-shrink: 0;
 }
 
@@ -556,6 +578,7 @@
   background: #f3f4f6;
   transform: none;
 }
+
 /* ==========================================================================
    7. SECTIONS & EMPTY STATE
    ========================================================================== */
@@ -565,16 +588,19 @@
   background: linear-gradient(to right, transparent, #e2e8f0, transparent);
   margin: 2rem auto;
 }
+
 .section-header-center {
   text-align: center;
   margin-bottom: 2.5rem;
 }
+
 .section-header-center h2 {
   font-size: 2.2rem;
   color: #1e293b;
   margin-bottom: 0.5rem;
   font-weight: 800;
 }
+
 .section-header-center p {
   font-size: 1.1rem;
   color: #64748b;
@@ -588,6 +614,7 @@
   scroll-snap-type: x mandatory;
   justify-content: flex-start;
 }
+
 .trending-card-wrapper {
   min-width: 320px;
   scroll-snap-align: start;
@@ -595,7 +622,6 @@
 
 .region-cards-grid {
   display: grid;
-  /* Cố định 3 cột trên màn hình lớn */
   grid-template-columns: repeat(3, 1fr);
   gap: 30px;
   justify-content: center;
@@ -603,7 +629,7 @@
 }
 
 .region-card {
-  height: 450px; /* Tăng chiều cao cho ấn tượng */
+  height: 450px;
   border-radius: 24px;
   position: relative;
   overflow: hidden;
@@ -657,41 +683,16 @@
   border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
-/* Ảnh nền chất lượng cao (Unsplash) */
 .card-north {
-  background-image: url("https://images.unsplash.com/photo-1506665531195-3566af2b4dfa?q=80&w=2670&auto=format&fit=crop"); /* Hạ Long Bay - Rất nét */
+  background-image: url("https://images.unsplash.com/photo-1506665531195-3566af2b4dfa?q=80&w=2670&auto=format&fit=crop");
 }
+
 .card-central {
-  background-image: url("https://image.vietgoing.com/destination/2024/1_20240105143218.jpg"); /* Hội An */
+  background-image: url("https://image.vietgoing.com/destination/2024/1_20240105143218.jpg");
 }
+
 .card-south {
-  background-image: url("https://dulichhaugiang.com.vn/wp-content/uploads/2025/07/hinh-anh-mien-tay-1.jpg"); /* Miền Tây sông nước - Rất nét */
-}
-
-/* Responsive cho Tablet & Mobile */
-@media (max-width: 1024px) {
-  .region-cards-grid {
-    grid-template-columns: repeat(2, 1fr); /* 2 cột trên Tablet */
-  }
-}
-
-@media (max-width: 768px) {
-  .region-cards-grid {
-    grid-template-columns: 1fr; /* 1 cột trên Mobile */
-  }
-  .region-card {
-    height: 300px;
-  }
-}
-
-.region-content span {
-  font-size: 1.1rem;
-  font-weight: 500;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 6px 12px;
-  border-radius: 20px;
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background-image: url("https://dulichhaugiang.com.vn/wp-content/uploads/2025/07/hinh-anh-mien-tay-1.jpg");
 }
 
 .empty-state-container {
@@ -701,11 +702,13 @@
   padding: 4rem 20px;
   text-align: center;
 }
+
 .empty-state-img {
   width: 180px;
   opacity: 0.8;
   margin-bottom: 1.5rem;
 }
+
 .empty-state-btn {
   padding: 12px 24px;
   background: #4f46e5;
@@ -716,6 +719,300 @@
   cursor: pointer;
   transition: all 0.2s;
 }
+
+/* ==========================================================================
+   8. SCROLL TO TOP BUTTON
+   ========================================================================== */
+.scroll-to-top-btn {
+  position: fixed;
+  bottom: 30px;
+  left: 30px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.8) translateY(20px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 9999;
+}
+
+.scroll-to-top-btn.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1) translateY(0);
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+.scroll-to-top-btn:hover {
+  transform: scale(1.1) translateY(-3px);
+  box-shadow: 0 12px 28px rgba(102, 126, 234, 0.6);
+}
+
+.scroll-to-top-btn:active {
+  transform: scale(0.95) translateY(0);
+}
+
+@keyframes pulseGlow {
+  0%,
+  100% {
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+  }
+  50% {
+    box-shadow: 0 8px 30px rgba(102, 126, 234, 0.7);
+  }
+}
+
+/* ==========================================================================
+   9. SEARCH AUTOCOMPLETE DROPDOWN
+   ========================================================================== */
+.search-autocomplete-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 850px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e2e8f0;
+  max-height: 400px;
+  overflow-y: auto;
+  z-index: 1000;
+  animation: dropdownSlideIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes dropdownSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.autocomplete-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.autocomplete-item:last-child {
+  border-bottom: none;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.highlighted {
+  background: linear-gradient(90deg, #f8fafc 0%, #f0f4f8 100%);
+  padding-left: 24px;
+}
+
+.autocomplete-icon {
+  color: #94a3b8;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.autocomplete-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.autocomplete-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.autocomplete-location {
+  font-size: 0.85rem;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.autocomplete-location::before {
+  content: "📍";
+  font-size: 0.75rem;
+}
+
+.autocomplete-badge {
+  padding: 4px 12px;
+  background: #e0e7ff;
+  color: #4338ca;
+  border-radius: 16px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.search-autocomplete-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.search-autocomplete-dropdown::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+
+.search-autocomplete-dropdown::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.search-autocomplete-dropdown::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.autocomplete-item mark {
+  background: #fef3c7;
+  color: #92400e;
+  font-weight: 600;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+.autocomplete-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.autocomplete-loading::before {
+  content: "";
+  width: 16px;
+  height: 16px;
+  margin-right: 10px;
+  border: 2px solid #e2e8f0;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.autocomplete-no-results {
+  padding: 24px 20px;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.95rem;
+}
+
+.autocomplete-no-results::before {
+  content: "🔍";
+  display: block;
+  font-size: 2rem;
+  margin-bottom: 8px;
+  opacity: 0.6;
+}
+
+/* ==========================================================================
+   10. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .explore-grid-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .region-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .explore-grid-container {
+    grid-template-columns: 1fr;
+  }
+
+  .region-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .region-card {
+    height: 300px;
+  }
+
+  .search-bar {
+    height: auto;
+    flex-direction: column;
+    border-radius: 20px;
+    padding: 10px;
+  }
+
+  .search-divider {
+    display: none;
+  }
+
+  .search-input-wrapper,
+  .search-location-wrapper {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .scroll-to-top-btn {
+    bottom: 20px;
+    right: 20px;
+    left: auto;
+    width: 48px;
+    height: 48px;
+    font-size: 1.1rem;
+  }
+
+  .search-autocomplete-dropdown {
+    max-width: calc(100% - 40px);
+    border-radius: 16px;
+  }
+
+  .autocomplete-item {
+    padding: 12px 16px;
+  }
+
+  .autocomplete-item:hover,
+  .autocomplete-item.highlighted {
+    padding-left: 20px;
+  }
+
+  .autocomplete-name {
+    font-size: 0.95rem;
+  }
+
+  .autocomplete-location {
+    font-size: 0.8rem;
+  }
+
+  .autocomplete-badge {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+  }
+}
+
 @keyframes dropdownFadeIn {
   from {
     opacity: 0;

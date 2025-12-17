@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef, useMemo } from "react";
 import API from "../../untils/axios";
 import { TAG_CATEGORIES } from "../../data/tags.js";
 import { toast } from "react-toastify";
+import AuthRequiredModal from "../../components/AuthRequiredModal/AuthRequired.js";
 
 import {
   FaUmbrellaBeach, FaMountain, FaLandmark, FaUtensils, FaHiking, FaTree, FaCity,
@@ -9,7 +10,7 @@ import {
   FaUsers, FaUser, FaClock, FaCalendarAlt, FaSun, FaCloudSun, FaLeaf, FaSnowflake,
   FaMoon, FaStar, FaMoneyBillWave, FaDollarSign, FaGem, FaGift, FaEye, FaImage,
   FaMapMarkedAlt, FaFireAlt, FaPaw, FaSearch, FaChevronUp, FaChevronDown,
-  FaMusic, FaSpa, FaChild, FaCrown, FaTimes
+  FaMusic, FaSpa, FaChild, FaCrown, FaTimes, FaArrowUp
 } from "react-icons/fa";
 
 import RecommendCard from "../Home/Recommendations/RecommendCard";
@@ -35,13 +36,70 @@ const QUICK_CATEGORIES = [
   { id: "Shopping", label: "🛍️ Ready to shop till you drop?", icon: null },
 ];
 
-// --- FAMOUS LOCATIONS (Tách phần 2) ---
+// --- FAMOUS LOCATIONS ---
 const FAMOUS_LOCATIONS = [
-  "vinh ha long", "ha long bay", "pho co hoi an", "hoi an", "ba na hills", "golden bridge",
-  "fansipan", "sapa", "trang an", "ninh binh", "cu chi tunnels", "phong nha",
-  "dragon bridge", "hoan kiem lake", "hue imperial city", "phu quoc", "da lat",
-  "nha tho duc ba", "cho ben thanh", "dinh doc lap", "landmark 81", "vinwonders", "hoi an ancient town"
+  // --- Miền Bắc ---
+  "Quần thể danh thắng Tràng An",
+  "Fansipan Legend",
+  "Hồ Hoàn Kiếm",
+  "Văn Miếu - Quốc Tử Giám",
+  "Hoàng thành Thăng Long",
+  "Chùa Một Cột Hà Nội",
+  "Phố Cổ Hà Nội",
+  "Tam Chúc",
+  "Khu di tích danh thắng Yên Tử",
+  "Thác Bản Giốc",
+  "Ruộng bậc thang Mù Cang Chải",
+  "Làng gốm Bát Tràng",
+
+  // --- Miền Trung ---
+  "Phố cổ Hội An",
+  "Quần thể di tích Cố đô Huế",
+  "Sun World Ba Na Hills",
+  "Cầu Vàng",
+  "Thánh địa Mỹ Sơn",
+  "Động Thiên Đường và Động Phong Nha",
+  "Đảo Lý Sơn",
+  "Cù Lao Chàm",
+  "Ngũ Hành Sơn",
+  "Lăng Vua Minh Mạng",
+  "Vườn thú ZooDoo",
+  "Chùa Linh Thắng",
+  "Cáp Treo Đồi Robin Đà Lạt",
+  "Tham Quan Cao Nguyên Hoa Đà Lạt",
+  "VinWonders Nha Trang",
+  "Tham Quan Bảo Tàng Thế Giới Cà Phê",
+  "Datanla",
+
+  // --- Miền Nam ---
+  "Chợ Bến Thành",
+  "Dinh Độc Lập",
+  "Chùa Tam Chúc",
+  "Hồ Mây",
+  "Mũi Né",
+  "Tham Quan Khám Phá Địa Đạo Củ Chi",
+  "Thảo Cầm Viên",
+  "Đài quan sát Landmark 81 SkyView",
+  "VinWonders Phú Quốc",
+  "Bảo Tàng Chứng Tích Chiến Tranh",
+  "Vinpearl Safari Phú Quốc",
+  "Chợ nổi Cái Răng",
+  "Nhà thờ Đức Bà",
+  "Bưu điện Trung tâm Sài Gòn",
+  "Khu du lịch Văn hóa Suối Tiên",
+  "Núi Bà Đen"
 ];
+
+// --- BUDGET MAPPING ---
+const BUDGET_MAPPING = {
+  "Free": { min: 0, max: 1 },
+  "< 50.000 VND": { min: 1, max: 50000 },
+  "50.000 - 100.000 VND": { min: 50000, max: 100000 },
+  "100.000 - 200.000 VND": { min: 100000, max: 200000 },
+  "200.000 - 500.000 VND": { min: 200000, max: 500000 },
+  "500.000 - 1.000.000 VND": { min: 500000, max: 1000000 },
+  "> 1.000.000 VND": { min: 1000000, max: Infinity }
+};
 
 const ICON_MAP = {
   Beach: <FaUmbrellaBeach />, Mountain: <FaMountain />, "Historical Site": <FaLandmark />,
@@ -56,9 +114,11 @@ const ICON_MAP = {
   "Full Day": <FaClock />, "2 Days": <FaClock />, "3+ Days": <FaClock />, "Weekend Trip": <FaClock />,
   Overnight: <FaClock />, "Multi-day Adventure": <FaClock />, Spring: <FaLeaf />, Summer: <FaSun />,
   Autumn: <FaCloudSun />, Winter: <FaSnowflake />, Morning: <FaSun />, Afternoon: <FaCloudSun />,
-  Evening: <FaCalendarAlt />, Night: <FaMoon />, "Free": <FaGift />, "< 5 Triệu": <FaMoneyBillWave />,
-  "5 - 10 Triệu": <FaDollarSign />, "10 - 20 Triệu": <FaGem />,
-  "> 20 Triệu": <FaCrown />, "Scenic Views": <FaEye />, "Instagrammable Spots": <FaImage />,
+  Evening: <FaCalendarAlt />, Night: <FaMoon />, 
+  "Free": <FaGift />, "< 50.000 VND": <FaMoneyBillWave />, "50.000 - 100.000 VND": <FaMoneyBillWave />,
+  "100.000 - 200.000 VND": <FaDollarSign />, "200.000 - 500.000 VND": <FaDollarSign />,
+  "500.000 - 1.000.000 VND": <FaGem />, "> 1.000.000 VND": <FaCrown />,
+  "Scenic Views": <FaEye />, "Instagrammable Spots": <FaImage />,
   "Local Cuisine": <FaUtensils />, "Festivals & Events": <FaFireAlt />, "Adventure Sports": <FaHiking />,
   "Relaxing Spots": <FaSpa />, "Cultural Immersion": <FaLandmark />, "Hidden Gems": <FaMapMarkedAlt />
 };
@@ -66,27 +126,44 @@ const ICON_MAP = {
 const CATEGORY_ICON_MAP = {
   "Destination Type": <FaMapMarkedAlt />, Activities: <FaHiking />,
   "Target Audience": <FaUsers />, Duration: <FaClock />, "Season/Time": <FaCalendarAlt />,
-  Budget: <FaDollarSign />, "Special Features": <FaStar />
+  Price: <FaDollarSign />, "Special Features": <FaStar />
 };
 
-// CẤU HÌNH PHÂN TRANG
-const REGULAR_ITEMS_PER_PAGE = 15; // Phần 1: 15 địa điểm
-const POPULAR_ITEMS_PER_PAGE = 9;  // Phần 2: 9 địa điểm
+const SERVICE_KEYWORDS = [
+  "hotel", "restaurant", "resort", "homestay", "cafe", "coffee", 
+  "food", "beverage", "lưu trú", "nhà hàng", "khách sạn", "ẩm thực", "quán"
+];
 
-// Utils
+const REGULAR_ITEMS_PER_PAGE = 15;
+const POPULAR_ITEMS_PER_PAGE = 9;
+
+// --- UTILS ---
+
 const normalizeString = (str) => {
   if (!str) return "";
-  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D").toLowerCase().trim();
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/Đ/g, "d").replace(/Ð/g, "D").toLowerCase().trim();
 };
 
-// Sanitize search string: remove zero-width chars, punctuation, collapse spaces
 const sanitizeSearch = (str) => {
   if (!str) return "";
   return str
-    .replace(/[\u200B-\u200D\uFEFF]/g, "")           // remove zero-width
-    .replace(/[^\p{L}\p{N}\s]/gu, " ")               // remove punctuation (unicode-safe)
-    .replace(/\s+/g, " ")                            // collapse spaces
+    .replace(/[\u200B-\u200D\uFEFF]/g, "")
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .replace(/\s+/g, " ")
     .trim();
+};
+
+const parsePrice = (rawPrice) => {
+  if (!rawPrice) return 0;
+  
+  const str = String(rawPrice).toLowerCase().trim();
+
+  if (str.includes("free") || str.includes("miễn phí")) return 0;
+
+  const numberStr = str.replace(/[^0-9]/g, "");
+
+  const val = Number(numberStr);
+  return isNaN(val) ? 0 : val;
 };
 
 const parseTags = (tagsRaw) => {
@@ -95,19 +172,16 @@ const parseTags = (tagsRaw) => {
     try {
       return JSON.parse(tagsRaw.replace(/'/g, '"'));
     } catch (e) {
-      return tagsRaw.replace(/[\]']/g, "").split(",").map(t => t.trim());
+      return tagsRaw.replace(/[\[\]']/g, "").split(",").map(t => t.trim());
     }
   }
   return [];
 };
 
-// Get all valid tags from TAG_CATEGORIES
 const ALL_VALID_TAGS = new Set(TAG_CATEGORIES.flatMap(c => c.tags));
 
-// Check if a string is a valid tag (not a location name)
 const isValidTag = (tag) => ALL_VALID_TAGS.has(tag);
 
-// Filter valid tags from array, return invalid ones as location names
 const separateTagsAndLocations = (items) => {
   const validTags = [];
   const locations = [];
@@ -121,7 +195,100 @@ const separateTagsAndLocations = (items) => {
   return { validTags, locations };
 };
 
-export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) {
+// ========================================
+// 🎯 SCROLL TO TOP BUTTON COMPONENT
+// ========================================
+const ScrollToTopButton = () => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const toggleVisibility = () => {
+      if (window.pageYOffset > 500) {
+        setIsVisible(true);
+      } else {
+        setIsVisible(false);
+      }
+    };
+
+    window.addEventListener("scroll", toggleVisibility);
+    return () => window.removeEventListener("scroll", toggleVisibility);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  };
+
+  return (
+    <button
+      className={`scroll-to-top-btn ${isVisible ? "visible" : ""}`}
+      onClick={scrollToTop}
+      aria-label="Scroll to top"
+    >
+      <FaArrowUp />
+    </button>
+  );
+};
+
+// ========================================
+// 🔍 SEARCH AUTOCOMPLETE COMPONENT
+// ========================================
+const SearchAutocomplete = ({ 
+  suggestions, 
+  onSelect, 
+  visible, 
+  searchValue,
+  highlightedIndex,
+  onMouseEnter,
+  onMouseLeave 
+}) => {
+  if (!visible || suggestions.length === 0) return null;
+
+  return (
+    <div className="search-autocomplete-dropdown">
+      {suggestions.map((suggestion, idx) => (
+        <div
+          key={idx}
+          className={`autocomplete-item ${idx === highlightedIndex ? 'highlighted' : ''}`}
+          onClick={() => onSelect(suggestion)}
+          onMouseEnter={() => onMouseEnter(idx)}
+          onMouseLeave={onMouseLeave}
+        >
+          <FaSearch className="autocomplete-icon" />
+          <div className="autocomplete-content">
+            <span className="autocomplete-name">{suggestion.name}</span>
+            {suggestion.province && (
+              <span className="autocomplete-location">{suggestion.province}</span>
+            )}
+          </div>
+          {suggestion.type && (
+            <span className="autocomplete-badge">{suggestion.type}</span>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const isServiceLocation = (dest) => {
+  const type = (dest.type || "").toLowerCase();
+  const category = (dest.category || "").toLowerCase();
+  
+  let tagsStr = "";
+  if (Array.isArray(dest.tags)) tagsStr = dest.tags.join(" ").toLowerCase();
+  else if (typeof dest.tags === "string") tagsStr = dest.tags.toLowerCase();
+
+  return SERVICE_KEYWORDS.some(kw => 
+    type.includes(kw) || category.includes(kw) || tagsStr.includes(kw)
+  );
+};
+
+// ========================================
+// 🚀 MAIN COMPONENT: EXPLORE PAGE
+// ========================================
+export default function ExplorePage({ savedIds = new Set(), handleToggleSave, isAuthenticated }) {
   // State Data
   const [regularDestinations, setRegularDestinations] = useState([]); 
   const [popularDestinations, setPopularDestinations] = useState([]); 
@@ -131,6 +298,12 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
   const [selectedTags, setSelectedTags] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   
+  // State Autocomplete
+  const [showAutocomplete, setShowAutocomplete] = useState(false);
+  const [autocompleteSuggestions, setAutocompleteSuggestions] = useState([]);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const searchInputRef = useRef(null);
+  
   // State UI
   const [showForm, setShowForm] = useState(false);
   const [selectedDestination, setSelectedDestination] = useState(null);
@@ -139,8 +312,11 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
   const categoryRefs = useRef({});
   
   // State Pagination
-  const [currentPage, setCurrentPage] = useState(1); // Page cho phần 1
-  const [popularPage, setPopularPage] = useState(1); // Page cho phần 2 (MỚI)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [popularPage, setPopularPage] = useState(1);
+
+  // State Authentication
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Locations
   const [vietnamLocations, setVietnamLocations] = useState([]);
@@ -148,8 +324,30 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
 
   const location = useLocation();
 
+  // Click outside to close autocomplete and category dropdowns
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchInputRef.current && !searchInputRef.current.contains(e.target)) {
+        setShowAutocomplete(false);
+        setHighlightedIndex(-1);
+      }
 
-  // Thêm useEffect để xử lý preSelectedTags từ navigation và URL params
+      if (openCategory) {
+        const clickedInsideCategory = Object.values(categoryRefs.current).some(
+          ref => ref && ref.contains(e.target)
+        );
+        
+        if (!clickedInsideCategory) {
+          setOpenCategory(null);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [openCategory]);
+
+  // Xử lý preSelectedTags từ navigation và URL params
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const tagsParam = urlParams.get("tags");
@@ -158,24 +356,17 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
     const preSearch = state.preSearch || state.q || "";
     const preTagsRaw = state.preSelectedTags || state.tags || [];
 
-    // Priority 1: Handle URL ?q= param (search query) - location_name from AI
-    // This takes highest priority to ensure location_name is always in search bar
     if (qParam) {
       const decodedQ = decodeURIComponent(qParam);
       setSearch(decodedQ);
-    }
-    // If no ?q= but have preSearch from state, use that
-    else if (preSearch) {
+    } else if (preSearch) {
       setSearch(preSearch);
     }
 
-    // Priority 2: Handle URL ?tags= param - separate valid tags from location names
-    // Tags are supplementary filters, location_name (from ?q=) takes priority
     if (tagsParam) {
       const parts = decodeURIComponent(tagsParam).split(",").map(t => t.trim()).filter(Boolean);
       const { validTags, locations } = separateTagsAndLocations(parts);
       
-      // Set valid tags to selectedTags (supplementary filters)
       if (validTags.length > 0) {
         setSelectedTags((prev) => {
           const newTags = [...prev];
@@ -188,21 +379,16 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
         });
       }
       
-      // Only set location names to search if ?q= was not provided
-      // This ensures ?q= (location_name from AI) always takes priority
       if (locations.length > 0 && !qParam && !preSearch) {
         const locationSearch = locations.join(" ");
         setSearch(locationSearch);
       }
     }
 
-    // Handle location.state.preSelectedTags - separate valid tags from location names
-    // Only process if ?q= was not provided (location_name takes priority)
     if (preTagsRaw && preTagsRaw.length > 0 && !qParam && !preSearch) {
       const tagsToSelect = Array.isArray(preTagsRaw) ? preTagsRaw : [preTagsRaw];
       const { validTags, locations } = separateTagsAndLocations(tagsToSelect);
       
-      // Set valid tags to selectedTags (supplementary filters)
       if (validTags.length > 0) {
         setSelectedTags((prev) => {
           const newTags = [...prev];
@@ -215,17 +401,14 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
         });
       }
       
-      // Set location names to search only if ?q= was not provided
       if (locations.length > 0) {
         const locationSearch = locations.join(" ");
         setSearch(locationSearch);
       }
     }
     
-    // Clear state và URL params sau khi đã xử lý để tránh re-trigger
     if (location.state || tagsParam || qParam) {
       window.history.replaceState({}, document.title);
-      // Clear URL params
       if (tagsParam || qParam) {
         const newUrl = window.location.pathname;
         window.history.replaceState({}, document.title, newUrl);
@@ -242,10 +425,20 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
         const regular = [];
 
         allData.forEach(dest => {
-            const normName = normalizeString(dest.name);
-            const isFamous = FAMOUS_LOCATIONS.some(f => normName.includes(f));
-            if (isFamous) popular.push(dest);
-            else regular.push(dest);
+            regular.push(dest);
+
+            const normDestName = normalizeString(dest.name);
+            
+            const isFamous = FAMOUS_LOCATIONS.some(f => {
+                const normFamousName = normalizeString(f);
+                return normDestName.includes(normFamousName);
+            });
+            
+            const isService = isServiceLocation(dest); 
+
+            if (isFamous && !isService) {
+              popular.push(dest);
+            }
         });
 
         setPopularDestinations(popular);
@@ -275,9 +468,109 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
       });
   }, []);
 
+  // --- AUTOCOMPLETE LOGIC ---
+  useEffect(() => {
+    if (search.trim().length >= 2) {
+      const searchNorm = normalizeString(search);
+      const allDestinations = [...regularDestinations, ...popularDestinations];
+      
+      const matches = allDestinations
+        .filter(dest => {
+          const nameMatch = normalizeString(dest.name).includes(searchNorm);
+          const provinceMatch = dest.province_name && normalizeString(dest.province_name).includes(searchNorm);
+          return nameMatch || provinceMatch;
+        })
+        .slice(0, 8)
+        .map(dest => ({
+          name: dest.name,
+          province: dest.province_name,
+          type: dest.type,
+          fullData: dest
+        }));
+
+      setAutocompleteSuggestions(matches);
+      setShowAutocomplete(matches.length > 0);
+    } else {
+      setAutocompleteSuggestions([]);
+      setShowAutocomplete(false);
+    }
+  }, [search, regularDestinations, popularDestinations]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!showAutocomplete) return;
+
+      switch(e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          setHighlightedIndex(prev => 
+            prev < autocompleteSuggestions.length - 1 ? prev + 1 : 0
+          );
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          setHighlightedIndex(prev => 
+            prev > 0 ? prev - 1 : autocompleteSuggestions.length - 1
+          );
+          break;
+        case 'Enter':
+          e.preventDefault();
+          if (highlightedIndex >= 0 && autocompleteSuggestions[highlightedIndex]) {
+            handleSelectSuggestion(autocompleteSuggestions[highlightedIndex]);
+          }
+          break;
+        case 'Escape':
+          setShowAutocomplete(false);
+          setHighlightedIndex(-1);
+          break;
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showAutocomplete, autocompleteSuggestions, highlightedIndex]);
+
+  // Click outside to close
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchInputRef.current && !searchInputRef.current.contains(e.target)) {
+        setShowAutocomplete(false);
+        setHighlightedIndex(-1);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSelectSuggestion = (suggestion) => {
+    setSearch(suggestion.name);
+    setShowAutocomplete(false);
+    setHighlightedIndex(-1);
+    setCurrentPage(1);
+    
+    setTimeout(() => {
+      const resultsSection = document.querySelector('.explore-grid-container');
+      if (resultsSection) {
+        resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+  };
+
   // --- HANDLERS ---
-  const handleSearchChange = (e) => { setSearch(e.target.value); setCurrentPage(1); };
-  const handleProvinceChange = (e) => { setSelectedProvinceId(e.target.value); setCurrentPage(1); };
+  const handleSearchChange = (e) => { 
+    setSearch(e.target.value); 
+    setCurrentPage(1); 
+    setHighlightedIndex(-1);
+  };
+  
+  const handleProvinceChange = (e) => { 
+    setSelectedProvinceId(e.target.value); 
+    setCurrentPage(1); 
+  };
   
   const handleCategoryClick = (catId) => {
     setSelectedCategory(selectedCategory === catId ? null : catId);
@@ -293,39 +586,62 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
   const toggleCategory = (title) => setOpenCategory(prev => prev === title ? null : title);
   const isCategoryActive = (tags) => tags.some(tag => selectedTags.includes(tag));
 
-
-  // --- FILTER LOGIC (SECTION 1) ---
-  // Filter destinations based on search, tags, category, and province
-  // This runs automatically when filter states change (React re-render)
+  // --- FILTER LOGIC (FIXED FOR REGION SEARCH) ---
   const filteredRegularItems = useMemo(() => {
     return regularDestinations.filter((dest) => {
       const destNameNorm = normalizeString(dest.name);
       const destProvinceNorm = normalizeString(dest.province_name);
       const destRegionNorm = dest.region_name ? normalizeString(dest.region_name) : "";
       
-      // Sanitize search before normalizing to handle dirty characters
       const sanitizedSearch = sanitizeSearch(search);
       const searchNorm = normalizeString(sanitizedSearch);
       
-      // Use token-based matching for better flexibility
-      // Split search into tokens and check if all tokens match
       const searchTokens = searchNorm.split(" ").filter(Boolean);
       const destTags = parseTags(dest.tags);
 
-      // Token-based search: all tokens must match (more flexible than exact string match)
-      // Match against destination name, province name, or region name
-      const matchesSearch = searchTokens.length === 0 || 
-        searchTokens.every((token) =>
-          destNameNorm.includes(token) ||
-          destProvinceNorm.includes(token) ||
-          destRegionNorm.includes(token)
-        );
-
-      // Tags: AND logic - all selected tags must be present in destination tags
-      const matchesTags = selectedTags.length === 0 || 
-        selectedTags.every((tag) => destTags.includes(tag));
+      // 1. Check Search text
+      // ✅ FIX: Kiểm tra chính xác nếu đang search theo miền
+      const isRegionSearch = searchNorm === "mien bac" || searchNorm === "mien trung" || searchNorm === "mien nam";
       
-      // Province: Exact match by province_id or province_name
+      let matchesSearch;
+      if (isRegionSearch) {
+        // Nếu search theo miền, chỉ match CHÍNH XÁC region_name
+        matchesSearch = destRegionNorm === searchNorm;
+      } else {
+        // Search bình thường (tìm theo tên, tỉnh, hoặc miền)
+        matchesSearch = searchTokens.length === 0 || 
+          searchTokens.every((token) =>
+            destNameNorm.includes(token) ||
+            destProvinceNorm.includes(token) ||
+            destRegionNorm.includes(token)
+          );
+      }
+
+      // 2. Check Tags (Price + Regular Tags)
+      const matchesTags = selectedTags.length === 0 || 
+        selectedTags.every((tag) => {
+          if (BUDGET_MAPPING[tag]) {
+            const { min, max } = BUDGET_MAPPING[tag];
+            
+            const priceVal = dest.entry_fee ?? dest.price ?? dest.cost ?? dest.budget;
+            
+            let realPrice = 0;
+            
+            if (priceVal === null || priceVal === undefined || priceVal === "" || priceVal === "Miễn Phí" || priceVal === "Free") {
+              realPrice = 0;
+            } else if (typeof priceVal === 'number') {
+              realPrice = priceVal;
+            } else {
+              realPrice = parsePrice(priceVal);
+            }
+            
+            return realPrice >= min && realPrice < max;
+          }
+          
+          return destTags.includes(tag);
+        });
+      
+      // 3. Check Province
       let matchesProvince = true;
       if (selectedProvinceId) {
         if (dest.province_id) {
@@ -338,7 +654,7 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
         }
       }
 
-      // Category: Exact match - check if any destination tag matches the selected category
+      // 4. Check Category (Quick Questions)
       let matchesCategory = true;
       if (selectedCategory) {
         matchesCategory = destTags.some(tag => 
@@ -347,10 +663,7 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
         );
       }
 
-      // Final match: all conditions must be true (AND logic)
-      const finalMatch = matchesSearch && matchesTags && matchesProvince && matchesCategory;
-
-      return finalMatch;
+      return matchesSearch && matchesTags && matchesProvince && matchesCategory;
     });
   }, [regularDestinations, search, selectedTags, selectedCategory, selectedProvinceId, vietnamLocations]);
 
@@ -369,14 +682,15 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
   // --- SCROLL UTILS ---
   const handleRegionClick = (regionName) => {
     setSearch(regionName);
-    setSelectedProvinceId(""); setSelectedCategory(null); setSelectedTags([]);
+    setSelectedProvinceId(""); 
+    setSelectedCategory(null); 
+    setSelectedTags([]);
     setCurrentPage(1);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handlePopularPageChange = (pageNum) => {
     setPopularPage(pageNum);
-    // Scroll nhẹ đến đầu section Popular nếu cần (tuỳ chọn)
     const section = document.getElementById('popular-section');
     if(section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
@@ -388,23 +702,44 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
       <div className="section-block">
         <h1 className="explore-header">Find Your Dream Trip ✈️</h1>
 
-        <div className="search-bar-container">
+        <div className="search-bar-container" ref={searchInputRef}>
           <div className="search-bar">
               <div className="search-input-wrapper">
                   <FaSearch className="search-icon" />
-                  <input type="text" placeholder="Tìm theo tên địa điểm, tỉnh thành hoặc vùng miền..." value={search} onChange={handleSearchChange} />
+                  <input 
+                    type="text" 
+                    placeholder="Search by place name, province, or region..." 
+                    value={search} 
+                    onChange={handleSearchChange}
+                    onFocus={() => {
+                      if (autocompleteSuggestions.length > 0) {
+                        setShowAutocomplete(true);
+                      }
+                    }}
+                  />
               </div>
               <div className="search-divider"></div>
               <div className="search-location-wrapper">
                   <div className="select-container">
                     <select className="location-select" value={selectedProvinceId} onChange={handleProvinceChange}>
-                        <option value="">Tất cả địa điểm</option>
+                        <option value="">All Provinces</option>
                         {vietnamLocations.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
                     </select>
                     <FaChevronDown className="select-arrow-icon" />
                   </div>
               </div>
           </div>
+          
+          {/* AUTOCOMPLETE DROPDOWN */}
+          <SearchAutocomplete
+            suggestions={autocompleteSuggestions}
+            onSelect={handleSelectSuggestion}
+            visible={showAutocomplete}
+            searchValue={search}
+            highlightedIndex={highlightedIndex}
+            onMouseEnter={(idx) => setHighlightedIndex(idx)}
+            onMouseLeave={() => setHighlightedIndex(-1)}
+          />
         </div>
 
         <div className="categories-row">
@@ -442,8 +777,7 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
           </div>
         </div>
 
-        {/* Active filter pills hidden to save space - filters are applied via search bar */}
-        {false && selectedTags.length > 0 && (
+        {selectedTags.length > 0 && (
           <div className="selected-tags-container">
             <span className="selected-label">Filters:</span>
             <div className="selected-tags-list">
@@ -475,13 +809,19 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
                     isSaved={savedIds.has(dest.id)}
                     onToggleSave={() => handleToggleSave(dest.id)}
                     onViewDetails={() => setViewingDestination(dest)}
-                    onCreateTrip={() => { setSelectedDestination(dest); setShowForm(true); }}
+                    onCreateTrip={() => {
+                      if (!isAuthenticated) {
+                        setShowAuthModal(true); 
+                      } else {
+                        setSelectedDestination(dest);
+                        setShowForm(true);
+                      }
+                    }}
                   />
                 </div>
               ))}
             </div>
             
-            {/* Pagination 1 */}
             {totalPages > 1 && (
               <div className="pagination-wrapper">
                 <button className="pagination-btn" disabled={currentPage === 1} onClick={() => {setCurrentPage(currentPage - 1); window.scrollTo(0,0)}}>Prev</button>
@@ -498,17 +838,33 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
           </>
         ) : (
           <div className="empty-state-container">
-            <img src="https://cdn-icons-png.flaticon.com/512/7486/7486831.png" alt="Thinking" className="empty-state-img" />
-            <h3 className="empty-state-title">Hmm, chưa tìm thấy kết quả nào...</h3>
-            <button className="empty-state-btn" onClick={() => { setSearch(""); setSelectedCategory(null); setSelectedTags([]); setSelectedProvinceId(""); setCurrentPage(1); }}>Làm mới bộ lọc</button>
+            <img 
+              src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" 
+              alt="No destinations found" 
+              className="empty-state-img"
+            />
+            <h3 className="empty-state-title">No destinations found</h3>
+            <p className="empty-state-desc">
+              We couldn't find any trips that match your current filters. <br/>
+              Try adjusting your search or clear filters to see more.
+            </p>
+            <button 
+              className="empty-state-btn"
+              onClick={() => {
+                setSelectedTags([]);
+                setSearch("");
+                setCurrentPage(1);
+              }}
+            >
+              Clear all filters
+            </button>
           </div>
         )}
       </div>
 
-      {/* ĐƯỜNG KẺ PHÂN CÁCH */}
       <div className="section-divider-line"></div>
 
-      {/* ================= SECTION 2: POPULAR DESTINATIONS (PAGINATED GRID) ================= */}
+      {/* ================= SECTION 2: POPULAR DESTINATIONS ================= */}
       {popularDestinations.length > 0 && (
         <div id="popular-section" className="section-block section-popular">
           <div className="section-header-center">
@@ -516,7 +872,6 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
             <p>Must-visit destinations rated by travelers worldwide</p>
           </div>
           
-          {/* Grid hiển thị 9 địa điểm */}
           <div className="explore-grid-container">
             {currentPopularItems.map((dest) => (
               <div key={dest.id} className="explore-grid-item">
@@ -525,13 +880,19 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
                     isSaved={savedIds.has(dest.id)}
                     onToggleSave={() => handleToggleSave(dest.id)}
                     onViewDetails={() => setViewingDestination(dest)}
-                    onCreateTrip={() => { setSelectedDestination(dest); setShowForm(true); }}
+                    onCreateTrip={() => {
+                      if (!isAuthenticated) {
+                        setShowAuthModal(true); 
+                      } else {
+                        setSelectedDestination(dest);
+                        setShowForm(true);
+                      }
+                    }}
                   />
               </div>
             ))}
           </div>
 
-          {/* Pagination 2 */}
           {totalPopularPages > 1 && (
             <div className="pagination-wrapper">
               <button className="pagination-btn" disabled={popularPage === 1} onClick={() => handlePopularPageChange(popularPage - 1)}>Prev</button>
@@ -550,10 +911,10 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
 
       <div className="section-divider-line"></div>
 
-      {/* ================= SECTION 3: EXPLORE BY REGION (3 BANNER 1 HÀNG) ================= */}
+      {/* ================= SECTION 3: EXPLORE BY REGION ================= */}
       <div className="section-block section-regions">
         <div className="section-header-center">
-          <h2>🌏 Explore by Region</h2>
+          <h2>🌍 Explore by Region</h2>
           <p>Discover the diverse beauty of Vietnam from North to South</p>
         </div>
         
@@ -584,11 +945,38 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave }) 
 
       {/* Modal & Form */}
       {viewingDestination && (
-        <DestinationModal destination={viewingDestination} onClose={() => setViewingDestination(null)} onCreateTrip={(dest) => { setViewingDestination(null); setSelectedDestination(dest); setShowForm(true); }} />
+        <DestinationModal 
+          destination={viewingDestination} 
+          onClose={() => setViewingDestination(null)} 
+          onCreateTrip={(dest) => {
+            setViewingDestination(null);
+            if (!isAuthenticated) {
+              setShowAuthModal(true);
+            } else {
+              setSelectedDestination(dest);
+              setShowForm(true);
+            }
+          }} 
+        />
       )}
+      
+      
       {showForm && selectedDestination && (
-        <CreateTripForm initialDestination={selectedDestination} onClose={() => setShowForm(false)} />
+        <CreateTripForm 
+          initialDestination={selectedDestination} 
+          onClose={() => setShowForm(false)} 
+        />
       )}
+      
+      {showAuthModal && (
+        <AuthRequiredModal 
+          onClose={() => setShowAuthModal(false)}
+          message="You need to be logged in to create a trip. Please login or register to continue your journey! ✈️"
+        />
+      )}
+
+      {/* SCROLL TO TOP BUTTON */}
+      <ScrollToTopButton />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { toast } from "react-toastify";
-import { FaLock, FaEye, FaEyeSlash, FaShieldAlt, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { FaLock, FaEye, FaEyeSlash, FaShieldAlt, FaCheckCircle, FaTimesCircle, FaHome } from "react-icons/fa";
 import API from "../untils/axios";
 import "../styles/AuthForm.css";
 
@@ -161,6 +161,15 @@ export default function ResetPasswordPage() {
 
   return (
     <div className="auth-page">
+    <button 
+      onClick={() => navigate("/")}
+      className="back-to-home-btn"
+      data-page="reset-password"
+      data-step={step}
+    >
+      <FaHome size={16} />
+      <span>Back to Home</span>
+    </button>
       <div className="auth-box verify-box">
         <div className="icon-wrapper" style={{ 
           background: step === 1 

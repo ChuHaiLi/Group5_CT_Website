@@ -100,7 +100,7 @@ flask db init
 
 **2. Create migration from models:**
 ```bash
-flask db migrate -m "initial migration"
+flask db-migrate -m "initial migration"
 ```
 
 **3. Apply migration to database:**
@@ -125,7 +125,7 @@ The API server will run at: [http://localhost:5000](http://localhost:5000)
 
 ```bash
 # Create new migration after model changes
-flask db migrate -m "description of changes"
+flask db-migrate -m "description of changes"
 
 # Apply migrations
 flask db upgrade

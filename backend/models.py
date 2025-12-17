@@ -187,6 +187,9 @@ class ChatSession(db.Model):
     title = db.Column(db.String(150), default="Cuộc trò chuyện mới")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationship to messages
+    messages = db.relationship("ChatMessage", backref="session", lazy=True, cascade="all, delete-orphan")
 
 class ChatMessage(db.Model):
     __tablename__ = 'chat_messages' # <-- THÊM: Đồng bộ tên bảng
