@@ -38,13 +38,59 @@ const QUICK_CATEGORIES = [
 
 // --- FAMOUS LOCATIONS ---
 const FAMOUS_LOCATIONS = [
-  "vinh ha long", "ha long bay", "pho co hoi an", "hoi an", "ba na hills", "golden bridge",
-  "fansipan", "sapa", "trang an", "ninh binh", "cu chi tunnels", "phong nha",
-  "dragon bridge", "hoan kiem lake", "hue imperial city", "phu quoc", "da lat",
-  "nha tho duc ba", "cho ben thanh", "dinh doc lap", "landmark 81", "vinwonders", "hoi an ancient town"
+  // --- Miền Bắc ---
+  "Quần thể danh thắng Tràng An",
+  "Fansipan Legend",
+  "Hồ Hoàn Kiếm",
+  "Văn Miếu - Quốc Tử Giám",
+  "Hoàng thành Thăng Long",
+  "Chùa Một Cột Hà Nội",
+  "Phố Cổ Hà Nội",
+  "Tam Chúc",
+  "Khu di tích danh thắng Yên Tử",
+  "Thác Bản Giốc",
+  "Ruộng bậc thang Mù Cang Chải",
+  "Làng gốm Bát Tràng",
+
+  // --- Miền Trung ---
+  "Phố cổ Hội An",
+  "Quần thể di tích Cố đô Huế",
+  "Sun World Ba Na Hills",
+  "Cầu Vàng",
+  "Thánh địa Mỹ Sơn",
+  "Động Thiên Đường và Động Phong Nha",
+  "Đảo Lý Sơn",
+  "Cù Lao Chàm",
+  "Ngũ Hành Sơn",
+  "Lăng Vua Minh Mạng",
+  "Vườn thú ZooDoo",
+  "Chùa Linh Thắng",
+  "Cáp Treo Đồi Robin Đà Lạt",
+  "Tham Quan Cao Nguyên Hoa Đà Lạt",
+  "VinWonders Nha Trang",
+  "Tham Quan Bảo Tàng Thế Giới Cà Phê",
+  "Datanla",
+
+  // --- Miền Nam ---
+  "Chợ Bến Thành",
+  "Dinh Độc Lập",
+  "Chùa Tam Chúc",
+  "Hồ Mây",
+  "Mũi Né",
+  "Tham Quan Khám Phá Địa Đạo Củ Chi",
+  "Thảo Cầm Viên",
+  "Đài quan sát Landmark 81 SkyView",
+  "VinWonders Phú Quốc",
+  "Bảo Tàng Chứng Tích Chiến Tranh",
+  "Vinpearl Safari Phú Quốc",
+  "Chợ nổi Cái Răng",
+  "Nhà thờ Đức Bà",
+  "Bưu điện Trung tâm Sài Gòn",
+  "Khu du lịch Văn hóa Suối Tiên",
+  "Núi Bà Đen"
 ];
 
-// --- BUDGET MAPPING (Bảng quy đổi giá) ---
+// --- BUDGET MAPPING ---
 const BUDGET_MAPPING = {
   "Free": { min: 0, max: 1 },
   "< 50.000 VND": { min: 1, max: 50000 },
@@ -83,6 +129,11 @@ const CATEGORY_ICON_MAP = {
   Price: <FaDollarSign />, "Special Features": <FaStar />
 };
 
+const SERVICE_KEYWORDS = [
+  "hotel", "restaurant", "resort", "homestay", "cafe", "coffee", 
+  "food", "beverage", "lưu trú", "nhà hàng", "khách sạn", "ẩm thực", "quán"
+];
+
 const REGULAR_ITEMS_PER_PAGE = 15;
 const POPULAR_ITEMS_PER_PAGE = 9;
 
@@ -90,7 +141,7 @@ const POPULAR_ITEMS_PER_PAGE = 9;
 
 const normalizeString = (str) => {
   if (!str) return "";
-  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/Đ/g, "d").replace(/Đ/g, "D").toLowerCase().trim();
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/Đ/g, "d").replace(/Ð/g, "D").toLowerCase().trim();
 };
 
 const sanitizeSearch = (str) => {
@@ -102,22 +153,15 @@ const sanitizeSearch = (str) => {
     .trim();
 };
 
-// --- PARSE PRICE FUNCTION ---
-// Hàm này giúp làm sạch dữ liệu giá từ DB (vd: "<= 500.000", "Free", "1.200.000 đ") thành số
 const parsePrice = (rawPrice) => {
   if (!rawPrice) return 0;
   
-  // Chuyển về string chữ thường
   const str = String(rawPrice).toLowerCase().trim();
 
-  // Nếu là Free/Miễn phí -> 0
   if (str.includes("free") || str.includes("miễn phí")) return 0;
 
-  // Xóa hết ký tự lạ, chỉ giữ lại số (0-9)
-  // Ví dụ: "<= 500.000 đ" -> "500000"
   const numberStr = str.replace(/[^0-9]/g, "");
 
-  // Chuyển thành số
   const val = Number(numberStr);
   return isNaN(val) ? 0 : val;
 };
@@ -228,6 +272,19 @@ const SearchAutocomplete = ({
   );
 };
 
+const isServiceLocation = (dest) => {
+  const type = (dest.type || "").toLowerCase();
+  const category = (dest.category || "").toLowerCase();
+  
+  let tagsStr = "";
+  if (Array.isArray(dest.tags)) tagsStr = dest.tags.join(" ").toLowerCase();
+  else if (typeof dest.tags === "string") tagsStr = dest.tags.toLowerCase();
+
+  return SERVICE_KEYWORDS.some(kw => 
+    type.includes(kw) || category.includes(kw) || tagsStr.includes(kw)
+  );
+};
+
 // ========================================
 // 🚀 MAIN COMPONENT: EXPLORE PAGE
 // ========================================
@@ -255,8 +312,8 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave, is
   const categoryRefs = useRef({});
   
   // State Pagination
-  const [currentPage, setCurrentPage] = useState(1); // Page cho phần 1
-  const [popularPage, setPopularPage] = useState(1); // Page cho phần 2 (MỚI)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [popularPage, setPopularPage] = useState(1);
 
   // State Authentication
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -270,13 +327,11 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave, is
   // Click outside to close autocomplete and category dropdowns
   useEffect(() => {
     const handleClickOutside = (e) => {
-      // Close autocomplete if click outside search bar
       if (searchInputRef.current && !searchInputRef.current.contains(e.target)) {
         setShowAutocomplete(false);
         setHighlightedIndex(-1);
       }
 
-      // Close category dropdown if click outside all categories
       if (openCategory) {
         const clickedInsideCategory = Object.values(categoryRefs.current).some(
           ref => ref && ref.contains(e.target)
@@ -370,10 +425,20 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave, is
         const regular = [];
 
         allData.forEach(dest => {
-            const normName = normalizeString(dest.name);
-            const isFamous = FAMOUS_LOCATIONS.some(f => normName.includes(f));
-            if (isFamous) popular.push(dest);
-            else regular.push(dest);
+            regular.push(dest);
+
+            const normDestName = normalizeString(dest.name);
+            
+            const isFamous = FAMOUS_LOCATIONS.some(f => {
+                const normFamousName = normalizeString(f);
+                return normDestName.includes(normFamousName);
+            });
+            
+            const isService = isServiceLocation(dest); 
+
+            if (isFamous && !isService) {
+              popular.push(dest);
+            }
         });
 
         setPopularDestinations(popular);
@@ -521,7 +586,7 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave, is
   const toggleCategory = (title) => setOpenCategory(prev => prev === title ? null : title);
   const isCategoryActive = (tags) => tags.some(tag => selectedTags.includes(tag));
 
-  // --- FILTER LOGIC (UPDATED WITH PRICE PARSING) ---
+  // --- FILTER LOGIC (FIXED FOR REGION SEARCH) ---
   const filteredRegularItems = useMemo(() => {
     return regularDestinations.filter((dest) => {
       const destNameNorm = normalizeString(dest.name);
@@ -535,42 +600,44 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave, is
       const destTags = parseTags(dest.tags);
 
       // 1. Check Search text
-      const matchesSearch = searchTokens.length === 0 || 
-        searchTokens.every((token) =>
-          destNameNorm.includes(token) ||
-          destProvinceNorm.includes(token) ||
-          destRegionNorm.includes(token)
-        );
+      // ✅ FIX: Kiểm tra chính xác nếu đang search theo miền
+      const isRegionSearch = searchNorm === "mien bac" || searchNorm === "mien trung" || searchNorm === "mien nam";
+      
+      let matchesSearch;
+      if (isRegionSearch) {
+        // Nếu search theo miền, chỉ match CHÍNH XÁC region_name
+        matchesSearch = destRegionNorm === searchNorm;
+      } else {
+        // Search bình thường (tìm theo tên, tỉnh, hoặc miền)
+        matchesSearch = searchTokens.length === 0 || 
+          searchTokens.every((token) =>
+            destNameNorm.includes(token) ||
+            destProvinceNorm.includes(token) ||
+            destRegionNorm.includes(token)
+          );
+      }
 
       // 2. Check Tags (Price + Regular Tags)
       const matchesTags = selectedTags.length === 0 || 
         selectedTags.every((tag) => {
-          // Kiểm tra xem tag này có phải là tag giá tiền không
           if (BUDGET_MAPPING[tag]) {
             const { min, max } = BUDGET_MAPPING[tag];
             
-            // Lấy giá từ entry_fee (priority cao nhất) hoặc các trường khác
             const priceVal = dest.entry_fee ?? dest.price ?? dest.cost ?? dest.budget;
             
-            // Xử lý giá tiền
             let realPrice = 0;
             
             if (priceVal === null || priceVal === undefined || priceVal === "" || priceVal === "Miễn Phí" || priceVal === "Free") {
-              // Nếu là miễn phí
               realPrice = 0;
             } else if (typeof priceVal === 'number') {
-              // Nếu đã là số (như entry_fee: 20000)
               realPrice = priceVal;
             } else {
-              // Nếu là string, dùng parsePrice để xử lý
               realPrice = parsePrice(priceVal);
             }
             
-            // So sánh với khoảng giá
             return realPrice >= min && realPrice < max;
           }
           
-          // Nếu không phải tag giá tiền, kiểm tra mảng tags như thường
           return destTags.includes(tag);
         });
       
@@ -784,9 +851,9 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave, is
             <button 
               className="empty-state-btn"
               onClick={() => {
-                setSelectedTags([]); // Xóa tags
-                setSearch("");       // Xóa tìm kiếm
-                setCurrentPage(1);   // Về trang đầu
+                setSelectedTags([]);
+                setSearch("");
+                setCurrentPage(1);
               }}
             >
               Clear all filters
@@ -847,7 +914,7 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave, is
       {/* ================= SECTION 3: EXPLORE BY REGION ================= */}
       <div className="section-block section-regions">
         <div className="section-header-center">
-          <h2>🌏 Explore by Region</h2>
+          <h2>🌍 Explore by Region</h2>
           <p>Discover the diverse beauty of Vietnam from North to South</p>
         </div>
         
@@ -884,7 +951,7 @@ export default function ExplorePage({ savedIds = new Set(), handleToggleSave, is
           onCreateTrip={(dest) => {
             setViewingDestination(null);
             if (!isAuthenticated) {
-              setShowAuthModal(true); // ← Check auth
+              setShowAuthModal(true);
             } else {
               setSelectedDestination(dest);
               setShowForm(true);
