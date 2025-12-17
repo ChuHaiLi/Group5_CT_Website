@@ -1098,63 +1098,52 @@ export default function EditTripPage() {
     };
 
     const flattenItinerary = (apiItinerary) => {
-        console.log('🔄 flattenItinerary called with:', apiItinerary); // DEBUG
+    let uniqueIdCounter = 0;
+    let extractedHotel = null;
 
-        let uniqueIdCounter = 0;
-        let extractedHotel = null;
+    const flattened = apiItinerary.map((dayPlan) => {
+        const nonHotelPlaces = [];
 
-        const flattened = apiItinerary.map((dayPlan) => {
-            const placesWithoutHotel = [];
+        (dayPlan.places || []).forEach((item) => {
+            // Logic nhận diện khách sạn (Đồng bộ với TripDetailsPage)
+            const isHotel =
+                item.is_accommodation === true ||
+                (item.type && item.type.toLowerCase() === 'hotel') ||
+                (item.category && (
+                    item.category.toLowerCase() === 'hotel' || 
+                    item.category.toLowerCase() === 'khách sạn' || 
+                    item.category.toLowerCase() === 'accommodation'
+                ));
 
-            (dayPlan.places || []).forEach((item) => {
-                // ✅ DEBUG: Log từng item
-                console.log('📍 Processing item:', {
-                    name: item.name,
-                    entry_fee: item.entry_fee,
-                    category: item.category,
-                    type: item.type
-                });
-
-                const isHotel = (item.category === 'Khách sạn' || item.type === 'hotel');
-
-                if (isHotel && !extractedHotel) {
+            if (isHotel) {
+                // Chỉ lấy khách sạn đầu tiên tìm thấy để hiển thị ở khung phía trên
+                if (!extractedHotel) {
                     extractedHotel = {
-                        id: item.id || -1,
-                        name: item.name || 'Khách sạn đã chọn',
-                        address: item.address || item.place || 'Địa chỉ không rõ',
-                        rating: item.rating || 0,
-                        type: 'hotel',
-                        lat: item.lat || item.latitude || null,
-                        lon: item.lon || item.longitude || null,
-                        // ✅ QUAN TRỌNG: Parse entry_fee sang số
-                        entry_fee: Number(item.entry_fee) || 0,
-                    };
-                    console.log('🏨 Extracted hotel:', extractedHotel);
-                } else if (isHotel && extractedHotel) {
-                    return;
-                } else {
-                    const newItem = {
                         ...item,
-                        uniqueId: `item-${item.id || item.name}-${uniqueIdCounter++}`,
-                        day: dayPlan.day,
-                        // ✅ QUAN TRỌNG: Parse entry_fee sang số
-                        entry_fee: Number(item.entry_fee) || 0,
+                        type: 'hotel',
+                        entry_fee: Number(item.entry_fee) || 0
                     };
-                    placesWithoutHotel.push(newItem);
-                    console.log('✅ Added place:', newItem.name, 'Fee:', newItem.entry_fee);
                 }
-            });
-
-            return {
-                ...dayPlan,
-                places: placesWithoutHotel,
-            };
+            } else {
+                // Chỉ thêm vào danh sách CHỈNH SỬA nếu KHÔNG PHẢI là khách sạn
+                nonHotelPlaces.push({
+                    ...item,
+                    uniqueId: item.uniqueId || `item-${item.id || item.name}-${uniqueIdCounter++}`,
+                    day: dayPlan.day,
+                    entry_fee: Number(item.entry_fee) || 0
+                });
+            }
         });
 
-        flattened.extractedHotel = extractedHotel;
-        console.log('🎯 Flattened result:', flattened);
-        return flattened;
-    };
+        return {
+            ...dayPlan,
+            places: nonHotelPlaces,
+        };
+    });
+
+    flattened.extractedHotel = extractedHotel;
+    return flattened;
+};
 
     const restoreItinerary = (flatItinerary) => {
         return flatItinerary.map((dayPlan) => ({
@@ -1315,7 +1304,7 @@ export default function EditTripPage() {
                     const savedHotelInMetadata = fetchedTrip.metadata?.hotel;
                     const extractedHotelFromItinerary = flattened.extractedHotel;
 
-                    const hotelToUse = savedHotelInMetadata || extractedHotelFromItinerary;
+                    const hotelToUse = fetchedTrip.metadata?.hotel || flattened.extractedHotel;
 
                     if (hotelToUse && hotelToUse.name) {
                         const index = hotelOptions.findIndex(h => h.id === hotelToUse.id);
@@ -1640,78 +1629,96 @@ export default function EditTripPage() {
 
     // --- HÀM LƯU DỮ LIỆU CHÍNH ---
     const handleSave = async () => {
-        if (!tripData) return;
-        const maxBudget = extractMaxBudget(editableData.budget);
-        if (maxBudget > 0 && currentTotalCost > maxBudget) {
-            toast.error(`Không thể LƯU: Tổng chi phí ước tính (${new Intl.NumberFormat('vi-VN').format(currentTotalCost)} VND) vượt quá Ngân sách tối đa (${new Intl.NumberFormat('vi-VN').format(maxBudget)} VND). Vui lòng điều chỉnh Ngân sách hoặc xóa bớt địa điểm.`, { autoClose: 8000 });
-            setIsSaving(false);
-            return; // NGĂN CHẶN LƯU
-        }
-        const { name, startDate, people, budget } = editableData;
-        // ✅ Lấy duration từ itinerary.length thực tế
-        const actualDuration = itinerary.length;
+    if (!tripData) return;
+    
+    const maxBudget = extractMaxBudget(editableData.budget);
+    if (maxBudget > 0 && currentTotalCost > maxBudget) {
+        toast.error(`Không thể LƯU: Tổng chi phí ước tính (${new Intl.NumberFormat('vi-VN').format(currentTotalCost)} VND) vượt quá Ngân sách tối đa (${new Intl.NumberFormat('vi-VN').format(maxBudget)} VND). Vui lòng điều chỉnh Ngân sách hoặc xóa bớt địa điểm.`, { autoClose: 8000 });
+        setIsSaving(false);
+        return; 
+    }
 
-        console.log('💾 [EditTripPage] Saving with:');
-        console.log('   - Actual Duration:', actualDuration);
-        console.log('   - Itinerary days:', itinerary.length);
+    const { name, startDate, people, budget } = editableData;
+    const actualDuration = itinerary.length;
 
-        if (!name?.trim() || !startDate || actualDuration <= 0) {
-            toast.error('Vui lòng đảm bảo các trường Tên, Ngày, Thời lượng hợp lệ.');
-            return;
-        }
+    if (!name?.trim() || !startDate || actualDuration <= 0) {
+        toast.error('Vui lòng đảm bảo các trường Tên, Ngày, Thời lượng hợp lệ.');
+        return;
+    }
 
-        setIsSaving(true);
-        setError(null);
+    setIsSaving(true);
+    setError(null);
+    const loadingToast = toast.info('Đang lưu thay đổi...', { autoClose: false });
 
-        const loadingToast = toast.info('Đang lưu thay đổi...', { autoClose: false });
+    try {
+        // 1. Chuẩn bị Itinerary payload
+        let updatedItinerary = restoreItinerary(itinerary);
 
-        try {
-            // 1. ✅ Lưu Metadata với ACTUAL duration
-            const metadataPayload = {
-                name: name,
-                duration: actualDuration, // ✅ Dùng actualDuration
-                start_date: startDate,
-                metadata: {
-                    people: people,
-                    budget: budget,
-                    hotel: currentHotel,
-                },
+        // ✅ QUAN TRỌNG: Chèn khách sạn trở lại vào Itinerary để trang Chi tiết nhận diện được
+        if (currentHotel) {
+            const hotelItem = {
+                ...currentHotel,
+                is_accommodation: true, // Flag quan trọng để logic lọc nhận diện được
+                category: 'Khách sạn',
+                type: 'hotel',
+                day: 1, // Mặc định gán vào ngày 1
+                time_slot: '21:00' // Giờ nghỉ ngơi giả định
             };
 
-            console.log('📤 Sending metadata payload:', metadataPayload);
-
-            await axios.put(`/api/trips/${tripId}`, metadataPayload, {
-                headers: { Authorization: `Bearer ${getAuthToken()}` },
-            });
-
-            // 2. Lưu Itinerary
-            const updatedItinerary = restoreItinerary(itinerary);
-            const itineraryPayload = { itinerary: updatedItinerary };
-
-            await axios.put(`/api/trips/${tripId}/itinerary`, itineraryPayload, {
-                headers: { Authorization: `Bearer ${getAuthToken()}` },
-            });
-
-            toast.dismiss(loadingToast);
-            toast.success("Đã lưu TẤT CẢ thay đổi thành công!", { autoClose: 3000 });
-
-            // ✅ Cập nhật editableData.duration
-            setEditableData(prev => ({ ...prev, duration: actualDuration }));
-
-            // ✅ Navigate với force reload
-            setTimeout(() => {
-                window.location.href = `/trips/${tripId}`;
-            }, 1000);
-
-        } catch (err) {
-            toast.dismiss(loadingToast);
-            setError("Lỗi khi lưu dữ liệu chuyến đi.");
-            toast.error("Không thể lưu thay đổi. Vui lòng thử lại.");
-            console.error("Error saving:", err.response?.data || err);
-        } finally {
-            setIsSaving(false);
+            // Tìm ngày 1 trong mảng đã restore và đẩy hotel vào
+            const day1 = updatedItinerary.find(d => d.day === 1);
+            if (day1) {
+                day1.places.push(hotelItem);
+            } else if (updatedItinerary.length > 0) {
+                // Nếu không tìm thấy ngày 1, đẩy vào ngày đầu tiên hiện có
+                updatedItinerary[0].places.push(hotelItem);
+            }
         }
-    };
+
+        // 2. Lưu Metadata (Bao gồm cả thông tin hotel trong metadata để backup)
+        const metadataPayload = {
+            name: name,
+            duration: actualDuration,
+            start_date: startDate,
+            metadata: {
+                people: people,
+                budget: budget,
+                hotel: currentHotel,
+            },
+        };
+
+        console.log('📤 Sending metadata payload:', metadataPayload);
+        await axios.put(`/api/trips/${tripId}`, metadataPayload, {
+            headers: { Authorization: `Bearer ${getAuthToken()}` },
+        });
+
+        // 3. Lưu Itinerary (Lúc này đã chứa Hotel bên trong places)
+        const itineraryPayload = { itinerary: updatedItinerary };
+        console.log('📤 Sending itinerary payload (with hotel):', itineraryPayload);
+        
+        await axios.put(`/api/trips/${tripId}/itinerary`, itineraryPayload, {
+            headers: { Authorization: `Bearer ${getAuthToken()}` },
+        });
+
+        toast.dismiss(loadingToast);
+        toast.success("Đã lưu TẤT CẢ thay đổi thành công!", { autoClose: 3000 });
+
+        setEditableData(prev => ({ ...prev, duration: actualDuration }));
+
+        // Điều hướng về trang chi tiết
+        setTimeout(() => {
+            window.location.href = `/trips/${tripId}`;
+        }, 1000);
+
+    } catch (err) {
+        toast.dismiss(loadingToast);
+        setError("Lỗi khi lưu dữ liệu chuyến đi.");
+        toast.error("Không thể lưu thay đổi. Vui lòng thử lại.");
+        console.error("Error saving:", err.response?.data || err);
+    } finally {
+        setIsSaving(false);
+    }
+};
 
     // --- AI evaluate handler ---
     const handleAIEvaluate = async () => {
