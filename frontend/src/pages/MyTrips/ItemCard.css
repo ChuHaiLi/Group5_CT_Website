@@ -1,0 +1,466 @@
+/* ItemCard.css - MERGED & FIXED: Giao diện hoàn chỉnh + Modal overlay toàn trang */
+
+/* ============ RESET & OVERRIDE ============ */
+.item-card * {
+    box-sizing: border-box;
+}
+
+/* ============ MAIN CARD CONTAINER ============ */
+.item-card {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+    padding: 1rem;
+    background: white;
+    border-radius: 12px;
+    border: 2px solid #e2e8f0;
+    margin-bottom: 0.75rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.item-card:hover {
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    transform: translateY(-2px);
+}
+
+.item-card.dragging {
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+    transform: rotate(3deg) scale(1.05);
+    opacity: 0.9;
+}
+
+/* ============ CARD MAIN SECTION (TOP) ============ */
+.item-card-main {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 1rem !important;
+    width: 100% !important;
+}
+
+/* ============ DRAG HANDLE ============ */
+.drag-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    cursor: grab;
+    font-size: 1.25rem;
+    padding: 0.5rem;
+    transition: color 0.2s ease;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.drag-handle:hover {
+    color: #667eea;
+}
+
+/* ============ ITEM ICON ============ */
+.item-icon {
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border-radius: 12px;
+    flex-shrink: 0;
+}
+
+/* ============ CONTENT SECTION ============ */
+.item-content {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+}
+
+/* ============ NAME INPUT ============ */
+.name-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e293b;
+    transition: all 0.2s ease;
+}
+
+.name-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* ============ TIME & DURATION GROUP ============ */
+.time-duration-group {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+    margin-top: 0.25rem;
+}
+
+.item-card-input-group {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 0.75rem !important;
+    width: 100% !important;
+}
+
+.item-card-input-group h3 {
+    display: block !important;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #475569;
+    margin: 0;
+    min-width: 80px;
+    flex-shrink: 0;
+    text-align: left !important;
+}
+
+.time-input,
+.duration-select {
+    display: block !important;
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #475569;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Tùy chỉnh mũi tên xuống (select dropdown) */
+.duration-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000000' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: calc(100% - 12px) center;
+    background-size: 24px;
+    padding-right: 3rem;
+}
+
+.time-input:focus,
+.duration-select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* ============ CATEGORY BADGE ============ */
+.category-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 6px;
+    width: fit-content;
+}
+
+/* ============ ACTION GROUP (BOTTOM BUTTONS) ============ */
+.action-group {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 0.75rem !important;
+    width: 100% !important;
+    margin-top: 0.5rem !important;
+}
+
+.view-link-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: #3182ce;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.view-link-btn:hover {
+    background: #2c5aa0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
+}
+
+.view-link-btn:active {
+    transform: translateY(0);
+}
+
+.delete-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: #fee2e2;
+    color: #dc2626;
+    border: 2px solid #fecaca;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+    background: #fecaca;
+    border-color: #fca5a5;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+}
+
+.delete-btn:active {
+    transform: translateY(0);
+}
+
+/* ============ THEME VARIATIONS ============ */
+.item-card.theme-lunch {
+    border-left: 4px solid #fbbf24;
+}
+
+.item-card.theme-lunch .item-icon {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+}
+
+.item-card.theme-travel {
+    border-left: 4px solid #34d399;
+}
+
+.item-card.theme-travel .item-icon {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+}
+
+.item-card.theme-default {
+    border-left: 4px solid;
+    border-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%) 1;
+}
+
+/* ============ CONFIRM DELETE MODAL ============ */
+.confirm-modal-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 15000 !important; /* Cao hơn DestinationModal (10000) nhưng thấp hơn ImageViewer (20000) */
+    backdrop-filter: blur(5px);
+    animation: fadeInModal 0.2s ease-out;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+@keyframes fadeInModal {
+    from { 
+        opacity: 0; 
+    }
+    to { 
+        opacity: 1; 
+    }
+}
+
+.confirm-modal {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 450px;
+    width: 90%;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    animation: scaleInModal 0.3s ease-out;
+}
+
+@keyframes scaleInModal {
+    from { 
+        transform: scale(0.9); 
+        opacity: 0; 
+    }
+    to { 
+        transform: scale(1); 
+        opacity: 1; 
+    }
+}
+
+.confirm-modal-icon {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    animation: bounceIn 0.5s ease-out;
+}
+
+@keyframes bounceIn {
+    0% { 
+        transform: scale(0); 
+    }
+    50% { 
+        transform: scale(1.2); 
+    }
+    100% { 
+        transform: scale(1); 
+    }
+}
+
+.confirm-modal h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin-bottom: 1rem;
+}
+
+.confirm-modal p {
+    color: #4a5568;
+    margin-bottom: 0.75rem;
+    line-height: 1.6;
+}
+
+.confirm-modal p strong {
+    color: #2d3748;
+    font-weight: 600;
+}
+
+.warning-text {
+    color: #e53e3e !important;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+}
+
+.confirm-modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.btn-cancel {
+    flex: 1;
+    padding: 0.75rem 1.5rem;
+    background: #e2e8f0;
+    color: #4a5568;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-cancel:hover {
+    background: #cbd5e0;
+    transform: translateY(-2px);
+}
+
+.btn-cancel:active {
+    transform: translateY(0);
+}
+
+.btn-confirm-delete {
+    flex: 1;
+    padding: 0.75rem 1.5rem;
+    background: #dc2626;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-confirm-delete:hover {
+    background: #b91c1c;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+.btn-confirm-delete:active {
+    transform: translateY(0);
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 768px) {
+    .item-card {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .item-card-main {
+        flex-direction: column;
+    }
+
+    .drag-handle {
+        align-self: center;
+    }
+
+    .item-icon {
+        align-self: center;
+    }
+
+    .item-card-input-group {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+
+    .item-card-input-group h3 {
+        min-width: auto;
+        text-align: left !important;
+    }
+
+    .time-input,
+    .duration-select {
+        width: 100%;
+    }
+    
+    .action-group {
+        flex-direction: column !important;
+    }
+    
+    .view-link-btn,
+    .delete-btn {
+        width: 100%;
+    }
+
+    .confirm-modal {
+        max-width: 95%;
+        padding: 1.5rem;
+    }
+
+    .confirm-modal h3 {
+        font-size: 1.25rem;
+    }
+
+    .confirm-modal-actions {
+        flex-direction: column;
+    }
+}

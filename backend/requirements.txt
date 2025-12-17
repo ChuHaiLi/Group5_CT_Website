@@ -1,0 +1,11 @@
+Flask
+Flask-SQLAlchemy
+Flask-JWT-Extended
+Flask-Cors
+Flask-Migrate
+Unidecode
+openai>=1.0.0
+python-dotenv
+requests
+alembic
+SQLAlchemy

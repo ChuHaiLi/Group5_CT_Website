@@ -1,0 +1,723 @@
+/* --- GLOBAL STYLES --- */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap");
+
+.saved-wrapper {
+  padding: 2rem 4rem;
+  font-family: "Poppins", sans-serif;
+  background: #f9fafb;
+  min-height: 100vh;
+  box-sizing: border-box;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.saved-wrapper > * {
+  width: 100%;
+  max-width: 1200px;
+}
+
+/* HEADER */
+.saved-header {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+}
+
+.saved-header h1 {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  color: #111827;
+}
+
+.saved-header p {
+  margin-bottom: 1.5rem;
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+/* TABS */
+.saved-tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.saved-tabs button {
+  padding: 0.6rem 1.4rem;
+  border-radius: 25px;
+  border: 1px solid #d1d5db;
+  background: white;
+  cursor: pointer;
+  font-weight: 600;
+  color: #6b7280;
+  transition: all 0.2s ease;
+  font-family: "Poppins", sans-serif;
+}
+
+.saved-tabs button.active {
+  background: #111827;
+  color: white;
+  border-color: #111827;
+}
+
+/* FIX HOVER TAB: Chữ đen nền xám */
+.saved-tabs button:not(.active):hover {
+  background: #f3f4f6;
+  color: #111827;
+  border-color: #d1d5db;
+}
+
+/* SEARCH BAR */
+.saved-search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  width: 100%;
+  background: white;
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+}
+
+.saved-search input {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  border: none;
+  font-size: 1rem;
+  outline: none;
+  font-family: "Poppins", sans-serif;
+}
+
+.saved-search .search-icon {
+  color: #6b7280;
+  font-size: 1.2rem;
+}
+
+/* --- SAVED CONTROLS (GROUP & SORT BAR) --- */
+.saved-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.group-filters {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.control-label {
+  font-weight: 700;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+}
+
+.group-options {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-chip {
+  background: white;
+  border: 1px solid #d1d5db;
+  padding: 0.4rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: "Poppins", sans-serif;
+}
+
+.filter-chip:hover {
+  border-color: #9ca3af;
+  background: #f3f4f6;
+}
+
+.filter-chip.active {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.25);
+}
+
+.sort-controls {
+  margin-left: auto;
+}
+
+.sort-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: white;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  font-family: "Poppins", sans-serif;
+  transition: all 0.2s;
+}
+
+.sort-btn:hover {
+  background: #f9fafb;
+  color: #111827;
+}
+
+/* --- GROUPED SECTIONS --- */
+.grouped-container {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  width: 100%;
+}
+
+.group-section {
+  width: 100%;
+}
+
+.group-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.header-text {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: #111827;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.05);
+  white-space: nowrap;
+}
+
+.header-count {
+  background: #f3f4f6;
+  color: #6b7280;
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-family: "Poppins", sans-serif;
+}
+
+.header-line {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(to right, #e5e7eb, transparent);
+  margin-top: 5px;
+}
+
+/* MAIN CONTENT */
+.saved-content {
+  width: 100%;
+}
+
+/* GRID LAYOUT */
+.saved-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  box-sizing: border-box;
+}
+
+@media screen and (min-width: 640px) {
+  .saved-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  .saved-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.saved-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #4b5563;
+}
+
+.saved-empty img {
+  width: 180px;
+  opacity: 0.6;
+  margin-bottom: 1rem;
+}
+
+.saved-empty h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  font-family: "Poppins", sans-serif;
+}
+
+/* ================================================= */
+/* FOLDER & MODAL STYLES */
+/* ================================================= */
+
+/* Grid Folder */
+.folders-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.folder-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.2s;
+  height: 120px;
+  position: relative;
+}
+
+.folder-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+  border-color: #d1d5db;
+}
+
+.folder-icon {
+  font-size: 2rem;
+  color: #3b82f6;
+  margin-bottom: 0.5rem;
+}
+
+.folder-info h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.folder-info p {
+  margin: 2px 0 0 0;
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.delete-folder-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  color: #ef4444;
+  opacity: 0;
+  transition: opacity 0.2s;
+  cursor: pointer;
+}
+
+.folder-card:hover .delete-folder-btn {
+  opacity: 1;
+}
+
+.folder-card.create-new {
+  border: 2px dashed #d1d5db;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+}
+
+.folder-card.create-new:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.folder-icon-circle {
+  width: 40px;
+  height: 40px;
+  background: #f3f4f6;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+/* Header bên trong folder */
+.folder-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.folder-header-bar h2 {
+  margin: 0;
+  font-size: 1.6rem;
+  font-family: "Poppins", sans-serif;
+  color: #111827;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  color: #6b7280;
+  font-size: 1rem;
+  padding: 0.5rem 0;
+  font-family: "Poppins", sans-serif;
+}
+
+.back-btn:hover {
+  color: #111827;
+}
+
+.folder-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border: none;
+  padding: 0.6rem 1.4rem;
+  border-radius: 99px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: "Poppins", sans-serif;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.add-btn {
+  background: #2563eb;
+  color: white;
+}
+
+.add-btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(37, 99, 235, 0.2);
+}
+
+.remove-btn {
+  background: white;
+  border: 1px solid #fee2e2;
+  color: #ef4444;
+  border-radius: 10px;
+}
+
+.remove-btn:hover {
+  background: #fef2f2;
+  border-color: #ef4444;
+}
+
+/* Folder trống – căn giữa */
+.folder-empty-state {
+  grid-column: 1 / -1;
+  width: 100%;
+  height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #9ca3af;
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+/* MODAL STYLES */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.create-folder-modal {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 400px;
+  text-align: center;
+}
+
+.create-folder-modal input {
+  width: 100%;
+  padding: 0.8rem;
+  margin: 1rem 0;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+.add-to-folder-modal {
+  background: white;
+  border-radius: 12px;
+  width: 500px;
+  max-width: 90%;
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  font-family: "Times New Roman", Times, serif;
+  font-weight: 1000;
+}
+
+.modal-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-family: "Poppins", sans-serif;
+}
+
+.modal-header p {
+  margin: 5px 0 0 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.modal-body-list {
+  padding: 1rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.select-item-row {
+  display: flex;
+  align-items: center;
+  padding: 0.8rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+  border: 1px solid transparent;
+  margin-bottom: 0.5rem;
+}
+
+.select-item-row:hover {
+  background: #f9fafb;
+}
+
+.select-item-row.selected {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+/* Style riêng cho nút Remove (Màu đỏ nhạt khi chọn) */
+.select-item-row.selected-remove {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.select-item-row img {
+  width: 50px;
+  height: 50px;
+  border-radius: 6px;
+  object-fit: cover;
+  margin-right: 1rem;
+}
+
+.select-item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.select-item-info strong {
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+.select-item-info span {
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.checkbox-circle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.select-item-row.selected .checkbox-circle {
+  border-color: #3b82f6;
+  background: #3b82f6;
+}
+
+.checkbox-circle.remove-style {
+  border-color: #ef4444;
+}
+
+.select-item-row.selected-remove .checkbox-circle.remove-style {
+  background: #ef4444;
+  border-color: #ef4444;
+}
+
+.inner-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-top: 1px solid #f3f4f6;
+}
+
+.btn-cancel,
+.btn-apply {
+  flex: 1;
+  max-width: 200px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.6rem 1.2rem;
+  box-sizing: border-box;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+}
+
+/* màu riêng */
+.btn-cancel {
+  background: #f3f4f6;
+  border: none;
+  color: #111827;
+}
+
+.btn-apply {
+  background: #10b981;
+  color: white;
+  border: none;
+}
+
+.btn-apply:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-apply.btn-danger {
+  background: #ef4444;
+}
+
+.btn-apply.btn-danger:hover {
+  background: #dc2626;
+}
+
+.no-items-text {
+  text-align: center;
+  color: #9ca3af;
+  padding: 2rem;
+}
+
+.auth-modal-message {
+  font-family: 'Poppins', 'Segoe UI Emoji', 'Apple Color Emoji', sans-serif;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+/* ----- NEW FOLDER MODAL FOOTER ----- */
+.create-folder-modal .modal-footer {
+  display: flex;
+  justify-content: center;   /* căn giữa cả cụm nút */
+  gap: 1rem;
+  padding: 1rem;
+  border-top: 1px solid #f3f4f6;
+}
+
+/* Hai nút có kích thước & style giống nhau */
+.create-folder-modal .btn-cancel,
+.create-folder-modal .btn-create {
+  min-width: 150px;                 /* 2 nút rộng bằng nhau */
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.6rem 1.6rem;
+  box-sizing: border-box;
+  border-radius: 999px;             /* bo tròn giống nút lớn */
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+/* Màu riêng từng nút */
+.create-folder-modal .btn-cancel {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.create-folder-modal .btn-create {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+/* Hover nhẹ */
+.create-folder-modal .btn-create:hover {
+  background: #1d4ed8;
+}
+
+.create-folder-modal .btn-cancel:hover {
+  background: #e5e7eb;
+}

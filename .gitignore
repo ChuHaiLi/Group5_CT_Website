@@ -1,0 +1,60 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Python
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.pyc
+.venv/
+venv/
+
+# Environments
+.env
+.env.local
+.env.*.local
+*.env
+
+# Databases
+*.sqlite3
+instance/
+backend/instance/
+
+# Alembic migration versions (auto-generated)
+# Ignore auto-generated migration files to avoid committing many versions
+backend/migrations/versions/*.py
+
+# Build / coverage
+dist/
+build/
+coverage/
+.coverage
+.coverage.*
+htmlcov/
+*.cover
+.hypothesis/
+.pytest_cache/
+.tox/
+coverage.xml
+*.coveragerc
+
+# Logs
+*.log
+
+# IDE / OS
+.DS_Store
+.vscode/
+.idea/
+Thumbs.db
+
+# Frontend
+frontend/build/
+frontend/.cache/
+frontend/coverage/
+frontend/.nyc_output/
+
+# Misc
+.cache/
+.parcel-cache/
