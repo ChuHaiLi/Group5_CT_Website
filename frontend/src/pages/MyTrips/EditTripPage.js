@@ -17,9 +17,9 @@ const getAuthToken = () => localStorage.getItem("access_token");
 const peopleOptions = ["1 person", "2-4 people", "5-10 people", "10+ people"];
 const budgetOptions = [
     "< 500k VND",
-    "500K - 1 milions VND",
-    "1 - 2 milions VND",
-    "> 2 milions VND",
+    "500K - 1 millions VND",
+    "1 - 2 millions VND",
+    "> 2 millions VND",
 ];
 
 const hotelOptions = [
@@ -77,10 +77,12 @@ const getDurationStringFromLength = (length) => {
 /** Helper: map budget label -> max VND amount */
 const extractMaxBudget = (budgetStr) => {
     if (!budgetStr) return 0;
+
+    if (budgetStr.includes(">")) return 1000000000;
+    if (budgetStr.includes("2 millions VND")) return 2000000;
+    if (budgetStr.includes("1 millions VND")) return 1000000;
     if (budgetStr.includes("500k VND")) return 500000;
-    if (budgetStr.includes("1 milions VND")) return 1000000;
-    if (budgetStr.includes("2 milions VND")) return 2000000;
-    if (budgetStr.includes(">")) return 1000000000; // 1 tỷ VND cho trường hợp lớn hơn
+
     return 0;
 };
 
@@ -91,39 +93,41 @@ const extractMaxBudget = (budgetStr) => {
 const calculateTotalCost = (
     mustIncludeDetails,
     selectedHotel,
-    durationStr,
+    durationDays,
     peopleCount
 ) => {
-    const durationDays = extractDurationDays(durationStr);
-    const numPeople = peopleCount.includes("1 person")
-        ? 1
-        : peopleCount.includes("2-4 people")
-            ? 4
-            : peopleCount.includes("5-10 people")
-                ? 10
-                : peopleCount.includes("10+ people")
-                    ? 10
-                    : 1; // Ước tính số người tối đa cho tính toán chi phí
+    // 🛡️ Safety guards
+    const days = Math.max(1, Number(durationDays) || 1);
 
-    let destinationsCost = 0;
-    // Cost của các địa điểm tham quan (Entry fees)
-    mustIncludeDetails.forEach((d) => {
-        // [CHANGE] Use d.entry_fee. The entry_fee for destinations is assumed to be per-person.
-        const cost = Number(d.entry_fee) || 0;
-        destinationsCost += cost;
-    });
+    // 👥 Resolve number of people
+    const numPeople = (() => {
+        if (peopleCount?.includes("1 person")) return 1;
+        if (peopleCount?.includes("2-4 people")) return 4;
+        if (peopleCount?.includes("5-10 people")) return 10;
+        if (peopleCount?.includes("10+ people")) return 10;
+        return 1;
+    })();
 
+    // 🗺️ Destinations cost (per person)
+    const destinationsCostPerPerson = Array.isArray(mustIncludeDetails)
+        ? mustIncludeDetails.reduce((sum, d) => {
+            const cost = Number(d?.entry_fee) || 0;
+            return sum + cost;
+        }, 0)
+        : 0;
+
+    // 🏨 Hotel cost (per night, per group)
     let hotelCost = 0;
-    if (selectedHotel && durationDays > 0) {
-        const numNights = Math.max(1, durationDays - 1); // Số đêm = Số ngày - 1
-        // [CHANGE] Use selectedHotel.entry_fee. Assumed to be the nightly rate (per room/group).
-        const costPerNight = Number(selectedHotel.entry_fee) || 0;
+    if (selectedHotel) {
+        const numNights = Math.max(1, days - 1);
+        const costPerNight = Number(selectedHotel?.entry_fee) || 0;
         hotelCost = costPerNight * numNights;
     }
 
-    // Tổng chi phí (Địa điểm * số người) + Chi phí khách sạn
-    // NOTE: Chỉ nhân cost địa điểm với số người, giữ nguyên cost khách sạn.
-    const totalCost = destinationsCost * numPeople + hotelCost;
+    // 💰 Final total
+    const totalCost =
+        destinationsCostPerPerson * numPeople + hotelCost;
+
     return totalCost;
 };
 
@@ -1179,7 +1183,7 @@ export default function EditTripPage() {
         const totalCost = calculateTotalCost(
             placesWithCost, // Địa điểm/hoạt động có phí
             currentHotel,    // Khách sạn (giả sử có entry_fee = nightly rate)
-            durationString,  // Thời lượng
+            itinerary.length,  // Thời lượng
             editableData.people // Số người
         );
 
@@ -1620,12 +1624,7 @@ export default function EditTripPage() {
             ...nextItinerary[dayIndex],
             places: [...(nextItinerary[dayIndex].places || []), newItem]
         };
-
-        nextItinerary[dayIndex] = {
-            ...nextItinerary[dayIndex],
-            places: [...(nextItinerary[dayIndex].places || []), newItem]
-        };
-
+        
         // Rebuild
         const rebuilt = await rebuildDay(nextItinerary[dayIndex].places || []);
         nextItinerary[dayIndex] = { ...nextItinerary[dayIndex], places: rebuilt };
@@ -2402,16 +2401,25 @@ export default function EditTripPage() {
                             </span>
                         </p>
                         <p style={{ margin: '8px 0 0', fontSize: '0.9rem', color: '#666' }}>
-                            (Ngân sách tối đa: {new Intl.NumberFormat('vi-VN').format(extractMaxBudget(editableData.budget))} VND)
+                            (Ngân sách tối đa:&nbsp;
+                            {extractMaxBudget(editableData.budget) != 1000000000
+                                ? `${new Intl.NumberFormat('vi-VN').format(extractMaxBudget(editableData.budget))} VND`
+                                : 'Không có'}
+                            )
                         </p>
+
                         {extractMaxBudget(editableData.budget) > 0 && currentTotalCost > extractMaxBudget(editableData.budget) && (
                             <p style={{ margin: '8px 0 0', color: '#dc2626', fontWeight: 600 }}>
                                 ⚠️ Chi phí đang vượt quá Ngân sách đã đặt.
                             </p>
                         )}
                         <p style={{ margin: '8px 0 0', fontSize: '0.75rem', color: '#999' }}>
-                            * Chi phí này bao gồm phí tham quan/hoạt động ($/người) và phí khách sạn ($/phòng/tổng số đêm).
+                            *Chi phí gồm 2 phần:<br />
+                            (1) Chi phí tham quan/hoạt động (giá × số người).<br />
+                            (2) Khách sạn (giá phòng × số đêm, số đêm = số ngày − 1).<br />
+                            Không bao gồm chi phí ăn uống.
                         </p>
+
                     </div>
                 ) : (
                     <p style={{ color: '#999' }}>Vui lòng chọn Số người và Ngân sách để xem ước tính chi phí.</p>
