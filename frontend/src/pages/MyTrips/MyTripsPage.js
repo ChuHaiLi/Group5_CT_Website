@@ -130,7 +130,11 @@ const TripCard = ({ trip, handleDelete, handleView, handleEdit }) => {
 };
 
 // --- MAIN COMPONENT ---
-export default function MyTripsPage({ isAuthenticated }) {
+export default function MyTripsPage() {
+     const [isAuthenticated, setIsAuthenticated] = useState(() => {
+        return !!localStorage.getItem("access_token");
+    });
+
     const [trips, setTrips] = useState([]);
     const [filteredTrips, setFilteredTrips] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -163,38 +167,85 @@ export default function MyTripsPage({ isAuthenticated }) {
     const hideToast = () => {
         setToast({ ...toast, isVisible: false });
     };
-
+    
+    // Check authentication status và monitor changes
     useEffect(() => {
-        if (!isAuthenticated) {
-            setShowAuthModal(true);
-            setIsLoading(false);
-            setTrips([]); 
-        } else {
-            setShowAuthModal(false);
-        }
+        const checkAuth = () => {
+            const token = localStorage.getItem("access_token");
+            const isAuth = !!token;
+            
+            // Cập nhật state nếu có thay đổi
+            setIsAuthenticated(isAuth);
+            
+            if (!isAuth) {
+                setShowAuthModal(true);
+                setIsLoading(false);
+                setTrips([]);
+                setFilteredTrips([]);
+            } else {
+                setShowAuthModal(false);
+            }
+        };
+
+        // Check immediately on mount
+        checkAuth();
+
+        // Listen for storage changes (từ các tabs khác)
+        const handleStorageChange = (e) => {
+            if (e.key === 'access_token' || e.key === null) {
+                checkAuth();
+            }
+        };
+        window.addEventListener('storage', handleStorageChange);
+        
+        // Listen for focus events (khi user quay lại tab)
+        window.addEventListener('focus', checkAuth);
+        
+        // Custom event cho logout trong cùng tab
+        window.addEventListener('authChange', checkAuth);
+        
+        // Polling backup (check mỗi 1 giây)
+        const interval = setInterval(checkAuth, 1000);
+
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+            window.removeEventListener('focus', checkAuth);
+            window.removeEventListener('authChange', checkAuth);
+            clearInterval(interval);
+        };
+    }, []);
+
+
+    // Fetch trips when authenticated
+    useEffect(() => {
+        const fetchTrips = async () => {
+            if (!isAuthenticated) {
+                setTrips([]);
+                setFilteredTrips([]);
+                setIsLoading(false);
+                return;
+            }
+            
+            setIsLoading(true);
+            setError(null);
+            try {
+                const response = await axios.get("/api/trips", {
+                    headers: { Authorization: `Bearer ${getAuthToken()}` },
+                });
+                setTrips(response.data);
+                setFilteredTrips(response.data);
+            } catch (err) {
+                setError("Không thể tải danh sách chuyến đi. Vui lòng kiểm tra kết nối.");
+                console.error("Error fetching trips:", err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchTrips();
     }, [isAuthenticated]);
 
-    // Fetch trips
-    const fetchTrips = async () => {
-        if (!isAuthenticated) return;
-        
-        setIsLoading(true);
-        setError(null);
-        try {
-            const response = await axios.get("/api/trips", {
-                headers: { Authorization: `Bearer ${getAuthToken()}` },
-            });
-            setTrips(response.data);
-            setFilteredTrips(response.data);
-        } catch (err) {
-            setError("Không thể tải danh sách chuyến đi. Vui lòng kiểm tra kết nối.");
-            console.error("Error fetching trips:", err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    // Filter and search logic (Search by trip name only)
+    // Filter and search logic
     useEffect(() => {
         let result = [...trips];
 
@@ -250,15 +301,25 @@ export default function MyTripsPage({ isAuthenticated }) {
     };
 
     const handleTripCreated = (newTrip) => {
+        // Refresh trips after creating new one
+        const fetchTrips = async () => {
+            try {
+                const response = await axios.get("/api/trips", {
+                    headers: { Authorization: `Bearer ${getAuthToken()}` },
+                });
+                setTrips(response.data);
+                setFilteredTrips(response.data);
+            } catch (err) {
+                console.error("Error fetching trips:", err);
+            }
+        };
         fetchTrips();
         setShowCreateForm(false);
         showToast(`Chuyến đi "${newTrip?.name}" đã được tạo thành công!`, "success");
     };
 
-    useEffect(() => {
-        fetchTrips();
-    }, [isAuthenticated]); 
-
+    // ✅ SAU KHI ĐẶT TẤT CẢ HOOKS, MỚI CHECK ĐIỀU KIỆN
+    
     if (!isAuthenticated) {
         return (
             <div className="itinerary-container">
@@ -336,8 +397,6 @@ export default function MyTripsPage({ isAuthenticated }) {
                     )}
                 </div>
             </div>
-
-            {/* 🔥 ĐÃ BỎ: Statistics Bar */}
 
             {error && <p className="error-message">{error}</p>}
 

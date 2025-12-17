@@ -1350,7 +1350,6 @@ def get_cost_from_entry_fee(destination_obj):
     except (ValueError, TypeError):
         return 0.0
 
-
 def generate_itinerary_optimized(
     province_id, 
     duration_days, 
@@ -1362,77 +1361,49 @@ def generate_itinerary_optimized(
     if must_include_place_ids is None: must_include_place_ids = []
     if excluded_ids is None: excluded_ids = []
 
-    # --- BƯỚC 0: XÁC MINH VÀ CHỌN KHÁCH SẠN ---
-    validated_user_hotel_id = None
-    if primary_accommodation_id:
-        user_selected_hotel = db.session.get(Destination, primary_accommodation_id)
-        if user_selected_hotel:
-            place_type_lower = getattr(user_selected_hotel, 'place_type', getattr(user_selected_hotel, 'category', '')).lower()
-            if any(kw in place_type_lower for kw in ['hotel', 'accommodation', 'resort', 'motel']):
-                validated_user_hotel_id = user_selected_hotel.id
-    
-    primary_accommodation_id = validated_user_hotel_id
-
-    if not primary_accommodation_id:
-        best_hotel = Destination.query.filter(
-            Destination.province_id == province_id,
-            or_(func.lower(Destination.place_type) == 'hotel', func.lower(Destination.category) == 'hotel'),
-            Destination.id.notin_(excluded_ids)
-        ).order_by(Destination.rating.desc()).first()
-        if best_hotel:
-            primary_accommodation_id = best_hotel.id
-
-    # --- BƯỚC 1: TÍNH TOÁN CHI PHÍ VÀ LỌC ĐỊA ĐIỂM ---
+    # --- BƯỚC 0: XÁC MINH KHÁCH SẠN (Chỉ để tính chi phí, không hiển thị) ---
     TOTAL_HOTEL_COST = 0.0
-    current_activities_cost = 0.0
-    
-    # 1.1 Kiểm tra chi phí Khách sạn trước
     if primary_accommodation_id:
         hotel_obj = db.session.get(Destination, primary_accommodation_id)
         if hotel_obj:
             hotel_unit_price = get_cost_from_entry_fee(hotel_obj)
             nights = max(0, duration_days - 1)
-            temp_hotel_total = hotel_unit_price * nights
+            TOTAL_HOTEL_COST = hotel_unit_price * nights
             
-            # NẾU KHÁCH SẠN QUÁ ĐẮT: Bỏ qua khách sạn để không làm sập web
-            if max_budget > 0 and temp_hotel_total > max_budget:
-                print(f"⚠️ [Budget Alert] Khách sạn {hotel_obj.name} vượt ngân sách. Chuyển sang chế độ không khách sạn.")
-                primary_accommodation_id = None
+            # Nếu khách sạn quá đắt, loại bỏ khỏi tính toán ngân sách
+            if max_budget > 0 and TOTAL_HOTEL_COST > max_budget:
                 TOTAL_HOTEL_COST = 0.0
-            else:
-                TOTAL_HOTEL_COST = temp_hotel_total
+                primary_accommodation_id = None
 
-    # 1.2 Thiết lập danh sách các điểm phải bao gồm (Must-include)
+    # --- BƯỚC 1: LỌC ĐỊA ĐIỂM THAM QUAN (KHÔNG BAO GỒM KHÁCH SẠN) ---
+    current_activities_cost = 0.0
+    # Loại bỏ khách sạn khỏi danh sách các điểm "phải đi" để không hiển thị trong lịch trình
     final_must_include_ids = [pid for pid in must_include_place_ids if pid != primary_accommodation_id]
-    if primary_accommodation_id:
-        final_must_include_ids.append(primary_accommodation_id)
-
+    
     must_include_places = []
-    EXCLUDED_TYPES_FOR_FILTER = ['hotel', 'restaurant', 'accommodation', 'resort', 'motel']
+    EXCLUDED_TYPES_FOR_FILTER = ['hotel', 'accommodation', 'resort', 'motel']
 
     for place_id in final_must_include_ids:
         place = db.session.get(Destination, place_id)
         if not place or place.id in excluded_ids: continue
         
-        is_hotel = (place.id == primary_accommodation_id)
         cost = get_cost_from_entry_fee(place)
-        
-        if is_hotel:
+        if max_budget == 0 or (TOTAL_HOTEL_COST + current_activities_cost + cost <= max_budget):
             must_include_places.append(place)
-        else:
-            # Check xem còn tiền cho hoạt động này không
-            if max_budget == 0 or (TOTAL_HOTEL_COST + current_activities_cost + cost <= max_budget):
-                must_include_places.append(place)
-                current_activities_cost += cost
+            current_activities_cost += cost
 
-    # 1.3 Lọc các điểm tham quan còn lại (Priority 2)
+    # Lọc các điểm tham quan còn lại
     remaining_budget = max_budget - (TOTAL_HOTEL_COST + current_activities_cost) if max_budget > 0 else 999999999
     
+    # Chặn khách sạn xuất hiện trong danh sách gợi ý thêm
     all_excluded_ids = set(final_must_include_ids) | set(excluded_ids)
+    if primary_accommodation_id:
+        all_excluded_ids.add(primary_accommodation_id)
+
     places_in_province = Destination.query.filter(
         Destination.province_id == province_id,
         Destination.id.notin_(all_excluded_ids),
-        ~or_(*[func.lower(Destination.place_type) == t for t in EXCLUDED_TYPES_FOR_FILTER])
+        ~or_(*[func.lower(Destination.place_type).contains(t) for t in EXCLUDED_TYPES_FOR_FILTER])
     ).all()
 
     remaining_places_sorted = sorted(places_in_province, key=lambda p: p.rating or 0, reverse=True)
@@ -1440,86 +1411,74 @@ def generate_itinerary_optimized(
     selected_remaining_places = []
     max_total_limit = duration_days * 4
     for place in remaining_places_sorted:
-        if len(selected_remaining_places) + len([p for p in must_include_places if p.id != primary_accommodation_id]) >= max_total_limit:
+        if len(selected_remaining_places) + len(must_include_places) >= max_total_limit:
             break
         cost = get_cost_from_entry_fee(place)
         if remaining_budget - cost >= 0:
             selected_remaining_places.append(place)
             remaining_budget -= cost
 
-    # --- BƯỚC 2: CHUYỂN ĐỔI SANG DICT & PHÂN BỔ ---
+    # --- BƯỚC 2: PHÂN BỔ VÀO LỊCH TRÌNH ---
     def create_place_dict(p, is_must_include):
-        is_acc = (p.id == primary_accommodation_id)
         return {
             "id": p.id, "name": p.name, 
             "category": getattr(p, 'category', 'General'),
             "type": getattr(p, 'place_type', 'point_of_interest'),
             "lat": float(p.latitude or 0), "lon": float(p.longitude or 0),
-            "duration_hours": 1.0 if is_acc else get_place_duration(p),
-            "is_accommodation": is_acc, "is_must_include": is_must_include,
+            "duration_hours": get_place_duration(p),
+            "is_must_include": is_must_include,
             "estimated_cost": get_cost_from_entry_fee(p)
         }
 
-    must_include_dicts = [create_place_dict(p, True) for p in must_include_places]
-    optional_dicts = [create_place_dict(p, False) for p in selected_remaining_places]
+    unassigned_activities = [create_place_dict(p, True) for p in must_include_places] + \
+                            [create_place_dict(p, False) for p in selected_remaining_places]
     
-    itinerary_draft = [{"day": day, "places": []} for day in range(1, duration_days + 1)]
-    primary_accommodation_dict = next((p for p in must_include_dicts if p['is_accommodation']), None)
-    
-    unassigned_activities = [p for p in must_include_dicts if not p['is_accommodation']] + optional_dicts
     random.shuffle(unassigned_activities)
 
-    MAX_HOURS_PER_DAY = 11.0
+    itinerary_draft = [{"day": day, "places": []} for day in range(1, duration_days + 1)]
+    MAX_HOURS_PER_DAY = 10.0 # Giảm xuống một chút vì không có hotel base
     TRAVEL_BUFFER = 0.5
 
     for day_index in range(duration_days):
         day_plan = itinerary_draft[day_index]["places"]
         current_daily_hours = 0.0
-        current_time = 8.0
+        current_time = 8.5 # Bắt đầu ngày lúc 8:30 sáng
 
-        # Sáng xuất phát từ Khách sạn (nếu có)
-        if primary_accommodation_dict:
-            time_slot = f"{int(current_time):02d}:00 - {int(current_time+1):02d}:00"
-            day_plan.append({**primary_accommodation_dict, "time_slot": time_slot, "estimated_cost": 0.0, "name": f"Xuất phát từ {primary_accommodation_dict['name']}"})
-            current_time += 1.0 + TRAVEL_BUFFER
-            current_daily_hours += 1.0
-
-        # Phân bổ hoạt động
         while current_daily_hours < MAX_HOURS_PER_DAY and unassigned_activities:
             next_p = unassigned_activities.pop(0)
             dur = next_p['duration_hours']
-            if current_daily_hours + dur + TRAVEL_BUFFER <= MAX_HOURS_PER_DAY:
+            
+            if current_daily_hours + dur <= MAX_HOURS_PER_DAY:
                 start_t = current_time
                 end_t = start_t + dur
+                
                 next_p['time_slot'] = f"{int(start_t):02d}:{int((start_t%1)*60):02d} - {int(end_t):02d}:{int((end_t%1)*60):02d}"
                 day_plan.append(next_p)
+                
                 current_time = end_t + TRAVEL_BUFFER
                 current_daily_hours += dur + TRAVEL_BUFFER
             else:
-                unassigned_activities.insert(0, next_p) # Trả lại nếu không đủ thời gian
+                unassigned_activities.insert(0, next_p)
                 break
 
-        # Tối về khách sạn (nếu có)
-        if primary_accommodation_dict:
-            start_h = max(current_time, 18.0)
-            day_plan.append({**primary_accommodation_dict, "time_slot": f"{int(start_h):02d}:00 - 22:00", "estimated_cost": 0.0, "name": f"Nghỉ ngơi tại {primary_accommodation_dict['name']}"})
-
-    # --- BƯỚC 3: ĐÓNG GÓI KẾT QUẢ ---
+    # --- BƯỚC 3: ĐÓNG GÓI ---
     final_itinerary = []
     for day_data in itinerary_draft:
         clean_places = []
         for p in day_data["places"]:
             cp = p.copy()
-            for key in ['duration_hours', 'is_accommodation', 'is_must_include', 'lat', 'lon']:
+            # Xóa các trường thừa trước khi trả về client
+            for key in ['duration_hours', 'is_must_include', 'lat', 'lon']:
                 cp.pop(key, None)
             clean_places.append(cp)
+        
         if clean_places:
             final_itinerary.append({"day": day_data["day"], "places": clean_places})
 
     return {
         "itinerary": final_itinerary, 
         "total_estimated_cost": TOTAL_HOTEL_COST + current_activities_cost,
-        "has_hotel": primary_accommodation_id is not None
+        "has_hotel_included_in_price": primary_accommodation_id is not None
     }
 
 # -------------------------------------------------------------
@@ -1940,8 +1899,9 @@ def regenerate_trip_itinerary(trip_id):
 
     province_id = data.get("province_id", trip.province_id)
     duration_days = data.get("duration", trip.duration)
-    must_include_place_ids = data.get("must_include_place_ids", []) 
-    
+    must_include_place_ids = data.get("must_include_place_ids", [])
+
+    # ✅ FIX 1: Luôn resolve max_budget rõ ràng
     max_budget = data.get("max_budget")
     if max_budget is None:
         max_budget = old_metadata.get("max_budget", 0)
@@ -1950,34 +1910,41 @@ def regenerate_trip_itinerary(trip_id):
         return jsonify({"message": "Province ID and duration are required for regeneration."}), 400
 
     try:
-        # Gọi hàm logic tối ưu
         itinerary_result = generate_itinerary_optimized(
-            province_id, 
-            duration_days, 
-            max_budget, 
+            province_id=province_id,
+            duration_days=duration_days,
+            max_budget=max_budget,
             must_include_place_ids=must_include_place_ids,
             primary_accommodation_id=old_metadata.get("primary_accommodation_id")
         )
-        
-        # ✅ SỬA: Lấy dữ liệu từ Dictionary trả về
+
         itinerary_draft = itinerary_result.get("itinerary", [])
         total_estimated_cost = itinerary_result.get("total_estimated_cost", 0)
-        
+        has_hotel = itinerary_result.get("has_hotel", False)
+
         if not itinerary_draft and not must_include_place_ids:
             return jsonify({"message": "No suitable destinations found to create an itinerary."}), 400
-            
+
+        # ✅ FIX 2: Lưu itinerary
         trip.itinerary_json = json.dumps(itinerary_draft, ensure_ascii=False)
-        
-        # Cập nhật metadata mới
-        old_metadata['max_budget'] = max_budget
-        old_metadata['total_estimated_cost'] = total_estimated_cost
-            
-        trip.metadata_json = json.dumps(old_metadata, ensure_ascii=False)
+
+        # ✅ FIX 3: Update metadata ĐẦY ĐỦ & ĐỒNG BỘ
+        new_metadata = old_metadata.copy()
+        new_metadata.update({
+            "max_budget": max_budget,
+            "total_estimated_cost": total_estimated_cost,
+            "primary_accommodation_id": (
+                old_metadata.get("primary_accommodation_id") if has_hotel else None
+            )
+        })
+
+        trip.metadata_json = json.dumps(new_metadata, ensure_ascii=False)
         trip.updated_at = datetime.now()
+
         db.session.commit()
-        
+
         province_name = trip.province.name if trip.province else "Unknown Province"
-        
+
         return jsonify({
             "message": "Itinerary successfully regenerated.",
             "trip": {
@@ -1986,7 +1953,7 @@ def regenerate_trip_itinerary(trip_id):
                 "province_name": province_name,
                 "itinerary": itinerary_draft,
                 "duration": trip.duration,
-                "metadata": old_metadata
+                "metadata": new_metadata
             }
         }), 200
 
@@ -1994,8 +1961,10 @@ def regenerate_trip_itinerary(trip_id):
         db.session.rollback()
         import traceback
         traceback.print_exc()
-        return jsonify({"message": f"An error occurred during itinerary regeneration: {str(e)}"}), 500
-    
+        return jsonify({
+            "message": f"An error occurred during itinerary regeneration: {str(e)}"
+        }), 500
+
 # API: MỞ RỘNG CHUYẾN ĐI (THÊM 1 NGÀY VÀO LỊCH TRÌNH)
 @app.route("/api/trips/<int:trip_id>/extend", methods=["POST"])
 @jwt_required()
