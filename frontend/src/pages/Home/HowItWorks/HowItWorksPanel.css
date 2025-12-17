@@ -16,7 +16,7 @@
 
 /* container 2 cột */
 .howitworks-inner {
-  width: min(1100px, 92vw);
+  width: min(1200px, 92vw);
   margin: 0 auto;
   display: flex;
   gap: 40px;
@@ -101,9 +101,9 @@
 /* cột preview bên phải (lúc đầu trống) */
 .howitworks-preview {
   flex: 1 1 0;
-  max-width: 520px;
+  max-width: 720px;
   border-radius: 18px;
-  background: rgba(15, 23, 42, 0.04); /* khung trống */
+  background: transparent;
   overflow: hidden;
   box-shadow: 0 12px 35px rgba(15, 23, 42, 0.15);
 }
