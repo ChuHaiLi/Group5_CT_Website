@@ -3,13 +3,16 @@ import { toast } from "react-toastify";
 import API from "../../untils/axios";
 import { usePageContext } from "../../context/PageContext";
 import { resizeImageTo128 } from "../../untils/imageResizer";
+
 import HeroSection from "./hero/hero";
 import CreateTripForm from "../../components/CreateTripForm";
-import HomeIntro from "./HomeIntro";
+import HomeIntro from "./Intro/HomeIntro";
+import HowItWorks from "./HowItWorks/HowItWorksPanel";
 import RelaxationSection from "./Relaxation/RelaxationSection";
 import TrendingSection from "./Trending/TrendingSection";
 import VacationCarousel from "./VacationCarousel/VacationCarousel";
 import WildlifeSection from "./Wildlife/WildlifeSection";
+
 import {
   sendVisionRequestToWidget,
   sendVisionResultToWidget,
@@ -395,6 +398,8 @@ export default function HomePage({ savedIds, handleToggleSave }) {
       />
 
       <HomeIntro />
+
+      <HowItWorks />
 
       <VacationCarousel />
 

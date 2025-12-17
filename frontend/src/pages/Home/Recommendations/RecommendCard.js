@@ -6,6 +6,7 @@ import {
   FaStarHalfAlt,
   FaRegStar,
   FaMapMarkerAlt,
+  FaMoneyBillWave,
 } from "react-icons/fa";
 import "./RecommendCard.css";
 
@@ -38,10 +39,16 @@ export default function RecommendCard({
 
     return stars;
   };
-  
-  // const descriptionText = Array.isArray(destination.description)
-  //   ? destination.description.join(' ')
-  //   : destination.description || '';
+
+  // ✅ FORMAT GIÁ TIỀN (VND)
+  const formatPrice = (price) => {
+    if (!price || price === 0) return "Free";
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+      minimumFractionDigits: 0,
+    }).format(price);
+  };
 
   const cardImageUrl = Array.isArray(destination.image_url) 
     ? destination.image_url[0] 
@@ -49,7 +56,7 @@ export default function RecommendCard({
 
   // --- LOGIC CHỌN HÀNH ĐỘNG KHI CLICK CARD CHUNG ---
   const handleCardClick = () => {
-      // Khi ở chế độ tìm kiếm nhỏ, click để MỞ MODAL chi tiết (dùng onSelectPlace)
+      // Khi ở chế độ tìm kiếm nhỏ, click để Mở MODAL chi tiết (dùng onSelectPlace)
       if (mode === "select-search" && onSelectPlace) {
           onSelectPlace(destination);
           return;
@@ -88,6 +95,13 @@ export default function RecommendCard({
                 <div className="search-item-rating">
                     {renderStars(destination.rating)} ({destination.rating})
                 </div>
+                {/* ✅ HIỂN THỊ GIÁ TRONG CHẾ ĐỘ TÌM KIẾM NGẮN */}
+                {(mode === "select" || mode === "select-search") && (
+                    <small style={{ color: '#10b981', fontWeight: 600, marginTop: '4px' }}>
+                        <FaMoneyBillWave style={{ marginRight: '4px' }} />
+                        {formatPrice(destination.entry_fee)}
+                    </small>
+                )}
             </div>
         </div>
     );
@@ -115,10 +129,18 @@ export default function RecommendCard({
       <div className="card-content">
         <h3 className="light">{destination.name}</h3>
 
-        {/* {Description và Weather được xoá bỏ để trông đơn giản hơn} */}
+        {/* Rating */}
         <div className="rating">
           <strong>Rating:</strong> {renderStars(destination.rating)}
         </div>
+
+        {/* ✅ HIỂN THỊ GIÁ CHỈ KHI Ở CHẾ ĐỘ SELECT (EditTripPage) */}
+        {mode === "select" && (
+            <div className="price-info">
+              <strong>Price:</strong> 
+              <span className="price-value">{formatPrice(destination.entry_fee)}</span>
+            </div>
+        )}
 
         {showActionButton && (
             <button

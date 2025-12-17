@@ -30,7 +30,6 @@ import API from "./untils/axios";
 import ChatWidget from "./components/ChatWidget/ChatWidget";
 import Footer from "./components/Footer/Footer";
 import { PageContext } from "./context/PageContext";
-import HowItWorksPanel from "./components/HowItWorks/HowItWorksPanel";
 import "./App.css";
 import { GOOGLE_CLIENT_ID } from './config';
 
@@ -84,7 +83,7 @@ function AppContent() {
     setPageContext(getDefaultContext(location.pathname));
   }, [location.pathname]);
 
-  // ✅ Check authentication on app load
+  // Check authentication on app load
   useEffect(() => {
     const accessToken = localStorage.getItem("access_token");
     if (!accessToken) {
@@ -176,7 +175,6 @@ function AppContent() {
   return (
     <PageContext.Provider value={{ pageContext, setPageContext }}>
       {!hideNavbar && <Navbar />}
-      {!hideNavbar && <HowItWorksPanel />}
       <div className={`page-wrapper ${!hideNavbar ? "with-navbar" : ""}`}>
         <Routes>
           {/* Public routes */}
@@ -191,7 +189,7 @@ function AppContent() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           
-          {/* ✅ FIX: Truyền setIsAuthenticated vào VerifyEmailPage */}
+          {/* Truyền setIsAuthenticated vào VerifyEmailPage */}
           <Route 
             path="/verify-email" 
             element={<VerifyEmailPage setIsAuthenticated={setIsAuthenticated} />} 
@@ -201,50 +199,40 @@ function AppContent() {
           <Route
             path="/"
             element={
-              isAuthenticated ? (
-                <Navigate to="/home" replace />
-              ) : (
-                <Navigate to="/login" replace />
-              )
+              <HomePage
+                savedIds={savedIds}
+                handleToggleSave={handleToggleSave}
+                isPublic={!isAuthenticated}
+              />
             }
+          />
+
+          {/* "/home" redirect về "/" để tránh duplicate */}
+          <Route
+            path="/home"
+            element={<Navigate to="/" replace />}
           />
 
           {/* Protected routes */}
-          <Route
-            path="/home"
-            element={
-              <PrivateRoute isAuthenticated={isAuthenticated}>
-                <HomePage
-                  savedIds={savedIds}
-                  handleToggleSave={handleToggleSave}
-                />
-              </PrivateRoute>
-            }
-          />
-
           <Route path="/verify-email-change" element={<VerifyEmailChangePage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route
             path="/explore"
             element={
-              <PrivateRoute isAuthenticated={isAuthenticated}>
-                <ExplorePage
-                  savedIds={savedIds}
-                  handleToggleSave={handleToggleSave}
-                />
-              </PrivateRoute>
+              <ExplorePage
+                savedIds={savedIds}
+                handleToggleSave={handleToggleSave}
+                isAuthenticated={isAuthenticated}  
+              />
             }
           />
 
           <Route
             path="/mytrips"
             element={
-              <PrivateRoute isAuthenticated={isAuthenticated}>
-                <MyTripsPage />
-              </PrivateRoute>
+              <MyTripsPage isAuthenticated={isAuthenticated} />
             }
           />
-
           <Route
             path="/trips/:tripId"
             element={
@@ -273,15 +261,14 @@ function AppContent() {
           />
 
           <Route
-            path="/saved"
-            element={
-              <PrivateRoute isAuthenticated={isAuthenticated}>
+              path="/saved"
+              element={
                 <SavedPage
                   savedIds={savedIds}
                   handleToggleSave={handleToggleSave}
+                  isAuthenticated={isAuthenticated}
                 />
-              </PrivateRoute>
-            }
+              }
           />
         </Routes>
       </div>

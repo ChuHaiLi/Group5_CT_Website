@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import RecommendCard from "../Home/Recommendations/RecommendCard";
 import CreateTripForm from "../../components/CreateTripForm";
+import AuthRequiredModal from "../../components/AuthRequiredModal/AuthRequired.js";
 import API from "../../untils/axios";
 import {
   FaSearch,
@@ -12,9 +14,16 @@ import CollectionsTab from "./CollectionsTab";
 import "./Saved.css";
 
 export default function SavedPage({ savedIds, handleToggleSave }) {
+  const navigate = useNavigate();
+  
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return !!localStorage.getItem("access_token");
+  });
+
   const [destinations, setDestinations] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const token = localStorage.getItem("access_token");
 
   const [activeTab, setActiveTab] = useState("saved");
@@ -108,25 +117,72 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!token) {
-        setDestinations([]);
-        setLoading(false);
-        return;
-      }
-      setLoading(true);
-      try {
-        const res = await API.get("/saved/list");
-        setDestinations(Array.isArray(res.data) ? res.data : []);
-      } catch (error) {
-        console.error("Failed to fetch saved list:", error);
-        setDestinations([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [token, savedIds]);
+  const checkAuth = () => {
+    const token = localStorage.getItem("access_token");
+    const isAuth = !!token;
+    
+    // Cập nhật state nếu có thay đổi
+    setIsAuthenticated(isAuth);
+    
+    if (!isAuth) {
+      setShowAuthModal(true);
+      setLoading(false);
+      setDestinations([]);
+    } else {
+      setShowAuthModal(false);
+    }
+  };
+
+  // Check immediately on mount
+  checkAuth();
+
+  // Listen for storage changes (từ các tabs khác)
+  const handleStorageChange = (e) => {
+    if (e.key === 'access_token' || e.key === null) {
+      checkAuth();
+    }
+  };
+  window.addEventListener('storage', handleStorageChange);
+  
+  // Listen for focus events (khi user quay lại tab)
+  window.addEventListener('focus', checkAuth);
+  
+  // Custom event cho logout trong cùng tab
+  window.addEventListener('authChange', checkAuth);
+  
+  // Polling backup (check mỗi 1 giây)
+  const interval = setInterval(checkAuth, 1000);
+
+  return () => {
+    window.removeEventListener('storage', handleStorageChange);
+    window.removeEventListener('focus', checkAuth);
+    window.removeEventListener('authChange', checkAuth);
+    clearInterval(interval);
+  };
+}, []);
+    
+  useEffect(() => {
+  const fetchData = async () => {
+    if (!isAuthenticated) { 
+      setDestinations([]);
+      setLoading(false);
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const res = await API.get("/saved/list");
+      setDestinations(Array.isArray(res.data) ? res.data : []);
+    } catch (error) {
+      console.error("Failed to fetch saved list:", error);
+      setDestinations([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  fetchData();
+}, [isAuthenticated]);
 
   const handleUnsave = async (id) => {
       await handleToggleSave(id);
@@ -226,6 +282,38 @@ export default function SavedPage({ savedIds, handleToggleSave }) {
       items: groups[key],
     }));
   }, [filteredDestinations, groupBy, sortOrder]);
+
+  if (!isAuthenticated) {
+        return (
+            <div className="saved-wrapper">
+                <div className="saved-header">
+                    <h1>Places You're Keeping</h1>
+                    <p>
+                        Keep all your dream destinations in one place — a personalized space
+                        where every spot you save becomes a trip waiting to happen. ✨
+                    </p>
+                </div>
+
+                <div className="saved-content">
+                    <div className="saved-empty">
+                        <div style={{ fontSize: '80px', marginBottom: '20px' }}>🔒</div>
+                        <h3>Login Required</h3>
+                        <p>Please login to view your saved destinations</p>
+                    </div>
+                </div>
+
+                {showAuthModal && (
+                    <AuthRequiredModal 
+                        onClose={() => {
+                            setShowAuthModal(false);
+                            navigate('/');
+                        }}
+                        message="You need to be logged in to view saved destinations. Please login or register to continue! 💾"
+                    />
+                )}
+            </div>
+        );
+    }
 
   return (
     <div className="saved-wrapper">

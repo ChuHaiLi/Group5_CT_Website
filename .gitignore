@@ -22,6 +22,10 @@ venv/
 instance/
 backend/instance/
 
+# Alembic migration versions (auto-generated)
+# Ignore auto-generated migration files to avoid committing many versions
+backend/migrations/versions/*.py
+
 # Build / coverage
 dist/
 build/

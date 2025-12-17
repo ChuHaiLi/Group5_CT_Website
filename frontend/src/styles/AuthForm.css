@@ -70,7 +70,155 @@
   z-index: 1;
   animation: overlayPulse 8s ease-in-out infinite alternate;
 }
+.back-to-home-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #0074D9, #39CCCC);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 4px 12px rgba(0, 116, 217, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.2);
+  z-index: 1000;
+  font-family: 'Poppins', 'Segoe UI', sans-serif;
+  backdrop-filter: blur(10px);
+}
 
+.back-to-home-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 
+    0 6px 20px rgba(0, 116, 217, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, #005FA3, #2BA0A0);
+}
+
+.back-to-home-btn:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 
+    0 2px 8px rgba(0, 116, 217, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+/* ===== REGISTER PAGE - Cam/Đỏ (Match với icon bản đồ) ===== */
+.auth-page .back-to-home-btn[data-page="register"],
+body[data-page="register"] .back-to-home-btn {
+  background: linear-gradient(135deg, #FF6B6B, #FFB347);
+  box-shadow: 
+    0 4px 12px rgba(255, 107, 107, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+.auth-page .back-to-home-btn[data-page="register"]:hover,
+body[data-page="register"] .back-to-home-btn:hover {
+  background: linear-gradient(135deg, #FF5252, #FFA726);
+  box-shadow: 
+    0 6px 20px rgba(255, 107, 107, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.3);
+}
+
+.auth-page .back-to-home-btn[data-page="register"]:active,
+body[data-page="register"] .back-to-home-btn:active {
+  box-shadow: 
+    0 2px 8px rgba(255, 107, 107, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+/* ===== FORGOT PASSWORD PAGE - Đỏ/Hồng đậm (Match với icon khóa) ===== */
+.auth-page .back-to-home-btn[data-page="forgot-password"],
+body[data-page="forgot-password"] .back-to-home-btn {
+  background: linear-gradient(135deg, #DC143C, #FF6B6B);
+  box-shadow: 
+    0 4px 12px rgba(220, 20, 60, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+.auth-page .back-to-home-btn[data-page="forgot-password"]:hover,
+body[data-page="forgot-password"] .back-to-home-btn:hover {
+  background: linear-gradient(135deg, #C41E3A, #FF5252);
+  box-shadow: 
+    0 6px 20px rgba(220, 20, 60, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.3);
+}
+
+.auth-page .back-to-home-btn[data-page="forgot-password"]:active,
+body[data-page="forgot-password"] .back-to-home-btn:active {
+  box-shadow: 
+    0 2px 8px rgba(220, 20, 60, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.auth-page .back-to-home-btn[data-page="reset-password"][data-step="1"],
+body[data-page="reset-password"] .back-to-home-btn[data-step="1"] {
+  background: linear-gradient(135deg, #FF6B6B, #DC143C);
+  box-shadow: 
+    0 4px 12px rgba(255, 107, 107, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+.auth-page .back-to-home-btn[data-page="reset-password"][data-step="1"]:hover,
+body[data-page="reset-password"] .back-to-home-btn[data-step="1"]:hover {
+  background: linear-gradient(135deg, #FF5252, #C41E3A);
+  box-shadow: 
+    0 6px 20px rgba(255, 107, 107, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.3);
+}
+
+.auth-page .back-to-home-btn[data-page="reset-password"][data-step="1"]:active,
+body[data-page="reset-password"] .back-to-home-btn[data-step="1"]:active {
+  box-shadow: 
+    0 2px 8px rgba(255, 107, 107, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+/* ===== RESET PASSWORD PAGE - Bước 2: Set New Password (Xanh lá) ===== */
+.auth-page .back-to-home-btn[data-page="reset-password"][data-step="2"],
+body[data-page="reset-password"] .back-to-home-btn[data-step="2"] {
+  background: linear-gradient(135deg, #4CAF50, #66BB6A);
+  box-shadow: 
+    0 4px 12px rgba(76, 175, 80, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+.auth-page .back-to-home-btn[data-page="reset-password"][data-step="2"]:hover,
+body[data-page="reset-password"] .back-to-home-btn[data-step="2"]:hover {
+  background: linear-gradient(135deg, #43A047, #4CAF50);
+  box-shadow: 
+    0 6px 20px rgba(76, 175, 80, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.3);
+}
+
+.auth-page .back-to-home-btn[data-page="reset-password"][data-step="2"]:active,
+body[data-page="reset-password"] .back-to-home-btn[data-step="2"]:active {
+  box-shadow: 
+    0 2px 8px rgba(76, 175, 80, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive cho mobile */
+@media (max-width: 600px) {
+  .back-to-home-btn {
+    top: 15px;
+    right: 15px;
+    padding: 10px 16px;
+    font-size: 13px;
+    gap: 6px;
+    border-radius: 10px;
+  }
+  
+  .back-to-home-btn span {
+    display: none;
+  }
+}
 @keyframes overlayPulse {
   0%, 100% {
     opacity: 0.85;

@@ -671,6 +671,12 @@
   padding: 2rem;
 }
 
+.auth-modal-message {
+  font-family: 'Poppins', 'Segoe UI Emoji', 'Apple Color Emoji', sans-serif;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
 /* ----- NEW FOLDER MODAL FOOTER ----- */
 .create-folder-modal .modal-footer {
   display: flex;

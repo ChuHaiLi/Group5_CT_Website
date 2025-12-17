@@ -5,8 +5,9 @@
 
 /* ============ CONTAINER & BASE ============ */
 .edit-trip-container {
+    width: 80%;
     min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #FFFFFF;
     padding: 2rem;
 }
 
@@ -30,14 +31,10 @@
 .trip-title {
     font-size: 1.75rem;
     font-weight: 700;
-    color: #1e293b;
+    color: #000000;
     margin: 0;
     flex: 1;
     text-align: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
 }
 
 /* Header Buttons */
@@ -71,15 +68,15 @@
 
 .save-btn,
 .ai-evaluate-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    background: #10b981;
+    color: #000000;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
 }
 
 .save-btn:hover:not(:disabled),
 .ai-evaluate-btn:hover:not(:disabled) {
     transform: translateY(-3px);
-    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.5);
+    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.5);
 }
 
 .save-btn:disabled,
@@ -96,12 +93,12 @@
     border-radius: 20px;
     background: #fff;
     border: 2px solid #e2e8f0;
-    color: #667eea;
+    color: #72dbdb;
 }
 
 .ai-view-last-btn:hover:not(:disabled) {
     background: #f8fafc;
-    border-color: #667eea;
+    border-color: #72dbdb;
     transform: rotate(90deg);
 }
 
@@ -112,7 +109,6 @@
     padding: 2rem;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     margin-bottom: 2rem;
-    max-width: 1600px;
     margin-left: auto;
     margin-right: auto;
     border: 2px solid transparent;
@@ -120,8 +116,8 @@
 }
 
 .edit-trip-metadata-form:hover {
-    border-color: #667eea;
-    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.2);
+    border-color: #72dbdb;
+    box-shadow: 0 12px 35px rgba(114, 219, 219, 0.2);
 }
 
 .edit-trip-metadata-form h2 {
@@ -141,7 +137,7 @@
     left: 0;
     width: 80px;
     height: 3px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #72dbdb;
 }
 
 .metadata-grid {
@@ -150,12 +146,14 @@
     gap: 1.5rem;
 }
 
+.edit-trip-input-group,
 .edit-page-input-group {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
 }
 
+.edit-trip-input-group label,
 .edit-page-input-group label {
     font-weight: 600;
     color: #475569;
@@ -163,6 +161,8 @@
     letter-spacing: 0.5px;
 }
 
+.edit-trip-input-group input,
+.edit-trip-input-group select,
 .edit-page-input-group input,
 .edit-page-input-group select {
     padding: 0.875rem;
@@ -173,15 +173,18 @@
     background: #f8fafc;
 }
 
+.edit-trip-input-group input:focus,
+.edit-trip-input-group select:focus,
 .edit-page-input-group input:focus,
 .edit-page-input-group select:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    border-color: #72dbdb;
+    box-shadow: 0 0 0 4px rgba(114, 219, 219, 0.1);
     background: white;
     transform: translateY(-1px);
 }
 
+.edit-trip-input-group input.disabled-input,
 .edit-page-input-group input.disabled-input {
     background: #f1f5f9;
     color: #94a3b8;
@@ -237,7 +240,6 @@
     border: none;
     border-top: 3px dashed #cbd5e1;
     margin: 2.5rem auto;
-    max-width: 1600px;
     opacity: 0.7;
 }
 
@@ -246,7 +248,6 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 2rem;
-    max-width: 1600px;
     margin: 0 auto;
 }
 
@@ -258,7 +259,6 @@
     padding: 2rem;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     height: fit-content;
-    max-height: calc(100vh - 200px);
     overflow-y: auto;
     border: 2px solid transparent;
     transition: all 0.3s ease;
@@ -270,8 +270,8 @@
 
 .original-column:hover,
 .editable-column:hover {
-    border-color: #667eea;
-    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.15);
+    border-color: #72dbdb;
+    box-shadow: 0 12px 35px rgba(114, 219, 219, 0.15);
 }
 
 .column-header {
@@ -288,7 +288,7 @@
     left: 0;
     width: 60px;
     height: 3px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #72dbdb;
 }
 
 .column-header h2 {
@@ -330,7 +330,7 @@
     left: 0;
     width: 4px;
     height: 100%;
-    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    background: #72dbdb;
     transform: scaleY(0);
     transition: transform 0.3s ease;
 }
@@ -344,15 +344,15 @@
 }
 
 .day-section.editable:hover {
-    border-color: #667eea;
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+    border-color: #72dbdb;
+    box-shadow: 0 8px 20px rgba(114, 219, 219, 0.2);
     transform: translateY(-2px);
 }
 
 .day-title {
     font-size: 1.25rem;
     font-weight: 700;
-    color: #667eea;
+    color: #111827;
     margin: 0 0 1rem 0;
     display: flex;
     align-items: center;
@@ -360,9 +360,8 @@
 }
 
 .day-title::before {
-    content: '📅';
     font-size: 1.5rem;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
 /* ============ PLACES LIST ============ */
@@ -379,14 +378,15 @@
     padding: 1rem;
     background: white;
     border-radius: 10px;
-    border-left: 4px solid #667eea;
+    border-left: 4px solid;
+    border-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%) 1;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
 }
 
 .place-item-readonly:hover {
     transform: translateX(4px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    box-shadow: 0 4px 12px rgba(114, 219, 219, 0.2);
 }
 
 .time-badge {
@@ -412,7 +412,7 @@
 
 .place-icon {
     font-size: 1.5rem;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
 .place-name {
@@ -441,9 +441,9 @@
 
 .droppable-area.dragging-over {
     background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-    border-color: #667eea;
+    border-color: #72dbdb;
     border-style: solid;
-    box-shadow: inset 0 0 20px rgba(102, 126, 234, 0.1);
+    box-shadow: inset 0 0 20px rgba(114, 219, 219, 0.1);
     transform: scale(1.02);
 }
 
@@ -465,7 +465,7 @@
 }
 
 .add-btn {
-    flex: 1;
+    flex: 0 1 auto;
     min-width: 100px;
     padding: 0.875rem 1.25rem;
     border: none;
@@ -574,14 +574,27 @@
     font-size: 5rem;
     margin-bottom: 20px;
     animation: bounce 0.6s ease-out;
-    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
 }
 
 @keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    25% { transform: translateY(-15px); }
-    50% { transform: translateY(-7px); }
-    75% { transform: translateY(-12px); }
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    25% {
+        transform: translateY(-15px);
+    }
+
+    50% {
+        transform: translateY(-7px);
+    }
+
+    75% {
+        transform: translateY(-12px);
+    }
 }
 
 .confirm-modal h3 {
@@ -700,14 +713,14 @@
     font-size: 0.95rem;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    color: white;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    color: #4b5563;
+    background: #72dbdb;
+    box-shadow: 0 4px 12px rgba(114, 219, 219, 0.3);
 }
 
 .apply-btn:hover:not(:disabled) {
     transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.5);
+    box-shadow: 0 8px 20px rgba(114, 219, 219, 0.5);
 }
 
 .close-btn {
@@ -739,7 +752,7 @@
 }
 
 .edit-trip-loading {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #72dbdb;
     color: white;
 }
 
@@ -755,7 +768,9 @@
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .edit-trip-error {
@@ -782,7 +797,7 @@
 .original-column::-webkit-scrollbar-thumb,
 .editable-column::-webkit-scrollbar-thumb,
 .ai-modal::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    background: #72dbdb;
     border-radius: 10px;
     border: 2px solid #f1f5f9;
 }
@@ -790,13 +805,63 @@
 .original-column::-webkit-scrollbar-thumb:hover,
 .editable-column::-webkit-scrollbar-thumb:hover,
 .ai-modal::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, #764ba2 0%, #667eea 100%);
+    background: #72dbdb;
+}
+
+/* Dropdown header hover effect */
+/* Fix drag offset issue */
+.day-section.editable {
+    transform: none !important;
+    /* Vô hiệu hóa mọi transform */
+}
+
+.droppable-area {
+    transform: none !important;
+    will-change: auto !important;
+}
+
+/* Khi đang drag, bỏ transform của item */
+.day-section [data-rbd-draggable-context-id] {
+    transform-origin: center !important;
+}
+
+.day-section .day-title {
+    user-select: none;
+    /* Không cho select text khi click */
+}
+
+.day-section:hover {
+    background: #f9fafb;
+}
+
+/* Animation cho dropdown */
+.droppable-area {
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        max-height: 2000px;
+        transform: translateY(0);
+    }
 }
 
 /* ============ ANIMATIONS ============ */
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes slideUp {
@@ -804,10 +869,70 @@
         opacity: 0;
         transform: translateY(50px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* ============ HOTEL REMOVE BUTTON ============ */
+.hotel-remove-btn {
+    padding: 8px 12px;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.hotel-remove-btn:hover {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.5);
+}
+
+.hotel-remove-btn:active {
+    transform: translateY(0);
+}
+
+/* ============ HOTEL ACTIONS GROUP ============ */
+.hotel-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.hotel-change-btn {
+    padding: 8px 12px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.hotel-change-btn:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.5);
+}
+
+.hotel-change-btn:active {
+    transform: translateY(0);
 }
 
 /* ============ RESPONSIVE DESIGN ============ */
@@ -823,7 +948,7 @@
     .editable-column {
         max-height: none;
     }
-    
+
     .metadata-grid {
         grid-template-columns: repeat(2, 1fr);
     }
@@ -867,106 +992,6 @@
     .add-btn {
         width: 100%;
     }
-  }
-  
-  .ai-evaluate-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 10px;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-  }
-  
-  .ai-evaluate-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-  }
-  
-  /* Modal footer close button styled like save button and placed bottom-right */
-  .ai-modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 10px;
-  }
-  
-  .apply-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 10px 20px;
-    min-width: 160px;
-    border: none;
-    border-radius: 10px;
-    font-weight: 600;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    color: white;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  }
-  
-  .apply-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-  }
-  
-  .apply-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-  
-  .close-btn {
-    background: #da3434;
-    border: none;
-    border-radius: 10px;
-    color: white;
-    font-weight: 600;
-    padding: 10px 20px;
-    min-width: 100px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 14px;
-  }
-  
-  .close-btn:hover {
-    background: #c82333;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
-  }
-  
-  .add-btn {
-    flex: 0 0 auto;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 10px 50px;
-    min-width: 80px;
-    border: none;
-    border-radius: 10px;
-    color: white;
-    font-weight: 600;
-    font-size: 14px;
-    transition: all 0.3s ease;
-  }
-  
-  .add-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
-  }
-  
-  .add-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
 
     .confirm-modal {
         padding: 28px;
@@ -980,7 +1005,7 @@
     .confirm-modal-actions button {
         max-width: none;
     }
-
+}
 
 @media (max-width: 480px) {
     .edit-trip-container {

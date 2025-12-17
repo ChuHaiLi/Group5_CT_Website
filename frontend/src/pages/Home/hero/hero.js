@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { FiPaperclip, FiMic, FiSend } from "react-icons/fi";
 import "./hero.css";
-import heroImg from "./hero.png";
+import heroImg from "../assets/hero.png";
 import bg from "../assets/home-bg.png";
 
 export default function Hero({

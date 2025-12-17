@@ -1,0 +1,128 @@
+.howitworks-section {
+  width: 100%;
+  /* tăng chiều cao: cho padding dày hơn */
+  padding: 60px 0 70px;
+  /* gradient dọc, trên và dưới đều là trắng */
+  background: linear-gradient(
+    to bottom,
+    #F3F6FA 0%,
+    #8bfff5 50%,
+    #F3F6FA 100%
+  );
+  color: #020617;
+  display: flex;
+  justify-content: center;
+}
+
+/* container 2 cột */
+.howitworks-inner {
+  width: min(1200px, 92vw);
+  margin: 0 auto;
+  display: flex;
+  gap: 40px;
+  align-items: stretch;
+  transform: scale(0.9);
+  transform-origin: top bottom;
+}
+
+/* cột text bên trái */
+.howitworks-text {
+  flex: 1 1 0;
+}
+
+.howitworks-title {
+  font-weight: 800;
+  font-size: 24px;
+  margin-bottom: 24px;
+}
+
+.howitworks-text ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.howitworks-step-item {
+  display: flex;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  align-items: flex-start;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.howitworks-step-item:last-child {
+  border-bottom: none;
+}
+
+.howitworks-step-item:hover {
+  background: rgba(15, 23, 42, 0.04);
+  transform: translateX(4px);
+}
+
+.howitworks-step-content {
+  flex: 1 1 auto;
+}
+
+.howitworks-step-content strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.howitworks-step-content span {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: #475569;
+}
+
+/* vòng tròn icon bên trái */
+.howitworks-text li::before {
+  content: attr(data-icon);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  margin-right: 14px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: #0f172a;
+  color: #f9fafb;
+  font-size: 1.25rem;
+}
+
+/* cột preview bên phải (lúc đầu trống) */
+.howitworks-preview {
+  flex: 1 1 0;
+  max-width: 720px;
+  border-radius: 18px;
+  background: transparent;
+  overflow: hidden;
+  box-shadow: 0 12px 35px rgba(15, 23, 42, 0.15);
+}
+
+.howitworks-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* responsive: dưới ~900px thì xếp dọc, preview xuống dưới */
+@media (max-width: 900px) {
+  .howitworks-inner {
+    flex-direction: column;
+  }
+
+  .howitworks-preview {
+    max-width: none;
+    height: 260px;
+  }
+}

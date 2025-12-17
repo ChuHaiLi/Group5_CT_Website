@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import CreateTripForm from '../../components/CreateTripForm';
+import AuthRequiredModal from "../../components/AuthRequiredModal/AuthRequired.js";
 import { FaEdit, FaTrash, FaEye, FaPlus} from 'react-icons/fa';
 import "./MyTripsPage.css";
 
@@ -130,12 +131,17 @@ const TripCard = ({ trip, handleDelete, handleView, handleEdit }) => {
 
 // --- MAIN COMPONENT ---
 export default function MyTripsPage() {
+     const [isAuthenticated, setIsAuthenticated] = useState(() => {
+        return !!localStorage.getItem("access_token");
+    });
+
     const [trips, setTrips] = useState([]);
     const [filteredTrips, setFilteredTrips] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [showAuthModal, setShowAuthModal] = useState(false); 
 
     // Confirmation modal state
     const [confirmModal, setConfirmModal] = useState({
@@ -161,26 +167,85 @@ export default function MyTripsPage() {
     const hideToast = () => {
         setToast({ ...toast, isVisible: false });
     };
+    
+    // Check authentication status và monitor changes
+    useEffect(() => {
+        const checkAuth = () => {
+            const token = localStorage.getItem("access_token");
+            const isAuth = !!token;
+            
+            // Cập nhật state nếu có thay đổi
+            setIsAuthenticated(isAuth);
+            
+            if (!isAuth) {
+                setShowAuthModal(true);
+                setIsLoading(false);
+                setTrips([]);
+                setFilteredTrips([]);
+            } else {
+                setShowAuthModal(false);
+            }
+        };
 
-    // Fetch trips
-    const fetchTrips = async () => {
-        setIsLoading(true);
-        setError(null);
-        try {
-            const response = await axios.get("/api/trips", {
-                headers: { Authorization: `Bearer ${getAuthToken()}` },
-            });
-            setTrips(response.data);
-            setFilteredTrips(response.data);
-        } catch (err) {
-            setError("Không thể tải danh sách chuyến đi. Vui lòng kiểm tra kết nối.");
-            console.error("Error fetching trips:", err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+        // Check immediately on mount
+        checkAuth();
 
-    // Filter and search logic (Search by trip name only)
+        // Listen for storage changes (từ các tabs khác)
+        const handleStorageChange = (e) => {
+            if (e.key === 'access_token' || e.key === null) {
+                checkAuth();
+            }
+        };
+        window.addEventListener('storage', handleStorageChange);
+        
+        // Listen for focus events (khi user quay lại tab)
+        window.addEventListener('focus', checkAuth);
+        
+        // Custom event cho logout trong cùng tab
+        window.addEventListener('authChange', checkAuth);
+        
+        // Polling backup (check mỗi 1 giây)
+        const interval = setInterval(checkAuth, 1000);
+
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+            window.removeEventListener('focus', checkAuth);
+            window.removeEventListener('authChange', checkAuth);
+            clearInterval(interval);
+        };
+    }, []);
+
+
+    // Fetch trips when authenticated
+    useEffect(() => {
+        const fetchTrips = async () => {
+            if (!isAuthenticated) {
+                setTrips([]);
+                setFilteredTrips([]);
+                setIsLoading(false);
+                return;
+            }
+            
+            setIsLoading(true);
+            setError(null);
+            try {
+                const response = await axios.get("/api/trips", {
+                    headers: { Authorization: `Bearer ${getAuthToken()}` },
+                });
+                setTrips(response.data);
+                setFilteredTrips(response.data);
+            } catch (err) {
+                setError("Không thể tải danh sách chuyến đi. Vui lòng kiểm tra kết nối.");
+                console.error("Error fetching trips:", err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchTrips();
+    }, [isAuthenticated]);
+
+    // Filter and search logic
     useEffect(() => {
         let result = [...trips];
 
@@ -236,15 +301,54 @@ export default function MyTripsPage() {
     };
 
     const handleTripCreated = (newTrip) => {
+        // Refresh trips after creating new one
+        const fetchTrips = async () => {
+            try {
+                const response = await axios.get("/api/trips", {
+                    headers: { Authorization: `Bearer ${getAuthToken()}` },
+                });
+                setTrips(response.data);
+                setFilteredTrips(response.data);
+            } catch (err) {
+                console.error("Error fetching trips:", err);
+            }
+        };
         fetchTrips();
         setShowCreateForm(false);
         showToast(`Chuyến đi "${newTrip?.name}" đã được tạo thành công!`, "success");
     };
 
-    useEffect(() => {
-        fetchTrips();
-    }, []);
+    // ✅ SAU KHI ĐẶT TẤT CẢ HOOKS, MỚI CHECK ĐIỀU KIỆN
+    
+    if (!isAuthenticated) {
+        return (
+            <div className="itinerary-container">
+                <div className="trips-header">
+                    <div className="header-left">
+                        <h2>My Itineraries</h2>
+                        <p className="header-subtitle">Quản lý tất cả chuyến đi của bạn</p>
+                    </div>
+                </div>
 
+                <div className="empty-state">
+                    <div style={{ fontSize: '80px', marginBottom: '20px' }}>🔒</div>
+                    <h3>Login Required</h3>
+                    <p>Please login to view and manage your trips</p>
+                </div>
+
+                {showAuthModal && (
+                    <AuthRequiredModal 
+                        onClose={() => {
+                            setShowAuthModal(false);
+                            navigate('/');
+                        }}
+                        message="You need to be logged in to view your trips. Please login or register to continue! ✈️"
+                    />
+                )}
+            </div>
+        );
+    }
+    
     // Loading state
     if (isLoading) {
         return (
@@ -293,8 +397,6 @@ export default function MyTripsPage() {
                     )}
                 </div>
             </div>
-
-            {/* 🔥 ĐÃ BỎ: Statistics Bar */}
 
             {error && <p className="error-message">{error}</p>}
 
