@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   FaFacebookF,
   FaWhatsapp,
@@ -19,6 +19,8 @@ const quickLinks = [
 ];
 
 export default function Footer() {
+  const [showMap, setShowMap] = useState(false);
+
   return (
     <footer className="wonderai-footer">
       <div className="footer-grid">
@@ -30,7 +32,7 @@ export default function Footer() {
           </p>
           <div className="footer-social">
             <a
-              href="https://facebook.com/wonderai.travel"
+              href="https://www.facebook.com/profile.php?id=61585391516813"
               target="_blank"
               rel="noreferrer"
               aria-label="Facebook"
@@ -66,7 +68,7 @@ export default function Footer() {
             ))}
             <li>
               <a
-                href="https://facebook.com/wonderai.travel.page"
+                href="https://www.facebook.com/profile.php?id=61585391516813"
                 target="_blank"
                 rel="noreferrer"
               >
@@ -85,11 +87,32 @@ export default function Footer() {
             </li>
             <li>
               <FaPhoneAlt />
-              <a href="tel:+84 99999 99999">+84 99999 99999</a>
+              <a href="tel:+84 99999 99999">+84 99999 9999</a>
             </li>
-            <li>
-              <FaMapMarkerAlt />
-              <span>18F Skyline Tower, 12 Le Duan, Ho Chi Minh City</span>
+            <li className="address-with-map">
+              <div className="address-text">
+                <FaMapMarkerAlt />
+                <span>136 Nguyen Van Cu, District 1, Ho Chi Minh City</span>
+              </div>
+              <button 
+                className="view-map-btn"
+                onClick={() => setShowMap(!showMap)}
+              >
+                {showMap ? 'Hide Map' : 'View on Map'}
+              </button>
+              {showMap && (
+                <div className="map-container">
+                  <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d664.5534752786523!2d106.68418487165826!3d10.758948543842083!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f1b22828983%3A0xe10f03f5cccc28ef!2zMTM2IE5ndXnhu4VuIFbEg24gQ-G7qywgUGjGsOG7nW5nIE5ndXnhu4VuIEPGsCBUcmluaCwgUXXhuq1uIDEsIFRow6BuaCBwaOG7kSBI4buTIENow60gTWluaCwgVmnhu4d0IE5hbQ!5e1!3m2!1svi!2s!4v1765993346579!5m2!1svi!2s"
+                    width="600"
+                    height="450"
+                    style={{ border: 0 }}
+                    allowFullScreen=""
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  ></iframe>
+                </div>
+              )}
             </li>
           </ul>
         </div>
