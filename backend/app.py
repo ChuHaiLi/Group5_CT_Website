@@ -513,16 +513,22 @@ def apply_heuristic_fallback(existing_result, compact_edited, raw_reply=None):
 @app.route("/api/ai/evaluate_itinerary", methods=["POST"])
 def evaluate_itinerary():
     """
-    Accepts JSON: { original_itinerary: [...], edited_itinerary: [...], context?: {...} }
+    Accepts JSON: { edited_itinerary: [...], original_itinerary?: [...], context?: {...} }
     Returns AI evaluation as structured JSON or a text summary.
+    Note: Only edited_itinerary is required. original_itinerary is optional.
     """
     payload = request.get_json() or {}
-    original = payload.get("original_itinerary")
     edited = payload.get("edited_itinerary")
+    original = payload.get("original_itinerary")  # Optional - only used for comparison if provided
     context = payload.get("context") or {}
 
-    if original is None or edited is None:
-        return jsonify({"error": "original_itinerary and edited_itinerary are required"}), 400
+    # ✅ CHỈ YÊU CẦU edited_itinerary (phần chỉnh sửa)
+    if edited is None:
+        return jsonify({"error": "edited_itinerary is required"}), 400
+    
+    # If original_itinerary is not provided, use edited_itinerary as both (for backward compatibility)
+    if original is None:
+        original = edited
 
     # If frontend provided specific evaluation instructions, use them (token-efficient)
     eval_instructions = payload.get("evaluation_instructions")
@@ -934,16 +940,22 @@ def evaluate_itinerary():
 @app.route("/api/ai/reorder_itinerary", methods=["POST"])
 def reorder_itinerary():
     """
-    Accepts JSON: { original_itinerary: [...], edited_itinerary: [...], context?: {...} }
+    Accepts JSON: { edited_itinerary: [...], original_itinerary?: [...], context?: {...} }
     Returns suggested_itinerary as structured JSON where only ordering of places may be changed.
+    Note: Only edited_itinerary is required. original_itinerary is optional.
     """
     payload = request.get_json() or {}
-    original = payload.get("original_itinerary")
     edited = payload.get("edited_itinerary")
+    original = payload.get("original_itinerary")  # Optional - only used for comparison if provided
     context = payload.get("context") or {}
 
-    if original is None or edited is None:
-        return jsonify({"error": "original_itinerary and edited_itinerary are required"}), 400
+    # ✅ CHỈ YÊU CẦU edited_itinerary (phần chỉnh sửa)
+    if edited is None:
+        return jsonify({"error": "edited_itinerary is required"}), 400
+    
+    # If original_itinerary is not provided, use edited_itinerary as both (for backward compatibility)
+    if original is None:
+        original = edited
 
     system_prompt = (
         "You are a Professional Travel Guide with 30 years of experience optimizing travel itineraries.\n"

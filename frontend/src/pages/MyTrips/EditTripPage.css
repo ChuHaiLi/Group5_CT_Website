@@ -31,14 +31,10 @@
 .trip-title {
     font-size: 1.75rem;
     font-weight: 700;
-    color: #1e293b;
+    color: #000000;
     margin: 0;
     flex: 1;
     text-align: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
 }
 
 /* Header Buttons */
@@ -72,15 +68,15 @@
 
 .save-btn,
 .ai-evaluate-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    background: #10b981;
+    color: #000000;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
 }
 
 .save-btn:hover:not(:disabled),
 .ai-evaluate-btn:hover:not(:disabled) {
     transform: translateY(-3px);
-    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.5);
+    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.5);
 }
 
 .save-btn:disabled,
@@ -97,12 +93,12 @@
     border-radius: 20px;
     background: #fff;
     border: 2px solid #e2e8f0;
-    color: #667eea;
+    color: #72dbdb;
 }
 
 .ai-view-last-btn:hover:not(:disabled) {
     background: #f8fafc;
-    border-color: #667eea;
+    border-color: #72dbdb;
     transform: rotate(90deg);
 }
 
@@ -120,8 +116,8 @@
 }
 
 .edit-trip-metadata-form:hover {
-    border-color: #667eea;
-    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.2);
+    border-color: #72dbdb;
+    box-shadow: 0 12px 35px rgba(114, 219, 219, 0.2);
 }
 
 .edit-trip-metadata-form h2 {
@@ -141,7 +137,7 @@
     left: 0;
     width: 80px;
     height: 3px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #72dbdb;
 }
 
 .metadata-grid {
@@ -150,13 +146,15 @@
     gap: 1.5rem;
 }
 
-.edit-trip-input-group {
+.edit-trip-input-group,
+.edit-page-input-group {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
 }
 
-.edit-trip-input-group label {
+.edit-trip-input-group label,
+.edit-page-input-group label {
     font-weight: 600;
     color: #475569;
     font-size: 0.875rem;
@@ -164,7 +162,9 @@
 }
 
 .edit-trip-input-group input,
-.edit-trip-input-group select {
+.edit-trip-input-group select,
+.edit-page-input-group input,
+.edit-page-input-group select {
     padding: 0.875rem;
     border: 2px solid #e2e8f0;
     border-radius: 10px;
@@ -174,15 +174,18 @@
 }
 
 .edit-trip-input-group input:focus,
-.edit-trip-input-group select:focus {
+.edit-trip-input-group select:focus,
+.edit-page-input-group input:focus,
+.edit-page-input-group select:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    border-color: #72dbdb;
+    box-shadow: 0 0 0 4px rgba(114, 219, 219, 0.1);
     background: white;
     transform: translateY(-1px);
 }
 
-.edit-trip-input-group input.disabled-input {
+.edit-trip-input-group input.disabled-input,
+.edit-page-input-group input.disabled-input {
     background: #f1f5f9;
     color: #94a3b8;
     cursor: not-allowed;
@@ -267,8 +270,8 @@
 
 .original-column:hover,
 .editable-column:hover {
-    border-color: #667eea;
-    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.15);
+    border-color: #72dbdb;
+    box-shadow: 0 12px 35px rgba(114, 219, 219, 0.15);
 }
 
 .column-header {
@@ -285,7 +288,7 @@
     left: 0;
     width: 60px;
     height: 3px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #72dbdb;
 }
 
 .column-header h2 {
@@ -327,7 +330,7 @@
     left: 0;
     width: 4px;
     height: 100%;
-    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    background: #72dbdb;
     transform: scaleY(0);
     transition: transform 0.3s ease;
 }
@@ -341,8 +344,8 @@
 }
 
 .day-section.editable:hover {
-    border-color: #667eea;
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+    border-color: #72dbdb;
+    box-shadow: 0 8px 20px rgba(114, 219, 219, 0.2);
     transform: translateY(-2px);
 }
 
@@ -375,14 +378,15 @@
     padding: 1rem;
     background: white;
     border-radius: 10px;
-    border-left: 4px solid #667eea;
+    border-left: 4px solid;
+    border-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%) 1;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
 }
 
 .place-item-readonly:hover {
     transform: translateX(4px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    box-shadow: 0 4px 12px rgba(114, 219, 219, 0.2);
 }
 
 .time-badge {
@@ -437,9 +441,9 @@
 
 .droppable-area.dragging-over {
     background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-    border-color: #667eea;
+    border-color: #72dbdb;
     border-style: solid;
-    box-shadow: inset 0 0 20px rgba(102, 126, 234, 0.1);
+    box-shadow: inset 0 0 20px rgba(114, 219, 219, 0.1);
     transform: scale(1.02);
 }
 
@@ -461,7 +465,7 @@
 }
 
 .add-btn {
-    flex: 1;
+    flex: 0 1 auto;
     min-width: 100px;
     padding: 0.875rem 1.25rem;
     border: none;
@@ -709,14 +713,14 @@
     font-size: 0.95rem;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    color: white;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    color: #4b5563;
+    background: #72dbdb;
+    box-shadow: 0 4px 12px rgba(114, 219, 219, 0.3);
 }
 
 .apply-btn:hover:not(:disabled) {
     transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.5);
+    box-shadow: 0 8px 20px rgba(114, 219, 219, 0.5);
 }
 
 .close-btn {
@@ -748,7 +752,7 @@
 }
 
 .edit-trip-loading {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #72dbdb;
     color: white;
 }
 
@@ -793,7 +797,7 @@
 .original-column::-webkit-scrollbar-thumb,
 .editable-column::-webkit-scrollbar-thumb,
 .ai-modal::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    background: #72dbdb;
     border-radius: 10px;
     border: 2px solid #f1f5f9;
 }
@@ -801,7 +805,7 @@
 .original-column::-webkit-scrollbar-thumb:hover,
 .editable-column::-webkit-scrollbar-thumb:hover,
 .ai-modal::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, #764ba2 0%, #667eea 100%);
+    background: #72dbdb;
 }
 
 /* Dropdown header hover effect */
