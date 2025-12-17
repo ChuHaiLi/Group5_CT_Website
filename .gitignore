@@ -12,7 +12,10 @@ __pycache__/
 venv/
 
 # Environments
+.env
 .env.local
+.env.*.local
+*.env
 
 # Databases
 *.sqlite3
@@ -27,6 +30,15 @@ backend/migrations/versions/*.py
 dist/
 build/
 coverage/
+.coverage
+.coverage.*
+htmlcov/
+*.cover
+.hypothesis/
+.pytest_cache/
+.tox/
+coverage.xml
+*.coveragerc
 
 # Logs
 *.log
@@ -40,6 +52,8 @@ Thumbs.db
 # Frontend
 frontend/build/
 frontend/.cache/
+frontend/coverage/
+frontend/.nyc_output/
 
 # Misc
 .cache/
