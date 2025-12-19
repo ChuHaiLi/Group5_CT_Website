@@ -606,7 +606,7 @@ start ..\htmlcov\index.html
 cd frontend
 
 # Run tests with coverage
-npm test -- --coverage --watchAll=false
+npx jest --config tests/frontend/jest.config.js --runInBand --coverage
 
 # Run tests in watch mode
 npm test

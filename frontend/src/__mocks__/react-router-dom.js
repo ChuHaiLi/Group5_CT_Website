@@ -25,8 +25,10 @@ module.exports = {
   Route: ({ element, path }) => React.createElement('div', { 'data-testid': `route-${path}` }, element),
   Navigate: ({ to, replace }) => React.createElement('div', { 'data-testid': 'navigate', 'data-to': to, 'data-replace': replace }),
   Link: ({ children, to, ...props }) => React.createElement('a', { href: to, ...props }, children),
-  NavLink: ({ children, to, className, ...props }) => 
-    React.createElement('a', { href: to, className, 'data-testid': `navlink-${to}`, ...props }, children),
+  NavLink: ({ children, to, className, ...props }) => {
+    const classNameValue = typeof className === 'function' ? className({ isActive: false }) : className;
+    return React.createElement('a', { href: to, className: classNameValue, 'data-testid': `navlink-${to}`, ...props }, children);
+  },
   
   // Export mocks for test access
   __mockNavigate: mockNavigate,
