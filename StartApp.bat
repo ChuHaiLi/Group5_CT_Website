@@ -11,68 +11,88 @@ echo Project root: %cd%
 echo ================================
 
 REM ====== BACKEND SETUP ======
+REM ===== Always run from backend folder =====
+cd /d "%~dp0backend"
+echo ================================
+echo Backend root: %cd%
+echo ================================
 echo.
 echo [1/4] Backend setup...
 
-if not exist "backend\" (
-  echo ERROR: Cannot find backend folder.
+REM ===== Check Python =====
+python --version >nul 2>&1
+if errorlevel 1 (
+  echo ERROR: Python not found in PATH
   pause
   exit /b 1
 )
 
-cd /d "%~dp0backend"
-
-
-REM Create venv only if not exists
+REM ===== Create venv if missing =====
 if not exist "venv\Scripts\python.exe" (
-  echo Creating venv...
+  echo Creating virtual environment...
   python -m venv venv
 )
 
-echo Activating venv...
+REM ===== Activate venv =====
 call venv\Scripts\activate.bat
+if errorlevel 1 (
+  echo ERROR: Failed to activate venv
+  pause
+  exit /b 1
+)
 
-echo Installing backend requirements...
+REM ===== Install requirements =====
+echo Installing backend dependencies...
 pip install -r requirements.txt
 if errorlevel 1 (
-  echo ERROR: Failed to install backend requirements.
+  echo ERROR: pip install failed
   pause
   exit /b 1
 )
-echo Backend dependencies installed successfully.
 
-if exit "instance/db.sqlite3" neq "instance\db.sqlite" (
-  del "instance\db.sqlite" 2>nul
+REM ===== Flask environment =====
+REM Nếu bạn dùng app.py
+set FLASK_APP=app.py
+set FLASK_ENV=development
+
+REM ===== Init migrations (FIRST TIME ONLY) =====
+if not exist "migrations\" (
+  echo Initializing Flask-Migrate...
+  flask db init
+  if errorlevel 1 (
+    echo ERROR: flask db init failed
+    pause
+    exit /b 1
+  )
 )
 
-REM Initialize database migrations (first time only)
-flask db init
+REM ===== Ensure versions folder exists (CRITICAL FIX) =====
+if not exist "migrations\versions\" (
+  mkdir "migrations\versions"
+)
+
+REM ===== Create migration (safe to run) =====
+echo Generating migration...
+flask db migrate -m "auto migration"
 if errorlevel 1 (
-  echo ERROR: Failed to initialize database migrations.
+  echo ERROR: flask db migrate failed
   pause
   exit /b 1
 )
 
-REM Create initial migration
-flask db-migrate -m "initial migration"
-if errorlevel 1 (
-  echo ERROR: Failed to create initial migration.
-  pause
-  exit /b 1
-)
-
-REM Apply migrations
+REM ===== Apply migrations =====
+echo Applying migrations...
 flask db upgrade
-echo Database migrations applied successfully.
-
-echo Optional: seed database (only if database is empty)
-echo Uncomment the lines below if you want to seed every time
-echo Running seed...
-python seed.py
 if errorlevel 1 (
-  echo ERROR: Failed to seed database.
+  echo ERROR: flask db upgrade failed
   pause
   exit /b 1
+)
+
+REM ===== Optional seed =====
+if exist "seed.py" (
+  echo Seeding database...
+  python seed.py
 )
 echo Database seeded successfully.
 
@@ -81,6 +101,9 @@ echo.
 echo [2/4] Frontend setup...
 
 cd /d "%~dp0frontend"
+echo ================================
+echo Frontend root: %cd%
+echo ================================
 
 if not exist "package.json" (
   echo ERROR: Cannot find frontend\package.json
