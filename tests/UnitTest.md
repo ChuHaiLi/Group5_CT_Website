@@ -27,8 +27,11 @@ npm install
 
 ### Run Tests
 ```bash
-npm test -- --coverage --watchAll=false
+npx jest --config tests/frontend/jest.config.js --runInBand --coverage
 ```
+
+# View HTML coverage report
+start .\coverage\lcov-report\index.html
 
 ### Coverage Report
 Coverage summary displayed in terminal.
