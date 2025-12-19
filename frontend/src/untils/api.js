@@ -28,14 +28,7 @@ API.interceptors.response.use(
         return axios(originalReq);
       } catch {
         localStorage.clear();
-        try {
-          window.location.href = "/login";
-        } catch (e) {
-          // In some test environments jsdom disallows navigation; set a test-only flag
-          try {
-            window.__TEST_NAV_REDIRECT__ = '/login';
-          } catch (_) {}
-        }
+        window.location.href = "/login";
       }
     }
     return Promise.reject(err);

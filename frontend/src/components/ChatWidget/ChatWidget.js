@@ -1343,9 +1343,9 @@ export default function ChatWidget({ isAuthenticated, pageContext }) {
                 or anything travel related!
               </p>
             )}
-            {messages.map((message, mIdx) => (
+            {messages.map((message) => (
               <div
-                key={message.id || `msg-${mIdx}`}
+                key={message.id}
                 className={`chat-widget-row ${
                   message.role === "user" ? "user" : "bot"
                 }`}
