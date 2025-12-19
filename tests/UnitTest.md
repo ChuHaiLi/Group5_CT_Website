@@ -31,8 +31,9 @@ npx jest --config tests/frontend/jest.config.js --runInBand --coverage
 ```
 
 # View HTML coverage report
+```bash
 start .\coverage\lcov-report\index.html
-
+```
 ### Coverage Report
 Coverage summary displayed in terminal.
 
