@@ -27,7 +27,6 @@ npm install
 
 ### Run Tests
 ```bash
-npm test -- --watchAll=false
 npx jest --config tests/frontend/jest.config.js --runInBand --coverage
 ```
 
