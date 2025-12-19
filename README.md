@@ -598,7 +598,7 @@ cd ..
 pytest -v --cov=backend --cov-report=term-missing --cov-report=html tests/backend
 
 # View HTML coverage report
-start ..\htmlcov\index.html
+start .\htmlcov\index.html
 ```
 
 ### Frontend Tests
