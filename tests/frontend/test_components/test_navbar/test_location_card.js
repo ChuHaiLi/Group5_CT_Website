@@ -73,10 +73,10 @@ describe('LocationCard', () => {
       image_url: 'https://example.com/test.jpg'
     };
     
-    render(<LocationCard location={locationWithEmptyDesc} />);
-    
+    const { container } = render(<LocationCard location={locationWithEmptyDesc} />);
+
     expect(screen.getByText('Test Location')).toBeInTheDocument();
-    const description = screen.getByText('');
+    const description = container.querySelector('p');
     expect(description).toBeInTheDocument();
   });
 

@@ -268,7 +268,7 @@ describe('DestinationModal', () => {
     const galleryItem = container.querySelector('.gallery-item');
     fireEvent.click(galleryItem);
     
-    const nextButton = screen.getByRole('button', { name: '' }).parentElement?.querySelector('.next');
+    const nextButton = container.querySelector('.image-nav-btn.next');
     if (nextButton) {
       fireEvent.click(nextButton);
       expect(screen.getByText('2 / 3')).toBeInTheDocument();
@@ -286,7 +286,7 @@ describe('DestinationModal', () => {
     const galleryItem = container.querySelector('.gallery-item');
     fireEvent.click(galleryItem);
     
-    const prevButton = screen.getByRole('button', { name: '' }).parentElement?.querySelector('.prev');
+    const prevButton = container.querySelector('.image-nav-btn.prev');
     if (prevButton) {
       fireEvent.click(prevButton);
       expect(screen.getByText('3 / 3')).toBeInTheDocument();
