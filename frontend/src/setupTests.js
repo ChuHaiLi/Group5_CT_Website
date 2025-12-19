@@ -84,12 +84,5 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
-// Mock fetch globally to avoid real network calls during tests
-if (typeof global.fetch === 'undefined') {
-  global.fetch = jest.fn(() => Promise.resolve({ ok: true, json: () => Promise.resolve({}) }));
-} else {
-  global.fetch = jest.fn(() => Promise.resolve({ ok: true, json: () => Promise.resolve({}) }));
-}
-
 // Mock window.scrollTo
 window.scrollTo = jest.fn();
