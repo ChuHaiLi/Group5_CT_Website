@@ -15,7 +15,7 @@ export default function HomeRecommendations({
     if (!destinations) {
       axios
         .get("/api/destinations")
-        .then((res) => setFetchedDestinations(res.data))
+        .then((res) => setFetchedDestinations(Array.isArray(res.data) ? res.data : []))
         .catch((err) => {
           if (process.env.NODE_ENV === 'development') {
             console.error("Error fetching destinations:", err);

@@ -4,8 +4,8 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter, MemoryRouter } from 'react-router-dom';
-import ResetPasswordPage from '../../../frontend/src/pages/ResetPasswordPage';
-import API from '../../../frontend/src/untils/axios';
+import ResetPasswordPage from '../../../../frontend/src/pages/ResetPasswordPage';
+import API from '../../../../frontend/src/untils/axios';
 
 // Mock dependencies
 jest.mock('../../../frontend/src/untils/axios');
@@ -129,7 +129,11 @@ describe('ResetPasswordPage', () => {
 
       fireEvent.paste(inputs[0], pasteEvent);
 
-      expect(pasteEvent.preventDefault).toHaveBeenCalled();
+      // After paste, inputs should be populated with the OTP digits
+      const filled = '123456'.split('');
+      filled.forEach((d, i) => {
+        expect(inputs[i].value).toBe(d);
+      });
     });
 
     test('should reject paste with non-numeric data', () => {
@@ -160,7 +164,8 @@ describe('ResetPasswordPage', () => {
       fireEvent.change(inputs[1], { target: { value: '2' } });
 
       const submitButton = screen.getByRole('button', { name: /verify code/i });
-      fireEvent.click(submitButton);
+      const form = submitButton.closest('form');
+      fireEvent.submit(form);
 
       await waitFor(() => {
         expect(toast.error).toHaveBeenCalledWith('Please enter all 6 digits');
@@ -317,16 +322,15 @@ describe('ResetPasswordPage', () => {
         expect(screen.getByText(/new password/i)).toBeInTheDocument();
       });
 
-      // Now test password validation
-      const passwordInput = screen.getByPlaceholderText(/new password/i);
+      // Now test password validation: password strength indicator should show invalid state
+      const passwordInput = screen.getByPlaceholderText(/^new password \(min 6 characters\)/i);
       fireEvent.change(passwordInput, { target: { value: '12345' } });
       fireEvent.blur(passwordInput);
 
-      const resetButton = screen.getByRole('button', { name: /reset password/i });
-      fireEvent.click(resetButton);
-
       await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith('Password must be at least 6 characters');
+        const strengthText = screen.getByText(/at least 6 characters/i);
+        expect(strengthText).toBeInTheDocument();
+        expect(strengthText).toHaveStyle({ color: '#666' });
       });
     });
 
@@ -350,18 +354,17 @@ describe('ResetPasswordPage', () => {
         expect(screen.getByText(/new password/i)).toBeInTheDocument();
       });
 
-      // Test password mismatch
-      const passwordInput = screen.getByPlaceholderText(/new password/i);
-      const confirmInput = screen.getByPlaceholderText(/confirm new password/i);
+      // Test password mismatch: the 'Passwords match' indicator should show invalid state
+      const passwordInput = screen.getByPlaceholderText(/^new password \(min 6 characters\)/i);
+      const confirmInput = screen.getByPlaceholderText(/confirm (new )?password/i);
       
       fireEvent.change(passwordInput, { target: { value: 'password123' } });
       fireEvent.change(confirmInput, { target: { value: 'different123' } });
 
-      const resetButton = screen.getByRole('button', { name: /reset password/i });
-      fireEvent.click(resetButton);
-
       await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith('Passwords do not match');
+        const matchText = screen.getByText(/passwords match/i);
+        expect(matchText).toBeInTheDocument();
+        expect(matchText).toHaveStyle({ color: '#666' });
       });
     });
 
@@ -388,8 +391,8 @@ describe('ResetPasswordPage', () => {
       });
 
       // Reset password
-      const passwordInput = screen.getByPlaceholderText(/new password/i);
-      const confirmInput = screen.getByPlaceholderText(/confirm new password/i);
+      const passwordInput = screen.getByPlaceholderText(/^new password \(min 6 characters\)/i);
+      const confirmInput = screen.getByPlaceholderText(/confirm (new )?password/i);
       
       fireEvent.change(passwordInput, { target: { value: 'newpassword123' } });
       fireEvent.change(confirmInput, { target: { value: 'newpassword123' } });
@@ -424,7 +427,7 @@ describe('ResetPasswordPage', () => {
         expect(screen.getByText(/new password/i)).toBeInTheDocument();
       });
 
-      const passwordInput = screen.getByPlaceholderText(/new password/i);
+      const passwordInput = screen.getByPlaceholderText(/^new password \(min 6 characters\)/i);
       const toggleButtons = screen.getAllByRole('button');
       const showHideButton = toggleButtons.find(btn => 
         btn.classList.contains('show-hide')

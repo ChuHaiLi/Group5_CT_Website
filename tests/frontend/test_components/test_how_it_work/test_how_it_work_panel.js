@@ -163,14 +163,14 @@ describe('HowItWorksPanel', () => {
   });
 
   test('should have proper ARIA attributes', () => {
-    renderComponent();
-    
-    const panel = screen.getByRole('complementary');
+    const { container } = renderComponent();
+
+    const panel = container.querySelector('.howitworks-panel');
     expect(panel).toHaveAttribute('aria-hidden', 'true');
-    
+
     const toggleButton = screen.getByLabelText('Show how it works');
     fireEvent.click(toggleButton);
-    
+
     expect(panel).toHaveAttribute('aria-hidden', 'false');
   });
 });

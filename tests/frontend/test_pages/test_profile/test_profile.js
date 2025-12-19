@@ -229,7 +229,7 @@ describe('ProfilePage', () => {
       await waitFor(() => {
         expect(screen.getByPlaceholderText(/enter current password/i)).toBeInTheDocument();
         expect(screen.getByPlaceholderText(/enter new password/i)).toBeInTheDocument();
-        expect(screen.getByPlaceholderText(/confirm new password/i)).toBeInTheDocument();
+        expect(screen.getByPlaceholderText(/confirm password/i)).toBeInTheDocument();
       });
     });
 
@@ -268,7 +268,7 @@ describe('ProfilePage', () => {
 
       await waitFor(() => {
         const newPasswordInput = screen.getByPlaceholderText(/enter new password/i);
-        const confirmPasswordInput = screen.getByPlaceholderText(/confirm new password/i);
+        const confirmPasswordInput = screen.getByPlaceholderText(/confirm password/i);
         
         fireEvent.change(newPasswordInput, { target: { value: 'password123' } });
         fireEvent.change(confirmPasswordInput, { target: { value: 'different123' } });
@@ -353,7 +353,7 @@ describe('ProfilePage', () => {
       await waitFor(() => {
         const currentPasswordInput = screen.getByPlaceholderText(/enter current password/i);
         const newPasswordInput = screen.getByPlaceholderText(/enter new password/i);
-        const confirmPasswordInput = screen.getByPlaceholderText(/confirm new password/i);
+        const confirmPasswordInput = screen.getByPlaceholderText(/confirm password/i);
         
         fireEvent.change(currentPasswordInput, { target: { value: 'oldpassword' } });
         fireEvent.change(newPasswordInput, { target: { value: 'newpassword123' } });

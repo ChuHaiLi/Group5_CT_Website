@@ -66,8 +66,8 @@ describe('AuthRequiredModal', () => {
   });
 
   test('should render close button', () => {
-    renderComponent();
-    
+    const { container } = renderComponent();
+
     const closeButton = container.querySelector('.auth-modal-close');
     expect(closeButton).toBeInTheDocument();
   });

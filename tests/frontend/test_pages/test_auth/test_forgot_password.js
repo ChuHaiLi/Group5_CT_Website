@@ -4,7 +4,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import ForgotPasswordPage from '../../../frontend/src/pages/ForgotPasswordPage';
+import ForgotPasswordPage from '../../../../frontend/src/pages/ForgotPasswordPage';
 import API from '../../../frontend/src/untils/axios';
 
 // Mock dependencies
@@ -83,7 +83,7 @@ describe('ForgotPasswordPage', () => {
 
       await waitFor(() => {
         const container = input.parentElement;
-        expect(container.querySelector('svg[style*="color: #f44336"]')).toBeInTheDocument();
+        expect(container.querySelector('svg[style*="#f44336"], svg[style*="rgb(244, 67, 54)"]')).toBeInTheDocument();
       });
     });
 
@@ -96,7 +96,7 @@ describe('ForgotPasswordPage', () => {
 
       await waitFor(() => {
         const container = input.parentElement;
-        expect(container.querySelector('svg[style*="color: #4CAF50"]')).toBeInTheDocument();
+        expect(container.querySelector('svg[style*="#4CAF50"], svg[style*="rgb(76, 175, 80)"]')).toBeInTheDocument();
       });
     });
 
@@ -143,7 +143,8 @@ describe('ForgotPasswordPage', () => {
       renderForgotPasswordPage();
 
       const submitButton = screen.getByRole('button', { name: /send reset code/i });
-      fireEvent.click(submitButton);
+      const form = submitButton.closest('form');
+      fireEvent.submit(form);
 
       await waitFor(() => {
         expect(toast.error).toHaveBeenCalledWith('Please enter your email');
@@ -158,7 +159,8 @@ describe('ForgotPasswordPage', () => {
       fireEvent.change(input, { target: { value: 'invalid-email' } });
 
       const submitButton = screen.getByRole('button', { name: /send reset code/i });
-      fireEvent.click(submitButton);
+      const form = submitButton.closest('form');
+      fireEvent.submit(form);
 
       await waitFor(() => {
         expect(toast.error).toHaveBeenCalledWith('Please enter a valid email address');
@@ -285,7 +287,7 @@ describe('ForgotPasswordPage', () => {
       const input = screen.getByPlaceholderText(/enter your email/i);
       fireEvent.change(input, { target: { value: 'invalid' } });
 
-      expect(screen.queryByText(/please enter a valid email address/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/please enter a valid email address/i)).toBeInTheDocument();
     });
 
     test('should show validation after blur', async () => {

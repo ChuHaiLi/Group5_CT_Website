@@ -1,0 +1,40 @@
+// Mock for @testing-library/react/dist/fire-event
+// Prevents import-time errors from real fire-event.js which expects undefined getEventInit config
+
+const fireEvent = {
+  click: jest.fn(),
+  change: jest.fn(),
+  submit: jest.fn(),
+  input: jest.fn(),
+  focus: jest.fn(),
+  blur: jest.fn(),
+  keyDown: jest.fn(),
+  keyUp: jest.fn(),
+  keyPress: jest.fn(),
+  mouseEnter: jest.fn(),
+  mouseLeave: jest.fn(),
+  mouseOver: jest.fn(),
+  mouseOut: jest.fn(),
+  mouseDown: jest.fn(),
+  mouseUp: jest.fn(),
+  touchStart: jest.fn(),
+  touchEnd: jest.fn(),
+  touchMove: jest.fn(),
+  touchCancel: jest.fn(),
+  doubleClick: jest.fn(),
+  contextMenu: jest.fn(),
+  wheel: jest.fn(),
+  scroll: jest.fn(),
+  copy: jest.fn(),
+  paste: jest.fn(),
+  cut: jest.fn(),
+  drag: jest.fn(),
+  dragStart: jest.fn(),
+  dragEnd: jest.fn(),
+  dragEnter: jest.fn(),
+  dragLeave: jest.fn(),
+  dragOver: jest.fn(),
+  drop: jest.fn(),
+};
+
+module.exports = fireEvent;

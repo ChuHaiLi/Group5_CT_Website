@@ -88,31 +88,31 @@ describe('Footer', () => {
   });
 
   test('should toggle map visibility when View on Map button is clicked', () => {
-    renderComponent();
-    
+    const { container } = renderComponent();
+
     const viewMapButton = screen.getByText('View on Map');
-    
-    // Initially no map
-    expect(screen.queryByRole('presentation')).not.toBeInTheDocument();
-    
+
+    // Initially no map iframe
+    expect(container.querySelector('iframe')).not.toBeInTheDocument();
+
     // Click to show map
     fireEvent.click(viewMapButton);
-    expect(screen.getByRole('presentation')).toBeInTheDocument();
+    expect(container.querySelector('iframe')).toBeInTheDocument();
     expect(screen.getByText('Hide Map')).toBeInTheDocument();
-    
+
     // Click to hide map
     const hideMapButton = screen.getByText('Hide Map');
     fireEvent.click(hideMapButton);
-    expect(screen.queryByRole('presentation')).not.toBeInTheDocument();
+    expect(container.querySelector('iframe')).not.toBeInTheDocument();
   });
 
   test('should render Google Maps iframe with correct src', () => {
-    renderComponent();
-    
+    const { container } = renderComponent();
+
     const viewMapButton = screen.getByText('View on Map');
     fireEvent.click(viewMapButton);
-    
-    const iframe = screen.getByRole('presentation');
+
+    const iframe = container.querySelector('iframe');
     expect(iframe).toHaveAttribute('src', expect.stringContaining('google.com/maps/embed'));
   });
 
