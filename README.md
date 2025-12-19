@@ -594,6 +594,7 @@ cd backend
 pip install pytest pytest-cov
 
 # Run all tests with coverage
+cd ..
 pytest -v --cov=backend --cov-report=term-missing --cov-report=html tests/backend
 
 # View HTML coverage report
