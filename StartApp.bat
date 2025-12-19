@@ -22,6 +22,7 @@ if not exist "backend\" (
 
 cd /d "%~dp0backend"
 
+
 REM Create venv only if not exists
 if not exist "venv\Scripts\python.exe" (
   echo Creating venv...
@@ -39,6 +40,30 @@ if errorlevel 1 (
   exit /b 1
 )
 echo Backend dependencies installed successfully.
+
+if exit "instance/db.sqlite3" neq "instance\db.sqlite" (
+  del "instance\db.sqlite" 2>nul
+)
+
+REM Initialize database migrations (first time only)
+flask db init
+if errorlevel 1 (
+  echo ERROR: Failed to initialize database migrations.
+  pause
+  exit /b 1
+)
+
+REM Create initial migration
+flask db-migrate -m "initial migration"
+if errorlevel 1 (
+  echo ERROR: Failed to create initial migration.
+  pause
+  exit /b 1
+)
+
+REM Apply migrations
+flask db upgrade
+echo Database migrations applied successfully.
 
 echo Optional: seed database (only if database is empty)
 echo Uncomment the lines below if you want to seed every time
